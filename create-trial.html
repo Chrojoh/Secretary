@@ -1,21 +1,20 @@
-<h1>Create a Trial</h1>
-
-<form id="trialForm">
-  <label>Club Name:</label>
-  <input type="text" name="clubName" required>
-
-  <label>Trial Secretary:</label>
-  <input type="text" name="secretary" required>
-
-  <label>How many days?</label>
-  <input type="number" id="numDays" min="1" max="7">
-
-  <button type="button" onclick="generateDays()">Create Days</button>
-
-  <div id="daysContainer"></div>
-
-  <button type="submit">Submit Trial</button>
-</form>
-
-<script type="module" src="js/create-trial.js"></script>
-
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Trial</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <h1>Create Trial</h1>
+  <form id="trialForm">
+    <input type="text" name="clubName" placeholder="Club Name">
+    <input type="text" name="secretary" placeholder="Trial Secretary">
+    <label>How many days?</label>
+    <input type="number" id="numDays" min="1">
+    <button type="button" onclick="generateDays()">Create Days</button>
+    <div id="daysContainer"></div>
+    <button type="submit">Save Trial</button>
+  </form>
+  <script type="module" src="js/create-trial.js"></script>
+</body>
+</html>
