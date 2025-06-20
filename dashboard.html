@@ -1,3 +1,4 @@
+<!-- dashboard.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,9 +6,11 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <h1>Welcome to Your Dashboard</h1>
-  <p id="user"></p>
-  <button onclick="logout()">Logout</button>
+  <h1>Welcome, <span id="username"></span></h1>
+
+  <button onclick="location.href='create-trial.html'">➕ Create New Trial</button>
+  <button onclick="location.href='view-trials.html'">📁 View My Trials</button>
+  <button onclick="logout()">🚪 Log Out</button>
 
   <script type="module" src="js/dashboard.js"></script>
 </body>
