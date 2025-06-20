@@ -3,15 +3,100 @@
 <head>
   <title>Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .dashboard-container {
+      text-align: center;
+    }
+    
+    .nav-button {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      padding: 15px 30px;
+      margin: 10px;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      min-width: 200px;
+    }
+    
+    .nav-button:hover {
+      background-color: #45a049;
+    }
+    
+    .logout-button {
+      background-color: #f44336;
+    }
+    
+    .logout-button:hover {
+      background-color: #da190b;
+    }
+  </style>
 </head>
 <body>
-  <h1>Welcome, <span id="username"></span></h1>
-  <button onclick="location.href='create-trial.html'">Create Trial</button>
-  <button onclick="location.href='view-trials.html'">View Trials</button>
-  <button onclick="location.href='trial-application.html'">Trial Application</button>
-  <button onclick="location.href='premium-generator.html'">Premium Generator</button>
-  <button onclick="location.href='waiver-generator.html'">Waiver Generator</button>
-  <button onclick="logout()">Logout</button>
-  <script type="module" src="js/dashboard.js"></script>
+  <div class="dashboard-container">
+    <h1>Welcome to Trial Secretary Dashboard</h1>
+    <p id="userInfo">Loading user info...</p>
+    
+    <div style="margin: 30px 0;">
+      <a href="create-trial.html" class="nav-button">Create Trial</a><br>
+      <a href="view-trials.html" class="nav-button">View Trials</a><br>
+      <a href="trial-application.html" class="nav-button">Trial Application</a><br>
+      <a href="premium-generator.html" class="nav-button">Premium Generator</a><br>
+      <a href="waiver-generator.html" class="nav-button">Waiver Generator</a><br>
+      <button class="nav-button logout-button" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth } from './js/firebase.js';
+    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+
+    console.log("Safe dashboard loading...");
+
+    // Simple auth check without infinite loops
+    let authChecked = false;
+    
+    auth.onAuthStateChanged(user => {
+      if (authChecked) return; // Prevent multiple calls
+      authChecked = true;
+      
+      console.log("Auth state changed:", user ? "logged in" : "not logged in");
+      
+      if (user) {
+        document.getElementById('userInfo').textContent = `Logged in as: ${user.email.split('@')[0]}`;
+        console.log("User authenticated successfully");
+      } else {
+        console.log("No user, redirecting to login");
+        // Add a small delay to prevent rapid redirects
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+      }
+    });
+
+    // Simple logout function
+    window.logout = async function() {
+      try {
+        console.log("Logging out...");
+        await signOut(auth);
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error("Logout error:", error);
+        alert("Error logging out: " + error.message);
+      }
+    };
+
+    console.log("Safe dashboard script loaded");
+  </script>
 </body>
 </html>
