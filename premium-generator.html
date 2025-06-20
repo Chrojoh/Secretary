@@ -1,115 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Premium List Generator</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>Premium Generator - West Kelowna K9</title>
   <style>
-    .container {
-      max-width: 800px;
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
       margin: 0 auto;
       padding: 20px;
+      background-color: #f5f5f5;
     }
     
-    .back-button {
-      background-color: #007cba;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-bottom: 20px;
-    }
-    
-    .premium-preview {
-      border: 2px solid #000;
+    .container {
+      background-color: white;
       padding: 30px;
-      margin: 20px 0;
-      background: white;
-      font-family: Arial, sans-serif;
-      line-height: 1.4;
-    }
-    
-    .premium-header {
-      text-align: center;
-      margin-bottom: 30px;
-      border-bottom: 2px solid #000;
-      padding-bottom: 20px;
-    }
-    
-    .premium-header h1 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    
-    .premium-header .subtitle {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-    
-    .premium-section {
-      margin: 20px 0;
-    }
-    
-    .premium-section h2 {
-      background-color: #f0f0f0;
-      padding: 8px;
-      margin: 15px 0 10px 0;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    
-    .judges-table, .classes-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 10px 0;
-    }
-    
-    .judges-table th, .judges-table td,
-    .classes-table th, .classes-table td {
-      border: 1px solid #000;
-      padding: 8px;
-      text-align: left;
-    }
-    
-    .judges-table th, .classes-table th {
-      background-color: #f0f0f0;
-      font-weight: bold;
-    }
-    
-    .fee-list {
-      list-style: none;
-      padding: 0;
-    }
-    
-    .fee-list li {
-      padding: 5px 0;
-      border-bottom: 1px dotted #ccc;
-    }
-    
-    .contact-box {
-      border: 1px solid #000;
-      padding: 15px;
-      background-color: #f9f9f9;
-    }
-    
-    .generate-buttons {
-      text-align: center;
-      margin: 20px 0;
-    }
-    
-    .edit-stage {
-      background-color: #f0f8ff;
-      border: 2px solid #4CAF50;
-      padding: 20px;
-      margin: 20px 0;
       border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
-    .edit-stage h3 {
-      color: #4CAF50;
-      margin-top: 0;
+    .controls {
+      background-color: #e8f4fd;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
     }
     
     .edit-form {
@@ -129,388 +42,247 @@
       display: block;
     }
     
-    .edit-form input,
-    .edit-form textarea {
+    .edit-form input, .edit-form textarea {
       width: 100%;
       padding: 8px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      font-size: 14px;
     }
     
     .edit-form textarea {
-      height: 80px;
-    }
-    
-    .generate-btn, .print-btn {
-      padding: 10px 20px;
-      margin: 0 10px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
+      height: 60px;
+      resize: vertical;
     }
     
     .generate-btn {
       background-color: #4CAF50;
       color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
     }
     
     .print-btn {
       background-color: #2196F3;
       color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    
+    .premium-document {
+      border: 2px solid #000;
+      padding: 30px;
+      margin: 20px 0;
+      background: white;
+      font-family: Arial, sans-serif;
+      line-height: 1.4;
+      color: #000;
+    }
+    
+    .premium-header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #000;
+      padding-bottom: 20px;
+    }
+    
+    .premium-header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    .premium-header .subtitle {
+      font-size: 16px;
+      margin: 8px 0;
+      font-weight: bold;
+    }
+    
+    .premium-section {
+      margin: 20px 0;
+    }
+    
+    .premium-section h2 {
+      background-color: #f0f0f0;
+      padding: 8px;
+      margin: 15px 0 10px 0;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+    
+    .judges-table, .classes-table, .fees-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+    
+    .judges-table th, .judges-table td,
+    .classes-table th, .classes-table td,
+    .fees-table th, .fees-table td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    .judges-table th, .classes-table th, .fees-table th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    
+    .contact-box {
+      border: 2px solid #000;
+      padding: 15px;
+      background-color: #f9f9f9;
+      margin: 15px 0;
     }
     
     @media print {
-      .back-button, .generate-buttons {
+      .controls {
         display: none;
       }
-      .premium-preview {
+      .premium-document {
         border: none;
         margin: 0;
         padding: 0;
+      }
+      body {
+        background: white;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="back-button" onclick="location.href='main-dashboard.html'">← Back to Dashboard</button>
-    <h1>Premium List Generator</h1>
-    
-    <div class="generate-buttons">
-      <button class="generate-btn" onclick="generatePremium()">Generate Premium List</button>
-      <button class="print-btn" onclick="window.print()">Print Premium</button>
-    </div>
-    
-    <div id="editStage" class="edit-stage" style="display: none;">
-      <h3>📝 Review and Edit Premium Details</h3>
-      <p>Review the auto-filled information below and make any necessary changes:</p>
+    <div class="controls">
+      <h2>🏆 Premium Generator for West Kelowna K9 Scent and Games</h2>
+      <p>Fill in the details below to generate your professional premium list:</p>
       
       <div class="edit-form">
         <div>
           <label>Club Name:</label>
-          <input type="text" id="editClubName">
-        </div>
-        <div>
-          <label>Trial Type:</label>
-          <input type="text" id="editTrialType" value="Scent Work Trial">
-        </div>
-        <div class="full-width">
-          <label>Trial Dates:</label>
-          <input type="text" id="editTrialDates" placeholder="Enter trial dates (e.g., Saturday, June 15, 2025 & Sunday, June 16, 2025)">
-        </div>
-        <div>
-          <label>Start Time:</label>
-          <input type="text" id="editStartTime" value="8:00 AM">
-        </div>
-        <div>
-          <label>End Time:</label>
-          <input type="text" id="editEndTime" value="5:00 PM">
-        </div>
-        <div class="full-width">
-          <label>Location Name:</label>
-          <input type="text" id="editLocation">
-        </div>
-        <div class="full-width">
-          <label>Location Address:</label>
-          <input type="text" id="editAddress">
+          <input type="text" id="clubName" value="West Kelowna K9 Scent and Games">
         </div>
         <div>
           <label>Trial Secretary:</label>
-          <input type="text" id="editSecretary">
+          <input type="text" id="secretary" value="Chris Johansen">
+        </div>
+        <div class="full-width">
+          <label>Trial Dates:</label>
+          <input type="text" id="trialDates" placeholder="e.g., Saturday, March 15, 2025 & Sunday, March 16, 2025">
+        </div>
+        <div>
+          <label>Start Time:</label>
+          <input type="text" id="startTime" value="8:00 AM">
+        </div>
+        <div>
+          <label>End Time:</label>
+          <input type="text" id="endTime" value="4:00 PM">
+        </div>
+        <div class="full-width">
+          <label>Trial Location:</label>
+          <input type="text" id="location" placeholder="Enter venue name and address">
         </div>
         <div>
           <label>Secretary Email:</label>
-          <input type="email" id="editEmail">
+          <input type="email" id="email" placeholder="chris.johansen@email.com">
         </div>
         <div>
           <label>Secretary Phone:</label>
-          <input type="tel" id="editPhone">
+          <input type="tel" id="phone" placeholder="(250) 555-0123">
         </div>
         <div>
           <label>Entry Limit:</label>
-          <input type="text" id="editEntryLimit" value="Determined by venue capacity">
+          <input type="text" id="entryLimit" value="60 dogs maximum">
+        </div>
+        <div>
+          <label>Entry Deadline:</label>
+          <input type="text" id="deadline" placeholder="e.g., March 1, 2025 at 11:59 PM">
         </div>
         <div class="full-width">
           <label>Judges (one per line):</label>
-          <textarea id="editJudges" placeholder="Enter judges, one per line"></textarea>
+          <textarea id="judges" placeholder="Enter judge names, one per line"></textarea>
         </div>
         <div class="full-width">
           <label>Classes Offered (one per line):</label>
-          <textarea id="editClasses" placeholder="Enter classes, one per line"></textarea>
+          <textarea id="classes" placeholder="e.g.,&#10;Novice Interior&#10;Novice Exterior&#10;Advanced Interior&#10;Advanced Exterior&#10;Excellent Interior&#10;Excellent Exterior"></textarea>
         </div>
       </div>
       
-      <div style="text-align: center; margin-top: 20px;">
-        <button class="generate-btn" onclick="generateFinalPremium()">Generate Final Premium</button>
-        <button onclick="cancelEdit()" style="background-color: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-left: 10px;">Cancel</button>
+      <div style="text-align: center;">
+        <button class="generate-btn" onclick="generatePremium()">Generate Premium</button>
+        <button class="print-btn" onclick="window.print()">Print Premium</button>
+        <button onclick="location.href='fresh.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Main</button>
       </div>
     </div>
     
-    <div id="premiumPreview" class="premium-preview" style="display: none;">
+    <div id="premiumDocument" class="premium-document" style="display: none;">
       <!-- Premium content will be generated here -->
     </div>
   </div>
 
-  <script type="module">
-    import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-    let currentTrialData = null;
-    let currentApplicationData = null;
-
-    window.generatePremium = async function() {
-      try {
-        if (!auth.currentUser) {
-          alert("Please log in first");
-          window.location.href = 'index.html';
-          return;
-        }
-
-        // Load trial data
-        await loadLatestTrialData();
-        
-        if (!currentTrialData) {
-          alert("No trial found. Please create a trial first.");
-          return;
-        }
-
-        // Try to load application data
-        await loadApplicationData();
-
-        // Show the edit stage with pre-filled data
-        showEditStage();
-        
-      } catch (error) {
-        console.error("Error generating premium:", error);
-        alert("Error generating premium: " + error.message);
-      }
-    };
-
-    function showEditStage() {
-      // Pre-fill the edit form with data
-      document.getElementById('editClubName').value = currentTrialData.clubName || '';
-      document.getElementById('editSecretary').value = currentTrialData.secretary || '';
-      
-      // Fix the date processing - this was the bug!
-      let trialDatesText = '';
-      if (currentTrialData.days && currentTrialData.days.length > 0) {
-        console.log("Raw trial days:", currentTrialData.days);
-        
-        const validDates = currentTrialData.days
-          .filter(day => day.date && day.date.trim())
-          .map(day => {
-            const dateStr = day.date;
-            console.log("Processing date:", dateStr);
-            
-            try {
-              const date = new Date(dateStr);
-              if (!isNaN(date.getTime())) {
-                return date.toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                });
-              }
-            } catch (e) {
-              console.error("Error parsing date:", dateStr, e);
-            }
-            return dateStr; // Return original if parsing fails
-          });
-        
-        console.log("Processed dates:", validDates);
-        
-        if (validDates.length > 0) {
-          trialDatesText = validDates.join(' & ');
-        }
-      }
-      
-      document.getElementById('editTrialDates').value = trialDatesText || 'Dates TBD';
-      
-      // Fill location info from application if available
-      if (currentApplicationData) {
-        document.getElementById('editLocation').value = currentApplicationData.trialLocation || '';
-        document.getElementById('editAddress').value = currentApplicationData.cityState || '';
-        document.getElementById('editEmail').value = currentApplicationData.contactEmail || '';
-        document.getElementById('editPhone').value = currentApplicationData.contactPhone || '';
-      }
-
-      // Extract judges
-      const judges = new Set();
-      if (currentTrialData.days) {
-        currentTrialData.days.forEach(day => {
-          if (day.classes) {
-            day.classes.forEach(cls => {
-              if (cls.rounds) {
-                cls.rounds.forEach(round => {
-                  if (round.judge && round.judge.trim()) {
-                    judges.add(round.judge.trim());
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-      document.getElementById('editJudges').value = Array.from(judges).join('\n');
-
-      // Extract classes
-      const classes = new Set();
-      if (currentTrialData.days) {
-        currentTrialData.days.forEach(day => {
-          if (day.classes) {
-            day.classes.forEach(cls => {
-              if (cls.className && cls.className.trim()) {
-                classes.add(cls.className.trim());
-              }
-            });
-          }
-        });
-      }
-      document.getElementById('editClasses').value = Array.from(classes).join('\n');
-
-      // Show the edit stage
-      document.getElementById('editStage').style.display = 'block';
-      
-      // Scroll to edit stage
-      document.getElementById('editStage').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    window.generateFinalPremium = function() {
-      // Get all the edited values
-      const editedData = {
-        clubName: document.getElementById('editClubName').value || '[CLUB NAME]',
-        trialType: document.getElementById('editTrialType').value || 'Scent Work Trial',
-        trialDates: document.getElementById('editTrialDates').value || '[TRIAL DATES]',
-        startTime: document.getElementById('editStartTime').value || '8:00 AM',
-        endTime: document.getElementById('editEndTime').value || '5:00 PM',
-        location: document.getElementById('editLocation').value || '[LOCATION]',
-        address: document.getElementById('editAddress').value || '[ADDRESS]',
-        secretary: document.getElementById('editSecretary').value || '[SECRETARY]',
-        email: document.getElementById('editEmail').value || '[EMAIL]',
-        phone: document.getElementById('editPhone').value || '[PHONE]',
-        entryLimit: document.getElementById('editEntryLimit').value || 'Determined by venue capacity',
-        judges: document.getElementById('editJudges').value.split('\n').filter(j => j.trim()),
-        classes: document.getElementById('editClasses').value.split('\n').filter(c => c.trim())
+  <script>
+    window.generatePremium = function() {
+      const data = {
+        clubName: document.getElementById('clubName').value || 'West Kelowna K9 Scent and Games',
+        secretary: document.getElementById('secretary').value || 'Chris Johansen',
+        trialDates: document.getElementById('trialDates').value || '[TRIAL DATES]',
+        startTime: document.getElementById('startTime').value || '8:00 AM',
+        endTime: document.getElementById('endTime').value || '4:00 PM',
+        location: document.getElementById('location').value || '[LOCATION TBD]',
+        email: document.getElementById('email').value || '[EMAIL TBD]',
+        phone: document.getElementById('phone').value || '[PHONE TBD]',
+        entryLimit: document.getElementById('entryLimit').value || '60 dogs maximum',
+        deadline: document.getElementById('deadline').value || '[DEADLINE TBD]',
+        judges: document.getElementById('judges').value.split('\n').filter(j => j.trim()),
+        classes: document.getElementById('classes').value.split('\n').filter(c => c.trim())
       };
 
-      console.log("Generating premium with edited data:", editedData);
-
-      // Generate the premium with edited data
-      generatePremiumHTML(editedData);
-      
-      // Hide edit stage and show premium
-      document.getElementById('editStage').style.display = 'none';
-      document.getElementById('premiumPreview').style.display = 'block';
-      
-      // Scroll to premium
-      document.getElementById('premiumPreview').scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.cancelEdit = function() {
-      document.getElementById('editStage').style.display = 'none';
-    };
-
-    async function loadLatestTrialData() {
-      const q = query(
-        collection(db, "trials"),
-        where("createdBy", "==", auth.currentUser.uid)
-      );
-      
-      const snapshot = await getDocs(q);
-      
-      if (!snapshot.empty) {
-        const trials = [];
-        snapshot.forEach(doc => {
-          trials.push({ id: doc.id, ...doc.data() });
-        });
-        
-        // Sort by creation date, most recent first
-        trials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
-        currentTrialData = trials[0];
-        console.log("Loaded trial data:", currentTrialData);
-      }
-    }
-
-    async function loadApplicationData() {
-      if (!currentTrialData) return;
-      
-      const q = query(
-        collection(db, "applications"),
-        where("trialId", "==", currentTrialData.id),
-        where("createdBy", "==", auth.currentUser.uid)
-      );
-      
-      const snapshot = await getDocs(q);
-      
-      if (!snapshot.empty) {
-        snapshot.forEach(doc => {
-          currentApplicationData = { id: doc.id, ...doc.data() };
-        });
-        console.log("Loaded application data:", currentApplicationData);
-      }
-    }
-
-    function generatePremiumHTML(editedData) {
-      const preview = document.getElementById('premiumPreview');
-      
-      // Use edited data instead of raw trial data
-      const data = editedData || {
-        clubName: currentTrialData?.clubName || '[CLUB NAME]',
-        trialType: 'Scent Work Trial',
-        trialDates: '[TRIAL DATES]',
-        startTime: '8:00 AM',
-        endTime: '5:00 PM',
-        location: '[LOCATION]',
-        address: '[ADDRESS]',
-        secretary: currentTrialData?.secretary || '[SECRETARY]',
-        email: '[EMAIL]',
-        phone: '[PHONE]',
-        entryLimit: 'Determined by venue capacity',
-        judges: [],
-        classes: []
-      };
-
-      // Generate judges table
       const judgesTableHTML = data.judges.length > 0 ? 
         data.judges.map(judge => 
-          `<tr><td>Scent Work</td><td>${judge}</td><td>Location TBD</td></tr>`
+          `<tr><td>Scent Work</td><td>${judge}</td><td>British Columbia</td></tr>`
         ).join('') :
-        '<tr><td>Scent Work</td><td>Judge TBD</td><td>Location TBD</td></tr>';
+        '<tr><td>Scent Work</td><td>[JUDGE TBD]</td><td>British Columbia</td></tr>';
 
-      // Generate classes table
-      const classesHTML = data.classes.length > 0 ? 
+      const classesTableHTML = data.classes.length > 0 ? 
         data.classes.map(className => 
-          `<tr><td>${className}</td><td>All levels welcome</td></tr>`
+          `<tr><td>${className}</td><td>As per C-WAGS rules</td></tr>`
         ).join('') :
-        '<tr><td>Classes TBD</td><td>To be determined</td></tr>';
+        '<tr><td>[CLASSES TBD]</td><td>To be determined</td></tr>';
 
-      preview.innerHTML = `
+      const premiumHTML = `
         <div class="premium-header">
           <h1>${data.clubName}</h1>
           <div class="subtitle">Licensed by C-WAGS</div>
-          <div class="subtitle">${data.trialType}</div>
+          <div class="subtitle">Scent Work Trial</div>
           <div class="subtitle">(Indoor/Outdoor)</div>
           <div style="margin-top: 15px;">
             <strong>${data.trialDates}</strong><br>
-            <strong>Start Time: ${data.startTime} – End Time: ${data.endTime}</strong>
+            <strong>${data.startTime} – ${data.endTime}</strong>
           </div>
         </div>
 
         <div class="premium-section">
           <h2>Location</h2>
-          <strong>${data.location}</strong><br>
-          ${data.address}
+          <strong>${data.location}</strong>
         </div>
 
         <div class="premium-section">
           <h2>Event Information</h2>
-          <strong>Show Secretary:</strong> ${data.secretary}<br>
-          <strong>Trial Contact:</strong> ${data.secretary}<br>
+          <strong>Trial Secretary:</strong> ${data.secretary}<br>
           <strong>Email:</strong> ${data.email}<br>
           <strong>Phone:</strong> ${data.phone}<br>
-          <strong>Entry Limit:</strong> ${data.entryLimit}
+          <strong>Entry Limit:</strong> ${data.entryLimit}<br>
+          <strong>Entry Deadline:</strong> ${data.deadline}
         </div>
 
         <div class="premium-section">
@@ -518,9 +290,9 @@
           <table class="judges-table">
             <thead>
               <tr>
-                <th>Class</th>
+                <th>Event</th>
                 <th>Judge Name</th>
-                <th>City/Province/State</th>
+                <th>Location</th>
               </tr>
             </thead>
             <tbody>
@@ -534,78 +306,104 @@
           <table class="classes-table">
             <thead>
               <tr>
-                <th>Class Name</th>
+                <th>Class</th>
                 <th>Description</th>
               </tr>
             </thead>
             <tbody>
-              ${classesHTML}
+              ${classesTableHTML}
             </tbody>
           </table>
         </div>
 
         <div class="premium-section">
           <h2>Entry Fees</h2>
-          <ul class="fee-list">
-            <li><strong>$25.00</strong> First entry of each dog</li>
-            <li><strong>$20.00</strong> Additional entry, same dog</li>
-            <li><strong>$15.00</strong> Exhibition Only</li>
-          </ul>
-          <p><em>Make cheques payable to: ${data.clubName}</em></p>
+          <table class="fees-table">
+            <thead>
+              <tr>
+                <th>Entry Type</th>
+                <th>Fee</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>First dog, first class</td><td>$35.00</td></tr>
+              <tr><td>Same dog, additional class</td><td>$25.00</td></tr>
+              <tr><td>Additional dog, same handler</td><td>$30.00</td></tr>
+              <tr><td>Junior Handler (under 18)</td><td>$20.00</td></tr>
+              <tr><td>Exhibition Only</td><td>$15.00</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Make cheques payable to:</strong> ${data.clubName}</p>
+          <p><strong>E-transfer accepted:</strong> ${data.email}</p>
         </div>
 
         <div class="premium-section">
-          <h2>Entry Deadline</h2>
-          <p><strong>Entries must be received by [DATE] at 11:59 PM</strong></p>
-          <p>Entries may be submitted online or mailed to the trial secretary.</p>
-        </div>
-
-        <div class="premium-section">
-          <h2>Show Rules and Information</h2>
+          <h2>Entry Requirements</h2>
           <ul>
-            <li>All dogs must be on leash unless in the search area</li>
+            <li>All dogs must be registered with C-WAGS or eligible for registration</li>
+            <li>Dogs must be at least 6 months of age on the day of the trial</li>
+            <li>Current vaccinations required (rabies, DHPP)</li>
             <li>Bitches in season may compete but must be crated separately</li>
-            <li>Dogs must be current on vaccinations</li>
-            <li>Refunds: Entry fees will be refunded if trial is cancelled</li>
-            <li>COVID Protocols: Follow current health guidelines</li>
+            <li>All dogs must be on leash when not in the search area</li>
           </ul>
         </div>
 
         <div class="premium-section">
-          <h2>Awards and Prizes</h2>
+          <h2>Trial Rules and Information</h2>
           <ul>
-            <li><strong>High in Trial:</strong> Rosette & Trophy</li>
-            <li><strong>Class Placements 1-4:</strong> Rosettes</li>
-            <li><strong>Qualifying Scores:</strong> Qualifying ribbons</li>
+            <li>Trial conducted under current C-WAGS Scent Work Rules and Regulations</li>
+            <li>Lunch and refreshments available on site</li>
+            <li>RV parking available (contact trial secretary)</li>
+            <li>Grooming area available</li>
+            <li>Clean up after your dog - bags provided</li>
+            <li>Crating space available inside venue</li>
           </ul>
         </div>
 
         <div class="premium-section">
+          <h2>Awards</h2>
+          <ul>
+            <li><strong>High in Trial:</strong> Rosette and special prize</li>
+            <li><strong>High Combined:</strong> Rosette (if applicable)</li>
+            <li><strong>Qualifying scores:</strong> C-WAGS qualifying ribbon</li>
+            <li><strong>Placements 1st-4th:</strong> C-WAGS placement ribbons</li>
+          </ul>
+        </div>
+
+        <div class="premium-section">
+          <h2>Accommodations</h2>
+          <p><strong>Pet-Friendly Hotels near West Kelowna:</strong></p>
+          <ul>
+            <li>Best Western Plus Wine Country Hotel & Suites - (250) 707-4400</li>
+            <li>Sandman Inn & Suites Vernon - (250) 542-4325</li>
+            <li>Coast Capri Hotel Kelowna - (250) 860-6060</li>
+          </ul>
+          <p><em>Please mention you're attending the dog trial when booking</em></p>
+        </div>
+
+        <div class="contact-box">
           <h2>Trial Secretary Contact</h2>
-          <div class="contact-box">
-            <strong>${data.secretary}</strong><br>
-            Email: ${data.email}<br>
-            Phone: ${data.phone}
-          </div>
+          <strong>${data.secretary}</strong><br>
+          ${data.clubName}<br>
+          Email: ${data.email}<br>
+          Phone: ${data.phone}<br><br>
+          <strong>For entries and questions contact trial secretary</strong>
         </div>
 
         <div class="premium-section">
           <h2>Directions to Trial Site</h2>
-          <p><strong>${data.location}</strong><br>${data.address}</p>
-          ${data.location !== '[LOCATION]' ? 
-            `<p><a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(data.location + ', ' + data.address)}" target="_blank">🗺️ Get Directions via Google Maps</a></p>` : 
-            '<p><em>Detailed directions will be provided upon entry confirmation.</em></p>'
-          }
+          <p><strong>${data.location}</strong></p>
+          <p><em>Detailed directions will be provided upon entry confirmation</em></p>
+          <p>GPS coordinates and additional parking information available from trial secretary</p>
         </div>
       `;
-    }
 
-    // Auth check
-    auth.onAuthStateChanged(user => {
-      if (!user) {
-        window.location.href = 'index.html';
-      }
-    });
+      document.getElementById('premiumDocument').innerHTML = premiumHTML;
+      document.getElementById('premiumDocument').style.display = 'block';
+      document.getElementById('premiumDocument').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    console.log("Premium generator loaded for West Kelowna K9 Scent and Games");
   </script>
 </body>
 </html>
