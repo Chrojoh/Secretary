@@ -5,7 +5,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 onAuthStateChanged(auth, user => {
   if (user) {
     const username = user.email.split('@')[0];
-    document.getElementById('user').textContent = `Logged in as: ${username}`;
+    document.getElementById("username").textContent = username;
   } else {
     window.location.href = "index.html";
   }
