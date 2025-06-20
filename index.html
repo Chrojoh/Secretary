@@ -1,300 +1,324 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Trial Secretary Login</title>
+  <title>Trial Secretary Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     body {
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       margin: 0;
       padding: 20px;
-      box-sizing: border-box;
     }
     
-    .login-container {
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
       background: white;
-      padding: 40px;
       border-radius: 15px;
       box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 400px;
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+      color: white;
+      padding: 30px;
       text-align: center;
     }
     
-    .login-header {
-      margin-bottom: 30px;
-    }
-    
-    .login-header h1 {
-      color: #333;
-      margin-bottom: 10px;
-      font-size: 28px;
-    }
-    
-    .login-header p {
-      color: #666;
+    .header h1 {
       margin: 0;
+      font-size: 32px;
     }
     
-    .form-group {
-      margin-bottom: 20px;
-      text-align: left;
+    .welcome-msg {
+      margin: 10px 0 0 0;
+      font-size: 18px;
+      opacity: 0.9;
     }
     
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #333;
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 30px;
     }
     
-    .form-group input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.3s;
-      box-sizing: border-box;
+    .nav-card {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
     }
     
-    .form-group input:focus {
-      outline: none;
+    .nav-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
       border-color: #4CAF50;
     }
     
-    .btn {
-      width: 100%;
-      padding: 12px;
+    .nav-card h3 {
+      margin: 0 0 15px 0;
+      color: #333;
+      font-size: 20px;
+    }
+    
+    .nav-card p {
+      color: #666;
+      margin: 0 0 20px 0;
+      line-height: 1.5;
+    }
+    
+    .nav-button {
+      background: #4CAF50;
+      color: white;
       border: none;
+      padding: 12px 24px;
       border-radius: 8px;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      margin: 10px 0;
+      width: 100%;
       transition: background-color 0.3s;
     }
     
-    .btn-login {
-      background-color: #4CAF50;
+    .nav-button:hover {
+      background: #45a049;
+    }
+    
+    .nav-button.secondary {
+      background: #2196F3;
+    }
+    
+    .nav-button.secondary:hover {
+      background: #1976D2;
+    }
+    
+    .nav-button.tertiary {
+      background: #ff9800;
+    }
+    
+    .nav-button.tertiary:hover {
+      background: #f57c00;
+    }
+    
+    .user-info {
+      background: #e8f5e8;
+      padding: 20px;
+      margin: 20px 30px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .user-details {
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    
+    .logout-btn {
+      background: #f44336;
       color: white;
-    }
-    
-    .btn-login:hover {
-      background-color: #45a049;
-    }
-    
-    .btn-signup {
-      background-color: #2196F3;
-      color: white;
-    }
-    
-    .btn-signup:hover {
-      background-color: #1976D2;
-    }
-    
-    .error {
-      background-color: #ffebee;
-      color: #c62828;
-      padding: 10px;
+      border: none;
+      padding: 8px 16px;
       border-radius: 5px;
-      margin: 10px 0;
+      cursor: pointer;
       font-size: 14px;
     }
     
-    .loading {
-      color: #666;
-      font-style: italic;
+    .logout-btn:hover {
+      background: #d32f2f;
     }
     
-    .alternative {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid #eee;
+    .quick-stats {
+      background: #fff3e0;
+      padding: 20px;
+      margin: 20px 30px;
+      border-radius: 8px;
+      border-left: 5px solid #ff9800;
     }
     
-    .alternative a {
-      color: #4CAF50;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    
-    .alternative a:hover {
-      text-decoration: underline;
+    .quick-stats h3 {
+      margin: 0 0 10px 0;
+      color: #f57c00;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-header">
-      <h1>🐕 Trial Secretary</h1>
-      <p>Login to manage your trials</p>
+  <div class="dashboard-container">
+    <div class="header">
+      <h1>🐕 Trial Secretary Dashboard</h1>
+      <div class="welcome-msg">Welcome back, <span id="username">User</span>!</div>
     </div>
     
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="username">Username:</label>
-        <input type="text" id="username" placeholder="Enter your username" required>
+    <div class="user-info">
+      <div class="user-details">
+        Logged in as: <span id="userEmail">Loading...</span>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    
+    <div class="quick-stats">
+      <h3>📊 Quick Stats</h3>
+      <div id="statsContent">Loading your trial statistics...</div>
+    </div>
+    
+    <div class="nav-grid">
+      <!-- Trial Management -->
+      <div class="nav-card" onclick="location.href='create-trial.html'">
+        <h3>🚀 Create Trial</h3>
+        <p>Set up a new trial with classes, judges, and schedules</p>
+        <button class="nav-button">Create New Trial</button>
       </div>
       
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" id="password" placeholder="Enter your password" required>
+      <div class="nav-card" onclick="location.href='view-trials.html'">
+        <h3>📋 View Trials</h3>
+        <p>View, edit, and manage your existing trials</p>
+        <button class="nav-button">Manage Trials</button>
       </div>
       
-      <button type="button" class="btn btn-login" onclick="login()">Login</button>
-      <button type="button" class="btn btn-signup" onclick="signup()">Sign Up</button>
-    </form>
-    
-    <div id="error" class="error" style="display: none;"></div>
-    <div id="loading" class="loading" style="display: none;">Please wait...</div>
-    
-    <div class="alternative">
-      <p>Having trouble logging in?</p>
-      <a href="fresh.html">Continue without login</a>
+      <!-- Applications & Documents -->
+      <div class="nav-card" onclick="location.href='trial-application.html'">
+        <h3>📄 Trial Application</h3>
+        <p>Complete C-WAGS trial application forms</p>
+        <button class="nav-button secondary">Create Application</button>
+      </div>
+      
+      <div class="nav-card" onclick="location.href='premium-generator.html'">
+        <h3>🏆 Premium Generator</h3>
+        <p>Generate professional premium lists for your trials</p>
+        <button class="nav-button secondary">Generate Premium</button>
+      </div>
+      
+      <div class="nav-card" onclick="location.href='trial-app.html'">
+        <h3>📋 C-WAGS Application</h3>
+        <p>Official C-WAGS trial application form</p>
+        <button class="nav-button tertiary">C-WAGS Form</button>
+      </div>
+      
+      <div class="nav-card" onclick="location.href='waiver-generator.html'">
+        <h3>📝 Waiver Generator</h3>
+        <p>Create liability waivers for your events</p>
+        <button class="nav-button tertiary">Generate Waivers</button>
+      </div>
+      
+      <!-- Quick Tools -->
+      <div class="nav-card" onclick="showQuickTools()">
+        <h3>⚡ Quick Tools</h3>
+        <p>Entry forms, results tracking, and more</p>
+        <button class="nav-button tertiary">Quick Access</button>
+      </div>
+      
+      <div class="nav-card" onclick="location.href='fresh.html'">
+        <h3>🛠️ Emergency Tools</h3>
+        <p>Backup tools and system utilities</p>
+        <button class="nav-button tertiary">Emergency Mode</button>
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { auth, db } from './js/firebase.js';
-    import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-    console.log("Login page loaded");
+    console.log("Dashboard loading...");
 
-    // Check if already logged in
     let authCheckComplete = false;
-    
-    auth.onAuthStateChanged(user => {
-      if (authCheckComplete) return; // Prevent multiple calls
+
+    // Safe auth state listener
+    auth.onAuthStateChanged(async (user) => {
+      if (authCheckComplete) return; // Prevent multiple executions
       authCheckComplete = true;
-      
+
+      console.log("Auth state changed:", user ? "logged in" : "not logged in");
+
       if (user) {
-        console.log("User already logged in:", user.email);
-        // Redirect to new safe dashboard
-        window.location.href = 'main-dashboard.html';
+        console.log("User authenticated:", user.email);
+        
+        // Update UI with user info
+        const username = user.email.split('@')[0];
+        document.getElementById('username').textContent = username;
+        document.getElementById('userEmail').textContent = user.email;
+        
+        // Load user stats
+        await loadUserStats(user);
+        
       } else {
-        console.log("No user logged in");
+        console.log("No user found, redirecting to login");
+        // Small delay to prevent rapid redirects
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
       }
     });
 
-    function getEmailFromUsername(username) {
-      return `${username}@trial.local`;
-    }
-
-    function showError(message) {
-      const errorDiv = document.getElementById('error');
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
-      setTimeout(() => {
-        errorDiv.style.display = 'none';
-      }, 5000);
-    }
-
-    function showLoading(show) {
-      document.getElementById('loading').style.display = show ? 'block' : 'none';
-      const buttons = document.querySelectorAll('.btn');
-      buttons.forEach(btn => btn.disabled = show);
-    }
-
-    window.signup = async function() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-
-      if (!username || !password) {
-        showError("Please fill in both username and password");
-        return;
-      }
-
-      if (password.length < 6) {
-        showError("Password must be at least 6 characters");
-        return;
-      }
-
-      const email = getEmailFromUsername(username);
-      showLoading(true);
-
+    async function loadUserStats(user) {
       try {
-        console.log("Creating user account...");
-        await createUserWithEmailAndPassword(auth, email, password);
+        // Count trials
+        const trialsQuery = query(
+          collection(db, "trials"),
+          where("createdBy", "==", user.uid)
+        );
+        const trialsSnapshot = await getDocs(trialsQuery);
         
-        // Save username mapping
-        await setDoc(doc(db, "usernames", username), { 
-          uid: auth.currentUser.uid,
-          createdAt: new Date()
-        });
+        // Count applications  
+        const appsQuery = query(
+          collection(db, "applications"),
+          where("createdBy", "==", user.uid)
+        );
+        const appsSnapshot = await getDocs(appsQuery);
+
+        const statsHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #4CAF50;">${trialsSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Trials Created</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #2196F3;">${appsSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Applications</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #ff9800;">Active</div>
+              <div style="font-size: 14px; color: #666;">System Status</div>
+            </div>
+          </div>
+        `;
         
-        console.log("Account created successfully");
-        window.location.href = 'main-dashboard.html';
+        document.getElementById('statsContent').innerHTML = statsHTML;
         
-      } catch (err) {
-        console.error("Signup error:", err);
-        showLoading(false);
-        
-        if (err.code === 'auth/email-already-in-use') {
-          showError("Username already exists. Try logging in instead.");
-        } else if (err.code === 'auth/weak-password') {
-          showError("Password is too weak. Use at least 6 characters.");
-        } else {
-          showError("Error creating account: " + err.message);
+      } catch (error) {
+        console.error("Error loading stats:", error);
+        document.getElementById('statsContent').innerHTML = 
+          '<p style="color: #666;">Unable to load statistics</p>';
+      }
+    }
+
+    window.logout = async function() {
+      if (confirm("Are you sure you want to logout?")) {
+        try {
+          console.log("Logging out...");
+          await signOut(auth);
+          window.location.href = 'index.html';
+        } catch (error) {
+          console.error("Logout error:", error);
+          alert("Error logging out: " + error.message);
         }
       }
     };
 
-    window.login = async function() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-
-      if (!username || !password) {
-        showError("Please fill in both username and password");
-        return;
-      }
-
-      const email = getEmailFromUsername(username);
-      showLoading(true);
-
-      try {
-        console.log("Checking username exists...");
-        const ref = doc(db, "usernames", username);
-        const snap = await getDoc(ref);
-        
-        if (!snap.exists()) {
-          throw new Error("Username not found. Try signing up first.");
-        }
-
-        console.log("Logging in user...");
-        await signInWithEmailAndPassword(auth, email, password);
-        
-        console.log("Login successful");
-        window.location.href = 'main-dashboard.html';
-        
-      } catch (err) {
-        console.error("Login error:", err);
-        showLoading(false);
-        
-        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
-          showError("Invalid username or password");
-        } else if (err.code === 'auth/too-many-requests') {
-          showError("Too many failed attempts. Please try again later.");
-        } else {
-          showError("Login failed: " + err.message);
-        }
-      }
+    window.showQuickTools = function() {
+      alert("Quick Tools coming soon! For now, use the individual tools from the dashboard.");
     };
 
-    // Enter key support
-    document.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        login();
-      }
-    });
-
-    console.log("Login system ready");
+    console.log("Dashboard script loaded successfully");
   </script>
 </body>
 </html>
