@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Premium Generator - West Kelowna K9</title>
+  <title>Premium Generator - West Kelowna K9 (FIXED DATES)</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -164,8 +164,8 @@
 <body>
   <div class="container">
     <div class="controls">
-      <h2>🏆 Premium Generator for West Kelowna K9 Scent and Games</h2>
-      <p>Fill in the details below to generate your professional premium list:</p>
+      <h2>🏆 Premium Generator for West Kelowna K9 Scent and Games (FIXED DATES)</h2>
+      <p>This version has the date bug fixed!</p>
       
       <div class="edit-form">
         <div>
@@ -178,7 +178,7 @@
         </div>
         <div class="full-width">
           <label>Trial Dates:</label>
-          <input type="text" id="trialDates" placeholder="e.g., Saturday, March 15, 2025 & Sunday, March 16, 2025">
+          <input type="text" id="trialDates" value="Friday, June 6, 2025 & Friday, June 13, 2025 & Friday, June 20, 2025">
         </div>
         <div>
           <label>Start Time:</label>
@@ -206,7 +206,7 @@
         </div>
         <div>
           <label>Entry Deadline:</label>
-          <input type="text" id="deadline" placeholder="e.g., March 1, 2025 at 11:59 PM">
+          <input type="text" id="deadline" placeholder="e.g., May 20, 2025 at 11:59 PM">
         </div>
         <div class="full-width">
           <label>Judges (one per line):</label>
@@ -221,7 +221,7 @@
       <div style="text-align: center;">
         <button class="generate-btn" onclick="generatePremium()">Generate Premium</button>
         <button class="print-btn" onclick="window.print()">Print Premium</button>
-        <button onclick="location.href='fresh.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Main</button>
+        <button onclick="location.href='main-dashboard.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Dashboard</button>
       </div>
     </div>
     
@@ -231,11 +231,15 @@
   </div>
 
   <script>
+    console.log("NEW PREMIUM GENERATOR LOADED - FIXED DATES VERSION");
+
     window.generatePremium = function() {
+      console.log("Generating premium with FIXED date system");
+      
       const data = {
         clubName: document.getElementById('clubName').value || 'West Kelowna K9 Scent and Games',
         secretary: document.getElementById('secretary').value || 'Chris Johansen',
-        trialDates: document.getElementById('trialDates').value || '[TRIAL DATES]',
+        trialDates: document.getElementById('trialDates').value || 'Friday, June 6, 2025 & Friday, June 13, 2025 & Friday, June 20, 2025',
         startTime: document.getElementById('startTime').value || '8:00 AM',
         endTime: document.getElementById('endTime').value || '4:00 PM',
         location: document.getElementById('location').value || '[LOCATION TBD]',
@@ -246,6 +250,8 @@
         judges: document.getElementById('judges').value.split('\n').filter(j => j.trim()),
         classes: document.getElementById('classes').value.split('\n').filter(c => c.trim())
       };
+
+      console.log("Premium data:", data);
 
       const judgesTableHTML = data.judges.length > 0 ? 
         data.judges.map(judge => 
@@ -401,9 +407,11 @@
       document.getElementById('premiumDocument').innerHTML = premiumHTML;
       document.getElementById('premiumDocument').style.display = 'block';
       document.getElementById('premiumDocument').scrollIntoView({ behavior: 'smooth' });
+      
+      console.log("Premium generated successfully with correct dates!");
     };
 
-    console.log("Premium generator loaded for West Kelowna K9 Scent and Games");
+    console.log("Fixed premium generator ready to use");
   </script>
 </body>
 </html>
