@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Waiver Generator</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .back-button {
+      background-color: #007cba;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    
+    .waiver-editor {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .editor-panel {
+      border: 1px solid #ccc;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    
+    .preview-panel {
+      border: 1px solid #ccc;
+      padding: 20px;
+      background-color: white;
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .form-group textarea {
+      height: 100px;
+      resize: vertical;
+    }
+    
+    .template-select {
+      margin-bottom: 20px;
+    }
+    
+    .action-buttons {
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .action-buttons button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    
+    .generate-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .save-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+    
+    .print-btn {
+      background-color: #ff9800;
+      color: white;
+    }
+    
+    .waiver-preview {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    
+    .waiver-preview h1 {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    
+    .waiver-preview h2 {
+      font-size: 14px;
+      margin: 15px 0 10px 0;
+      text-decoration: underline;
+    }
+    
+    .signature-section {
+      margin-top: 30px;
+      border-top: 1px solid #000;
+      padding-top: 20px;
+    }
+    
+    .signature-line {
+      border-bottom: 1px solid #000;
+      margin: 15px 0;
+      padding-bottom: 2px;
+      min-height: 20px;
+    }
+    
+    @media print {
+      .back-button, .waiver-editor, .action-buttons {
+        display: none;
+      }
+      .preview-panel {
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .waiver-editor {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="back-button" onclick="location.href='dashboard.html'">← Back to Dashboard</button>
+    <h1>Waiver Generator</h1>
+    
+    <div class="template-select">
+      <label><strong>Select Waiver Template:</strong></label>
+      <select id="templateSelect" onchange="loadTemplate()">
+        <option value="scent">Scent Work Trial Waiver</option>
+        <option value="obedience">Obedience Trial Waiver</option>
+        <option value="rally">Rally Trial Waiver</option>
+        <option value="custom">Custom Waiver</option>
+      </select>
+    </div>
+    
+    <div class="waiver-editor">
+      <div class="editor-panel">
+        <h3>Edit Waiver Details</h3>
+        
+        <div class="form-group">
+          <label>Club/Organization Name:</label>
+          <input type="text" id="clubName" placeholder="Enter club name">
+        </div>
+        
+        <div class="form-group">
+          <label>Event Name:</label>
+          <input type="text" id="eventName" placeholder="Enter event name">
+        </div>
+        
+        <div class="form-group">
+          <label>Event Date(s):</label>
+          <input type="text" id="eventDates" placeholder="Enter event dates">
+        </div>
+        
+        <div class="form-group">
+          <label>Location:</label>
+          <input type="text" id="eventLocation" placeholder="Enter event location">
+        </div>
+        
+        <div class="form-group">
+          <label>Additional Terms:</label>
+          <textarea id="additionalTerms" placeholder="Add any additional terms or conditions"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Emergency Contact:</label>
+          <input type="text" id="emergencyContact" placeholder="Emergency contact information">
+        </div>
+        
+        <div class="action-buttons">
+          <button class="generate-btn" onclick="generateWaiver()">Generate Waiver</button>
+          <button class="save-btn" onclick="saveWaiver()">Save Waiver</button>
+          <button class="print-btn" onclick="window.print()">Print Waiver</button>
+        </div>
+      </div>
+      
+      <div class="preview-panel">
+        <div id="waiverPreview" class="waiver-preview">
+          <p><em>Select a template and fill in the details to generate your waiver preview.</em></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    let currentTrialData = null;
+    let currentApplicationData = null;
+
+    // Waiver templates
+    const waiverTemplates = {
+      scent: {
+        title: "SCENT WORK TRIAL WAIVER AND RELEASE",
+        activityRisks: "participating in scent work activities including but not limited to: dogs searching for odor, off-leash work, interaction with other dogs and handlers, and activities in various environments",
+        specificTerms: `
+          <p><strong>I understand that:</strong></p>
+          <ul>
+            <li>Scent work involves dogs working in close proximity to each other and various environments</li>
+            <li>Dogs may be working off-leash in designated search areas</li>
+            <li>There are inherent risks involved in dog training and competition activities</li>
+            <li>I am responsible for my dog's behavior and actions at all times</li>
+            <li>I will follow all safety protocols and instructions from event officials</li>
+          </ul>
+        `
+      },
+      obedience: {
+        title: "OBEDIENCE TRIAL WAIVER AND RELEASE",
+        activityRisks: "participating in dog obedience activities including but not limited to: on and off-leash exercises, jumping, retrieving, and group exercises with other dogs",
+        specificTerms: `
+          <p><strong>I understand that:</strong></p>
+          <ul>
+            <li>Obedience work involves precision exercises that may include jumping and retrieving</li>
+            <li>Dogs will be working both on and off-leash</li>
+            <li>Group exercises require dogs to work in close proximity</li>
+            <li>I am responsible for my dog's performance and safety</li>
+            <li>I will maintain control of my dog except when in the ring under judge's direction</li>
+          </ul>
+        `
+      },
+      rally: {
+        title: "RALLY TRIAL WAIVER AND RELEASE",
+        activityRisks: "participating in rally obedience activities including but not limited to: navigating courses with various obstacles, on and off-leash work, and interaction with other dogs and handlers",
+        specificTerms: `
+          <p><strong>I understand that:</strong></p>
+          <ul>
+            <li>Rally involves navigating a course with various signs and obstacles</li>
+            <li>Advanced levels require off-leash work</li>
+            <li>There is continuous movement and direction changes throughout the course</li>
+            <li>I am responsible for my dog's safety while navigating the course</li>
+            <li>I will follow all course directions and safety guidelines</li>
+          </ul>
+        `
+      },
+      custom: {
+        title: "EVENT WAIVER AND RELEASE",
+        activityRisks: "participating in dog training and competition activities",
+        specificTerms: `
+          <p><strong>I understand that:</strong></p>
+          <ul>
+            <li>This event involves activities with dogs that carry inherent risks</li>
+            <li>I am responsible for my dog's behavior and safety</li>
+            <li>I will follow all event rules and safety protocols</li>
+          </ul>
+        `
+      }
+    };
+
+    window.loadTemplate = function() {
+      const selectedTemplate = document.getElementById('templateSelect').value;
+      const template = waiverTemplates[selectedTemplate];
+      
+      // Auto-fill some fields if we have trial data
+      if (currentTrialData) {
+        document.getElementById('clubName').value = currentTrialData.clubName || '';
+        document.getElementById('eventName').value = `${template.title.split(' ')[0]} Trial` || '';
+        
+        // Get trial dates
+        if (currentTrialData.days && currentTrialData.days.length > 0) {
+          const dates = currentTrialData.days
+            .filter(day => day.date)
+            .map(day => new Date(day.date).toLocaleDateString());
+          if (dates.length > 0) {
+            document.getElementById('eventDates').value = dates.join(', ');
+          }
+        }
+      }
+      
+      // Auto-fill location if we have application data
+      if (currentApplicationData) {
+        document.getElementById('eventLocation').value = currentApplicationData.trialLocation || '';
+        document.getElementById('emergencyContact').value = `${currentApplicationData.contactName || ''} - ${currentApplicationData.contactPhone || ''}`;
+      }
+      
+      // Generate preview
+      generateWaiver();
+    };
+
+    window.generateWaiver = function() {
+      const templateType = document.getElementById('templateSelect').value;
+      const template = waiverTemplates[templateType];
+      
+      const clubName = document.getElementById('clubName').value || '[CLUB NAME]';
+      const eventName = document.getElementById('eventName').value || '[EVENT NAME]';
+      const eventDates = document.getElementById('eventDates').value || '[EVENT DATES]';
+      const eventLocation = document.getElementById('eventLocation').value || '[EVENT LOCATION]';
+      const additionalTerms = document.getElementById('additionalTerms').value;
+      const emergencyContact = document.getElementById('emergencyContact').value || '[EMERGENCY CONTACT]';
+
+      const waiverHTML = `
+        <h1>${template.title}</h1>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+          <strong>${clubName}</strong><br>
+          <strong>${eventName}</strong><br>
+          <strong>${eventDates}</strong><br>
+          <strong>${eventLocation}</strong>
+        </div>
+
+        <h2>ASSUMPTION OF RISK AND RELEASE OF LIABILITY</h2>
+        
+        <p>I, the undersigned, acknowledge that I am participating in the above-named event with full knowledge that there are inherent risks involved in ${template.activityRisks}.</p>
+
+        <p><strong>I VOLUNTARILY ASSUME ALL RISKS</strong> associated with participation in this event, including but not limited to:</p>
+        <ul>
+          <li>Injury to myself, my dog, or my property</li>
+          <li>Damage caused by other participants, their dogs, or event equipment</li>
+          <li>Accidents, injuries, or incidents that may occur during the event</li>
+          <li>Any unforeseen circumstances or emergencies</li>
+        </ul>
+
+        ${template.specificTerms}
+
+        <h2>RELEASE AND INDEMNIFICATION</h2>
+        
+        <p>In consideration for being allowed to participate in this event, I hereby RELEASE, WAIVE, DISCHARGE, and COVENANT NOT TO SUE ${clubName}, its officers, directors, members, volunteers, and event officials (collectively "Released Parties") from any and all liability, claims, demands, actions, and causes of action whatsoever arising out of or related to any loss, damage, or injury that may be sustained by me, my dog, or my property while participating in this event.</p>
+
+        <p>I further agree to INDEMNIFY and HOLD HARMLESS the Released Parties from any loss or liability incurred as a result of my participation in this event.</p>
+
+        <h2>MEDICAL TREATMENT</h2>
+        
+        <p>I understand that the Released Parties do not provide medical insurance coverage for participants. In the event of injury, I authorize emergency medical treatment and agree to be financially responsible for any medical expenses incurred.</p>
+        
+        <p><strong>Emergency Contact:</strong> ${emergencyContact}</p>
+
+        ${additionalTerms ? `<h2>ADDITIONAL TERMS</h2><p>${additionalTerms}</p>` : ''}
+
+        <h2>ACKNOWLEDGMENT</h2>
+        
+        <p>I have read this waiver and release, understand its terms, and voluntarily sign it as my own free act and deed. I understand that this is a legal document that affects my legal rights.</p>
+
+        <div class="signature-section">
+          <p><strong>Participant Information:</strong></p>
+          
+          <p>Participant Name: <span class="signature-line"></span></p>
+          
+          <p>Signature: <span class="signature-line"></span> Date: <span class="signature-line" style="width: 150px;"></span></p>
+          
+          <p>Dog's Name: <span class="signature-line"></span> Breed: <span class="signature-line"></span></p>
+          
+          <p>Address: <span class="signature-line"></span></p>
+          
+          <p>Phone: <span class="signature-line"></span> Email: <span class="signature-line"></span></p>
+          
+          <br>
+          
+          <p><em>If participant is under 18 years of age, parent or guardian must also sign:</em></p>
+          
+          <p>Parent/Guardian Name: <span class="signature-line"></span></p>
+          
+          <p>Parent/Guardian Signature: <span class="signature-line"></span> Date: <span class="signature-line" style="width: 150px;"></span></p>
+        </div>
+      `;
+
+      document.getElementById('waiverPreview').innerHTML = waiverHTML;
+    };
+
+    window.saveWaiver = async function() {
+      try {
+        if (!auth.currentUser) {
+          alert("Please log in first");
+          return;
+        }
+
+        const waiverData = {
+          clubName: document.getElementById('clubName').value,
+          eventName: document.getElementById('eventName').value,
+          eventDates: document.getElementById('eventDates').value,
+          eventLocation: document.getElementById('eventLocation').value,
+          additionalTerms: document.getElementById('additionalTerms').value,
+          emergencyContact: document.getElementById('emergencyContact').value,
+          templateType: document.getElementById('templateSelect').value,
+          waiverHTML: document.getElementById('waiverPreview').innerHTML,
+          trialId: currentTrialData?.id || null,
+          createdAt: new Date(),
+          createdBy: auth.currentUser.uid
+        };
+
+        const docRef = await addDoc(collection(db, "waivers"), waiverData);
+        console.log("Waiver saved with ID:", docRef.id);
+        alert("Waiver saved successfully!");
+
+      } catch (error) {
+        console.error("Error saving waiver:", error);
+        alert("Error saving waiver: " + error.message);
+      }
+    };
+
+    // Load trial and application data on page load
+    async function loadTrialData() {
+      try {
+        if (!auth.currentUser) return;
+
+        // Load latest trial
+        const trialsQuery = query(
+          collection(db, "trials"),
+          where("createdBy", "==", auth.currentUser.uid)
+        );
+        
+        const trialsSnapshot = await getDocs(trialsQuery);
+        
+        if (!trialsSnapshot.empty) {
+          const trials = [];
+          trialsSnapshot.forEach(doc => {
+            trials.push({ id: doc.id, ...doc.data() });
+          });
+          
+          trials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
+          currentTrialData = trials[0];
+        }
+
+        // Load application data if trial exists
+        if (currentTrialData) {
+          const appQuery = query(
+            collection(db, "applications"),
+            where("trialId", "==", currentTrialData.id),
+            where("createdBy", "==", auth.currentUser.uid)
+          );
+          
+          const appSnapshot = await getDocs(appQuery);
+          
+          if (!appSnapshot.empty) {
+            appSnapshot.forEach(doc => {
+              currentApplicationData = { id: doc.id, ...doc.data() };
+            });
+          }
+        }
+
+        // Auto-load the default template
+        loadTemplate();
+
+      } catch (error) {
+        console.error("Error loading data:", error);
+      }
+    }
+
+    // Auth state listener
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loadTrialData();
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>
