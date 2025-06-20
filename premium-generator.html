@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Premium Generator - Auto-Fill Fixed</title>
+  <title>Premium Generator - Enhanced</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -33,6 +33,18 @@
       border-radius: 5px;
       font-family: monospace;
       font-size: 12px;
+      display: none; /* Hidden by default */
+    }
+    
+    .debug-toggle {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin: 5px 0;
     }
     
     .edit-form {
@@ -58,6 +70,7 @@
       border: 1px solid #ccc;
       border-radius: 4px;
       font-size: 14px;
+      box-sizing: border-box;
     }
     
     .edit-form textarea {
@@ -156,6 +169,28 @@
       margin: 15px 0;
     }
     
+    .map-container {
+      margin: 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .map-container iframe {
+      width: 100%;
+      height: 250px;
+      border: none;
+    }
+    
+    .status-message {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    
     @media print {
       .controls, .debug-info {
         display: none;
@@ -164,6 +199,9 @@
         border: none;
         margin: 0;
         padding: 0;
+      }
+      .map-container {
+        display: none;
       }
       body {
         background: white;
@@ -174,11 +212,17 @@
 <body>
   <div class="container">
     <div class="controls">
-      <h2>🏆 Premium Generator - Auto-Fill with Date Fix</h2>
+      <h2>🏆 Premium Generator - Enhanced</h2>
       <button class="generate-btn" onclick="loadTrialData()">🔄 Load Trial Data</button>
       <button class="generate-btn" onclick="generatePremium()">Generate Premium</button>
       <button class="print-btn" onclick="window.print()">Print Premium</button>
       <button onclick="location.href='main-dashboard.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Dashboard</button>
+      
+      <button class="debug-toggle" onclick="toggleDebug()">Show Debug Info</button>
+      
+      <div id="statusMessage" class="status-message" style="display: none;">
+        Ready to load trial data...
+      </div>
       
       <div id="debugInfo" class="debug-info">
         Click "Load Trial Data" to see debugging information...
@@ -219,7 +263,7 @@
         </div>
         <div>
           <label>Entry Limit:</label>
-          <input type="text" id="entryLimit" value="60 dogs maximum">
+          <input type="text" id="entryLimit" value="To be determined by venue">
         </div>
         <div>
           <label>Entry Deadline:</label>
@@ -245,10 +289,51 @@
     import { auth, db } from './js/firebase.js';
     import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-    console.log("AUTO-FILL PREMIUM GENERATOR WITH DATE FIX LOADED");
+    console.log("ENHANCED PREMIUM GENERATOR LOADED");
 
     let currentTrialData = null;
     let currentApplicationData = null;
+    let debugVisible = false;
+
+    // Show status messages to user
+    function showStatus(message, isError = false) {
+      const statusEl = document.getElementById('statusMessage');
+      statusEl.textContent = message;
+      statusEl.style.display = 'block';
+      statusEl.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
+      statusEl.style.borderColor = isError ? '#f5c6cb' : '#c3e6cb';
+      statusEl.style.color = isError ? '#721c24' : '#155724';
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        statusEl.style.display = 'none';
+      }, 5000);
+    }
+
+    // Toggle debug information visibility
+    window.toggleDebug = function() {
+      debugVisible = !debugVisible;
+      const debugEl = document.getElementById('debugInfo');
+      const toggleBtn = document.querySelector('.debug-toggle');
+      
+      if (debugVisible) {
+        debugEl.style.display = 'block';
+        toggleBtn.textContent = 'Hide Debug Info';
+      } else {
+        debugEl.style.display = 'none';
+        toggleBtn.textContent = 'Show Debug Info';
+      }
+    };
+
+    // Generate Google Maps embed URL from address
+    function generateMapEmbed(address) {
+      if (!address || !address.trim()) {
+        return null;
+      }
+      
+      const encodedAddress = encodeURIComponent(address.trim());
+      return `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodedAddress}`;
+    }
 
     // SUPER ROBUST DATE CONVERSION FUNCTION
     function convertDateSafely(dateStr) {
@@ -315,9 +400,10 @@
     window.loadTrialData = async function() {
       try {
         console.log("🔄 Loading trial data...");
+        showStatus("Loading trial data...");
         
         if (!auth.currentUser) {
-          alert("Please log in first");
+          showStatus("Please log in first", true);
           return;
         }
 
@@ -360,16 +446,23 @@
 
         // Process and display data
         fillFormFromTrialData();
+        showStatus("Trial data loaded successfully! ✅");
         
       } catch (error) {
         console.error("💥 Error loading trial data:", error);
-        document.getElementById('debugInfo').innerHTML = `❌ Error: ${error.message}`;
+        showStatus(`Error loading data: ${error.message}`, true);
+        if (debugVisible) {
+          document.getElementById('debugInfo').innerHTML = `❌ Error: ${error.message}`;
+        }
       }
     };
 
     function fillFormFromTrialData() {
       if (!currentTrialData) {
-        document.getElementById('debugInfo').innerHTML = "❌ No trial data loaded";
+        showStatus("No trial data found", true);
+        if (debugVisible) {
+          document.getElementById('debugInfo').innerHTML = "❌ No trial data loaded";
+        }
         return;
       }
 
@@ -446,7 +539,9 @@
       document.getElementById('classes').value = Array.from(classes).join('\n');
       debugHTML += `<p><strong>Classes found:</strong> ${Array.from(classes).join(', ')}</p>`;
 
-      document.getElementById('debugInfo').innerHTML = debugHTML;
+      if (debugVisible) {
+        document.getElementById('debugInfo').innerHTML = debugHTML;
+      }
       
       console.log("✅ Form filled successfully!");
     }
@@ -461,7 +556,7 @@
         location: document.getElementById('location').value || '[LOCATION TBD]',
         email: document.getElementById('email').value || '[EMAIL TBD]',
         phone: document.getElementById('phone').value || '[PHONE TBD]',
-        entryLimit: document.getElementById('entryLimit').value || '60 dogs maximum',
+        entryLimit: document.getElementById('entryLimit').value || 'To be determined by venue',
         deadline: document.getElementById('deadline').value || '[DEADLINE TBD]',
         judges: document.getElementById('judges').value.split('\n').filter(j => j.trim()),
         classes: document.getElementById('classes').value.split('\n').filter(c => c.trim())
@@ -479,6 +574,19 @@
         ).join('') :
         '<tr><td>[CLASSES TBD]</td><td>To be determined</td></tr>';
 
+      // Generate map embed if location is available
+      const mapHTML = data.location && data.location !== '[LOCATION TBD]' ? `
+        <div class="map-container">
+          <iframe
+            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dpoWj2xTqMjj2w&q=${encodeURIComponent(data.location)}"
+            allowfullscreen
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+        <p><em>Note: If the map doesn't load correctly, please search for the address in Google Maps</em></p>
+      ` : '';
+
       const premiumHTML = `
         <div class="premium-header">
           <h1>${data.clubName}</h1>
@@ -494,6 +602,7 @@
         <div class="premium-section">
           <h2>Location</h2>
           <strong>${data.location}</strong>
+          ${mapHTML}
         </div>
 
         <div class="premium-section">
@@ -586,15 +695,18 @@
       document.getElementById('premiumDocument').innerHTML = premiumHTML;
       document.getElementById('premiumDocument').style.display = 'block';
       document.getElementById('premiumDocument').scrollIntoView({ behavior: 'smooth' });
+      
+      showStatus("Premium generated successfully! 🏆");
     };
 
     // Auto-load trial data when page loads
     window.addEventListener('load', () => {
       console.log("🚀 Page loaded, auto-loading trial data...");
+      showStatus("Page loaded, ready to load trial data");
       setTimeout(loadTrialData, 1000); // Small delay to ensure auth is ready
     });
 
-    console.log("Premium generator ready with auto-fill and date debugging");
+    console.log("Enhanced premium generator ready with maps and hidden debug");
   </script>
 </body>
 </html>
