@@ -156,6 +156,21 @@
       margin: 15px 0;
     }
     
+    .maps-link {
+      display: inline-block;
+      background-color: #4285f4;
+      color: white;
+      padding: 8px 15px;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    
+    .maps-link:hover {
+      background-color: #3367d6;
+    }
+    
     @media print {
       .controls, .debug-info {
         display: none;
@@ -167,6 +182,9 @@
       }
       body {
         background: white;
+      }
+      .maps-link {
+        display: none;
       }
     }
   </style>
@@ -180,8 +198,8 @@
       <button class="print-btn" onclick="window.print()">Print Premium</button>
       <button onclick="location.href='main-dashboard.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Dashboard</button>
       
-      <div id="debugInfo" class="debug-info">
-        Click "Load Trial Data" to see debugging information...
+      <div id="debugInfo" class="debug-info" style="display: none;">
+        Debug information running in background...
       </div>
       
       <div class="edit-form">
@@ -208,6 +226,10 @@
         <div class="full-width">
           <label>Trial Location:</label>
           <input type="text" id="location" placeholder="Enter venue name and address">
+        </div>
+        <div class="full-width">
+          <label>Address (for directions):</label>
+          <input type="text" id="address" placeholder="Enter full address for Google Maps">
         </div>
         <div>
           <label>Secretary Email:</label>
@@ -363,13 +385,13 @@
         
       } catch (error) {
         console.error("💥 Error loading trial data:", error);
-        document.getElementById('debugInfo').innerHTML = `❌ Error: ${error.message}`;
+        // Debug info hidden - error only in console
       }
     };
 
     function fillFormFromTrialData() {
       if (!currentTrialData) {
-        document.getElementById('debugInfo').innerHTML = "❌ No trial data loaded";
+        console.log("❌ No trial data loaded");
         return;
       }
 
@@ -379,20 +401,20 @@
       document.getElementById('clubName').value = currentTrialData.clubName || 'West Kelowna K9 Scent and Games';
       document.getElementById('secretary').value = currentTrialData.secretary || 'Chris Johansen';
 
-      // Process dates with debug info
-      let debugHTML = "<h4>🔍 Date Processing Debug:</h4>";
+      // Process dates with debug info (console only)
+      console.log("🔍 Date Processing Debug:");
       let processedDates = [];
       
       if (currentTrialData.days && currentTrialData.days.length > 0) {
-        debugHTML += `<p>Raw trial days: ${JSON.stringify(currentTrialData.days, null, 2)}</p>`;
+        console.log("Raw trial days:", currentTrialData.days);
         
         currentTrialData.days.forEach((day, index) => {
           if (day.date && day.date.trim()) {
-            debugHTML += `<p><strong>Day ${index + 1}:</strong><br>`;
-            debugHTML += `&nbsp;&nbsp;Input: "${day.date}"<br>`;
+            console.log(`Day ${index + 1}:`);
+            console.log(`  Input: "${day.date}"`);
             
             const converted = convertDateSafely(day.date);
-            debugHTML += `&nbsp;&nbsp;Output: "${converted}"</p>`;
+            console.log(`  Output: "${converted}"`);
             
             processedDates.push(converted);
           }
@@ -400,12 +422,13 @@
         
         const finalDateString = processedDates.join(' & ');
         document.getElementById('trialDates').value = finalDateString;
-        debugHTML += `<p><strong>Final date string:</strong> ${finalDateString}</p>`;
+        console.log("Final date string:", finalDateString);
       }
 
       // Fill other data
       if (currentApplicationData) {
         document.getElementById('location').value = currentApplicationData.trialLocation || '';
+        document.getElementById('address').value = currentApplicationData.trialAddress || '';
         document.getElementById('email').value = currentApplicationData.contactEmail || '';
         document.getElementById('phone').value = currentApplicationData.contactPhone || '';
       }
@@ -428,7 +451,7 @@
         });
       }
       document.getElementById('judges').value = Array.from(judges).join('\n');
-      debugHTML += `<p><strong>Judges found:</strong> ${Array.from(judges).join(', ')}</p>`;
+      console.log("Judges found:", Array.from(judges));
 
       // Extract and fill classes
       const classes = new Set();
@@ -444,9 +467,7 @@
         });
       }
       document.getElementById('classes').value = Array.from(classes).join('\n');
-      debugHTML += `<p><strong>Classes found:</strong> ${Array.from(classes).join(', ')}</p>`;
-
-      document.getElementById('debugInfo').innerHTML = debugHTML;
+      console.log("Classes found:", Array.from(classes));
       
       console.log("✅ Form filled successfully!");
     }
@@ -459,6 +480,7 @@
         startTime: document.getElementById('startTime').value || '8:00 AM',
         endTime: document.getElementById('endTime').value || '4:00 PM',
         location: document.getElementById('location').value || '[LOCATION TBD]',
+        address: document.getElementById('address').value || '',
         email: document.getElementById('email').value || '[EMAIL TBD]',
         phone: document.getElementById('phone').value || '[PHONE TBD]',
         entryLimit: document.getElementById('entryLimit').value || '60 dogs maximum',
@@ -478,6 +500,40 @@
           `<tr><td>${className}</td><td>As per C-WAGS rules</td></tr>`
         ).join('') :
         '<tr><td>[CLASSES TBD]</td><td>To be determined</td></tr>';
+
+      // Enhanced directions section with Google Maps integration
+      const directionsSection = () => {
+        const hasLocation = data.location && data.location !== '[LOCATION TBD]';
+        const hasAddress = data.address && data.address.trim();
+        
+        if (hasLocation && hasAddress) {
+          const fullAddress = `${data.location}, ${data.address}`;
+          const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fullAddress)}`;
+          
+          return `
+            <div class="premium-section">
+              <h2>Directions to Trial Site</h2>
+              <p><strong>${data.location}</strong><br>${data.address}</p>
+              <a href="${mapsUrl}" target="_blank" class="maps-link">🗺️ Get Directions via Google Maps</a>
+            </div>
+          `;
+        } else if (hasLocation) {
+          return `
+            <div class="premium-section">
+              <h2>Directions to Trial Site</h2>
+              <p><strong>${data.location}</strong></p>
+              <p><em>Detailed directions will be provided upon entry confirmation.</em></p>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="premium-section">
+              <h2>Directions to Trial Site</h2>
+              <p><em>Location and detailed directions will be provided upon entry confirmation.</em></p>
+            </div>
+          `;
+        }
+      };
 
       const premiumHTML = `
         <div class="premium-header">
@@ -576,11 +632,7 @@
           Phone: ${data.phone}
         </div>
 
-        <div class="premium-section">
-          <h2>Directions to Trial Site</h2>
-          <p><strong>${data.location}</strong></p>
-          <p><em>Detailed directions will be provided upon entry confirmation</em></p>
-        </div>
+        ${directionsSection()}
       `;
 
       document.getElementById('premiumDocument').innerHTML = premiumHTML;
