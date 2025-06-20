@@ -1,123 +1,195 @@
 import { db, auth } from './firebase.js';
 import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-let data = null;
-let classes = [];
-let judges = [];
+let dataLoaded = false;
 
+// Predefined classes and judges since your JSON doesn't contain them
+const availableClasses = [
+  "Novice A",
+  "Novice B", 
+  "Open A",
+  "Open B",
+  "Utility A", 
+  "Utility B",
+  "Graduate Novice",
+  "Graduate Open",
+  "Versatility",
+  "Brace",
+  "Team"
+];
+
+const availableJudges = [
+  "Judge TBD",
+  "Alice Johnson",
+  "Bob Smith", 
+  "Carol Davis",
+  "David Wilson",
+  "Eva Martinez",
+  "Frank Thompson",
+  "Grace Lee",
+  "Henry Brown",
+  "Isabel Garcia"
+];
+
+// Load the data (for dogs list, even though we're not using it in this form)
 fetch('./js/data.json')
   .then(res => res.json())
   .then(json => { 
-    data = json;
-    console.log("Data loaded:", data);
-    
-    // Extract unique classes and judges from the data
-    if (Array.isArray(data)) {
-      // Get unique classes (filter out empty strings)
-      classes = [...new Set(data.map(item => item.Class).filter(cls => cls && cls.trim() !== ""))];
-      
-      // Get unique judges (filter out empty strings)
-      judges = [...new Set(data.map(item => item.Judges).filter(judge => judge && judge.trim() !== ""))];
-      
-      console.log("Classes found:", classes);
-      console.log("Judges found:", judges);
-      
-      // If no classes/judges found in data, use defaults
-      if (classes.length === 0) {
-        classes = ["Novice A", "Novice B", "Open A", "Open B", "Utility A", "Utility B", "Graduate Novice", "Graduate Open"];
-      }
-      if (judges.length === 0) {
-        judges = ["Judge 1", "Judge 2", "Judge 3", "Judge 4"];
-      }
-    }
+    console.log("Dog data loaded successfully");
+    dataLoaded = true;
   })
   .catch(err => {
     console.error('Error loading data:', err);
-    // Use default values if loading fails
-    classes = ["Novice A", "Novice B", "Open A", "Open B", "Utility A", "Utility B"];
-    judges = ["Judge 1", "Judge 2", "Judge 3", "Judge 4"];
+    dataLoaded = true; // Still allow the form to work
   });
 
 window.generateDays = function () {
-  const numDays = parseInt(document.getElementById("numDays").value);
+  console.log("generateDays called");
+  
+  const numDaysInput = document.getElementById("numDays");
+  const numDays = parseInt(numDaysInput.value);
+  
+  if (isNaN(numDays) || numDays < 1) {
+    alert("Please enter a valid number of days (1 or more)");
+    return;
+  }
+  
   const container = document.getElementById("daysContainer");
   container.innerHTML = "";
 
   for (let d = 0; d < numDays; d++) {
     const dayBox = document.createElement("div");
+    dayBox.style.border = "1px solid #ccc";
+    dayBox.style.padding = "10px";
+    dayBox.style.marginBottom = "10px";
+    
     dayBox.innerHTML = `
       <h3>Day ${d + 1}</h3>
-      <input type="date" name="date${d}">
+      <label>Date:</label>
+      <input type="date" name="date${d}" style="margin-bottom: 10px;">
+      <br>
       <label>How many classes?</label>
-      <input type="number" min="1" onchange="generateClasses(this, ${d})">
-      <div class="classes-container"></div>
+      <input type="number" min="1" max="20" style="margin-left: 10px;" onchange="generateClasses(this, ${d})">
+      <div class="classes-container" style="margin-top: 10px;"></div>
     `;
     container.appendChild(dayBox);
   }
+  
+  console.log(`Generated ${numDays} day boxes`);
 };
 
 window.generateClasses = function (input, dayIndex) {
-  const num = parseInt(input.value);
-  const container = input.nextElementSibling;
-  container.innerHTML = "";
-
-  // Check if we have classes available
-  if (classes.length === 0) {
-    console.log("Classes not loaded yet, please wait and try again");
-    input.value = ""; // Reset the input
-    return;
-  }
-
-  console.log("Generating", num, "classes with options:", classes);
-
-  const classOpts = classes.map(c => `<option value="${c}">${c}</option>`).join("");
-
-  for (let i = 0; i < num; i++) {
-    const cls = document.createElement("div");
-    cls.innerHTML = `
-      <h4>Class ${i + 1}</h4>
-      <input list="classList${dayIndex}_${i}" placeholder="Select Class">
-      <datalist id="classList${dayIndex}_${i}">${classOpts}</datalist>
-      <label>Rounds:</label>
-      <select onchange="generateRounds(this, '${dayIndex}_${i}')">
-        ${[...Array(10).keys()].map(n => `<option>${n + 1}</option>`).join("")}
-      </select>
-      <div class="rounds-container"></div>
-    `;
-    container.appendChild(cls);
+  console.log(`generateClasses called for day ${dayIndex}`);
+  
+  try {
+    const num = parseInt(input.value);
+    
+    if (isNaN(num) || num < 1) {
+      console.log("Invalid number of classes");
+      return;
+    }
+    
+    const container = input.nextElementSibling;
+    if (!container) {
+      console.error("Container not found");
+      return;
+    }
+    
+    container.innerHTML = "";
+    
+    console.log(`Creating ${num} classes with ${availableClasses.length} class options`);
+    
+    const classOpts = availableClasses.map(c => `<option value="${c}">${c}</option>`).join("");
+    
+    for (let i = 0; i < num; i++) {
+      const cls = document.createElement("div");
+      cls.style.border = "1px solid #eee";
+      cls.style.padding = "8px";
+      cls.style.marginBottom = "8px";
+      cls.style.backgroundColor = "#f9f9f9";
+      
+      cls.innerHTML = `
+        <h4>Class ${i + 1}</h4>
+        <label>Class Type:</label>
+        <input list="classList${dayIndex}_${i}" placeholder="Select Class" style="margin-left: 10px; width: 150px;">
+        <datalist id="classList${dayIndex}_${i}">${classOpts}</datalist>
+        <br><br>
+        <label>Number of Rounds:</label>
+        <select style="margin-left: 10px;" onchange="generateRounds(this, '${dayIndex}_${i}')">
+          <option value="">Select rounds</option>
+          ${[...Array(10).keys()].map(n => `<option value="${n + 1}">${n + 1}</option>`).join("")}
+        </select>
+        <div class="rounds-container" style="margin-top: 10px;"></div>
+      `;
+      container.appendChild(cls);
+    }
+    
+    console.log(`Successfully created ${num} classes`);
+    
+  } catch (error) {
+    console.error("Error in generateClasses:", error);
+    alert("An error occurred while generating classes. Please try again.");
   }
 };
 
 window.generateRounds = function (select, id) {
-  const container = select.nextElementSibling;
-  const num = parseInt(select.value);
-  container.innerHTML = "";
+  console.log(`generateRounds called for ${id}`);
   
-  // Check if we have judges available
-  if (judges.length === 0) {
-    console.log("Judges not loaded yet, please wait and try again");
-    return;
-  }
+  try {
+    const container = select.nextElementSibling;
+    if (!container) {
+      console.error("Rounds container not found");
+      return;
+    }
+    
+    const num = parseInt(select.value);
+    if (isNaN(num) || num < 1) {
+      container.innerHTML = "";
+      return;
+    }
+    
+    container.innerHTML = "";
+    
+    console.log(`Creating ${num} rounds with ${availableJudges.length} judge options`);
+    
+    const judgeOpts = availableJudges.map(j => `<option value="${j}">${j}</option>`).join("");
 
-  console.log("Generating", num, "rounds with judge options:", judges);
-
-  const judgeOpts = judges.map(j => `<option value="${j}">${j}</option>`).join("");
-
-  for (let i = 0; i < num; i++) {
-    const round = document.createElement("div");
-    round.innerHTML = `
-      <input list="judgeList${id}_${i}" placeholder="Judge">
-      <datalist id="judgeList${id}_${i}">${judgeOpts}</datalist>
-      <label>FEO?</label>
-      <input type="checkbox">
-    `;
-    container.appendChild(round);
+    for (let i = 0; i < num; i++) {
+      const round = document.createElement("div");
+      round.style.padding = "5px";
+      round.style.marginBottom = "5px";
+      round.style.backgroundColor = "#f0f0f0";
+      
+      round.innerHTML = `
+        <strong>Round ${i + 1}:</strong>
+        <label>Judge:</label>
+        <input list="judgeList${id}_${i}" placeholder="Select Judge" style="margin-left: 10px; width: 120px;">
+        <datalist id="judgeList${id}_${i}">${judgeOpts}</datalist>
+        <label style="margin-left: 15px;">
+          <input type="checkbox"> FEO (For Exhibition Only)
+        </label>
+      `;
+      container.appendChild(round);
+    }
+    
+    console.log(`Successfully created ${num} rounds`);
+    
+  } catch (error) {
+    console.error("Error in generateRounds:", error);
+    alert("An error occurred while generating rounds. Please try again.");
   }
 };
 
 // Add form submit handler
-document.getElementById('trialForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  console.log("Form submitted");
-  // Add your save logic here
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('trialForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      console.log("Form submitted");
+      alert("Form submission functionality would go here");
+    });
+  }
+  
+  console.log("Create trial page loaded successfully");
 });
