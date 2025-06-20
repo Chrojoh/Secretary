@@ -99,6 +99,48 @@
       margin: 20px 0;
     }
     
+    .edit-stage {
+      background-color: #f0f8ff;
+      border: 2px solid #4CAF50;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+    }
+    
+    .edit-stage h3 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    
+    .edit-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin: 15px 0;
+    }
+    
+    .edit-form .full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .edit-form label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+    
+    .edit-form input,
+    .edit-form textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    .edit-form textarea {
+      height: 80px;
+    }
+    
     .generate-btn, .print-btn {
       padding: 10px 20px;
       margin: 0 10px;
@@ -140,6 +182,71 @@
       <button class="print-btn" onclick="window.print()">Print Premium</button>
     </div>
     
+    <div id="editStage" class="edit-stage" style="display: none;">
+      <h3>📝 Review and Edit Premium Details</h3>
+      <p>Review the auto-filled information below and make any necessary changes:</p>
+      
+      <div class="edit-form">
+        <div>
+          <label>Club Name:</label>
+          <input type="text" id="editClubName">
+        </div>
+        <div>
+          <label>Trial Type:</label>
+          <input type="text" id="editTrialType" value="Scent Work Trial">
+        </div>
+        <div class="full-width">
+          <label>Trial Dates:</label>
+          <input type="text" id="editTrialDates" placeholder="Enter trial dates (e.g., Saturday, June 15, 2025 & Sunday, June 16, 2025)">
+        </div>
+        <div>
+          <label>Start Time:</label>
+          <input type="text" id="editStartTime" value="8:00 AM">
+        </div>
+        <div>
+          <label>End Time:</label>
+          <input type="text" id="editEndTime" value="5:00 PM">
+        </div>
+        <div class="full-width">
+          <label>Location Name:</label>
+          <input type="text" id="editLocation">
+        </div>
+        <div class="full-width">
+          <label>Location Address:</label>
+          <input type="text" id="editAddress">
+        </div>
+        <div>
+          <label>Trial Secretary:</label>
+          <input type="text" id="editSecretary">
+        </div>
+        <div>
+          <label>Secretary Email:</label>
+          <input type="email" id="editEmail">
+        </div>
+        <div>
+          <label>Secretary Phone:</label>
+          <input type="tel" id="editPhone">
+        </div>
+        <div>
+          <label>Entry Limit:</label>
+          <input type="text" id="editEntryLimit" value="Determined by venue capacity">
+        </div>
+        <div class="full-width">
+          <label>Judges (one per line):</label>
+          <textarea id="editJudges" placeholder="Enter judges, one per line"></textarea>
+        </div>
+        <div class="full-width">
+          <label>Classes Offered (one per line):</label>
+          <textarea id="editClasses" placeholder="Enter classes, one per line"></textarea>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="generate-btn" onclick="generateFinalPremium()">Generate Final Premium</button>
+        <button onclick="cancelEdit()" style="background-color: #f44336; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-left: 10px;">Cancel</button>
+      </div>
+    </div>
+    
     <div id="premiumPreview" class="premium-preview" style="display: none;">
       <!-- Premium content will be generated here -->
     </div>
@@ -171,15 +278,138 @@
         // Try to load application data
         await loadApplicationData();
 
-        // Generate the premium
-        generatePremiumHTML();
-        
-        document.getElementById('premiumPreview').style.display = 'block';
+        // Show the edit stage with pre-filled data
+        showEditStage();
         
       } catch (error) {
         console.error("Error generating premium:", error);
         alert("Error generating premium: " + error.message);
       }
+    };
+
+    function showEditStage() {
+      // Pre-fill the edit form with data
+      document.getElementById('editClubName').value = currentTrialData.clubName || '';
+      document.getElementById('editSecretary').value = currentTrialData.secretary || '';
+      
+      // Fix the date processing - this was the bug!
+      let trialDatesText = '';
+      if (currentTrialData.days && currentTrialData.days.length > 0) {
+        console.log("Raw trial days:", currentTrialData.days);
+        
+        const validDates = currentTrialData.days
+          .filter(day => day.date && day.date.trim())
+          .map(day => {
+            const dateStr = day.date;
+            console.log("Processing date:", dateStr);
+            
+            try {
+              const date = new Date(dateStr);
+              if (!isNaN(date.getTime())) {
+                return date.toLocaleDateString('en-US', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                });
+              }
+            } catch (e) {
+              console.error("Error parsing date:", dateStr, e);
+            }
+            return dateStr; // Return original if parsing fails
+          });
+        
+        console.log("Processed dates:", validDates);
+        
+        if (validDates.length > 0) {
+          trialDatesText = validDates.join(' & ');
+        }
+      }
+      
+      document.getElementById('editTrialDates').value = trialDatesText || 'Dates TBD';
+      
+      // Fill location info from application if available
+      if (currentApplicationData) {
+        document.getElementById('editLocation').value = currentApplicationData.trialLocation || '';
+        document.getElementById('editAddress').value = currentApplicationData.cityState || '';
+        document.getElementById('editEmail').value = currentApplicationData.contactEmail || '';
+        document.getElementById('editPhone').value = currentApplicationData.contactPhone || '';
+      }
+
+      // Extract judges
+      const judges = new Set();
+      if (currentTrialData.days) {
+        currentTrialData.days.forEach(day => {
+          if (day.classes) {
+            day.classes.forEach(cls => {
+              if (cls.rounds) {
+                cls.rounds.forEach(round => {
+                  if (round.judge && round.judge.trim()) {
+                    judges.add(round.judge.trim());
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+      document.getElementById('editJudges').value = Array.from(judges).join('\n');
+
+      // Extract classes
+      const classes = new Set();
+      if (currentTrialData.days) {
+        currentTrialData.days.forEach(day => {
+          if (day.classes) {
+            day.classes.forEach(cls => {
+              if (cls.className && cls.className.trim()) {
+                classes.add(cls.className.trim());
+              }
+            });
+          }
+        });
+      }
+      document.getElementById('editClasses').value = Array.from(classes).join('\n');
+
+      // Show the edit stage
+      document.getElementById('editStage').style.display = 'block';
+      
+      // Scroll to edit stage
+      document.getElementById('editStage').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    window.generateFinalPremium = function() {
+      // Get all the edited values
+      const editedData = {
+        clubName: document.getElementById('editClubName').value || '[CLUB NAME]',
+        trialType: document.getElementById('editTrialType').value || 'Scent Work Trial',
+        trialDates: document.getElementById('editTrialDates').value || '[TRIAL DATES]',
+        startTime: document.getElementById('editStartTime').value || '8:00 AM',
+        endTime: document.getElementById('editEndTime').value || '5:00 PM',
+        location: document.getElementById('editLocation').value || '[LOCATION]',
+        address: document.getElementById('editAddress').value || '[ADDRESS]',
+        secretary: document.getElementById('editSecretary').value || '[SECRETARY]',
+        email: document.getElementById('editEmail').value || '[EMAIL]',
+        phone: document.getElementById('editPhone').value || '[PHONE]',
+        entryLimit: document.getElementById('editEntryLimit').value || 'Determined by venue capacity',
+        judges: document.getElementById('editJudges').value.split('\n').filter(j => j.trim()),
+        classes: document.getElementById('editClasses').value.split('\n').filter(c => c.trim())
+      };
+
+      console.log("Generating premium with edited data:", editedData);
+
+      // Generate the premium with edited data
+      generatePremiumHTML(editedData);
+      
+      // Hide edit stage and show premium
+      document.getElementById('editStage').style.display = 'none';
+      document.getElementById('premiumPreview').style.display = 'block';
+      
+      // Scroll to premium
+      document.getElementById('premiumPreview').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.cancelEdit = function() {
+      document.getElementById('editStage').style.display = 'none';
     };
 
     async function loadLatestTrialData() {
@@ -222,98 +452,65 @@
       }
     }
 
-    function generatePremiumHTML() {
+    function generatePremiumHTML(editedData) {
       const preview = document.getElementById('premiumPreview');
       
-      // Extract data for premium
-      const clubName = currentTrialData.clubName || 'Club Name Not Specified';
-      const secretary = currentTrialData.secretary || 'Secretary Not Specified';
-      
-      // Get trial dates
-      let trialDates = 'Dates TBD';
-      if (currentTrialData.days && currentTrialData.days.length > 0) {
-        const dates = currentTrialData.days
-          .filter(day => day.date)
-          .map(day => new Date(day.date).toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          }));
-        if (dates.length > 0) {
-          trialDates = dates.join(' & ');
-        }
-      }
+      // Use edited data instead of raw trial data
+      const data = editedData || {
+        clubName: currentTrialData?.clubName || '[CLUB NAME]',
+        trialType: 'Scent Work Trial',
+        trialDates: '[TRIAL DATES]',
+        startTime: '8:00 AM',
+        endTime: '5:00 PM',
+        location: '[LOCATION]',
+        address: '[ADDRESS]',
+        secretary: currentTrialData?.secretary || '[SECRETARY]',
+        email: '[EMAIL]',
+        phone: '[PHONE]',
+        entryLimit: 'Determined by venue capacity',
+        judges: [],
+        classes: []
+      };
 
-      // Get location from application if available
-      const location = currentApplicationData?.trialLocation || 'Location TBD';
-      const cityState = currentApplicationData?.cityState || 'City, State TBD';
-      
       // Generate judges table
-      const judges = new Set();
-      if (currentTrialData.days) {
-        currentTrialData.days.forEach(day => {
-          if (day.classes) {
-            day.classes.forEach(cls => {
-              if (cls.rounds) {
-                cls.rounds.forEach(round => {
-                  if (round.judge && round.judge.trim()) {
-                    judges.add(round.judge.trim());
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-
-      const judgesTableHTML = Array.from(judges).map(judge => 
-        `<tr><td>Scent Work</td><td>${judge}</td><td>Location TBD</td></tr>`
-      ).join('');
+      const judgesTableHTML = data.judges.length > 0 ? 
+        data.judges.map(judge => 
+          `<tr><td>Scent Work</td><td>${judge}</td><td>Location TBD</td></tr>`
+        ).join('') :
+        '<tr><td>Scent Work</td><td>Judge TBD</td><td>Location TBD</td></tr>';
 
       // Generate classes table
-      const classes = new Set();
-      if (currentTrialData.days) {
-        currentTrialData.days.forEach(day => {
-          if (day.classes) {
-            day.classes.forEach(cls => {
-              if (cls.className && cls.className.trim()) {
-                classes.add(cls.className.trim());
-              }
-            });
-          }
-        });
-      }
-
-      const classesHTML = Array.from(classes).map(className => 
-        `<tr><td>${className}</td><td>All levels welcome</td></tr>`
-      ).join('');
+      const classesHTML = data.classes.length > 0 ? 
+        data.classes.map(className => 
+          `<tr><td>${className}</td><td>All levels welcome</td></tr>`
+        ).join('') :
+        '<tr><td>Classes TBD</td><td>To be determined</td></tr>';
 
       preview.innerHTML = `
         <div class="premium-header">
-          <h1>${clubName}</h1>
+          <h1>${data.clubName}</h1>
           <div class="subtitle">Licensed by C-WAGS</div>
-          <div class="subtitle">Scent Work Trial</div>
+          <div class="subtitle">${data.trialType}</div>
           <div class="subtitle">(Indoor/Outdoor)</div>
           <div style="margin-top: 15px;">
-            <strong>${trialDates}</strong><br>
-            <strong>Start Time: 8:00 AM – End Time: 5:00 PM</strong>
+            <strong>${data.trialDates}</strong><br>
+            <strong>Start Time: ${data.startTime} – End Time: ${data.endTime}</strong>
           </div>
         </div>
 
         <div class="premium-section">
           <h2>Location</h2>
-          <strong>${location}</strong><br>
-          ${cityState}
+          <strong>${data.location}</strong><br>
+          ${data.address}
         </div>
 
         <div class="premium-section">
           <h2>Event Information</h2>
-          <strong>Show Secretary:</strong> ${secretary}<br>
-          <strong>Trial Contact:</strong> ${currentApplicationData?.contactName || secretary}<br>
-          <strong>Email:</strong> ${currentApplicationData?.contactEmail || 'TBD'}<br>
-          <strong>Phone:</strong> ${currentApplicationData?.contactPhone || 'TBD'}<br>
-          <strong>Entry Limit:</strong> Determined by venue capacity
+          <strong>Show Secretary:</strong> ${data.secretary}<br>
+          <strong>Trial Contact:</strong> ${data.secretary}<br>
+          <strong>Email:</strong> ${data.email}<br>
+          <strong>Phone:</strong> ${data.phone}<br>
+          <strong>Entry Limit:</strong> ${data.entryLimit}
         </div>
 
         <div class="premium-section">
@@ -327,7 +524,7 @@
               </tr>
             </thead>
             <tbody>
-              ${judgesTableHTML || '<tr><td>Scent Work</td><td>Judge TBD</td><td>Location TBD</td></tr>'}
+              ${judgesTableHTML}
             </tbody>
           </table>
         </div>
@@ -342,7 +539,7 @@
               </tr>
             </thead>
             <tbody>
-              ${classesHTML || '<tr><td>Classes TBD</td><td>To be determined</td></tr>'}
+              ${classesHTML}
             </tbody>
           </table>
         </div>
@@ -354,7 +551,7 @@
             <li><strong>$20.00</strong> Additional entry, same dog</li>
             <li><strong>$15.00</strong> Exhibition Only</li>
           </ul>
-          <p><em>Make cheques payable to: ${clubName}</em></p>
+          <p><em>Make cheques payable to: ${data.clubName}</em></p>
         </div>
 
         <div class="premium-section">
@@ -386,23 +583,17 @@
         <div class="premium-section">
           <h2>Trial Secretary Contact</h2>
           <div class="contact-box">
-            <strong>${secretary}</strong><br>
-            Email: ${currentApplicationData?.contactEmail || 'TBD'}<br>
-            Phone: ${currentApplicationData?.contactPhone || 'TBD'}
+            <strong>${data.secretary}</strong><br>
+            Email: ${data.email}<br>
+            Phone: ${data.phone}
           </div>
         </div>
 
         <div class="premium-section">
           <h2>Directions to Trial Site</h2>
-          <p><strong>${location}</strong><br>${cityState}</p>
-          ${currentApplicationData?.trialLocation ? 
-            `<p><a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(currentApplicationData.trialLocation + ', ' + cityState)}" target="_blank">🗺️ Get Directions via Google Maps</a></p>
-             <div style="margin: 10px 0;">
-               <iframe width="100%" height="200" frameborder="0" style="border:0"
-                 src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(currentApplicationData.trialLocation + ', ' + cityState)}"
-                 allowfullscreen>
-               </iframe>
-             </div>` : 
+          <p><strong>${data.location}</strong><br>${data.address}</p>
+          ${data.location !== '[LOCATION]' ? 
+            `<p><a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(data.location + ', ' + data.address)}" target="_blank">🗺️ Get Directions via Google Maps</a></p>` : 
             '<p><em>Detailed directions will be provided upon entry confirmation.</em></p>'
           }
         </div>
