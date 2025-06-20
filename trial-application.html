@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Scent Trial Application</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .application-form {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background: white;
+      border: 2px solid #000;
+      font-family: Arial, sans-serif;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      margin: 10px 0;
+    }
+    
+    .form-row {
+      display: flex;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    
+    .form-group {
+      flex: 1;
+      margin-right: 10px;
+    }
+    
+    .form-group:last-child {
+      margin-right: 0;
+    }
+    
+    .form-group label {
+      font-weight: bold;
+      display: inline-block;
+      min-width: 120px;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+      border: 1px solid #000;
+      padding: 5px;
+      font-size: 14px;
+      width: calc(100% - 130px);
+      min-width: 150px;
+    }
+    
+    .full-width input,
+    .full-width textarea {
+      width: calc(100% - 10px);
+    }
+    
+    .missing {
+      background-color: #ffcccc !important;
+      border: 2px solid #ff0000 !important;
+    }
+    
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      border: 2px solid #000;
+    }
+    
+    .schedule-table th,
+    .schedule-table td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: center;
+      min-height: 30px;
+    }
+    
+    .schedule-table th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    
+    .schedule-table input {
+      border: none;
+      width: 100%;
+      padding: 2px;
+      background: transparent;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      margin-right: 5px;
+    }
+    
+    .info-section {
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+    }
+    
+    .button-group {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .button-group button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .save-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+    
+    .cancel-btn {
+      background-color: #f44336;
+      color: white;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="application-form">
+    <div class="header">
+      <h1>Scent Trial Application</h1>
+    </div>
+    
+    <form id="applicationForm">
+      <!-- Basic Information Section -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Trial Dates:</label>
+          <input type="text" id="trialDates" placeholder="Enter trial dates">
+        </div>
+        <div class="form-group">
+          <label>City, St/Prov:</label>
+          <input type="text" id="cityState" placeholder="Enter city and state/province">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label>Host Name:</label>
+          <input type="text" id="hostName" placeholder="Enter host name">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Name of Trial Location:</label>
+          <input type="text" id="trialLocation" placeholder="Enter trial location">
+        </div>
+        <div class="form-group">
+          <label>Premium web site:</label>
+          <input type="text" id="premiumWebsite" placeholder="Enter website URL">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Trial Contact Name:</label>
+          <input type="text" id="contactName" placeholder="Enter contact name">
+        </div>
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" id="contactEmail" placeholder="Enter email address">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Contact Phone:</label>
+          <input type="tel" id="contactPhone" placeholder="Enter phone number">
+        </div>
+        <div class="form-group">
+          <label>Submitted date:</label>
+          <input type="date" id="submittedDate">
+        </div>
+      </div>
+      
+      <!-- Judges Section -->
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label>Judges:</label>
+          <textarea id="judges" rows="2" placeholder="List all judges"></textarea>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label>C-WAGS Advocate(s):</label>
+          <input type="text" id="advocates" placeholder="Enter C-WAGS advocate names">
+        </div>
+      </div>
+      
+      <!-- Schedule Table -->
+      <p><strong>On each class line, list judge (first name okay) under the day and round that they are judging</strong></p>
+      
+      <table class="schedule-table" id="scheduleTable">
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Day 1<br>Judge</th>
+            <th>Day 2<br>Judge</th>
+            <th>Day 3<br>Judge</th>
+            <th>Day 4<br>Judge</th>
+            <th>Day 5<br>Judge</th>
+            <th>Day 6<br>Judge</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleBody">
+          <!-- Schedule rows will be populated by JavaScript -->
+        </tbody>
+      </table>
+      
+      <!-- Additional Information -->
+      <div class="form-row">
+        <div class="form-group checkbox-group">
+          <label>Inside / Outside trial:</label>
+          <input type="radio" name="location" value="inside" id="inside">
+          <label for="inside">Inside</label>
+          <input type="radio" name="location" value="outside" id="outside">
+          <label for="outside">Outside</label>
+        </div>
+        <div class="form-group">
+          <label>Ring Surface:</label>
+          <input type="text" id="ringSurface" placeholder="Enter ring surface">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group checkbox-group">
+          <label>League:</label>
+          <input type="checkbox" id="leagueYes">
+          <label for="leagueYes">YES</label>
+          <input type="checkbox" id="leagueNo">
+          <label for="leagueNo">NO</label>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Search Size exception request:</label>
+          <input type="text" id="searchException" placeholder="Enter any exceptions">
+        </div>
+        <div class="form-group">
+          <label>Number of Search Areas:</label>
+          <input type="number" id="searchAreas" placeholder="Enter number">
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Insurance Expirations Date:</label>
+          <input type="date" id="insuranceDate">
+        </div>
+        <div class="form-group checkbox-group">
+          <label>Scent – Resets Offered:</label>
+          <input type="radio" name="resets" value="yes" id="resetsYes">
+          <label for="resetsYes">Yes</label>
+          <input type="radio" name="resets" value="no" id="resetsNo">
+          <label for="resetsNo">No</label>
+        </div>
+      </div>
+      
+      <!-- Information Section -->
+      <div class="info-section">
+        <p><strong>Application fee due with application covers a trial on consecutive days (or one league trial maximum 6 dates within an 8-week period). $25 if received at least 25 days prior, $35 received less than 25 days</strong></p>
+        <p><strong>Post-trial administrative fee of $ 1.50 per entered team runs payable with results.</strong></p>
+        <p>Return completed application, certificate of insurance by Email to <strong>cwags.trials@gmail.com</strong>. Payment may be made using web payment link on Trial Host Payment <strong>https://c-wags.org/online-payments/</strong> web page OR mail to: <strong>C-WAGS, ℅ Shirley Ottmer, 3693 Fairview Ave., Jackson, MI 49203</strong></p>
+        <p>Mailed checks or money orders on Canadian banks must include an additional $6 for bank fee.</p>
+        <p><strong>Application fee waived and post-trial fee is $1.00 per entry for an organization's first trial.</strong></p>
+        <p><strong>Any Class Entries by Shirley Ottmer will be paid to host at $5 per class entered.</strong></p>
+      </div>
+      
+      <div class="button-group">
+        <button type="submit" class="save-btn">Save Application</button>
+        <button type="button" class="cancel-btn" onclick="location.href='dashboard.html'">Cancel</button>
+      </div>
+    </form>
+  </div>
+  
+  <script type="module" src="js/trial-application.js"></script>
+</body>
+</html>
