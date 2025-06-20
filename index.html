@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+  <title>Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <h1>Login / Sign Up</h1>
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="signup()">Sign Up</button>
-  <button onclick="login()">Login</button>
-  <p id="error" style="color:red"></p>
-  <script type="module" src="js/auth.js"></script>
+  <h1>Welcome, <span id="username"></span></h1>
+  <button onclick="location.href='create-trial.html'">Create Trial</button>
+  <button onclick="location.href='view-trials.html'">View Trials</button>
+  <button onclick="location.href='trial-application.html'">Trial Application</button>
+  <button onclick="location.href='premium-generator.html'">Premium Generator</button>
+  <button onclick="logout()">Logout</button>
+  <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>
