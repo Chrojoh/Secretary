@@ -67,9 +67,14 @@
 
   <script type="module">
     import { db, auth } from './js/firebase.js';
-    import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { addDoc, collection, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     console.log("Script starting to load...");
+
+    // Check if we're editing an existing trial
+    const editTrialId = sessionStorage.getItem('editTrialId');
+    let isEditMode = false;
+    let currentTrialData = null;
 
     // Simple predefined lists to avoid JSON loading issues
     const DEFAULT_CLASSES = [
@@ -98,10 +103,177 @@
       }
     });
 
-    // Try to load extracted data from CSV
-    fetch('./js/data.json')
-      .then(response => response.json())
-      .then(data => {
+    // Load existing trial data if in edit mode
+    async function loadExistingTrialData() {
+      if (!editTrialId) return;
+
+      try {
+        console.log("🔄 Loading existing trial for editing:", editTrialId);
+        
+        // Wait for auth
+        await new Promise((resolve) => {
+          if (auth.currentUser) {
+            resolve();
+          } else {
+            const unsubscribe = auth.onAuthStateChanged((user) => {
+              unsubscribe();
+              resolve();
+            });
+          }
+        });
+
+        if (!auth.currentUser) {
+          alert("You must be logged in to edit a trial");
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Load the specific trial
+        const trialDoc = await getDoc(doc(db, "trials", editTrialId));
+        
+        if (trialDoc.exists()) {
+          currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
+          isEditMode = true;
+          
+          console.log("✅ Loaded trial for editing:", currentTrialData);
+          
+          // Populate form with existing data
+          populateFormWithTrialData();
+          
+          // Update button text
+          const submitButton = document.querySelector('button[type="submit"]');
+          if (submitButton) {
+            submitButton.textContent = "Update Trial";
+          }
+          
+          // Update page title
+          document.querySelector('h1').textContent = "Edit Trial";
+          
+        } else {
+          console.error("Trial not found");
+          alert("Trial not found");
+          sessionStorage.removeItem('editTrialId');
+          window.location.href = "view-trials.html";
+        }
+        
+      } catch (error) {
+        console.error("Error loading trial for editing:", error);
+        alert("Error loading trial: " + error.message);
+      }
+    }
+
+    // Populate form with existing trial data
+    function populateFormWithTrialData() {
+      if (!currentTrialData) return;
+
+      console.log("🎯 Populating form with existing trial data...");
+
+      // Fill basic info
+      if (currentTrialData.clubName) {
+        document.querySelector('input[name="clubName"]').value = currentTrialData.clubName;
+      }
+      if (currentTrialData.secretary) {
+        document.querySelector('input[name="secretary"]').value = currentTrialData.secretary;
+      }
+      if (currentTrialData.numDays) {
+        document.getElementById('numDays').value = currentTrialData.numDays;
+        
+        // Auto-generate days
+        generateDays();
+        
+        // Wait a moment for DOM to update, then populate days
+        setTimeout(() => {
+          populateDaysData();
+        }, 500);
+      }
+    }
+
+    // Populate days, classes, and rounds with existing data
+    function populateDaysData() {
+      if (!currentTrialData || !currentTrialData.days) return;
+
+      console.log("📅 Populating days data...");
+
+      currentTrialData.days.forEach((dayData, dayIndex) => {
+        // Set date
+        const dateInput = document.querySelector(`input[name="date${dayIndex}"]`);
+        if (dateInput && dayData.date) {
+          dateInput.value = dayData.date;
+        }
+
+        // Set number of classes and generate them
+        if (dayData.classes && dayData.classes.length > 0) {
+          const numClassesInput = document.querySelector(`input[data-day="${dayIndex}"]`);
+          if (numClassesInput) {
+            numClassesInput.value = dayData.classes.length;
+            generateClasses(numClassesInput);
+
+            // Wait for classes to be generated, then populate them
+            setTimeout(() => {
+              populateClassesData(dayIndex, dayData.classes);
+            }, 200);
+          }
+        }
+      });
+    }
+
+    // Populate classes and rounds data
+    function populateClassesData(dayIndex, classesData) {
+      console.log(`🎓 Populating classes for day ${dayIndex + 1}...`);
+
+      classesData.forEach((classData, classIndex) => {
+        // Set class name
+        const classSelect = document.querySelector(`select[data-day="${dayIndex}"][data-class="${classIndex}"]`);
+        if (classSelect && classData.className) {
+          classSelect.value = classData.className;
+        }
+
+        // Set number of rounds and generate them
+        if (classData.rounds && classData.rounds.length > 0) {
+          const numRoundsInput = document.querySelector(`input[data-day="${dayIndex}"][data-class="${classIndex}"]`);
+          if (numRoundsInput) {
+            numRoundsInput.value = classData.rounds.length;
+            generateRounds(numRoundsInput);
+
+            // Wait for rounds to be generated, then populate them
+            setTimeout(() => {
+              populateRoundsData(dayIndex, classIndex, classData.rounds);
+            }, 100);
+          }
+        }
+      });
+    }
+
+    // Populate rounds data (judges and FEO checkboxes)
+    function populateRoundsData(dayIndex, classIndex, roundsData) {
+      console.log(`⚖️ Populating rounds for day ${dayIndex + 1}, class ${classIndex + 1}...`);
+
+      const roundsContainer = document.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
+      if (!roundsContainer) return;
+
+      const judgeSelects = roundsContainer.querySelectorAll('select');
+      const feoCheckboxes = roundsContainer.querySelectorAll('input[type="checkbox"]');
+
+      roundsData.forEach((roundData, roundIndex) => {
+        // Set judge
+        if (judgeSelects[roundIndex] && roundData.judge) {
+          judgeSelects[roundIndex].value = roundData.judge;
+        }
+
+        // Set FEO checkbox
+        if (feoCheckboxes[roundIndex] && roundData.feo) {
+          feoCheckboxes[roundIndex].checked = roundData.feo;
+        }
+      });
+    }
+
+    // Initialize the page
+    async function initializePage() {
+      // Try to load extracted data from CSV first
+      try {
+        const response = await fetch('./js/data.json');
+        const data = await response.json();
+        
         console.log("Loading data from js/data.json...");
         
         const extractedClasses = [];
@@ -126,17 +298,23 @@
           globalJudges = extractedJudges;
           console.log("Using extracted judges:", globalJudges.length);
         }
-      })
-      .catch(err => {
+      } catch (err) {
         console.log("Using default classes and judges due to error:", err);
-      });
+      }
 
-    // Form submission - only save when user clicks Save Trial button
+      // Load existing trial data if in edit mode
+      await loadExistingTrialData();
+    }
+
+    // Start initialization
+    initializePage();
+
+    // Form submission - save or update trial
     document.getElementById('trialForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       try {
-        console.log("Save Trial button clicked");
+        console.log(isEditMode ? "Update Trial button clicked" : "Save Trial button clicked");
         
         // Wait for auth state to be properly loaded
         if (!auth.currentUser) {
@@ -173,7 +351,7 @@
         // Show saving status
         const submitButton = e.target.querySelector('button[type="submit"]');
         const originalText = submitButton.textContent;
-        submitButton.textContent = "Saving...";
+        submitButton.textContent = isEditMode ? "Updating..." : "Saving...";
         submitButton.disabled = true;
         
         // Collect ALL the trial data including classes, rounds, and judges
@@ -181,16 +359,31 @@
         
         console.log("Saving complete trial data:", trialData);
         
-        const docRef = await addDoc(collection(db, "trials"), trialData);
-        console.log("Trial saved with ID:", docRef.id);
+        if (isEditMode && currentTrialData) {
+          // Update existing trial
+          await updateDoc(doc(db, "trials", currentTrialData.id), {
+            ...trialData,
+            updatedAt: new Date()
+          });
+          console.log("Trial updated with ID:", currentTrialData.id);
+          alert("Trial updated successfully!");
+        } else {
+          // Create new trial
+          const docRef = await addDoc(collection(db, "trials"), trialData);
+          console.log("Trial saved with ID:", docRef.id);
+          alert("Trial saved successfully!");
+        }
         
         // Reset button
         submitButton.textContent = originalText;
         submitButton.disabled = false;
         
-        // Go directly back to dashboard
-        console.log("Redirecting to dashboard...");
-        window.location.href = "dashboard.html";
+        // Clear edit mode
+        sessionStorage.removeItem('editTrialId');
+        
+        // Go back to view trials if editing, dashboard if creating
+        console.log("Redirecting...");
+        window.location.href = isEditMode ? "view-trials.html" : "dashboard.html";
         
       } catch (error) {
         console.error("Error saving trial:", error);
@@ -199,7 +392,7 @@
         // Reset button on error
         const submitButton = e.target.querySelector('button[type="submit"]');
         if (submitButton) {
-          submitButton.textContent = "Save Trial";
+          submitButton.textContent = isEditMode ? "Update Trial" : "Save Trial";
           submitButton.disabled = false;
         }
       }
