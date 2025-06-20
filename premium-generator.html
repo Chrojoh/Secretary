@@ -394,8 +394,17 @@
 
         <div class="premium-section">
           <h2>Directions to Trial Site</h2>
-          <p>${location}<br>${cityState}</p>
-          <p><em>Detailed directions will be provided upon entry confirmation.</em></p>
+          <p><strong>${location}</strong><br>${cityState}</p>
+          ${currentApplicationData?.trialLocation ? 
+            `<p><a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(currentApplicationData.trialLocation + ', ' + cityState)}" target="_blank">🗺️ Get Directions via Google Maps</a></p>
+             <div style="margin: 10px 0;">
+               <iframe width="100%" height="200" frameborder="0" style="border:0"
+                 src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(currentApplicationData.trialLocation + ', ' + cityState)}"
+                 allowfullscreen>
+               </iframe>
+             </div>` : 
+            '<p><em>Detailed directions will be provided upon entry confirmation.</em></p>'
+          }
         </div>
       `;
     }
