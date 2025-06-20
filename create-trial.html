@@ -282,10 +282,26 @@
       e.preventDefault();
       
       try {
+        console.log("Form submission started");
+        
+        // Wait for auth state to be properly loaded
         if (!auth.currentUser) {
-          alert("You must be logged in");
+          console.log("No current user, waiting for auth...");
+          await new Promise((resolve) => {
+            const unsubscribe = auth.onAuthStateChanged((user) => {
+              unsubscribe();
+              resolve();
+            });
+          });
+        }
+        
+        if (!auth.currentUser) {
+          alert("You must be logged in to save a trial");
+          window.location.href = "index.html";
           return;
         }
+        
+        console.log("User confirmed:", auth.currentUser.email);
         
         const clubName = document.querySelector('input[name="clubName"]').value;
         const secretary = document.querySelector('input[name="secretary"]').value;
@@ -294,6 +310,12 @@
           alert("Please enter a club name");
           return;
         }
+        
+        // Show saving status
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = "Saving...";
+        submitButton.disabled = true;
         
         const trialData = {
           clubName: clubName,
@@ -309,12 +331,27 @@
         const docRef = await addDoc(collection(db, "trials"), trialData);
         console.log("Trial saved with ID:", docRef.id);
         
-        alert("Trial saved successfully!");
-        window.location.href = "dashboard.html";
+        // Reset button before redirect
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+        
+        // Use a more gentle redirect that preserves auth
+        console.log("Redirecting to dashboard...");
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1000);
+        
+        // Show success message
+        alert("Trial saved successfully! Redirecting to dashboard...");
         
       } catch (error) {
         console.error("Error saving trial:", error);
         alert("Error saving trial: " + error.message);
+        
+        // Reset button on error
+        const submitButton = e.target.querySelector('button[type="submit"]');
+        submitButton.textContent = "Save Trial";
+        submitButton.disabled = false;
       }
     });
 
