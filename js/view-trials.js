@@ -1,7 +1,28 @@
 import { auth, db } from './firebase.js';
-import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import { collection, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 const trialList = document.getElementById("trialList");
+
+async function deleteTrial(trialId, trialName) {
+  if (confirm(`Are you sure you want to delete "${trialName}"? This cannot be undone.`)) {
+    try {
+      await deleteDoc(doc(db, "trials", trialId));
+      console.log("Trial deleted:", trialId);
+      alert("Trial deleted successfully!");
+      // Reload the trials list
+      location.reload();
+    } catch (error) {
+      console.error("Error deleting trial:", error);
+      alert("Error deleting trial: " + error.message);
+    }
+  }
+}
+
+function editTrial(trialId) {
+  // Store the trial ID in sessionStorage so the create-trial page can load it for editing
+  sessionStorage.setItem('editTrialId', trialId);
+  window.location.href = 'create-trial.html';
+}
 
 async function loadTrials(user) {
   try {
@@ -72,6 +93,10 @@ async function loadTrials(user) {
       }
       
       trialItem.innerHTML = `
+        <div class="trial-actions">
+          <button class="edit-btn" onclick="editTrial('${trialData.id}')">Edit</button>
+          <button class="delete-btn" onclick="deleteTrial('${trialData.id}', '${trialData.clubName || 'Unnamed Trial'}')">Delete</button>
+        </div>
         <h3>${trialData.clubName || 'Unnamed Trial'}</h3>
         <div class="trial-details">
           <strong>Secretary:</strong> ${trialData.secretary || 'Not specified'}<br>
@@ -92,6 +117,10 @@ async function loadTrials(user) {
     trialList.innerHTML = '<div class="no-trials">Error loading trials: ' + error.message + '</div>';
   }
 }
+
+// Make functions globally accessible
+window.deleteTrial = deleteTrial;
+window.editTrial = editTrial;
 
 auth.onAuthStateChanged(async user => {
   if (!user) {
