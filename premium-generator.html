@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Premium List Generator</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .back-button {
+      background-color: #007cba;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    
+    .premium-preview {
+      border: 2px solid #000;
+      padding: 30px;
+      margin: 20px 0;
+      background: white;
+      font-family: Arial, sans-serif;
+      line-height: 1.4;
+    }
+    
+    .premium-header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #000;
+      padding-bottom: 20px;
+    }
+    
+    .premium-header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    
+    .premium-header .subtitle {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    
+    .premium-section {
+      margin: 20px 0;
+    }
+    
+    .premium-section h2 {
+      background-color: #f0f0f0;
+      padding: 8px;
+      margin: 15px 0 10px 0;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    
+    .judges-table, .classes-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+    
+    .judges-table th, .judges-table td,
+    .classes-table th, .classes-table td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    .judges-table th, .classes-table th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    
+    .fee-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .fee-list li {
+      padding: 5px 0;
+      border-bottom: 1px dotted #ccc;
+    }
+    
+    .contact-box {
+      border: 1px solid #000;
+      padding: 15px;
+      background-color: #f9f9f9;
+    }
+    
+    .generate-buttons {
+      text-align: center;
+      margin: 20px 0;
+    }
+    
+    .generate-btn, .print-btn {
+      padding: 10px 20px;
+      margin: 0 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+    }
+    
+    .generate-btn {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .print-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+    
+    @media print {
+      .back-button, .generate-buttons {
+        display: none;
+      }
+      .premium-preview {
+        border: none;
+        margin: 0;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="back-button" onclick="location.href='dashboard.html'">← Back to Dashboard</button>
+    <h1>Premium List Generator</h1>
+    
+    <div class="generate-buttons">
+      <button class="generate-btn" onclick="generatePremium()">Generate Premium List</button>
+      <button class="print-btn" onclick="window.print()">Print Premium</button>
+    </div>
+    
+    <div id="premiumPreview" class="premium-preview" style="display: none;">
+      <!-- Premium content will be generated here -->
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    let currentTrialData = null;
+    let currentApplicationData = null;
+
+    window.generatePremium = async function() {
+      try {
+        if (!auth.currentUser) {
+          alert("Please log in first");
+          window.location.href = 'index.html';
+          return;
+        }
+
+        // Load trial data
+        await loadLatestTrialData();
+        
+        if (!currentTrialData) {
+          alert("No trial found. Please create a trial first.");
+          return;
+        }
+
+        // Try to load application data
+        await loadApplicationData();
+
+        // Generate the premium
+        generatePremiumHTML();
+        
+        document.getElementById('premiumPreview').style.display = 'block';
+        
+      } catch (error) {
+        console.error("Error generating premium:", error);
+        alert("Error generating premium: " + error.message);
+      }
+    };
+
+    async function loadLatestTrialData() {
+      const q = query(
+        collection(db, "trials"),
+        where("createdBy", "==", auth.currentUser.uid)
+      );
+      
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        const trials = [];
+        snapshot.forEach(doc => {
+          trials.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Sort by creation date, most recent first
+        trials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
+        currentTrialData = trials[0];
+        console.log("Loaded trial data:", currentTrialData);
+      }
+    }
+
+    async function loadApplicationData() {
+      if (!currentTrialData) return;
+      
+      const q = query(
+        collection(db, "applications"),
+        where("trialId", "==", currentTrialData.id),
+        where("createdBy", "==", auth.currentUser.uid)
+      );
+      
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        snapshot.forEach(doc => {
+          currentApplicationData = { id: doc.id, ...doc.data() };
+        });
+        console.log("Loaded application data:", currentApplicationData);
+      }
+    }
+
+    function generatePremiumHTML() {
+      const preview = document.getElementById('premiumPreview');
+      
+      // Extract data for premium
+      const clubName = currentTrialData.clubName || 'Club Name Not Specified';
+      const secretary = currentTrialData.secretary || 'Secretary Not Specified';
+      
+      // Get trial dates
+      let trialDates = 'Dates TBD';
+      if (currentTrialData.days && currentTrialData.days.length > 0) {
+        const dates = currentTrialData.days
+          .filter(day => day.date)
+          .map(day => new Date(day.date).toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }));
+        if (dates.length > 0) {
+          trialDates = dates.join(' & ');
+        }
+      }
+
+      // Get location from application if available
+      const location = currentApplicationData?.trialLocation || 'Location TBD';
+      const cityState = currentApplicationData?.cityState || 'City, State TBD';
+      
+      // Generate judges table
+      const judges = new Set();
+      if (currentTrialData.days) {
+        currentTrialData.days.forEach(day => {
+          if (day.classes) {
+            day.classes.forEach(cls => {
+              if (cls.rounds) {
+                cls.rounds.forEach(round => {
+                  if (round.judge && round.judge.trim()) {
+                    judges.add(round.judge.trim());
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+
+      const judgesTableHTML = Array.from(judges).map(judge => 
+        `<tr><td>Scent Work</td><td>${judge}</td><td>Location TBD</td></tr>`
+      ).join('');
+
+      // Generate classes table
+      const classes = new Set();
+      if (currentTrialData.days) {
+        currentTrialData.days.forEach(day => {
+          if (day.classes) {
+            day.classes.forEach(cls => {
+              if (cls.className && cls.className.trim()) {
+                classes.add(cls.className.trim());
+              }
+            });
+          }
+        });
+      }
+
+      const classesHTML = Array.from(classes).map(className => 
+        `<tr><td>${className}</td><td>All levels welcome</td></tr>`
+      ).join('');
+
+      preview.innerHTML = `
+        <div class="premium-header">
+          <h1>${clubName}</h1>
+          <div class="subtitle">Licensed by C-WAGS</div>
+          <div class="subtitle">Scent Work Trial</div>
+          <div class="subtitle">(Indoor/Outdoor)</div>
+          <div style="margin-top: 15px;">
+            <strong>${trialDates}</strong><br>
+            <strong>Start Time: 8:00 AM – End Time: 5:00 PM</strong>
+          </div>
+        </div>
+
+        <div class="premium-section">
+          <h2>Location</h2>
+          <strong>${location}</strong><br>
+          ${cityState}
+        </div>
+
+        <div class="premium-section">
+          <h2>Event Information</h2>
+          <strong>Show Secretary:</strong> ${secretary}<br>
+          <strong>Trial Contact:</strong> ${currentApplicationData?.contactName || secretary}<br>
+          <strong>Email:</strong> ${currentApplicationData?.contactEmail || 'TBD'}<br>
+          <strong>Phone:</strong> ${currentApplicationData?.contactPhone || 'TBD'}<br>
+          <strong>Entry Limit:</strong> Determined by venue capacity
+        </div>
+
+        <div class="premium-section">
+          <h2>Judging Panel</h2>
+          <table class="judges-table">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Judge Name</th>
+                <th>City/Province/State</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${judgesTableHTML || '<tr><td>Scent Work</td><td>Judge TBD</td><td>Location TBD</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="premium-section">
+          <h2>Classes Offered</h2>
+          <table class="classes-table">
+            <thead>
+              <tr>
+                <th>Class Name</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${classesHTML || '<tr><td>Classes TBD</td><td>To be determined</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="premium-section">
+          <h2>Entry Fees</h2>
+          <ul class="fee-list">
+            <li><strong>$25.00</strong> First entry of each dog</li>
+            <li><strong>$20.00</strong> Additional entry, same dog</li>
+            <li><strong>$15.00</strong> Exhibition Only</li>
+          </ul>
+          <p><em>Make cheques payable to: ${clubName}</em></p>
+        </div>
+
+        <div class="premium-section">
+          <h2>Entry Deadline</h2>
+          <p><strong>Entries must be received by [DATE] at 11:59 PM</strong></p>
+          <p>Entries may be submitted online or mailed to the trial secretary.</p>
+        </div>
+
+        <div class="premium-section">
+          <h2>Show Rules and Information</h2>
+          <ul>
+            <li>All dogs must be on leash unless in the search area</li>
+            <li>Bitches in season may compete but must be crated separately</li>
+            <li>Dogs must be current on vaccinations</li>
+            <li>Refunds: Entry fees will be refunded if trial is cancelled</li>
+            <li>COVID Protocols: Follow current health guidelines</li>
+          </ul>
+        </div>
+
+        <div class="premium-section">
+          <h2>Awards and Prizes</h2>
+          <ul>
+            <li><strong>High in Trial:</strong> Rosette & Trophy</li>
+            <li><strong>Class Placements 1-4:</strong> Rosettes</li>
+            <li><strong>Qualifying Scores:</strong> Qualifying ribbons</li>
+          </ul>
+        </div>
+
+        <div class="premium-section">
+          <h2>Trial Secretary Contact</h2>
+          <div class="contact-box">
+            <strong>${secretary}</strong><br>
+            Email: ${currentApplicationData?.contactEmail || 'TBD'}<br>
+            Phone: ${currentApplicationData?.contactPhone || 'TBD'}
+          </div>
+        </div>
+
+        <div class="premium-section">
+          <h2>Directions to Trial Site</h2>
+          <p>${location}<br>${cityState}</p>
+          <p><em>Detailed directions will be provided upon entry confirmation.</em></p>
+        </div>
+      `;
+    }
+
+    // Auth check
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>
