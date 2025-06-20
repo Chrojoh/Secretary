@@ -2,45 +2,56 @@ import { db, auth } from './firebase.js';
 import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 let dataLoaded = false;
+let availableClasses = [];
+let availableJudges = [];
 
-// Predefined classes and judges since your JSON doesn't contain them
-const availableClasses = [
-  "Novice A",
-  "Novice B", 
-  "Open A",
-  "Open B",
-  "Utility A", 
-  "Utility B",
-  "Graduate Novice",
-  "Graduate Open",
-  "Versatility",
-  "Brace",
-  "Team"
-];
-
-const availableJudges = [
-  "Judge TBD",
-  "Alice Johnson",
-  "Bob Smith", 
-  "Carol Davis",
-  "David Wilson",
-  "Eva Martinez",
-  "Frank Thompson",
-  "Grace Lee",
-  "Henry Brown",
-  "Isabel Garcia"
-];
-
-// Load the data (for dogs list, even though we're not using it in this form)
+// Load the data and extract classes and judges
 fetch('./js/data.json')
   .then(res => res.json())
-  .then(json => { 
-    console.log("Dog data loaded successfully");
+  .then(data => { 
+    console.log("Data loaded successfully");
+    console.log("Sample records:", data.slice(0, 3));
+    
+    if (Array.isArray(data)) {
+      // Extract unique classes (filter out empty strings)
+      const classSet = new Set();
+      const judgeSet = new Set();
+      
+      data.forEach(record => {
+        if (record.Class && record.Class.trim() !== "") {
+          classSet.add(record.Class.trim());
+        }
+        if (record.Judges && record.Judges.trim() !== "") {
+          judgeSet.add(record.Judges.trim());
+        }
+      });
+      
+      availableClasses = Array.from(classSet).sort();
+      availableJudges = Array.from(judgeSet).sort();
+      
+      console.log("Classes found:", availableClasses);
+      console.log("Judges found:", availableJudges);
+      console.log(`Extracted ${availableClasses.length} classes and ${availableJudges.length} judges`);
+      
+      // If no classes/judges found, use fallbacks
+      if (availableClasses.length === 0) {
+        availableClasses = ["Class TBD", "Novice", "Open", "Utility"];
+        console.log("No classes found in data, using fallbacks");
+      }
+      if (availableJudges.length === 0) {
+        availableJudges = ["Judge TBD", "Judge 1", "Judge 2"];
+        console.log("No judges found in data, using fallbacks");
+      }
+    }
+    
     dataLoaded = true;
   })
   .catch(err => {
     console.error('Error loading data:', err);
-    dataLoaded = true; // Still allow the form to work
+    // Use fallback data if loading fails
+    availableClasses = ["Class TBD", "Novice", "Open", "Utility"];
+    availableJudges = ["Judge TBD", "Judge 1", "Judge 2"];
+    dataLoaded = true;
   });
 
 window.generateDays = function () {
@@ -81,6 +92,13 @@ window.generateDays = function () {
 window.generateClasses = function (input, dayIndex) {
   console.log(`generateClasses called for day ${dayIndex}`);
   
+  // Check if data is loaded
+  if (!dataLoaded) {
+    alert("Data is still loading, please wait a moment and try again");
+    input.value = "";
+    return;
+  }
+  
   try {
     const num = parseInt(input.value);
     
@@ -98,6 +116,7 @@ window.generateClasses = function (input, dayIndex) {
     container.innerHTML = "";
     
     console.log(`Creating ${num} classes with ${availableClasses.length} class options`);
+    console.log("Available classes:", availableClasses);
     
     const classOpts = availableClasses.map(c => `<option value="${c}">${c}</option>`).join("");
     
@@ -111,7 +130,7 @@ window.generateClasses = function (input, dayIndex) {
       cls.innerHTML = `
         <h4>Class ${i + 1}</h4>
         <label>Class Type:</label>
-        <input list="classList${dayIndex}_${i}" placeholder="Select Class" style="margin-left: 10px; width: 150px;">
+        <input list="classList${dayIndex}_${i}" placeholder="Select Class" style="margin-left: 10px; width: 200px;">
         <datalist id="classList${dayIndex}_${i}">${classOpts}</datalist>
         <br><br>
         <label>Number of Rounds:</label>
@@ -151,6 +170,7 @@ window.generateRounds = function (select, id) {
     container.innerHTML = "";
     
     console.log(`Creating ${num} rounds with ${availableJudges.length} judge options`);
+    console.log("Available judges:", availableJudges.slice(0, 5), "...");
     
     const judgeOpts = availableJudges.map(j => `<option value="${j}">${j}</option>`).join("");
 
@@ -163,7 +183,7 @@ window.generateRounds = function (select, id) {
       round.innerHTML = `
         <strong>Round ${i + 1}:</strong>
         <label>Judge:</label>
-        <input list="judgeList${id}_${i}" placeholder="Select Judge" style="margin-left: 10px; width: 120px;">
+        <input list="judgeList${id}_${i}" placeholder="Select Judge" style="margin-left: 10px; width: 150px;">
         <datalist id="judgeList${id}_${i}">${judgeOpts}</datalist>
         <label style="margin-left: 15px;">
           <input type="checkbox"> FEO (For Exhibition Only)
@@ -187,7 +207,18 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       console.log("Form submitted");
-      alert("Form submission functionality would go here");
+      
+      // Collect all form data
+      const formData = new FormData(form);
+      const trialData = {
+        clubName: formData.get('clubName'),
+        secretary: formData.get('secretary'),
+        numDays: document.getElementById('numDays').value,
+        days: []
+      };
+      
+      console.log("Trial data collected:", trialData);
+      alert("Trial data would be saved here. Check console for details.");
     });
   }
   
