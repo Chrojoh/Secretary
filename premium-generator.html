@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Premium Generator - West Kelowna K9 (FIXED DATES)</title>
+  <title>Premium Generator - Auto-Fill Fixed</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -23,6 +23,16 @@
       padding: 20px;
       border-radius: 8px;
       margin-bottom: 20px;
+    }
+    
+    .debug-info {
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 12px;
     }
     
     .edit-form {
@@ -147,7 +157,7 @@
     }
     
     @media print {
-      .controls {
+      .controls, .debug-info {
         display: none;
       }
       .premium-document {
@@ -164,8 +174,15 @@
 <body>
   <div class="container">
     <div class="controls">
-      <h2>🏆 Premium Generator for West Kelowna K9 Scent and Games (FIXED DATES)</h2>
-      <p>This version has the date bug fixed!</p>
+      <h2>🏆 Premium Generator - Auto-Fill with Date Fix</h2>
+      <button class="generate-btn" onclick="loadTrialData()">🔄 Load Trial Data</button>
+      <button class="generate-btn" onclick="generatePremium()">Generate Premium</button>
+      <button class="print-btn" onclick="window.print()">Print Premium</button>
+      <button onclick="location.href='main-dashboard.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Dashboard</button>
+      
+      <div id="debugInfo" class="debug-info">
+        Click "Load Trial Data" to see debugging information...
+      </div>
       
       <div class="edit-form">
         <div>
@@ -178,7 +195,7 @@
         </div>
         <div class="full-width">
           <label>Trial Dates:</label>
-          <input type="text" id="trialDates" value="Friday, June 6, 2025 & Friday, June 13, 2025 & Friday, June 20, 2025">
+          <input type="text" id="trialDates" placeholder="Will be auto-filled from trial data">
         </div>
         <div>
           <label>Start Time:</label>
@@ -210,18 +227,12 @@
         </div>
         <div class="full-width">
           <label>Judges (one per line):</label>
-          <textarea id="judges" placeholder="Enter judge names, one per line"></textarea>
+          <textarea id="judges" placeholder="Will be auto-filled from trial data"></textarea>
         </div>
         <div class="full-width">
           <label>Classes Offered (one per line):</label>
-          <textarea id="classes" placeholder="e.g.,&#10;Novice Interior&#10;Novice Exterior&#10;Advanced Interior&#10;Advanced Exterior&#10;Excellent Interior&#10;Excellent Exterior"></textarea>
+          <textarea id="classes" placeholder="Will be auto-filled from trial data"></textarea>
         </div>
-      </div>
-      
-      <div style="text-align: center;">
-        <button class="generate-btn" onclick="generatePremium()">Generate Premium</button>
-        <button class="print-btn" onclick="window.print()">Print Premium</button>
-        <button onclick="location.href='main-dashboard.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Dashboard</button>
       </div>
     </div>
     
@@ -230,16 +241,221 @@
     </div>
   </div>
 
-  <script>
-    console.log("NEW PREMIUM GENERATOR LOADED - FIXED DATES VERSION");
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    console.log("AUTO-FILL PREMIUM GENERATOR WITH DATE FIX LOADED");
+
+    let currentTrialData = null;
+    let currentApplicationData = null;
+
+    // SUPER ROBUST DATE CONVERSION FUNCTION
+    function convertDateSafely(dateStr) {
+      console.log("🔧 CONVERTING DATE:", dateStr);
+      
+      if (!dateStr || !dateStr.trim()) {
+        console.log("❌ Empty date string");
+        return "Date TBD";
+      }
+      
+      try {
+        // Method 1: Parse YYYY-MM-DD format manually
+        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          const [year, month, day] = dateStr.split('-').map(num => parseInt(num, 10));
+          console.log("📅 Parsed components:", {year, month, day});
+          
+          // Create date in LOCAL timezone (month is 0-indexed)
+          const localDate = new Date(year, month - 1, day, 12, 0, 0); // Noon to avoid DST issues
+          console.log("🕐 Created local date:", localDate);
+          
+          // Get day of week to verify
+          const dayOfWeek = localDate.getDay(); // 0=Sunday, 1=Monday, etc.
+          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+          console.log("📆 Day of week:", dayNames[dayOfWeek]);
+          
+          const formatted = localDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric', 
+            month: 'long',
+            day: 'numeric'
+          });
+          
+          console.log("✅ Final formatted date:", formatted);
+          return formatted;
+        }
+        
+        // Method 2: If already formatted, return as-is
+        if (dateStr.includes(',')) {
+          console.log("✅ Already formatted, returning:", dateStr);
+          return dateStr;
+        }
+        
+        // Method 3: Try direct parsing (fallback)
+        console.log("⚠️ Trying fallback parsing...");
+        const fallbackDate = new Date(dateStr + 'T12:00:00');
+        if (!isNaN(fallbackDate.getTime())) {
+          return fallbackDate.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long', 
+            day: 'numeric'
+          });
+        }
+        
+        console.log("❌ All parsing methods failed");
+        return dateStr; // Return original if all else fails
+        
+      } catch (error) {
+        console.error("💥 Date conversion error:", error);
+        return dateStr;
+      }
+    }
+
+    window.loadTrialData = async function() {
+      try {
+        console.log("🔄 Loading trial data...");
+        
+        if (!auth.currentUser) {
+          alert("Please log in first");
+          return;
+        }
+
+        // Load latest trial
+        const trialsQuery = query(
+          collection(db, "trials"),
+          where("createdBy", "==", auth.currentUser.uid)
+        );
+        
+        const trialsSnapshot = await getDocs(trialsQuery);
+        
+        if (!trialsSnapshot.empty) {
+          const trials = [];
+          trialsSnapshot.forEach(doc => {
+            trials.push({ id: doc.id, ...doc.data() });
+          });
+          
+          trials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
+          currentTrialData = trials[0];
+          console.log("📊 Loaded trial:", currentTrialData);
+        }
+
+        // Load application data
+        if (currentTrialData) {
+          const appQuery = query(
+            collection(db, "applications"),
+            where("trialId", "==", currentTrialData.id),
+            where("createdBy", "==", auth.currentUser.uid)
+          );
+          
+          const appSnapshot = await getDocs(appQuery);
+          
+          if (!appSnapshot.empty) {
+            appSnapshot.forEach(doc => {
+              currentApplicationData = { id: doc.id, ...doc.data() };
+            });
+            console.log("📋 Loaded application:", currentApplicationData);
+          }
+        }
+
+        // Process and display data
+        fillFormFromTrialData();
+        
+      } catch (error) {
+        console.error("💥 Error loading trial data:", error);
+        document.getElementById('debugInfo').innerHTML = `❌ Error: ${error.message}`;
+      }
+    };
+
+    function fillFormFromTrialData() {
+      if (!currentTrialData) {
+        document.getElementById('debugInfo').innerHTML = "❌ No trial data loaded";
+        return;
+      }
+
+      console.log("🎯 Filling form from trial data...");
+      
+      // Fill basic info
+      document.getElementById('clubName').value = currentTrialData.clubName || 'West Kelowna K9 Scent and Games';
+      document.getElementById('secretary').value = currentTrialData.secretary || 'Chris Johansen';
+
+      // Process dates with debug info
+      let debugHTML = "<h4>🔍 Date Processing Debug:</h4>";
+      let processedDates = [];
+      
+      if (currentTrialData.days && currentTrialData.days.length > 0) {
+        debugHTML += `<p>Raw trial days: ${JSON.stringify(currentTrialData.days, null, 2)}</p>`;
+        
+        currentTrialData.days.forEach((day, index) => {
+          if (day.date && day.date.trim()) {
+            debugHTML += `<p><strong>Day ${index + 1}:</strong><br>`;
+            debugHTML += `&nbsp;&nbsp;Input: "${day.date}"<br>`;
+            
+            const converted = convertDateSafely(day.date);
+            debugHTML += `&nbsp;&nbsp;Output: "${converted}"</p>`;
+            
+            processedDates.push(converted);
+          }
+        });
+        
+        const finalDateString = processedDates.join(' & ');
+        document.getElementById('trialDates').value = finalDateString;
+        debugHTML += `<p><strong>Final date string:</strong> ${finalDateString}</p>`;
+      }
+
+      // Fill other data
+      if (currentApplicationData) {
+        document.getElementById('location').value = currentApplicationData.trialLocation || '';
+        document.getElementById('email').value = currentApplicationData.contactEmail || '';
+        document.getElementById('phone').value = currentApplicationData.contactPhone || '';
+      }
+
+      // Extract and fill judges
+      const judges = new Set();
+      if (currentTrialData.days) {
+        currentTrialData.days.forEach(day => {
+          if (day.classes) {
+            day.classes.forEach(cls => {
+              if (cls.rounds) {
+                cls.rounds.forEach(round => {
+                  if (round.judge && round.judge.trim()) {
+                    judges.add(round.judge.trim());
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+      document.getElementById('judges').value = Array.from(judges).join('\n');
+      debugHTML += `<p><strong>Judges found:</strong> ${Array.from(judges).join(', ')}</p>`;
+
+      // Extract and fill classes
+      const classes = new Set();
+      if (currentTrialData.days) {
+        currentTrialData.days.forEach(day => {
+          if (day.classes) {
+            day.classes.forEach(cls => {
+              if (cls.className && cls.className.trim()) {
+                classes.add(cls.className.trim());
+              }
+            });
+          }
+        });
+      }
+      document.getElementById('classes').value = Array.from(classes).join('\n');
+      debugHTML += `<p><strong>Classes found:</strong> ${Array.from(classes).join(', ')}</p>`;
+
+      document.getElementById('debugInfo').innerHTML = debugHTML;
+      
+      console.log("✅ Form filled successfully!");
+    }
 
     window.generatePremium = function() {
-      console.log("Generating premium with FIXED date system");
-      
       const data = {
         clubName: document.getElementById('clubName').value || 'West Kelowna K9 Scent and Games',
         secretary: document.getElementById('secretary').value || 'Chris Johansen',
-        trialDates: document.getElementById('trialDates').value || 'Friday, June 6, 2025 & Friday, June 13, 2025 & Friday, June 20, 2025',
+        trialDates: document.getElementById('trialDates').value || '[TRIAL DATES]',
         startTime: document.getElementById('startTime').value || '8:00 AM',
         endTime: document.getElementById('endTime').value || '4:00 PM',
         location: document.getElementById('location').value || '[LOCATION TBD]',
@@ -250,8 +466,6 @@
         judges: document.getElementById('judges').value.split('\n').filter(j => j.trim()),
         classes: document.getElementById('classes').value.split('\n').filter(c => c.trim())
       };
-
-      console.log("Premium data:", data);
 
       const judgesTableHTML = data.judges.length > 0 ? 
         data.judges.map(judge => 
@@ -354,64 +568,33 @@
           </ul>
         </div>
 
-        <div class="premium-section">
-          <h2>Trial Rules and Information</h2>
-          <ul>
-            <li>Trial conducted under current C-WAGS Scent Work Rules and Regulations</li>
-            <li>Lunch and refreshments available on site</li>
-            <li>RV parking available (contact trial secretary)</li>
-            <li>Grooming area available</li>
-            <li>Clean up after your dog - bags provided</li>
-            <li>Crating space available inside venue</li>
-          </ul>
-        </div>
-
-        <div class="premium-section">
-          <h2>Awards</h2>
-          <ul>
-            <li><strong>High in Trial:</strong> Rosette and special prize</li>
-            <li><strong>High Combined:</strong> Rosette (if applicable)</li>
-            <li><strong>Qualifying scores:</strong> C-WAGS qualifying ribbon</li>
-            <li><strong>Placements 1st-4th:</strong> C-WAGS placement ribbons</li>
-          </ul>
-        </div>
-
-        <div class="premium-section">
-          <h2>Accommodations</h2>
-          <p><strong>Pet-Friendly Hotels near West Kelowna:</strong></p>
-          <ul>
-            <li>Best Western Plus Wine Country Hotel & Suites - (250) 707-4400</li>
-            <li>Sandman Inn & Suites Vernon - (250) 542-4325</li>
-            <li>Coast Capri Hotel Kelowna - (250) 860-6060</li>
-          </ul>
-          <p><em>Please mention you're attending the dog trial when booking</em></p>
-        </div>
-
         <div class="contact-box">
           <h2>Trial Secretary Contact</h2>
           <strong>${data.secretary}</strong><br>
           ${data.clubName}<br>
           Email: ${data.email}<br>
-          Phone: ${data.phone}<br><br>
-          <strong>For entries and questions contact trial secretary</strong>
+          Phone: ${data.phone}
         </div>
 
         <div class="premium-section">
           <h2>Directions to Trial Site</h2>
           <p><strong>${data.location}</strong></p>
           <p><em>Detailed directions will be provided upon entry confirmation</em></p>
-          <p>GPS coordinates and additional parking information available from trial secretary</p>
         </div>
       `;
 
       document.getElementById('premiumDocument').innerHTML = premiumHTML;
       document.getElementById('premiumDocument').style.display = 'block';
       document.getElementById('premiumDocument').scrollIntoView({ behavior: 'smooth' });
-      
-      console.log("Premium generated successfully with correct dates!");
     };
 
-    console.log("Fixed premium generator ready to use");
+    // Auto-load trial data when page loads
+    window.addEventListener('load', () => {
+      console.log("🚀 Page loaded, auto-loading trial data...");
+      setTimeout(loadTrialData, 1000); // Small delay to ensure auth is ready
+    });
+
+    console.log("Premium generator ready with auto-fill and date debugging");
   </script>
 </body>
 </html>
