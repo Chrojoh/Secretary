@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trial Secretary Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+    
+    .welcome-msg {
+      margin: 10px 0 0 0;
+      font-size: 18px;
+      opacity: 0.9;
+    }
+    
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 30px;
+    }
+    
+    .nav-card {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .nav-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-color: #4CAF50;
+    }
+    
+    .nav-card h3 {
+      margin: 0 0 15px 0;
+      color: #333;
+      font-size: 20px;
+    }
+    
+    .nav-card p {
+      color: #666;
+      margin: 0 0 20px 0;
+      line-height: 1.5;
+    }
+    
+    .nav-button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    
+    .nav-button:hover {
+      background: #45a049;
+    }
+    
+    .nav-button.secondary {
+      background: #2196F3;
+    }
+    
+    .nav-button.secondary:hover {
+      background: #1976D2;
+    }
+    
+    .nav-button.tertiary {
+      background: #ff9800;
+    }
+    
+    .nav-button.tertiary:hover {
+      background: #f57c00;
+    }
+    
+    .user-info {
+      background: #e8f5e8;
+      padding: 20px;
+      margin: 20px 30px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .user-details {
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    
+    .logout-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .logout-btn:hover {
+      background: #d32f2f;
+    }
+    
+    .quick-stats {
+      background: #fff3e0;
+      padding: 20px;
+      margin: 20px 30px;
+      border-radius: 8px;
+      border-left: 5px solid #ff9800;
+    }
+    
+    .quick-stats h3 {
+      margin: 0 0 10px 0;
+      color: #f57c00;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="header">
+      <h1>🐕 Trial Secretary Dashboard</h1>
+      <div class="welcome-msg">Welcome back, <span id="username">User</span>!</div>
+    </div>
+    
+    <div class="user-info">
+      <div class="user-details">
+        Logged in as: <span id="userEmail">Loading...</span>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    
+    <div class="quick-stats">
+      <h3>📊 Quick Stats</h3>
+      <div id="statsContent">Loading your trial statistics...</div>
+    </div>
+    
+    <div class="nav-grid">
+      <!-- Trial Management -->
+      <div class="nav-card" onclick="location.href='create-trial.html'">
+        <h3>🚀 Create Trial</h3>
+        <p>Set up a new trial with classes, judges, and schedules</p>
+        <button class="nav-button">Create New Trial</button>
+      </div>
+      
+      <div class="nav-card" onclick="location.href='view-trials.html'">
+        <h3>📋 View Trials</h3>
+        <p>View, edit, and manage your existing trials</p>
+        <button class="nav-button">Manage Trials</button>
+      </div>
+      
+      <!-- Applications & Documents -->
+      <div class="nav-card" onclick="location.href='trial-application.html'">
+        <h3>📄 Trial Application</h3>
+        <p>Complete C-WAGS trial application forms</p>
+        <button class="nav-button secondary">Create Application</button>
+      </div>
+      
+      <div class="nav-card" onclick="location.href='premium.html'">
+        <h3>🏆 Premium Generator</h3>
+        <p>Generate professional premium lists for your trials</p>
+        <button class="nav-button secondary">Generate Premium</button>
+      </div>
+      
+      <div class="nav-card" onclick="location.href='trial-app.html'">
+        <h3>📋 C-WAGS Application</h3>
+        <p>Official C-WAGS trial application form</p>
+        <button class="nav-button tertiary">C-WAGS Form</button>
+      </div>
+      
+      <div class="nav-card" onclick="location.href='waiver-generator.html'">
+        <h3>📝 Waiver Generator</h3>
+        <p>Create liability waivers for your events</p>
+        <button class="nav-button tertiary">Generate Waivers</button>
+      </div>
+      
+      <!-- Quick Tools -->
+      <div class="nav-card" onclick="showQuickTools()">
+        <h3>⚡ Quick Tools</h3>
+        <p>Entry forms, results tracking, and more</p>
+        <button class="nav-button tertiary">Quick Access</button>
+      </div>
+      
+      <div class="nav-card" onclick="location.href='fresh.html'">
+        <h3>🛠️ Emergency Tools</h3>
+        <p>Backup tools and system utilities</p>
+        <button class="nav-button tertiary">Emergency Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    console.log("Dashboard loading...");
+
+    let authCheckComplete = false;
+
+    // Safe auth state listener
+    auth.onAuthStateChanged(async (user) => {
+      if (authCheckComplete) return; // Prevent multiple executions
+      authCheckComplete = true;
+
+      console.log("Auth state changed:", user ? "logged in" : "not logged in");
+
+      if (user) {
+        console.log("User authenticated:", user.email);
+        
+        // Update UI with user info
+        const username = user.email.split('@')[0];
+        document.getElementById('username').textContent = username;
+        document.getElementById('userEmail').textContent = user.email;
+        
+        // Load user stats
+        await loadUserStats(user);
+        
+      } else {
+        console.log("No user found, redirecting to login");
+        // Small delay to prevent rapid redirects
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+      }
+    });
+
+    async function loadUserStats(user) {
+      try {
+        // Count trials
+        const trialsQuery = query(
+          collection(db, "trials"),
+          where("createdBy", "==", user.uid)
+        );
+        const trialsSnapshot = await getDocs(trialsQuery);
+        
+        // Count applications  
+        const appsQuery = query(
+          collection(db, "applications"),
+          where("createdBy", "==", user.uid)
+        );
+        const appsSnapshot = await getDocs(appsQuery);
+
+        const statsHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #4CAF50;">${trialsSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Trials Created</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #2196F3;">${appsSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Applications</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #ff9800;">Active</div>
+              <div style="font-size: 14px; color: #666;">System Status</div>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('statsContent').innerHTML = statsHTML;
+        
+      } catch (error) {
+        console.error("Error loading stats:", error);
+        document.getElementById('statsContent').innerHTML = 
+          '<p style="color: #666;">Unable to load statistics</p>';
+      }
+    }
+
+    window.logout = async function() {
+      if (confirm("Are you sure you want to logout?")) {
+        try {
+          console.log("Logging out...");
+          await signOut(auth);
+          window.location.href = 'index.html';
+        } catch (error) {
+          console.error("Logout error:", error);
+          alert("Error logging out: " + error.message);
+        }
+      }
+    };
+
+    window.showQuickTools = function() {
+      alert("Quick Tools coming soon! For now, use the individual tools from the dashboard.");
+    };
+
+    console.log("Dashboard script loaded successfully");
+  </script>
+</body>
+</html>
