@@ -3,8 +3,25 @@
 <head>
   <title>Create Trial</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .back-button {
+      background-color: #007cba;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    
+    .back-button:hover {
+      background-color: #005a8b;
+    }
+  </style>
 </head>
 <body>
+  <button class="back-button" onclick="location.href='dashboard.html'">← Back to Dashboard</button>
   <h1>Create Trial</h1>
   <form id="trialForm">
     <input type="text" name="clubName" placeholder="Club Name">
