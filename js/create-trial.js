@@ -56,6 +56,13 @@ window.generateRounds = function (select, id) {
   const container = select.nextElementSibling;
   const num = parseInt(select.value);
   container.innerHTML = "";
+  
+  // Check if data is loaded
+  if (!data || !data.judges) {
+    console.log("Data not loaded yet, please try again in a moment");
+    return;
+  }
+  
   const judgeOpts = data.judges.map(j => `<option value="${j}">${j}</option>`).join("");
 
   for (let i = 0; i < num; i++) {
