@@ -30,6 +30,12 @@ window.generateClasses = function (input, dayIndex) {
   const container = input.nextElementSibling;
   container.innerHTML = "";
 
+  // Check if data is loaded
+  if (!data || !data.classes) {
+    console.log("Data not loaded yet, please try again in a moment");
+    return;
+  }
+
   for (let i = 0; i < num; i++) {
     const cls = document.createElement("div");
     const classOpts = data.classes.map(c => `<option value="${c}">${c}</option>`).join("");
@@ -46,7 +52,6 @@ window.generateClasses = function (input, dayIndex) {
     container.appendChild(cls);
   }
 };
-
 window.generateRounds = function (select, id) {
   const container = select.nextElementSibling;
   const num = parseInt(select.value);
