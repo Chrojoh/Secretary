@@ -26,8 +26,19 @@ fetch('./js/data.json')
         }
       });
       
-      availableClasses = Array.from(classSet).sort();
-      availableJudges = Array.from(judgeSet).sort();
+      // Keep classes in the order they appear in JSON (no sorting)
+      availableClasses = [];
+      availableJudges = [];
+      
+      // Preserve original order from JSON
+      data.forEach(record => {
+        if (record.Class && record.Class.trim() !== "" && !availableClasses.includes(record.Class.trim())) {
+          availableClasses.push(record.Class.trim());
+        }
+        if (record.Judges && record.Judges.trim() !== "" && !availableJudges.includes(record.Judges.trim())) {
+          availableJudges.push(record.Judges.trim());
+        }
+      });
       
       console.log("Classes found:", availableClasses);
       console.log("Judges found:", availableJudges);
@@ -218,7 +229,8 @@ document.addEventListener('DOMContentLoaded', function() {
       };
       
       console.log("Trial data collected:", trialData);
-      alert("Trial data would be saved here. Check console for details.");
+      // TODO: Add actual save functionality here
+      // For now, just log to console without showing alert
     });
   }
   
