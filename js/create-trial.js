@@ -18,351 +18,299 @@
     .back-button:hover {
       background-color: #005a8b;
     }
+    
+    .day-container {
+      border: 1px solid #ccc;
+      padding: 15px;
+      margin: 10px 0;
+      background-color: #f9f9f9;
+    }
+    
+    .class-container {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin: 5px 0;
+      background-color: #fff;
+    }
+    
+    .round-container {
+      padding: 5px;
+      margin: 2px 0;
+      background-color: #f0f0f0;
+    }
   </style>
 </head>
 <body>
   <button class="back-button" onclick="location.href='dashboard.html'">← Back to Dashboard</button>
   <h1>Create Trial</h1>
   <form id="trialForm">
-    <input type="text" name="clubName" placeholder="Club Name">
-    <input type="text" name="secretary" placeholder="Trial Secretary">
-    <label>How many days?</label>
-    <input type="number" id="numDays" min="1">
-    <button type="button" onclick="generateDays()">Create Days</button>
+    <div style="margin-bottom: 15px;">
+      <label>Club Name:</label><br>
+      <input type="text" name="clubName" placeholder="Club Name" style="width: 300px; padding: 5px;">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+      <label>Trial Secretary:</label><br>
+      <input type="text" name="secretary" placeholder="Trial Secretary" style="width: 300px; padding: 5px;">
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+      <label>How many days?</label><br>
+      <input type="number" id="numDays" min="1" max="10" style="width: 100px; padding: 5px;">
+      <button type="button" onclick="generateDays()" style="margin-left: 10px; padding: 5px 10px;">Create Days</button>
+    </div>
+    
     <div id="daysContainer"></div>
-    <button type="submit">Save Trial</button>
+    
+    <button type="submit" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; cursor: pointer; margin-top: 20px;">Save Trial</button>
   </form>
+
   <script type="module">
-import { db, auth } from './js/firebase.js';
-import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { db, auth } from './js/firebase.js';
+    import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-let dataLoaded = false;
-let availableClasses = [];
-let availableJudges = [];
+    // Simple predefined lists to avoid JSON loading issues
+    const DEFAULT_CLASSES = [
+      "Patrol 1", "Detective 2", "Investigator 3", "Super Sleuth 4", "Private Inv",
+      "Novice A", "Novice B", "Open A", "Open B", "Utility A", "Utility B"
+    ];
 
-// Load the data and extract classes and judges
-fetch('./js/data.json')
-  .then(res => res.json())
-  .then(data => { 
-    console.log("Data loaded successfully");
-    console.log("Sample records:", data.slice(0, 3));
-    
-    if (Array.isArray(data)) {
-      // Keep classes in the order they appear in JSON (no sorting)
-      availableClasses = [];
-      availableJudges = [];
-      
-      // Preserve original order from JSON
-      data.forEach(record => {
-        if (record.Class && record.Class.trim() !== "" && !availableClasses.includes(record.Class.trim())) {
-          availableClasses.push(record.Class.trim());
-        }
-        if (record.Judges && record.Judges.trim() !== "" && !availableJudges.includes(record.Judges.trim())) {
-          availableJudges.push(record.Judges.trim());
-        }
-      });
-      
-      console.log("Classes found:", availableClasses);
-      console.log("Judges found:", availableJudges);
-      console.log(`Extracted ${availableClasses.length} classes and ${availableJudges.length} judges`);
-      
-      // If no classes/judges found, use fallbacks
-      if (availableClasses.length === 0) {
-        availableClasses = ["Class TBD", "Novice", "Open", "Utility"];
-        console.log("No classes found in data, using fallbacks");
-      }
-      if (availableJudges.length === 0) {
-        availableJudges = ["Judge TBD", "Judge 1", "Judge 2"];
-        console.log("No judges found in data, using fallbacks");
-      }
-    }
-    
-    dataLoaded = true;
-  })
-  .catch(err => {
-    console.error('Error loading data:', err);
-    // Use fallback data if loading fails
-    availableClasses = ["Class TBD", "Novice", "Open", "Utility"];
-    availableJudges = ["Judge TBD", "Judge 1", "Judge 2"];
-    dataLoaded = true;
-  });
+    const DEFAULT_JUDGES = [
+      "Linda Alberta", "Ginger Alpine", "Paige Alpine-Malone", "Anita Amemnt", "Denise Ames",
+      "Judge 1", "Judge 2", "Judge 3", "Judge 4", "Judge 5"
+    ];
 
-window.generateDays = function () {
-  console.log("generateDays called");
-  
-  const numDaysInput = document.getElementById("numDays");
-  const numDays = parseInt(numDaysInput.value);
-  
-  if (isNaN(numDays) || numDays < 1) {
-    alert("Please enter a valid number of days (1 or more)");
-    return;
-  }
-  
-  const container = document.getElementById("daysContainer");
-  container.innerHTML = "";
+    let globalClasses = [...DEFAULT_CLASSES];
+    let globalJudges = [...DEFAULT_JUDGES];
 
-  for (let d = 0; d < numDays; d++) {
-    const dayBox = document.createElement("div");
-    dayBox.style.border = "1px solid #ccc";
-    dayBox.style.padding = "10px";
-    dayBox.style.marginBottom = "10px";
-    
-    dayBox.innerHTML = `
-      <h3>Day ${d + 1}</h3>
-      <label>Date:</label>
-      <input type="date" name="date${d}" style="margin-bottom: 10px;">
-      <br>
-      <label>How many classes?</label>
-      <input type="number" min="1" max="20" style="margin-left: 10px;" onchange="generateClasses(this, ${d})">
-      <div class="classes-container" style="margin-top: 10px;"></div>
-    `;
-    container.appendChild(dayBox);
-  }
-  
-  console.log(`Generated ${numDays} day boxes`);
-};
-
-window.generateClasses = function (input, dayIndex) {
-  console.log(`generateClasses called for day ${dayIndex}`);
-  
-  // Check if data is loaded
-  if (!dataLoaded) {
-    alert("Data is still loading, please wait a moment and try again");
-    input.value = "";
-    return;
-  }
-  
-  try {
-    const num = parseInt(input.value);
-    
-    if (isNaN(num) || num < 1) {
-      console.log("Invalid number of classes");
-      return;
-    }
-    
-    const container = input.nextElementSibling;
-    if (!container) {
-      console.error("Container not found");
-      return;
-    }
-    
-    container.innerHTML = "";
-    
-    console.log(`Creating ${num} classes with ${availableClasses.length} class options`);
-    console.log("Available classes:", availableClasses);
-    
-    const classOpts = availableClasses.map(c => `<option value="${c}">${c}</option>`).join("");
-    
-    for (let i = 0; i < num; i++) {
-      const cls = document.createElement("div");
-      cls.style.border = "1px solid #eee";
-      cls.style.padding = "8px";
-      cls.style.marginBottom = "8px";
-      cls.style.backgroundColor = "#f9f9f9";
-      
-      cls.innerHTML = `
-        <h4>Class ${i + 1}</h4>
-        <label>Class Type:</label>
-        <input list="classList${dayIndex}_${i}" placeholder="Select Class" style="margin-left: 10px; width: 200px;">
-        <datalist id="classList${dayIndex}_${i}">${classOpts}</datalist>
-        <br><br>
-        <label>Number of Rounds:</label>
-        <select style="margin-left: 10px;" onchange="generateRounds(this, '${dayIndex}_${i}')">
-          <option value="">Select rounds</option>
-          ${[...Array(10).keys()].map(n => `<option value="${n + 1}">${n + 1}</option>`).join("")}
-        </select>
-        <div class="rounds-container" style="margin-top: 10px;"></div>
-      `;
-      container.appendChild(cls);
-    }
-    
-    console.log(`Successfully created ${num} classes`);
-    
-  } catch (error) {
-    console.error("Error in generateClasses:", error);
-    alert("An error occurred while generating classes. Please try again.");
-  }
-};
-
-window.generateRounds = function (select, id) {
-  console.log(`generateRounds called for ${id}`);
-  
-  try {
-    const container = select.nextElementSibling;
-    if (!container) {
-      console.error("Rounds container not found");
-      return;
-    }
-    
-    const num = parseInt(select.value);
-    if (isNaN(num) || num < 1) {
-      container.innerHTML = "";
-      return;
-    }
-    
-    container.innerHTML = "";
-    
-    console.log(`Creating ${num} rounds with ${availableJudges.length} judge options`);
-    console.log("Available judges:", availableJudges.slice(0, 5), "...");
-    
-    const judgeOpts = availableJudges.map(j => `<option value="${j}">${j}</option>`).join("");
-
-    for (let i = 0; i < num; i++) {
-      const round = document.createElement("div");
-      round.style.padding = "5px";
-      round.style.marginBottom = "5px";
-      round.style.backgroundColor = "#f0f0f0";
-      
-      round.innerHTML = `
-        <strong>Round ${i + 1}:</strong>
-        <label>Judge:</label>
-        <input list="judgeList${id}_${i}" placeholder="Select Judge" style="margin-left: 10px; width: 150px;">
-        <datalist id="judgeList${id}_${i}">${judgeOpts}</datalist>
-        <label style="margin-left: 15px;">
-          <input type="checkbox"> FEO (For Exhibition Only)
-        </label>
-      `;
-      container.appendChild(round);
-    }
-    
-    console.log(`Successfully created ${num} rounds`);
-    
-  } catch (error) {
-    console.error("Error in generateRounds:", error);
-    alert("An error occurred while generating rounds. Please try again.");
-  }
-};
-
-// Function to collect all trial data from the form
-function collectTrialData() {
-  const clubName = document.querySelector('input[name="clubName"]').value;
-  const secretary = document.querySelector('input[name="secretary"]').value;
-  const numDays = document.getElementById('numDays').value;
-  
-  const days = [];
-  const daysContainer = document.getElementById('daysContainer');
-  const dayBoxes = daysContainer.children;
-  
-  for (let d = 0; d < dayBoxes.length; d++) {
-    const dayBox = dayBoxes[d];
-    const dateInput = dayBox.querySelector(`input[name="date${d}"]`);
-    const classesContainer = dayBox.querySelector('.classes-container');
-    
-    const dayData = {
-      dayNumber: d + 1,
-      date: dateInput ? dateInput.value : '',
-      classes: []
-    };
-    
-    if (classesContainer) {
-      const classBoxes = classesContainer.children;
-      for (let c = 0; c < classBoxes.length; c++) {
-        const classBox = classBoxes[c];
-        const classInput = classBox.querySelector('input[list*="classList"]');
-        const roundsSelect = classBox.querySelector('select');
-        const roundsContainer = classBox.querySelector('.rounds-container');
-        
-        const classData = {
-          classNumber: c + 1,
-          className: classInput ? classInput.value : '',
-          rounds: []
-        };
-        
-        if (roundsContainer) {
-          const roundBoxes = roundsContainer.children;
-          for (let r = 0; r < roundBoxes.length; r++) {
-            const roundBox = roundBoxes[r];
-            const judgeInput = roundBox.querySelector('input[list*="judgeList"]');
-            const feoCheckbox = roundBox.querySelector('input[type="checkbox"]');
-            
-            const roundData = {
-              roundNumber: r + 1,
-              judge: judgeInput ? judgeInput.value : '',
-              feo: feoCheckbox ? feoCheckbox.checked : false
-            };
-            
-            classData.rounds.push(roundData);
+    // Try to load data but don't depend on it
+    try {
+      fetch('./js/data.json')
+        .then(res => res.json())
+        .then(data => {
+          console.log("Data loaded, extracting classes and judges");
+          
+          const extractedClasses = [];
+          const extractedJudges = [];
+          
+          if (Array.isArray(data)) {
+            data.forEach(record => {
+              if (record.Class && record.Class.trim() && !extractedClasses.includes(record.Class.trim())) {
+                extractedClasses.push(record.Class.trim());
+              }
+              if (record.Judges && record.Judges.trim() && !extractedJudges.includes(record.Judges.trim())) {
+                extractedJudges.push(record.Judges.trim());
+              }
+            });
           }
+          
+          if (extractedClasses.length > 0) {
+            globalClasses = extractedClasses;
+            console.log("Using extracted classes:", globalClasses.length);
+          }
+          if (extractedJudges.length > 0) {
+            globalJudges = extractedJudges;
+            console.log("Using extracted judges:", globalJudges.length);
+          }
+        })
+        .catch(err => {
+          console.log("Using default classes and judges due to error:", err);
+        });
+    } catch (e) {
+      console.log("Using default classes and judges");
+    }
+
+    window.generateDays = function() {
+      try {
+        console.log("generateDays function called");
+        
+        const numDaysInput = document.getElementById("numDays");
+        const numDays = parseInt(numDaysInput.value);
+        
+        if (isNaN(numDays) || numDays < 1) {
+          alert("Please enter a valid number of days (1 or more)");
+          return;
         }
         
-        dayData.classes.push(classData);
-      }
-    }
-    
-    days.push(dayData);
-  }
-  
-  return {
-    clubName: clubName,
-    secretary: secretary,
-    numDays: parseInt(numDays),
-    days: days,
-    createdAt: new Date(),
-    createdBy: auth.currentUser ? auth.currentUser.uid : null
-  };
-}
+        const container = document.getElementById("daysContainer");
+        container.innerHTML = "";
 
-// Add form submit handler
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('trialForm');
-  if (form) {
-    form.addEventListener('submit', async function(e) {
+        for (let d = 0; d < numDays; d++) {
+          const dayDiv = document.createElement("div");
+          dayDiv.className = "day-container";
+          dayDiv.innerHTML = `
+            <h3>Day ${d + 1}</h3>
+            <div style="margin-bottom: 10px;">
+              <label>Date:</label>
+              <input type="date" name="date${d}" style="margin-left: 10px;">
+            </div>
+            <div style="margin-bottom: 10px;">
+              <label>How many classes?</label>
+              <input type="number" min="1" max="20" data-day="${d}" onchange="generateClasses(this)" style="margin-left: 10px; width: 60px;">
+            </div>
+            <div class="classes-container-${d}"></div>
+          `;
+          container.appendChild(dayDiv);
+        }
+        
+        console.log(`Generated ${numDays} day containers successfully`);
+        
+      } catch (error) {
+        console.error("Error in generateDays:", error);
+        alert("Error creating days: " + error.message);
+      }
+    };
+
+    window.generateClasses = function(input) {
+      try {
+        console.log("generateClasses function called");
+        
+        const dayIndex = input.getAttribute('data-day');
+        const num = parseInt(input.value);
+        
+        if (isNaN(num) || num < 1) {
+          return;
+        }
+        
+        const container = document.querySelector(`.classes-container-${dayIndex}`);
+        if (!container) {
+          console.error("Could not find container for day", dayIndex);
+          return;
+        }
+        
+        container.innerHTML = "";
+        
+        console.log(`Creating ${num} classes for day ${dayIndex}`);
+        
+        for (let i = 0; i < num; i++) {
+          const classDiv = document.createElement("div");
+          classDiv.className = "class-container";
+          
+          const classOptions = globalClasses.map(c => `<option value="${c}">${c}</option>`).join("");
+          
+          classDiv.innerHTML = `
+            <h4>Class ${i + 1}</h4>
+            <div style="margin-bottom: 10px;">
+              <label>Class Type:</label>
+              <select data-day="${dayIndex}" data-class="${i}" style="margin-left: 10px; width: 200px;">
+                <option value="">Select Class</option>
+                ${classOptions}
+              </select>
+            </div>
+            <div style="margin-bottom: 10px;">
+              <label>Number of Rounds:</label>
+              <select onchange="generateRounds(this)" data-day="${dayIndex}" data-class="${i}" style="margin-left: 10px;">
+                <option value="">Select rounds</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+            </div>
+            <div class="rounds-container-${dayIndex}-${i}"></div>
+          `;
+          
+          container.appendChild(classDiv);
+        }
+        
+        console.log(`Successfully created ${num} classes`);
+        
+      } catch (error) {
+        console.error("Error in generateClasses:", error);
+        alert("Error creating classes: " + error.message);
+      }
+    };
+
+    window.generateRounds = function(select) {
+      try {
+        console.log("generateRounds function called");
+        
+        const dayIndex = select.getAttribute('data-day');
+        const classIndex = select.getAttribute('data-class');
+        const num = parseInt(select.value);
+        
+        if (isNaN(num) || num < 1) {
+          return;
+        }
+        
+        const container = document.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
+        if (!container) {
+          console.error("Could not find rounds container");
+          return;
+        }
+        
+        container.innerHTML = "";
+        
+        const judgeOptions = globalJudges.map(j => `<option value="${j}">${j}</option>`).join("");
+        
+        for (let i = 0; i < num; i++) {
+          const roundDiv = document.createElement("div");
+          roundDiv.className = "round-container";
+          roundDiv.innerHTML = `
+            <strong>Round ${i + 1}:</strong>
+            <select style="margin-left: 10px; width: 150px;">
+              <option value="">Select Judge</option>
+              ${judgeOptions}
+            </select>
+            <label style="margin-left: 15px;">
+              <input type="checkbox"> FEO
+            </label>
+          `;
+          container.appendChild(roundDiv);
+        }
+        
+        console.log(`Successfully created ${num} rounds`);
+        
+      } catch (error) {
+        console.error("Error in generateRounds:", error);
+        alert("Error creating rounds: " + error.message);
+      }
+    };
+
+    // Simple form submission
+    document.getElementById('trialForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      console.log("Form submitted");
-      
-      // Check if user is logged in
-      if (!auth.currentUser) {
-        alert("You must be logged in to save a trial");
-        window.location.href = "index.html";
-        return;
-      }
-      
-      // Validate required fields
-      const clubName = document.querySelector('input[name="clubName"]').value;
-      const secretary = document.querySelector('input[name="secretary"]').value;
-      
-      if (!clubName.trim()) {
-        alert("Please enter a club name");
-        return;
-      }
-      
-      if (!secretary.trim()) {
-        alert("Please enter a trial secretary name");
-        return;
-      }
       
       try {
-        // Show saving message
-        const submitButton = form.querySelector('button[type="submit"]');
-        const originalText = submitButton.textContent;
-        submitButton.textContent = "Saving...";
-        submitButton.disabled = true;
+        if (!auth.currentUser) {
+          alert("You must be logged in");
+          return;
+        }
         
-        // Collect all trial data
-        const trialData = collectTrialData();
-        console.log("Trial data collected:", trialData);
+        const clubName = document.querySelector('input[name="clubName"]').value;
+        const secretary = document.querySelector('input[name="secretary"]').value;
         
-        // Save to Firebase
+        if (!clubName.trim()) {
+          alert("Please enter a club name");
+          return;
+        }
+        
+        // Simple data collection
+        const trialData = {
+          clubName: clubName,
+          secretary: secretary,
+          numDays: parseInt(document.getElementById('numDays').value) || 0,
+          createdAt: new Date(),
+          createdBy: auth.currentUser.uid,
+          days: [] // We'll keep this simple for now
+        };
+        
+        console.log("Saving trial data:", trialData);
+        
         const docRef = await addDoc(collection(db, "trials"), trialData);
         console.log("Trial saved with ID:", docRef.id);
         
-        // Redirect to dashboard
+        alert("Trial saved successfully!");
         window.location.href = "dashboard.html";
         
       } catch (error) {
         console.error("Error saving trial:", error);
         alert("Error saving trial: " + error.message);
-        
-        // Reset button
-        const submitButton = form.querySelector('button[type="submit"]');
-        submitButton.textContent = "Save Trial";
-        submitButton.disabled = false;
       }
     });
-  }
-  
-  console.log("Create trial page loaded successfully");
-});
+
+    console.log("Create trial page script loaded successfully");
   </script>
 </body>
 </html>
