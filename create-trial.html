@@ -11,19 +11,6 @@
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
-      border-ra<!DOCTYPE html>
-<html>
-<head>
-  <title>Create Trial</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .back-button {
-      background-color: #007cba;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
       border-radius: 5px;
       margin-bottom: 20px;
     }
@@ -82,6 +69,8 @@
     import { db, auth } from './js/firebase.js';
     import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
+    console.log("Script starting to load...");
+
     // Simple predefined lists to avoid JSON loading issues
     const DEFAULT_CLASSES = [
       "Patrol 1", "Detective 2", "Investigator 3", "Super Sleuth 4", "Private Inv",
@@ -96,62 +85,9 @@
     let globalClasses = [...DEFAULT_CLASSES];
     let globalJudges = [...DEFAULT_JUDGES];
 
-    // Try to load data but don't depend on it
-    try {
-      fetch('./js/data.json')
-        .then(res => res.json())
-        .then(data => {
-          console.log("Data loaded, extracting classes and judges");
-          
-          const extractedClasses = [];
-          const extractedJudges = [];
-          
-          if (Array.isArray(data)) {
-            data.forEach(record => {
-              if (record.Class && record.Class.trim() && !extractedClasses.includes(record.Class.trim())) {
-                extractedClasses.push(record.Class.trim());
-              }
-              if (record.Judges && record.Judges.trim() && !extractedJudges.includes(record.Judges.trim())) {
-                extractedJudges.push(record.Judges.trim());
-              }
-            });
-          }
-          
-          if (extractedClasses.length > 0) {
-            globalClasses = extractedClasses;
-            console.log("Using extracted classes:", globalClasses.length);
-          }
-          if (extractedJudges.length > 0) {
-            globalJudges = extractedJudges;
-            console.log("Using extracted judges:", globalJudges.length);
-          }
-        })
-        .catch(err => {
-          console.log("Using default classes and judges due to error:", err);
-        });
-    } catch (e) {
-      console.log("Using default classes and judges");
-    }
+    console.log("Default classes and judges loaded");
 
-    console.log("Create trial page script loaded successfully");
-
-    // Make functions globally accessible
-    window.generateDays = generateDays;
-    window.generateClasses = generateClasses;
-    window.generateRounds = generateRounds;
-
-    // Event listeners setup
-    document.addEventListener('DOMContentLoaded', function() {
-      // Delegate event listeners for dynamically created elements
-      document.addEventListener('change', function(e) {
-        if (e.target.classList.contains('classes-input')) {
-          generateClasses(e.target);
-        } else if (e.target.classList.contains('rounds-select')) {
-          generateRounds(e.target);
-        }
-      });
-    });
-
+    // Define functions that will be called by onclick
     function generateDays() {
       try {
         console.log("generateDays function called");
@@ -178,7 +114,7 @@
             </div>
             <div style="margin-bottom: 10px;">
               <label>How many classes?</label>
-              <input type="number" min="1" max="20" class="classes-input" data-day="${d}" onchange="generateClasses(this)" style="margin-left: 10px; width: 60px;">
+              <input type="number" min="1" max="20" data-day="${d}" onchange="generateClasses(this)" style="margin-left: 10px; width: 60px;">
             </div>
             <div class="classes-container-${d}"></div>
           `;
@@ -213,6 +149,7 @@
         container.innerHTML = "";
         
         console.log(`Creating ${num} classes for day ${dayIndex}`);
+        console.log("Using classes:", globalClasses);
         
         for (let i = 0; i < num; i++) {
           const classDiv = document.createElement("div");
@@ -231,7 +168,7 @@
             </div>
             <div style="margin-bottom: 10px;">
               <label>Number of Rounds:</label>
-              <select class="rounds-select" data-day="${dayIndex}" data-class="${i}" onchange="generateRounds(this)" style="margin-left: 10px;">
+              <select onchange="generateRounds(this)" data-day="${dayIndex}" data-class="${i}" style="margin-left: 10px;">
                 <option value="">Select rounds</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -300,7 +237,47 @@
       }
     }
 
-    // Simple form submission
+    // Make functions globally available for onclick handlers
+    window.generateDays = generateDays;
+    window.generateClasses = generateClasses;
+    window.generateRounds = generateRounds;
+
+    console.log("Functions attached to window object");
+
+    // Try to load data but don't depend on it
+    fetch('./js/data.json')
+      .then(res => res.json())
+      .then(data => {
+        console.log("JSON data loaded, extracting classes and judges");
+        
+        const extractedClasses = [];
+        const extractedJudges = [];
+        
+        if (Array.isArray(data)) {
+          data.forEach(record => {
+            if (record.Class && record.Class.trim() && !extractedClasses.includes(record.Class.trim())) {
+              extractedClasses.push(record.Class.trim());
+            }
+            if (record.Judges && record.Judges.trim() && !extractedJudges.includes(record.Judges.trim())) {
+              extractedJudges.push(record.Judges.trim());
+            }
+          });
+        }
+        
+        if (extractedClasses.length > 0) {
+          globalClasses = extractedClasses;
+          console.log("Using extracted classes:", globalClasses.length);
+        }
+        if (extractedJudges.length > 0) {
+          globalJudges = extractedJudges;
+          console.log("Using extracted judges:", globalJudges.length);
+        }
+      })
+      .catch(err => {
+        console.log("Using default classes and judges due to error:", err);
+      });
+
+    // Form submission
     document.getElementById('trialForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -318,14 +295,13 @@
           return;
         }
         
-        // Simple data collection
         const trialData = {
           clubName: clubName,
           secretary: secretary,
           numDays: parseInt(document.getElementById('numDays').value) || 0,
           createdAt: new Date(),
           createdBy: auth.currentUser.uid,
-          days: [] // We'll keep this simple for now
+          days: []
         };
         
         console.log("Saving trial data:", trialData);
@@ -344,28 +320,5 @@
 
     console.log("Create trial page script loaded successfully");
   </script>
-</body>
-</html>dius: 5px;
-      margin-bottom: 20px;
-    }
-    
-    .back-button:hover {
-      background-color: #005a8b;
-    }
-  </style>
-</head>
-<body>
-  <button class="back-button" onclick="location.href='dashboard.html'">← Back to Dashboard</button>
-  <h1>Create Trial</h1>
-  <form id="trialForm">
-    <input type="text" name="clubName" placeholder="Club Name">
-    <input type="text" name="secretary" placeholder="Trial Secretary">
-    <label>How many days?</label>
-    <input type="number" id="numDays" min="1">
-    <button type="button" onclick="generateDays()">Create Days</button>
-    <div id="daysContainer"></div>
-    <button type="submit">Save Trial</button>
-  </form>
-  <script type="module" src="js/create-trial.js"></script>
 </body>
 </html>
