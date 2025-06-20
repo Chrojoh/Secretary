@@ -556,11 +556,18 @@
           console.log("✅ Auto-filled Club Name from Host Name:", currentApplicationData.hostName);
         }
         
-        // City/State information if available
-        if (currentApplicationData.cityState && !document.getElementById('location').value) {
-          document.getElementById('location').value = currentApplicationData.cityState;
+        // City/State information if available - now using venueAddress
+        if (currentApplicationData.venueAddress && !document.getElementById('location').value) {
+          document.getElementById('location').value = currentApplicationData.venueAddress;
           highlightAutoFilledField('location');
-          console.log("✅ Auto-filled Location from City/State:", currentApplicationData.cityState);
+          console.log("✅ Auto-filled Location from Venue Address:", currentApplicationData.venueAddress);
+        }
+        
+        // Also use venueAddress for the address field if trialAddress is not available
+        if (currentApplicationData.venueAddress && !document.getElementById('address').value) {
+          document.getElementById('address').value = currentApplicationData.venueAddress;
+          highlightAutoFilledField('address');
+          console.log("✅ Auto-filled Address from Venue Address:", currentApplicationData.venueAddress);
         }
       }
 
