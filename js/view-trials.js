@@ -1,5 +1,5 @@
 import { auth, db } from './firebase.js';
-import { collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 const trialList = document.getElementById("trialList");
 
@@ -7,10 +7,10 @@ async function loadTrials(user) {
   try {
     console.log("Loading trials for user:", user.email);
     
+    // Simplified query without orderBy to avoid index requirement
     const q = query(
       collection(db, "trials"), 
-      where("createdBy", "==", user.uid),
-      orderBy("createdAt", "desc")
+      where("createdBy", "==", user.uid)
     );
     
     const snapshot = await getDocs(q);
@@ -22,8 +22,22 @@ async function loadTrials(user) {
     
     trialList.innerHTML = ''; // Clear loading message
     
+    // Convert to array and sort manually
+    const trials = [];
     snapshot.forEach(doc => {
       const trialData = doc.data();
+      trials.push({ id: doc.id, ...trialData });
+    });
+    
+    // Sort by creation date (most recent first) - do this in JavaScript instead of Firestore
+    trials.sort((a, b) => {
+      const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+      const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+      return dateB - dateA; // Most recent first
+    });
+    
+    // Display trials
+    trials.forEach(trialData => {
       console.log("Trial data:", trialData);
       
       const trialItem = document.createElement("div");
@@ -71,7 +85,7 @@ async function loadTrials(user) {
       trialList.appendChild(trialItem);
     });
     
-    console.log(`Loaded ${snapshot.size} trials`);
+    console.log(`Loaded ${trials.length} trials`);
     
   } catch (error) {
     console.error("Error loading trials:", error);
