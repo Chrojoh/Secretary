@@ -247,8 +247,8 @@ function highlightMissingFields() {
     }
   });
   
-  // Check radio buttons and checkboxes
-  const locationRadios = document.querySelectorAll('input[name="location"]');
+  // Check Inside/Outside radio buttons
+  const locationRadios = document.querySelectorAll('input[name="trialLocation"]');
   const locationChecked = Array.from(locationRadios).some(radio => radio.checked);
   if (!locationChecked) {
     locationRadios.forEach(radio => radio.parentElement.style.backgroundColor = '#ffcccc');
@@ -257,6 +257,7 @@ function highlightMissingFields() {
     locationRadios.forEach(radio => radio.parentElement.style.backgroundColor = '');
   }
   
+  // Check Resets radio buttons
   const resetsRadios = document.querySelectorAll('input[name="resets"]');
   const resetsChecked = Array.from(resetsRadios).some(radio => radio.checked);
   if (!resetsChecked) {
