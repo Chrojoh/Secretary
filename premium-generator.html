@@ -1,45 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Premium Generator - Auto-Fill Fixed</title>
+  <title>Premium Generator</title>
+  <link rel="stylesheet" href="css/style.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 900px;
+    .container {
+      max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
-      background-color: #f5f5f5;
-    }
-    
-    .container {
-      background-color: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
     .controls {
-      background-color: #e8f4fd;
+      background-color: #f5f5f5;
       padding: 20px;
       border-radius: 8px;
       margin-bottom: 20px;
     }
     
-    .debug-info {
-      background-color: #fff3cd;
-      border: 1px solid #ffeaa7;
-      padding: 15px;
-      margin: 15px 0;
-      border-radius: 5px;
-      font-family: monospace;
-      font-size: 12px;
+    .controls h2 {
+      margin-top: 0;
+      color: #333;
     }
     
     .edit-form {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 15px;
-      margin: 15px 0;
+      margin-top: 20px;
     }
     
     .edit-form .full-width {
@@ -47,21 +34,22 @@
     }
     
     .edit-form label {
-      font-weight: bold;
-      margin-bottom: 5px;
       display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
     }
     
     .edit-form input, .edit-form textarea {
       width: 100%;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 14px;
     }
     
     .edit-form textarea {
-      height: 60px;
+      height: 80px;
       resize: vertical;
     }
     
@@ -70,10 +58,14 @@
       color: white;
       border: none;
       padding: 12px 24px;
+      font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 16px;
       margin: 10px 5px;
+    }
+    
+    .generate-btn:hover {
+      background-color: #45a049;
     }
     
     .print-btn {
@@ -81,20 +73,54 @@
       color: white;
       border: none;
       padding: 12px 24px;
+      font-size: 16px;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 16px;
       margin: 10px 5px;
     }
     
+    .print-btn:hover {
+      background-color: #0b7dda;
+    }
+    
+    .reload-btn {
+      background-color: #FF9800;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+    
+    .reload-btn:hover {
+      background-color: #e68900;
+    }
+    
+    .loading-indicator {
+      display: none;
+      color: #4CAF50;
+      font-weight: bold;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #e8f5e8;
+      border-radius: 4px;
+      border-left: 4px solid #4CAF50;
+    }
+    
+    .auto-filled {
+      background-color: #e8f5e8 !important;
+      transition: background-color 2s ease;
+    }
+    
     .premium-document {
-      border: 2px solid #000;
-      padding: 30px;
-      margin: 20px 0;
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin-top: 20px;
       background: white;
       font-family: Arial, sans-serif;
       line-height: 1.4;
-      color: #000;
     }
     
     .premium-header {
@@ -172,7 +198,7 @@
     }
     
     @media print {
-      .controls, .debug-info {
+      .controls, .loading-indicator {
         display: none;
       }
       .premium-document {
@@ -192,24 +218,25 @@
 <body>
   <div class="container">
     <div class="controls">
-      <h2>🏆 Premium Generator - Auto-Fill with Date Fix</h2>
-      <button class="generate-btn" onclick="loadTrialData()">🔄 Load Trial Data</button>
+      <h2>🏆 Premium Generator</h2>
+      
+      <div class="loading-indicator" id="loadingIndicator">
+        🔄 Auto-loading trial data...
+      </div>
+      
+      <button class="reload-btn" onclick="loadTrialData()">🔄 Reload Trial Data</button>
       <button class="generate-btn" onclick="generatePremium()">Generate Premium</button>
       <button class="print-btn" onclick="window.print()">Print Premium</button>
       <button onclick="location.href='main-dashboard.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Dashboard</button>
       
-      <div id="debugInfo" class="debug-info">
-        Click "Load Trial Data" to see debugging information...
-      </div>
-      
       <div class="edit-form">
         <div>
           <label>Club Name:</label>
-          <input type="text" id="clubName" value="West Kelowna K9 Scent and Games">
+          <input type="text" id="clubName" placeholder="Will be auto-filled from trial data">
         </div>
         <div>
           <label>Trial Secretary:</label>
-          <input type="text" id="secretary" value="Chris Johansen">
+          <input type="text" id="secretary" placeholder="Will be auto-filled from trial data">
         </div>
         <div class="full-width">
           <label>Trial Dates:</label>
@@ -233,11 +260,11 @@
         </div>
         <div>
           <label>Secretary Email:</label>
-          <input type="email" id="email" placeholder="chris.johansen@email.com">
+          <input type="email" id="email" placeholder="Enter email address">
         </div>
         <div>
           <label>Secretary Phone:</label>
-          <input type="tel" id="phone" placeholder="(250) 555-0123">
+          <input type="tel" id="phone" placeholder="Enter phone number">
         </div>
         <div>
           <label>Entry Limit:</label>
@@ -255,6 +282,27 @@
           <label>Classes Offered (one per line):</label>
           <textarea id="classes" placeholder="Will be auto-filled from trial data"></textarea>
         </div>
+        
+        <!-- Entry Fees Section -->
+        <div class="full-width">
+          <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Entry Fees</h3>
+          <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;">
+            <label>First dog, first class:</label>
+            <input type="text" id="fee1" value="$35.00" style="width: 80px;">
+            
+            <label>Same dog, additional class:</label>
+            <input type="text" id="fee2" value="$25.00" style="width: 80px;">
+            
+            <label>Additional dog, same handler:</label>
+            <input type="text" id="fee3" value="$30.00" style="width: 80px;">
+            
+            <label>Junior Handler (under 18):</label>
+            <input type="text" id="fee4" value="$20.00" style="width: 80px;">
+            
+            <label>Exhibition Only:</label>
+            <input type="text" id="fee5" value="$15.00" style="width: 80px;">
+          </div>
+        </div>
       </div>
     </div>
     
@@ -267,14 +315,14 @@
     import { auth, db } from './js/firebase.js';
     import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-    console.log("AUTO-FILL PREMIUM GENERATOR WITH DATE FIX LOADED");
+    console.log("IMPROVED PREMIUM GENERATOR LOADED");
 
     let currentTrialData = null;
     let currentApplicationData = null;
 
-    // SUPER ROBUST DATE CONVERSION FUNCTION
+    // ROBUST DATE CONVERSION FUNCTION
     function convertDateSafely(dateStr) {
-      console.log("🔧 CONVERTING DATE:", dateStr);
+      console.log("🔧 Converting date:", dateStr);
       
       if (!dateStr || !dateStr.trim()) {
         console.log("❌ Empty date string");
@@ -282,68 +330,98 @@
       }
       
       try {
-        // Method 1: Parse YYYY-MM-DD format manually
+        // Parse YYYY-MM-DD format manually
         if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
           const [year, month, day] = dateStr.split('-').map(num => parseInt(num, 10));
           console.log("📅 Parsed components:", {year, month, day});
           
           // Create date in LOCAL timezone (month is 0-indexed)
-          const localDate = new Date(year, month - 1, day, 12, 0, 0); // Noon to avoid DST issues
+          const localDate = new Date(year, month - 1, day, 12, 0, 0);
           console.log("🕐 Created local date:", localDate);
           
-          // Get day of week to verify
-          const dayOfWeek = localDate.getDay(); // 0=Sunday, 1=Monday, etc.
-          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-          console.log("📆 Day of week:", dayNames[dayOfWeek]);
-          
-          const formatted = localDate.toLocaleDateString('en-US', {
-            weekday: 'long',
+          // Format as readable date
+          const options = { 
+            weekday: 'long', 
             year: 'numeric', 
-            month: 'long',
-            day: 'numeric'
-          });
-          
-          console.log("✅ Final formatted date:", formatted);
+            month: 'long', 
+            day: 'numeric' 
+          };
+          const formatted = localDate.toLocaleDateString('en-US', options);
+          console.log("✅ Formatted date:", formatted);
           return formatted;
         }
         
-        // Method 2: If already formatted, return as-is
-        if (dateStr.includes(',')) {
-          console.log("✅ Already formatted, returning:", dateStr);
-          return dateStr;
-        }
-        
-        // Method 3: Try direct parsing (fallback)
-        console.log("⚠️ Trying fallback parsing...");
-        const fallbackDate = new Date(dateStr + 'T12:00:00');
-        if (!isNaN(fallbackDate.getTime())) {
-          return fallbackDate.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
+        // Try other formats
+        const date = new Date(dateStr);
+        if (!isNaN(date.getTime())) {
+          const options = { 
+            weekday: 'long', 
+            year: 'numeric', 
             month: 'long', 
-            day: 'numeric'
-          });
+            day: 'numeric' 
+          };
+          return date.toLocaleDateString('en-US', options);
         }
         
-        console.log("❌ All parsing methods failed");
-        return dateStr; // Return original if all else fails
+        console.log("⚠️ Could not parse date, returning original");
+        return dateStr;
         
       } catch (error) {
         console.error("💥 Date conversion error:", error);
-        return dateStr;
+        return dateStr || "Date TBD";
+      }
+    }
+
+    function showLoadingIndicator() {
+      const indicator = document.getElementById('loadingIndicator');
+      if (indicator) {
+        indicator.style.display = 'block';
+      }
+    }
+
+    function hideLoadingIndicator() {
+      const indicator = document.getElementById('loadingIndicator');
+      if (indicator) {
+        indicator.style.display = 'none';
+      }
+    }
+
+    function highlightAutoFilledField(fieldId) {
+      const field = document.getElementById(fieldId);
+      if (field && field.value && field.value.trim()) {
+        field.classList.add('auto-filled');
+        setTimeout(() => {
+          field.classList.remove('auto-filled');
+        }, 3000);
       }
     }
 
     window.loadTrialData = async function() {
       try {
         console.log("🔄 Loading trial data...");
-        
+        showLoadingIndicator();
+
+        // Wait for auth state to be ready
+        await new Promise((resolve) => {
+          if (auth.currentUser) {
+            resolve();
+          } else {
+            const unsubscribe = auth.onAuthStateChanged((user) => {
+              unsubscribe();
+              resolve();
+            });
+          }
+        });
+
         if (!auth.currentUser) {
-          alert("Please log in first");
+          console.log("❌ No authenticated user");
+          hideLoadingIndicator();
           return;
         }
 
-        // Load latest trial
+        console.log("👤 Authenticated user:", auth.currentUser.email);
+
+        // Load trial data
         const trialsQuery = query(
           collection(db, "trials"),
           where("createdBy", "==", auth.currentUser.uid)
@@ -380,57 +458,77 @@
           }
         }
 
-        // Process and display data
+        // Fill form and hide loading
         fillFormFromTrialData();
+        hideLoadingIndicator();
         
       } catch (error) {
         console.error("💥 Error loading trial data:", error);
-        document.getElementById('debugInfo').innerHTML = `❌ Error: ${error.message}`;
+        hideLoadingIndicator();
       }
     };
 
     function fillFormFromTrialData() {
       if (!currentTrialData) {
-        document.getElementById('debugInfo').innerHTML = "❌ No trial data loaded";
+        console.log("❌ No trial data to fill form");
         return;
       }
 
       console.log("🎯 Filling form from trial data...");
       
-      // Fill basic info
-      document.getElementById('clubName').value = currentTrialData.clubName || 'West Kelowna K9 Scent and Games';
-      document.getElementById('secretary').value = currentTrialData.secretary || 'Chris Johansen';
+      // Fill basic info with highlighting
+      if (currentTrialData.clubName) {
+        document.getElementById('clubName').value = currentTrialData.clubName;
+        highlightAutoFilledField('clubName');
+        console.log("✅ Auto-filled Club Name:", currentTrialData.clubName);
+      }
+      
+      if (currentTrialData.secretary) {
+        document.getElementById('secretary').value = currentTrialData.secretary;
+        highlightAutoFilledField('secretary');
+        console.log("✅ Auto-filled Secretary:", currentTrialData.secretary);
+      }
 
-      // Process dates with debug info
-      let debugHTML = "<h4>🔍 Date Processing Debug:</h4>";
+      // Process and fill dates
       let processedDates = [];
       
       if (currentTrialData.days && currentTrialData.days.length > 0) {
-        debugHTML += `<p>Raw trial days: ${JSON.stringify(currentTrialData.days, null, 2)}</p>`;
+        console.log("📅 Processing trial dates...");
         
         currentTrialData.days.forEach((day, index) => {
           if (day.date && day.date.trim()) {
-            debugHTML += `<p><strong>Day ${index + 1}:</strong><br>`;
-            debugHTML += `&nbsp;&nbsp;Input: "${day.date}"<br>`;
-            
             const converted = convertDateSafely(day.date);
-            debugHTML += `&nbsp;&nbsp;Output: "${converted}"</p>`;
-            
             processedDates.push(converted);
+            console.log(`Day ${index + 1}: ${day.date} → ${converted}`);
           }
         });
         
-        const finalDateString = processedDates.join(' & ');
-        document.getElementById('trialDates').value = finalDateString;
-        debugHTML += `<p><strong>Final date string:</strong> ${finalDateString}</p>`;
+        if (processedDates.length > 0) {
+          const finalDateString = processedDates.join(' & ');
+          document.getElementById('trialDates').value = finalDateString;
+          highlightAutoFilledField('trialDates');
+          console.log("✅ Auto-filled Trial Dates:", finalDateString);
+        }
       }
 
-      // Fill other data
+      // Fill application data if available
       if (currentApplicationData) {
-        document.getElementById('location').value = currentApplicationData.trialLocation || '';
-        document.getElementById('address').value = currentApplicationData.trialAddress || '';
-        document.getElementById('email').value = currentApplicationData.contactEmail || '';
-        document.getElementById('phone').value = currentApplicationData.contactPhone || '';
+        if (currentApplicationData.trialLocation) {
+          document.getElementById('location').value = currentApplicationData.trialLocation;
+          highlightAutoFilledField('location');
+        }
+        if (currentApplicationData.trialAddress) {
+          document.getElementById('address').value = currentApplicationData.trialAddress;
+          highlightAutoFilledField('address');
+        }
+        if (currentApplicationData.contactEmail) {
+          document.getElementById('email').value = currentApplicationData.contactEmail;
+          highlightAutoFilledField('email');
+        }
+        if (currentApplicationData.contactPhone) {
+          document.getElementById('phone').value = currentApplicationData.contactPhone;
+          highlightAutoFilledField('phone');
+        }
       }
 
       // Extract and fill judges
@@ -450,8 +548,12 @@
           }
         });
       }
-      document.getElementById('judges').value = Array.from(judges).join('\n');
-      debugHTML += `<p><strong>Judges found:</strong> ${Array.from(judges).join(', ')}</p>`;
+      
+      if (judges.size > 0) {
+        document.getElementById('judges').value = Array.from(judges).join('\n');
+        highlightAutoFilledField('judges');
+        console.log("✅ Auto-filled Judges:", Array.from(judges).join(', '));
+      }
 
       // Extract and fill classes
       const classes = new Set();
@@ -466,18 +568,20 @@
           }
         });
       }
-      document.getElementById('classes').value = Array.from(classes).join('\n');
-      debugHTML += `<p><strong>Classes found:</strong> ${Array.from(classes).join(', ')}</p>`;
-
-      document.getElementById('debugInfo').innerHTML = debugHTML;
       
-      console.log("✅ Form filled successfully!");
+      if (classes.size > 0) {
+        document.getElementById('classes').value = Array.from(classes).join('\n');
+        highlightAutoFilledField('classes');
+        console.log("✅ Auto-filled Classes:", Array.from(classes).join(', '));
+      }
+
+      console.log("🎉 Form auto-fill completed successfully!");
     }
 
     window.generatePremium = function() {
       const data = {
-        clubName: document.getElementById('clubName').value || 'West Kelowna K9 Scent and Games',
-        secretary: document.getElementById('secretary').value || 'Chris Johansen',
+        clubName: document.getElementById('clubName').value || '[CLUB NAME]',
+        secretary: document.getElementById('secretary').value || '[TRIAL SECRETARY]',
         trialDates: document.getElementById('trialDates').value || '[TRIAL DATES]',
         startTime: document.getElementById('startTime').value || '8:00 AM',
         endTime: document.getElementById('endTime').value || '4:00 PM',
@@ -488,127 +592,88 @@
         entryLimit: document.getElementById('entryLimit').value || '60 dogs maximum',
         deadline: document.getElementById('deadline').value || '[DEADLINE TBD]',
         judges: document.getElementById('judges').value.split('\n').filter(j => j.trim()),
-        classes: document.getElementById('classes').value.split('\n').filter(c => c.trim())
+        classes: document.getElementById('classes').value.split('\n').filter(c => c.trim()),
+        fees: {
+          fee1: document.getElementById('fee1').value || '$35.00',
+          fee2: document.getElementById('fee2').value || '$25.00',
+          fee3: document.getElementById('fee3').value || '$30.00',
+          fee4: document.getElementById('fee4').value || '$20.00',
+          fee5: document.getElementById('fee5').value || '$15.00'
+        }
       };
 
-      const judgesTableHTML = data.judges.length > 0 ? 
-        data.judges.map(judge => 
-          `<tr><td>Scent Work</td><td>${judge}</td><td>British Columbia</td></tr>`
-        ).join('') :
-        '<tr><td>Scent Work</td><td>[JUDGE TBD]</td><td>British Columbia</td></tr>';
+      const judgesTableHTML = data.judges.length > 0 ?
+        `<table class="judges-table">
+          <thead>
+            <tr><th>Judge</th></tr>
+          </thead>
+          <tbody>
+            ${data.judges.map(judge => `<tr><td>${judge}</td></tr>`).join('')}
+          </tbody>
+        </table>` : '<p>Judges to be announced</p>';
 
-      const classesTableHTML = data.classes.length > 0 ? 
-        data.classes.map(className => 
-          `<tr><td>${className}</td><td>As per C-WAGS rules</td></tr>`
-        ).join('') :
-        '<tr><td>[CLASSES TBD]</td><td>To be determined</td></tr>';
+      const classesTableHTML = data.classes.length > 0 ?
+        `<table class="classes-table">
+          <thead>
+            <tr><th>Class</th></tr>
+          </thead>
+          <tbody>
+            ${data.classes.map(cls => `<tr><td>${cls}</td></tr>`).join('')}
+          </tbody>
+        </table>` : '<p>Classes to be announced</p>';
 
-      // Enhanced directions section with Google Maps integration
       const directionsSection = () => {
-        const hasLocation = data.location && data.location !== '[LOCATION TBD]';
-        const hasAddress = data.address && data.address.trim();
-        
-        if (hasLocation && hasAddress) {
-          const fullAddress = `${data.location}, ${data.address}`;
-          const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(fullAddress)}`;
-          
+        if (data.address && data.address.trim()) {
+          const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.address)}`;
           return `
             <div class="premium-section">
-              <h2>Directions to Trial Site</h2>
-              <p><strong>${data.location}</strong><br>${data.address}</p>
-              <a href="${mapsUrl}" target="_blank" class="maps-link">🗺️ Get Directions via Google Maps</a>
-            </div>
-          `;
-        } else if (hasLocation) {
-          return `
-            <div class="premium-section">
-              <h2>Directions to Trial Site</h2>
-              <p><strong>${data.location}</strong></p>
-              <p><em>Detailed directions will be provided upon entry confirmation.</em></p>
-            </div>
-          `;
-        } else {
-          return `
-            <div class="premium-section">
-              <h2>Directions to Trial Site</h2>
-              <p><em>Location and detailed directions will be provided upon entry confirmation.</em></p>
+              <h2>Directions</h2>
+              <p><strong>Address:</strong> ${data.address}</p>
+              <a href="${mapsUrl}" target="_blank" class="maps-link">Get Directions on Google Maps</a>
             </div>
           `;
         }
+        return '';
       };
 
       const premiumHTML = `
         <div class="premium-header">
           <h1>${data.clubName}</h1>
-          <div class="subtitle">Licensed by C-WAGS</div>
-          <div class="subtitle">Scent Work Trial</div>
-          <div class="subtitle">(Indoor/Outdoor)</div>
-          <div style="margin-top: 15px;">
-            <strong>${data.trialDates}</strong><br>
-            <strong>${data.startTime} – ${data.endTime}</strong>
-          </div>
+          <div class="subtitle">C-WAGS Scent Work Trial</div>
+          <div class="subtitle">${data.trialDates}</div>
+          <div class="subtitle">${data.startTime} - ${data.endTime}</div>
+          <div class="subtitle">${data.location}</div>
         </div>
 
         <div class="premium-section">
-          <h2>Location</h2>
-          <strong>${data.location}</strong>
+          <h2>Trial Information</h2>
+          <p><strong>Trial Secretary:</strong> ${data.secretary}</p>
+          <p><strong>Entry Limit:</strong> ${data.entryLimit}</p>
+          <p><strong>Entry Deadline:</strong> ${data.deadline}</p>
         </div>
 
         <div class="premium-section">
-          <h2>Event Information</h2>
-          <strong>Trial Secretary:</strong> ${data.secretary}<br>
-          <strong>Email:</strong> ${data.email}<br>
-          <strong>Phone:</strong> ${data.phone}<br>
-          <strong>Entry Limit:</strong> ${data.entryLimit}<br>
-          <strong>Entry Deadline:</strong> ${data.deadline}
-        </div>
-
-        <div class="premium-section">
-          <h2>Judging Panel</h2>
-          <table class="judges-table">
-            <thead>
-              <tr>
-                <th>Event</th>
-                <th>Judge Name</th>
-                <th>Location</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${judgesTableHTML}
-            </tbody>
-          </table>
+          <h2>Judges</h2>
+          ${judgesTableHTML}
         </div>
 
         <div class="premium-section">
           <h2>Classes Offered</h2>
-          <table class="classes-table">
-            <thead>
-              <tr>
-                <th>Class</th>
-                <th>Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${classesTableHTML}
-            </tbody>
-          </table>
+          ${classesTableHTML}
         </div>
 
         <div class="premium-section">
           <h2>Entry Fees</h2>
           <table class="fees-table">
             <thead>
-              <tr>
-                <th>Entry Type</th>
-                <th>Fee</th>
-              </tr>
+              <tr><th>Entry Type</th><th>Fee</th></tr>
             </thead>
             <tbody>
-              <tr><td>First dog, first class</td><td>$35.00</td></tr>
-              <tr><td>Same dog, additional class</td><td>$25.00</td></tr>
-              <tr><td>Additional dog, same handler</td><td>$30.00</td></tr>
-              <tr><td>Junior Handler (under 18)</td><td>$20.00</td></tr>
-              <tr><td>Exhibition Only</td><td>$15.00</td></tr>
+              <tr><td>First dog, first class</td><td>${data.fees.fee1}</td></tr>
+              <tr><td>Same dog, additional class</td><td>${data.fees.fee2}</td></tr>
+              <tr><td>Additional dog, same handler</td><td>${data.fees.fee3}</td></tr>
+              <tr><td>Junior Handler (under 18)</td><td>${data.fees.fee4}</td></tr>
+              <tr><td>Exhibition Only</td><td>${data.fees.fee5}</td></tr>
             </tbody>
           </table>
           <p><strong>Make cheques payable to:</strong> ${data.clubName}</p>
@@ -642,13 +707,13 @@
       document.getElementById('premiumDocument').scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Auto-load trial data when page loads
+    // Auto-load trial data when page loads with longer delay to ensure auth is ready
     window.addEventListener('load', () => {
       console.log("🚀 Page loaded, auto-loading trial data...");
-      setTimeout(loadTrialData, 1000); // Small delay to ensure auth is ready
+      setTimeout(loadTrialData, 2000); // Increased delay for better reliability
     });
 
-    console.log("Premium generator ready with auto-fill and date debugging");
+    console.log("Premium generator ready with improved auto-fill");
   </script>
 </body>
 </html>
