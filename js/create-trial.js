@@ -1,4 +1,39 @@
-import { db, auth } from './firebase.js';
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Trial</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .back-button {
+      background-color: #007cba;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    
+    .back-button:hover {
+      background-color: #005a8b;
+    }
+  </style>
+</head>
+<body>
+  <button class="back-button" onclick="location.href='dashboard.html'">← Back to Dashboard</button>
+  <h1>Create Trial</h1>
+  <form id="trialForm">
+    <input type="text" name="clubName" placeholder="Club Name">
+    <input type="text" name="secretary" placeholder="Trial Secretary">
+    <label>How many days?</label>
+    <input type="number" id="numDays" min="1">
+    <button type="button" onclick="generateDays()">Create Days</button>
+    <div id="daysContainer"></div>
+    <button type="submit">Save Trial</button>
+  </form>
+  <script type="module">
+import { db, auth } from './js/firebase.js';
 import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 let dataLoaded = false;
@@ -13,19 +48,6 @@ fetch('./js/data.json')
     console.log("Sample records:", data.slice(0, 3));
     
     if (Array.isArray(data)) {
-      // Extract unique classes (filter out empty strings)
-      const classSet = new Set();
-      const judgeSet = new Set();
-      
-      data.forEach(record => {
-        if (record.Class && record.Class.trim() !== "") {
-          classSet.add(record.Class.trim());
-        }
-        if (record.Judges && record.Judges.trim() !== "") {
-          judgeSet.add(record.Judges.trim());
-        }
-      });
-      
       // Keep classes in the order they appear in JSON (no sorting)
       availableClasses = [];
       availableJudges = [];
@@ -341,3 +363,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   console.log("Create trial page loaded successfully");
 });
+  </script>
+</body>
+</html>
