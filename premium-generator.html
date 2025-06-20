@@ -513,21 +513,54 @@
 
       // Fill application data if available
       if (currentApplicationData) {
+        console.log("📋 Auto-filling from trial application data...");
+        
+        // Location information
         if (currentApplicationData.trialLocation) {
           document.getElementById('location').value = currentApplicationData.trialLocation;
           highlightAutoFilledField('location');
+          console.log("✅ Auto-filled Location:", currentApplicationData.trialLocation);
         }
+        
+        // Address for directions
         if (currentApplicationData.trialAddress) {
           document.getElementById('address').value = currentApplicationData.trialAddress;
           highlightAutoFilledField('address');
+          console.log("✅ Auto-filled Address:", currentApplicationData.trialAddress);
         }
+        
+        // Contact information from trial application
         if (currentApplicationData.contactEmail) {
           document.getElementById('email').value = currentApplicationData.contactEmail;
           highlightAutoFilledField('email');
+          console.log("✅ Auto-filled Email:", currentApplicationData.contactEmail);
         }
+        
         if (currentApplicationData.contactPhone) {
           document.getElementById('phone').value = currentApplicationData.contactPhone;
           highlightAutoFilledField('phone');
+          console.log("✅ Auto-filled Phone:", currentApplicationData.contactPhone);
+        }
+        
+        // Use contact name from trial application instead of secretary if available
+        if (currentApplicationData.contactName && !document.getElementById('secretary').value) {
+          document.getElementById('secretary').value = currentApplicationData.contactName;
+          highlightAutoFilledField('secretary');
+          console.log("✅ Auto-filled Secretary from Application Contact:", currentApplicationData.contactName);
+        }
+        
+        // Use host name from trial application if club name not already filled
+        if (currentApplicationData.hostName && !document.getElementById('clubName').value) {
+          document.getElementById('clubName').value = currentApplicationData.hostName;
+          highlightAutoFilledField('clubName');
+          console.log("✅ Auto-filled Club Name from Host Name:", currentApplicationData.hostName);
+        }
+        
+        // City/State information if available
+        if (currentApplicationData.cityState && !document.getElementById('location').value) {
+          document.getElementById('location').value = currentApplicationData.cityState;
+          highlightAutoFilledField('location');
+          console.log("✅ Auto-filled Location from City/State:", currentApplicationData.cityState);
         }
       }
 
@@ -669,11 +702,11 @@
               <tr><th>Entry Type</th><th>Fee</th></tr>
             </thead>
             <tbody>
-              <tr><td>First dog, first class</td><td>${data.fees.fee1}</td></tr>
-              <tr><td>Same dog, additional class</td><td>${data.fees.fee2}</td></tr>
-              <tr><td>Additional dog, same handler</td><td>${data.fees.fee3}</td></tr>
-              <tr><td>Junior Handler (under 18)</td><td>${data.fees.fee4}</td></tr>
-              <tr><td>Exhibition Only</td><td>${data.fees.fee5}</td></tr>
+              ${data.fees.fee1 && !data.fees.fee1.match(/^\$?0+\.?0*$/) ? `<tr><td>First dog, first class</td><td>${data.fees.fee1}</td></tr>` : ''}
+              ${data.fees.fee2 && !data.fees.fee2.match(/^\$?0+\.?0*$/) ? `<tr><td>Same dog, additional class</td><td>${data.fees.fee2}</td></tr>` : ''}
+              ${data.fees.fee3 && !data.fees.fee3.match(/^\$?0+\.?0*$/) ? `<tr><td>Additional dog, same handler</td><td>${data.fees.fee3}</td></tr>` : ''}
+              ${data.fees.fee4 && !data.fees.fee4.match(/^\$?0+\.?0*$/) ? `<tr><td>Junior Handler (under 18)</td><td>${data.fees.fee4}</td></tr>` : ''}
+              ${data.fees.fee5 && !data.fees.fee5.match(/^\$?0+\.?0*$/) ? `<tr><td>Exhibition Only</td><td>${data.fees.fee5}</td></tr>` : ''}
             </tbody>
           </table>
           <p><strong>Make cheques payable to:</strong> ${data.clubName}</p>
