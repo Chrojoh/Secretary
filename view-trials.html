@@ -3,10 +3,60 @@
 <head>
   <title>My Trials</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .trial-list {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    
+    .trial-item {
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    
+    .trial-item h3 {
+      margin: 0 0 10px 0;
+      color: #333;
+    }
+    
+    .trial-details {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .no-trials {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      margin: 50px 0;
+    }
+    
+    .back-button {
+      background-color: #007cba;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    
+    .back-button:hover {
+      background-color: #005a8b;
+    }
+  </style>
 </head>
 <body>
-  <h1>My Trials</h1>
-  <ul id="trialList"></ul>
+  <div class="trial-list">
+    <button class="back-button" onclick="location.href='dashboard.html'">← Back to Dashboard</button>
+    <h1>My Trials</h1>
+    <div id="trialList"></div>
+  </div>
   <script type="module" src="js/view-trials.js"></script>
 </body>
 </html>
