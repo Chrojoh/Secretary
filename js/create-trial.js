@@ -1,6 +1,11 @@
 import { db, auth } from './firebase.js';
-import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-import data from './data.json' assert { type: "json" };
+import { addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+let data = null;
+
+fetch('./js/data.json')
+  .then(res => res.json())
+  .then(json => { data = json; });
 
 window.generateDays = function () {
   const numDays = parseInt(document.getElementById("numDays").value);
