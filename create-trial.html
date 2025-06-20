@@ -277,12 +277,12 @@
         console.log("Using default classes and judges due to error:", err);
       });
 
-    // Form submission
+    // Form submission - only save when user clicks Save Trial button
     document.getElementById('trialForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
       try {
-        console.log("Form submission started");
+        console.log("Save Trial button clicked");
         
         // Wait for auth state to be properly loaded
         if (!auth.currentUser) {
@@ -311,38 +311,32 @@
           return;
         }
         
+        if (!secretary.trim()) {
+          alert("Please enter a trial secretary name");
+          return;
+        }
+        
         // Show saving status
         const submitButton = e.target.querySelector('button[type="submit"]');
         const originalText = submitButton.textContent;
         submitButton.textContent = "Saving...";
         submitButton.disabled = true;
         
-        const trialData = {
-          clubName: clubName,
-          secretary: secretary,
-          numDays: parseInt(document.getElementById('numDays').value) || 0,
-          createdAt: new Date(),
-          createdBy: auth.currentUser.uid,
-          days: []
-        };
+        // Collect ALL the trial data including classes, rounds, and judges
+        const trialData = collectAllTrialData();
         
-        console.log("Saving trial data:", trialData);
+        console.log("Saving complete trial data:", trialData);
         
         const docRef = await addDoc(collection(db, "trials"), trialData);
         console.log("Trial saved with ID:", docRef.id);
         
-        // Reset button before redirect
+        // Reset button
         submitButton.textContent = originalText;
         submitButton.disabled = false;
         
-        // Use a more gentle redirect that preserves auth
+        // Go directly back to dashboard
         console.log("Redirecting to dashboard...");
-        setTimeout(() => {
-          window.location.href = "dashboard.html";
-        }, 1000);
-        
-        // Show success message
-        alert("Trial saved successfully! Redirecting to dashboard...");
+        window.location.href = "dashboard.html";
         
       } catch (error) {
         console.error("Error saving trial:", error);
@@ -350,10 +344,83 @@
         
         // Reset button on error
         const submitButton = e.target.querySelector('button[type="submit"]');
-        submitButton.textContent = "Save Trial";
-        submitButton.disabled = false;
+        if (submitButton) {
+          submitButton.textContent = "Save Trial";
+          submitButton.disabled = false;
+        }
       }
     });
+
+    // Function to collect ALL trial data - classes, rounds, judges, everything
+    function collectAllTrialData() {
+      const clubName = document.querySelector('input[name="clubName"]').value;
+      const secretary = document.querySelector('input[name="secretary"]').value;
+      const numDays = parseInt(document.getElementById('numDays').value) || 0;
+      
+      const days = [];
+      const daysContainer = document.getElementById('daysContainer');
+      
+      if (daysContainer) {
+        const dayContainers = daysContainer.querySelectorAll('.day-container');
+        
+        dayContainers.forEach((dayContainer, dayIndex) => {
+          const dateInput = dayContainer.querySelector(`input[name="date${dayIndex}"]`);
+          const classesContainer = dayContainer.querySelector(`.classes-container-${dayIndex}`);
+          
+          const dayData = {
+            dayNumber: dayIndex + 1,
+            date: dateInput ? dateInput.value : '',
+            classes: []
+          };
+          
+          if (classesContainer) {
+            const classContainers = classesContainer.querySelectorAll('.class-container');
+            
+            classContainers.forEach((classContainer, classIndex) => {
+              const classSelect = classContainer.querySelector(`select[data-day="${dayIndex}"][data-class="${classIndex}"]`);
+              const roundsSelect = classContainer.querySelector(`select[data-day="${dayIndex}"][data-class="${classIndex}"]`);
+              const roundsContainer = classContainer.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
+              
+              const classData = {
+                classNumber: classIndex + 1,
+                className: classSelect ? classSelect.value : '',
+                rounds: []
+              };
+              
+              if (roundsContainer) {
+                const roundContainers = roundsContainer.querySelectorAll('.round-container');
+                
+                roundContainers.forEach((roundContainer, roundIndex) => {
+                  const judgeSelect = roundContainer.querySelector('select');
+                  const feoCheckbox = roundContainer.querySelector('input[type="checkbox"]');
+                  
+                  const roundData = {
+                    roundNumber: roundIndex + 1,
+                    judge: judgeSelect ? judgeSelect.value : '',
+                    feo: feoCheckbox ? feoCheckbox.checked : false
+                  };
+                  
+                  classData.rounds.push(roundData);
+                });
+              }
+              
+              dayData.classes.push(classData);
+            });
+          }
+          
+          days.push(dayData);
+        });
+      }
+      
+      return {
+        clubName: clubName,
+        secretary: secretary,
+        numDays: numDays,
+        days: days,
+        createdAt: new Date(),
+        createdBy: auth.currentUser.uid
+      };
+    }
 
     console.log("Create trial page script loaded successfully");
   </script>
