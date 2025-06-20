@@ -211,26 +211,131 @@ window.generateRounds = function (select, id) {
   }
 };
 
+// Function to collect all trial data from the form
+function collectTrialData() {
+  const clubName = document.querySelector('input[name="clubName"]').value;
+  const secretary = document.querySelector('input[name="secretary"]').value;
+  const numDays = document.getElementById('numDays').value;
+  
+  const days = [];
+  const daysContainer = document.getElementById('daysContainer');
+  const dayBoxes = daysContainer.children;
+  
+  for (let d = 0; d < dayBoxes.length; d++) {
+    const dayBox = dayBoxes[d];
+    const dateInput = dayBox.querySelector(`input[name="date${d}"]`);
+    const classesContainer = dayBox.querySelector('.classes-container');
+    
+    const dayData = {
+      dayNumber: d + 1,
+      date: dateInput ? dateInput.value : '',
+      classes: []
+    };
+    
+    if (classesContainer) {
+      const classBoxes = classesContainer.children;
+      for (let c = 0; c < classBoxes.length; c++) {
+        const classBox = classBoxes[c];
+        const classInput = classBox.querySelector('input[list*="classList"]');
+        const roundsSelect = classBox.querySelector('select');
+        const roundsContainer = classBox.querySelector('.rounds-container');
+        
+        const classData = {
+          classNumber: c + 1,
+          className: classInput ? classInput.value : '',
+          rounds: []
+        };
+        
+        if (roundsContainer) {
+          const roundBoxes = roundsContainer.children;
+          for (let r = 0; r < roundBoxes.length; r++) {
+            const roundBox = roundBoxes[r];
+            const judgeInput = roundBox.querySelector('input[list*="judgeList"]');
+            const feoCheckbox = roundBox.querySelector('input[type="checkbox"]');
+            
+            const roundData = {
+              roundNumber: r + 1,
+              judge: judgeInput ? judgeInput.value : '',
+              feo: feoCheckbox ? feoCheckbox.checked : false
+            };
+            
+            classData.rounds.push(roundData);
+          }
+        }
+        
+        dayData.classes.push(classData);
+      }
+    }
+    
+    days.push(dayData);
+  }
+  
+  return {
+    clubName: clubName,
+    secretary: secretary,
+    numDays: parseInt(numDays),
+    days: days,
+    createdAt: new Date(),
+    createdBy: auth.currentUser ? auth.currentUser.uid : null
+  };
+}
+
 // Add form submit handler
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('trialForm');
   if (form) {
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
       console.log("Form submitted");
       
-      // Collect all form data
-      const formData = new FormData(form);
-      const trialData = {
-        clubName: formData.get('clubName'),
-        secretary: formData.get('secretary'),
-        numDays: document.getElementById('numDays').value,
-        days: []
-      };
+      // Check if user is logged in
+      if (!auth.currentUser) {
+        alert("You must be logged in to save a trial");
+        window.location.href = "index.html";
+        return;
+      }
       
-      console.log("Trial data collected:", trialData);
-      // TODO: Add actual save functionality here
-      // For now, just log to console without showing alert
+      // Validate required fields
+      const clubName = document.querySelector('input[name="clubName"]').value;
+      const secretary = document.querySelector('input[name="secretary"]').value;
+      
+      if (!clubName.trim()) {
+        alert("Please enter a club name");
+        return;
+      }
+      
+      if (!secretary.trim()) {
+        alert("Please enter a trial secretary name");
+        return;
+      }
+      
+      try {
+        // Show saving message
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = "Saving...";
+        submitButton.disabled = true;
+        
+        // Collect all trial data
+        const trialData = collectTrialData();
+        console.log("Trial data collected:", trialData);
+        
+        // Save to Firebase
+        const docRef = await addDoc(collection(db, "trials"), trialData);
+        console.log("Trial saved with ID:", docRef.id);
+        
+        // Redirect to dashboard
+        window.location.href = "dashboard.html";
+        
+      } catch (error) {
+        console.error("Error saving trial:", error);
+        alert("Error saving trial: " + error.message);
+        
+        // Reset button
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.textContent = "Save Trial";
+        submitButton.disabled = false;
+      }
     });
   }
   
