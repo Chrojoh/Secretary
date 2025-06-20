@@ -57,7 +57,7 @@
     <div style="margin-bottom: 15px;">
       <label>How many days?</label><br>
       <input type="number" id="numDays" min="1" max="10" style="width: 100px; padding: 5px;">
-      <button type="button" onclick="generateDays()" style="margin-left: 10px; padding: 5px 10px;">Create Days</button>
+      <button type="button" id="generateDaysBtn" style="margin-left: 10px; padding: 5px 10px;">Create Days</button>
     </div>
     
     <div id="daysContainer"></div>
@@ -120,7 +120,26 @@
       console.log("Using default classes and judges");
     }
 
-    window.generateDays = function() {
+    console.log("Create trial page script loaded successfully");
+
+    // Event listeners setup
+    document.addEventListener('DOMContentLoaded', function() {
+      // Generate Days button
+      document.getElementById('generateDaysBtn').addEventListener('click', function() {
+        generateDays();
+      });
+      
+      // Delegate event listeners for dynamically created elements
+      document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('classes-input')) {
+          generateClasses(e.target);
+        } else if (e.target.classList.contains('rounds-select')) {
+          generateRounds(e.target);
+        }
+      });
+    });
+
+    function generateDays() {
       try {
         console.log("generateDays function called");
         
@@ -146,7 +165,7 @@
             </div>
             <div style="margin-bottom: 10px;">
               <label>How many classes?</label>
-              <input type="number" min="1" max="20" data-day="${d}" onchange="generateClasses(this)" style="margin-left: 10px; width: 60px;">
+              <input type="number" min="1" max="20" class="classes-input" data-day="${d}" style="margin-left: 10px; width: 60px;">
             </div>
             <div class="classes-container-${d}"></div>
           `;
@@ -159,9 +178,9 @@
         console.error("Error in generateDays:", error);
         alert("Error creating days: " + error.message);
       }
-    };
+    }
 
-    window.generateClasses = function(input) {
+    function generateClasses(input) {
       try {
         console.log("generateClasses function called");
         
@@ -199,7 +218,7 @@
             </div>
             <div style="margin-bottom: 10px;">
               <label>Number of Rounds:</label>
-              <select onchange="generateRounds(this)" data-day="${dayIndex}" data-class="${i}" style="margin-left: 10px;">
+              <select class="rounds-select" data-day="${dayIndex}" data-class="${i}" style="margin-left: 10px;">
                 <option value="">Select rounds</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -220,9 +239,9 @@
         console.error("Error in generateClasses:", error);
         alert("Error creating classes: " + error.message);
       }
-    };
+    }
 
-    window.generateRounds = function(select) {
+    function generateRounds(select) {
       try {
         console.log("generateRounds function called");
         
@@ -266,7 +285,7 @@
         console.error("Error in generateRounds:", error);
         alert("Error creating rounds: " + error.message);
       }
-    };
+    }
 
     // Simple form submission
     document.getElementById('trialForm').addEventListener('submit', async function(e) {
