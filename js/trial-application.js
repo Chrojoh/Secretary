@@ -14,10 +14,25 @@ const requiredFields = [
 // Load trial data and populate form
 async function loadTrialData() {
   try {
+    // Wait for auth state to be determined
+    await new Promise((resolve) => {
+      if (auth.currentUser) {
+        resolve();
+      } else {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+          unsubscribe();
+          resolve();
+        });
+      }
+    });
+
     if (!auth.currentUser) {
+      console.log("No authenticated user found, redirecting to login");
       window.location.href = 'index.html';
       return;
     }
+
+    console.log("Authenticated user:", auth.currentUser.email);
 
     // Get the most recent trial for this user
     const q = query(
@@ -332,7 +347,8 @@ async function saveApplication(formData) {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
-  loadTrialData();
+  // Don't load trial data immediately - wait for auth
+  console.log("Page loaded, waiting for authentication...");
   
   // Add event listeners for real-time validation
   requiredFields.forEach(fieldId => {
@@ -377,7 +393,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Auth state listener
 auth.onAuthStateChanged(user => {
-  if (!user) {
+  if (user) {
+    console.log("User authenticated:", user.email);
+    // Now load the trial data
+    loadTrialData();
+  } else {
+    console.log("No user authenticated, redirecting to login");
     window.location.href = 'index.html';
   }
 });
