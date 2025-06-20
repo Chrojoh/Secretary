@@ -6,7 +6,7 @@ let applicationData = null;
 
 // Required fields for highlighting
 const requiredFields = [
-  'trialDates', 'cityState', 'hostName', 'trialLocation', 'premiumWebsite',
+  'trialDates', 'venueAddress', 'hostName', 'trialLocation', 'premiumWebsite',
   'contactName', 'contactEmail', 'contactPhone', 'advocates', 'ringSurface',
   'searchAreas', 'insuranceDate'
 ];
@@ -56,7 +56,7 @@ async function loadTrialData() {
       populateFormFromTrial();
     } else {
       alert("No trial found. Please create a trial first.");
-      window.location.href = 'dashboard.html';
+      window.location.href = 'main-dashboard.html';
     }
     
     // Try to load existing application data
@@ -247,14 +247,14 @@ function highlightMissingFields() {
     }
   });
   
-  // Check Inside/Outside radio buttons
-  const locationRadios = document.querySelectorAll('input[name="trialLocation"]');
-  const locationChecked = Array.from(locationRadios).some(radio => radio.checked);
+  // Check Inside/Outside checkboxes (updated for checkboxes instead of radio buttons)
+  const locationCheckboxes = document.querySelectorAll('input[name="trialLocation"]');
+  const locationChecked = Array.from(locationCheckboxes).some(checkbox => checkbox.checked);
   if (!locationChecked) {
-    locationRadios.forEach(radio => radio.parentElement.style.backgroundColor = '#ffcccc');
+    locationCheckboxes.forEach(checkbox => checkbox.parentElement.style.backgroundColor = '#ffcccc');
     missingCount++;
   } else {
-    locationRadios.forEach(radio => radio.parentElement.style.backgroundColor = '');
+    locationCheckboxes.forEach(checkbox => checkbox.parentElement.style.backgroundColor = '');
   }
   
   // Check Resets radio buttons
@@ -293,6 +293,14 @@ function collectFormData() {
       }
     }
   });
+  
+  // Special handling for Inside/Outside trial checkboxes
+  const locationCheckboxes = document.querySelectorAll('input[name="trialLocation"]:checked');
+  const locationValues = Array.from(locationCheckboxes).map(checkbox => checkbox.value);
+  if (locationValues.length > 0) {
+    formData.trialLocationTypes = locationValues; // Store as array
+    formData.trialLocationType = locationValues.join(' & '); // Store as string for display
+  }
   
   // Collect schedule table data
   const scheduleRows = document.querySelectorAll('#scheduleBody tr');
@@ -338,7 +346,8 @@ async function saveApplication(formData) {
     }
     
     alert("Application saved successfully!");
-    window.location.href = 'dashboard.html';
+    // **FIXED REDIRECT** - Changed from 'dashboard.html' to 'main-dashboard.html'
+    window.location.href = 'main-dashboard.html';
     
   } catch (error) {
     console.error("Error saving application:", error);
@@ -364,13 +373,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const leagueYes = document.getElementById('leagueYes');
   const leagueNo = document.getElementById('leagueNo');
   
-  leagueYes.addEventListener('change', function() {
-    if (this.checked) leagueNo.checked = false;
-  });
-  
-  leagueNo.addEventListener('change', function() {
-    if (this.checked) leagueYes.checked = false;
-  });
+  if (leagueYes && leagueNo) {
+    leagueYes.addEventListener('change', function() {
+      if (this.checked) leagueNo.checked = false;
+    });
+    
+    leagueNo.addEventListener('change', function() {
+      if (this.checked) leagueYes.checked = false;
+    });
+  }
   
   // Form submission
   const form = document.getElementById('applicationForm');
