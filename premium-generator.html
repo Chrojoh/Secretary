@@ -198,8 +198,8 @@
       <button class="print-btn" onclick="window.print()">Print Premium</button>
       <button onclick="location.href='main-dashboard.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Dashboard</button>
       
-      <div id="debugInfo" class="debug-info" style="display: none;">
-        Debug information running in background...
+      <div id="debugInfo" class="debug-info">
+        Click "Load Trial Data" to see debugging information...
       </div>
       
       <div class="edit-form">
@@ -385,13 +385,13 @@
         
       } catch (error) {
         console.error("💥 Error loading trial data:", error);
-        // Debug info hidden - error only in console
+        document.getElementById('debugInfo').innerHTML = `❌ Error: ${error.message}`;
       }
     };
 
     function fillFormFromTrialData() {
       if (!currentTrialData) {
-        console.log("❌ No trial data loaded");
+        document.getElementById('debugInfo').innerHTML = "❌ No trial data loaded";
         return;
       }
 
@@ -401,20 +401,20 @@
       document.getElementById('clubName').value = currentTrialData.clubName || 'West Kelowna K9 Scent and Games';
       document.getElementById('secretary').value = currentTrialData.secretary || 'Chris Johansen';
 
-      // Process dates with debug info (console only)
-      console.log("🔍 Date Processing Debug:");
+      // Process dates with debug info
+      let debugHTML = "<h4>🔍 Date Processing Debug:</h4>";
       let processedDates = [];
       
       if (currentTrialData.days && currentTrialData.days.length > 0) {
-        console.log("Raw trial days:", currentTrialData.days);
+        debugHTML += `<p>Raw trial days: ${JSON.stringify(currentTrialData.days, null, 2)}</p>`;
         
         currentTrialData.days.forEach((day, index) => {
           if (day.date && day.date.trim()) {
-            console.log(`Day ${index + 1}:`);
-            console.log(`  Input: "${day.date}"`);
+            debugHTML += `<p><strong>Day ${index + 1}:</strong><br>`;
+            debugHTML += `&nbsp;&nbsp;Input: "${day.date}"<br>`;
             
             const converted = convertDateSafely(day.date);
-            console.log(`  Output: "${converted}"`);
+            debugHTML += `&nbsp;&nbsp;Output: "${converted}"</p>`;
             
             processedDates.push(converted);
           }
@@ -422,7 +422,7 @@
         
         const finalDateString = processedDates.join(' & ');
         document.getElementById('trialDates').value = finalDateString;
-        console.log("Final date string:", finalDateString);
+        debugHTML += `<p><strong>Final date string:</strong> ${finalDateString}</p>`;
       }
 
       // Fill other data
@@ -451,7 +451,7 @@
         });
       }
       document.getElementById('judges').value = Array.from(judges).join('\n');
-      console.log("Judges found:", Array.from(judges));
+      debugHTML += `<p><strong>Judges found:</strong> ${Array.from(judges).join(', ')}</p>`;
 
       // Extract and fill classes
       const classes = new Set();
@@ -467,7 +467,9 @@
         });
       }
       document.getElementById('classes').value = Array.from(classes).join('\n');
-      console.log("Classes found:", Array.from(classes));
+      debugHTML += `<p><strong>Classes found:</strong> ${Array.from(classes).join(', ')}</p>`;
+
+      document.getElementById('debugInfo').innerHTML = debugHTML;
       
       console.log("✅ Form filled successfully!");
     }
