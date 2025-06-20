@@ -1,4 +1,3 @@
-// js/auth.js
 import { auth, db } from './firebase.js';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
@@ -7,8 +6,8 @@ function getEmailFromUsername(username) {
   return `${username}@trial.local`;
 }
 
-async function signup() {
-  const username = document.getElementById('username').value.trim();
+window.signup = async function () {
+  const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
   const email = getEmailFromUsername(username);
 
@@ -17,12 +16,12 @@ async function signup() {
     await setDoc(doc(db, "usernames", username), { uid: auth.currentUser.uid });
     window.location.href = "dashboard.html";
   } catch (err) {
-    document.getElementById('error').textContent = err.message;
+    document.getElementById("error").textContent = err.message;
   }
-}
+};
 
-async function login() {
-  const username = document.getElementById('username').value.trim();
+window.login = async function () {
+  const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
   const email = getEmailFromUsername(username);
 
@@ -34,9 +33,6 @@ async function login() {
     await signInWithEmailAndPassword(auth, email, password);
     window.location.href = "dashboard.html";
   } catch (err) {
-    document.getElementById('error').textContent = err.message;
+    document.getElementById("error").textContent = err.message;
   }
-}
-
-window.signup = signup;
-window.login = login;
+};
