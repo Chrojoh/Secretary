@@ -6,6 +6,20 @@ function getEmailFromUsername(username) {
   return `${username}@trial.local`;
 }
 
+window.signup = async function () {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const email = getEmailFromUsername(username);
+
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    await setDoc(doc(db, "usernames", username), { uid: auth.currentUser.uid });
+    window.location.href = "dashboard.html";
+  } catch (err) {
+    document.getElementById("error").textContent = err.message;
+  }
+};
+
 window.login = async function () {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
@@ -22,18 +36,3 @@ window.login = async function () {
     document.getElementById("error").textContent = err.message;
   }
 };
-
-window.signup = async function () {
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-  const email = getEmailFromUsername(username);
-
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, "usernames", username), { uid: auth.currentUser.uid });
-    window.location.href = "dashboard.html";
-  } catch (err) {
-    document.getElementById("error").textContent = err.message;
-  }
-};
-
