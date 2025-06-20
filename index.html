@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Trial Secretary Login</title>
+  <title>Login</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <h1>Login / Sign Up</h1>
-
-  <div>
-    <input type="text" id="username" placeholder="Choose a username" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="signup()">Sign Up</button>
-    <button onclick="login()">Login</button>
-    <p id="error" style="color: red;"></p>
-  </div>
-
+  <input type="text" id="username" placeholder="Username">
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="signup()">Sign Up</button>
+  <button onclick="login()">Login</button>
+  <p id="error" style="color:red"></p>
   <script type="module" src="js/auth.js"></script>
 </body>
 </html>
