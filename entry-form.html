@@ -1251,21 +1251,17 @@
       const dogCallName = document.getElementById('dogCallName').value.trim();
       const hasClasses = selectedClasses.size > 0;
       
-      console.log("🔍 Form validation check:", {
-        trialSelected: !!trialSelected,
-        waiverAccepted,
-        cwagsNumber: !!cwagsNumber,
-        handlerName: !!handlerName,
-        handlerEmail: !!handlerEmail,
-        handlerPhone: !!handlerPhone,
-        dogCallName: !!dogCallName,
-        hasClasses,
-        selectedClassesCount: selectedClasses.size
-      });
+      console.log("🔍 Form validation check:");
+      console.log("Trial selected:", trialSelected, "(length:", trialSelected.length, ")");
+      console.log("Waiver accepted:", waiverAccepted);
+      console.log("C-WAGS number:", cwagsNumber, "(length:", cwagsNumber.length, ")");
+      console.log("Handler name:", handlerName, "(length:", handlerName.length, ")");
+      console.log("Handler email:", handlerEmail, "(length:", handlerEmail.length, ")");
+      console.log("Handler phone:", handlerPhone, "(length:", handlerPhone.length, ")");
+      console.log("Dog call name:", dogCallName, "(length:", dogCallName.length, ")");
+      console.log("Has classes:", hasClasses, "(count:", selectedClasses.size, ")");
       
       const isValid = trialSelected && waiverAccepted && cwagsNumber && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
-      
-      console.log("✅ Form is valid:", isValid);
       
       const submitBtn = document.getElementById('submitBtn');
       if (submitBtn) {
@@ -1283,6 +1279,8 @@
           if (!hasClasses) missingFields.push("Class selection");
           
           console.log("❌ Missing required fields:", missingFields);
+        } else if (isValid) {
+          console.log("✅ Form is valid! Submit button enabled.");
         }
       }
     }
