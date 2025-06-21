@@ -607,13 +607,6 @@
                 <option value="Yes">Yes</option>
               </select>
             </div>
-            <div class="form-group">
-              <label>Entry Type</label>
-              <select id="entryType">
-                <option value="Regular">Regular Entry</option>
-                <option value="Exhibition">Exhibition Only</option>
-              </select>
-            </div>
           </div>
         </div>
 
@@ -628,10 +621,6 @@
             <div class="summary-item">
               <strong>Entry Fee</strong>
               <span id="calculatedFee">$0.00</span>
-            </div>
-            <div class="summary-item">
-              <strong>Entry Type</strong>
-              <span id="summaryEntryType">Regular</span>
             </div>
             <div class="summary-item">
               <strong>Junior Handler</strong>
@@ -1201,7 +1190,6 @@
     function updateEntrySummary() {
       const entryCount = selectedClasses.size;
       const isJunior = document.getElementById('juniorHandler').value === 'Yes';
-      const isExhibition = document.getElementById('entryType').value === 'Exhibition';
       
       let totalFee = 0;
       let regularEntries = 0;
@@ -1222,13 +1210,11 @@
         }
       });
       
-      if (isExhibition) {
-        totalFee = fees.exhibition * entryCount;
-      } else if (isJunior) {
-        totalFee = fees.juniorHandler * entryCount;
-      } else if (entryCount > 0) {
-        // FEO entries are typically free or lower cost - keeping same pricing for now
-        totalFee = fees.firstClass + (fees.additionalClass * (entryCount - 1));
+      if (isJunior) {
+        totalFee = fees.juniorHandler * regularEntries; // Only charge for regular entries if junior
+      } else if (regularEntries > 0) {
+        // Calculate fees for regular entries only (FEO entries are typically free)
+        totalFee = fees.firstClass + (fees.additionalClass * Math.max(0, regularEntries - 1));
       }
       
       // Count unique classes (for display purposes)
@@ -1249,7 +1235,6 @@
       
       document.getElementById('selectedClassCount').textContent = entryBreakdown;
       document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
-      document.getElementById('summaryEntryType').textContent = document.getElementById('entryType').value;
       document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
     }
 
@@ -1266,9 +1251,40 @@
       const dogCallName = document.getElementById('dogCallName').value.trim();
       const hasClasses = selectedClasses.size > 0;
       
+      console.log("🔍 Form validation check:", {
+        trialSelected: !!trialSelected,
+        waiverAccepted,
+        cwagsNumber: !!cwagsNumber,
+        handlerName: !!handlerName,
+        handlerEmail: !!handlerEmail,
+        handlerPhone: !!handlerPhone,
+        dogCallName: !!dogCallName,
+        hasClasses,
+        selectedClassesCount: selectedClasses.size
+      });
+      
       const isValid = trialSelected && waiverAccepted && cwagsNumber && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
       
-      document.getElementById('submitBtn').disabled = !isValid;
+      console.log("✅ Form is valid:", isValid);
+      
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.disabled = !isValid;
+        if (!isValid && !isAutoFilling) {
+          // Help user identify what's missing
+          let missingFields = [];
+          if (!trialSelected) missingFields.push("Trial selection");
+          if (!waiverAccepted) missingFields.push("Waiver acceptance");
+          if (!cwagsNumber) missingFields.push("C-WAGS number");
+          if (!handlerName) missingFields.push("Handler name");
+          if (!handlerEmail) missingFields.push("Handler email");
+          if (!handlerPhone) missingFields.push("Handler phone");
+          if (!dogCallName) missingFields.push("Dog call name");
+          if (!hasClasses) missingFields.push("Class selection");
+          
+          console.log("❌ Missing required fields:", missingFields);
+        }
+      }
     }
 
     // Setup event listeners
@@ -1302,10 +1318,8 @@
 
       // Fee calculation listeners
       const juniorHandler = document.getElementById('juniorHandler');
-      const entryType = document.getElementById('entryType');
       
       if (juniorHandler) juniorHandler.addEventListener('change', updateEntrySummary);
-      if (entryType) entryType.addEventListener('change', updateEntrySummary);
       
       // Form validation listeners
       const validationFields = ['trialSelection', 'waiverAccepted', 'cwagsNumber', 'handlerName', 'handlerEmail', 'handlerPhone', 'dogCallName'];
@@ -1386,7 +1400,6 @@
           regularEntries: selectedEntries.filter(e => e.entryType === 'regular').length,
           feoEntries: selectedEntries.filter(e => e.entryType === 'feo').length,
           juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
-          entryType: document.getElementById('entryType').value,
           waiverAccepted: true,
           entryFee: document.getElementById('calculatedFee').textContent,
           submittedAt: new Date(),
