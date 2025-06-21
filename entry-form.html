@@ -463,14 +463,27 @@
       <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
     </div>
 
-    <!-- Trial Information -->
+    <!-- Trial Selection -->
     <div class="trial-info">
+      <h3>🎯 Select Trial</h3>
+      <div class="form-row">
+        <div class="form-group required full-width">
+          <label for="trialSelection">Choose which trial to enter:</label>
+          <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
+            <option value="">Loading available trials...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trial Information -->
+    <div class="trial-info" id="trialInfoSection" style="display: none;">
       <h3>📋 Trial Information</h3>
       <div class="trial-details">
-        <div><strong>Club:</strong> <span id="clubName">Loading...</span></div>
-        <div><strong>Dates:</strong> <span id="trialDates">Loading...</span></div>
-        <div><strong>Location:</strong> <span id="trialLocation">Loading...</span></div>
-        <div><strong>Secretary:</strong> <span id="trialSecretary">Loading...</span></div>
+        <div><strong>Club:</strong> <span id="clubName">-</span></div>
+        <div><strong>Dates:</strong> <span id="trialDates">-</span></div>
+        <div><strong>Location:</strong> <span id="trialLocation">-</span></div>
+        <div><strong>Secretary:</strong> <span id="trialSecretary">-</span></div>
       </div>
     </div>
 
@@ -655,6 +668,7 @@
     let selectedClasses = new Set();
     let registrationData = [];
     let isAutoFilling = false;
+    let availableTrials = [];
 
     // Fee structure
     const fees = {
@@ -795,7 +809,7 @@
       checkFormValidity();
     }
 
-    // Load trial data
+    // Load trial data and populate trial selector
     async function loadTrialData() {
       try {
         await loadRegistrationData();
@@ -818,7 +832,7 @@
           return;
         }
 
-        // Load most recent trial
+        // Load all trials for this user
         const trialsQuery = query(
           collection(db, "trials"),
           where("createdBy", "==", auth.currentUser.uid)
@@ -827,30 +841,108 @@
         const trialsSnapshot = await getDocs(trialsQuery);
         
         if (!trialsSnapshot.empty) {
-          const trials = [];
+          availableTrials = [];
           trialsSnapshot.forEach(doc => {
-            trials.push({ id: doc.id, ...doc.data() });
+            availableTrials.push({ id: doc.id, ...doc.data() });
           });
           
-          trials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
-          currentTrialData = trials[0];
+          // Sort trials by creation date (most recent first)
+          availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
           
-          console.log("✅ Loaded trial data:", currentTrialData);
-          populateTrialInfo();
-          populateClasses();
+          console.log("✅ Loaded trials:", availableTrials);
+          populateTrialSelector();
         } else {
-          alert("No trial found. Please create a trial first.");
+          alert("No trials found. Please create a trial first.");
           window.location.href = 'main-dashboard.html';
           return;
         }
 
         setupEventListeners();
-        document.getElementById('cwagsNumber').focus();
         
       } catch (error) {
         console.error("❌ Error loading trial data:", error);
         alert("Error loading trial data: " + error.message);
       }
+    }
+
+    // Populate the trial selector dropdown
+    function populateTrialSelector() {
+      const trialSelect = document.getElementById('trialSelection');
+      if (!trialSelect) return;
+
+      // Clear existing options
+      trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+
+      // Add each trial as an option
+      availableTrials.forEach(trial => {
+        const option = document.createElement('option');
+        option.value = trial.id;
+        
+        // Create a descriptive label for the trial
+        let trialLabel = trial.clubName || 'Unnamed Trial';
+        
+        if (trial.days && trial.days.length > 0) {
+          const dates = trial.days
+            .filter(day => day.date)
+            .map(day => new Date(day.date).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric' 
+            }))
+            .join(', ');
+          if (dates) {
+            trialLabel += ` (${dates})`;
+          }
+        }
+        
+        option.textContent = trialLabel;
+        trialSelect.appendChild(option);
+      });
+
+      // Auto-select the most recent trial
+      if (availableTrials.length > 0) {
+        trialSelect.value = availableTrials[0].id;
+        handleTrialSelection(availableTrials[0].id);
+      }
+    }
+
+    // Handle trial selection change
+    function handleTrialSelection(trialId) {
+      if (!trialId) {
+        currentTrialData = null;
+        document.getElementById('trialInfoSection').style.display = 'none';
+        document.getElementById('classSelection').innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: #666;">
+            Please select a trial to view available classes.
+          </div>
+        `;
+        checkFormValidity();
+        return;
+      }
+
+      // Find the selected trial
+      const selectedTrial = availableTrials.find(trial => trial.id === trialId);
+      if (!selectedTrial) {
+        console.error("❌ Trial not found:", trialId);
+        return;
+      }
+
+      currentTrialData = selectedTrial;
+      console.log("✅ Selected trial:", currentTrialData);
+      
+      // Clear previous selections
+      selectedClasses.clear();
+      document.querySelectorAll('.entry-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      
+      // Update the form
+      populateTrialInfo();
+      populateClasses();
+      updateEntrySummary();
+      checkFormValidity();
+      
+      // Show trial info section
+      document.getElementById('trialInfoSection').style.display = 'block';
     }
 
     // Populate trial information
@@ -870,6 +962,8 @@
           .map(day => new Date(day.date).toLocaleDateString())
           .join(', ');
         document.getElementById('trialDates').textContent = dates || 'TBD';
+      } else {
+        document.getElementById('trialDates').textContent = 'TBD';
       }
 
       document.getElementById('trialLocation').textContent = 'TBD';
@@ -1162,6 +1256,7 @@
     function checkFormValidity() {
       if (isAutoFilling) return;
       
+      const trialSelected = document.getElementById('trialSelection').value.trim();
       const waiverAccepted = document.getElementById('waiverAccepted').checked;
       const cwagsNumber = document.getElementById('cwagsNumber').value.trim();
       const handlerName = document.getElementById('handlerName').value.trim();
@@ -1170,13 +1265,21 @@
       const dogCallName = document.getElementById('dogCallName').value.trim();
       const hasClasses = selectedClasses.size > 0;
       
-      const isValid = waiverAccepted && cwagsNumber && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
+      const isValid = trialSelected && waiverAccepted && cwagsNumber && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
       
       document.getElementById('submitBtn').disabled = !isValid;
     }
 
     // Setup event listeners
     function setupEventListeners() {
+      // Trial selection listener
+      const trialSelect = document.getElementById('trialSelection');
+      if (trialSelect) {
+        trialSelect.addEventListener('change', function(e) {
+          handleTrialSelection(e.target.value);
+        });
+      }
+
       // Registration number lookup with debouncing
       let registrationTimeout;
       const cwagsInput = document.getElementById('cwagsNumber');
@@ -1204,7 +1307,7 @@
       if (entryType) entryType.addEventListener('change', updateEntrySummary);
       
       // Form validation listeners
-      const validationFields = ['waiverAccepted', 'cwagsNumber', 'handlerName', 'handlerEmail', 'handlerPhone', 'dogCallName'];
+      const validationFields = ['trialSelection', 'waiverAccepted', 'cwagsNumber', 'handlerName', 'handlerEmail', 'handlerPhone', 'dogCallName'];
       validationFields.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
@@ -1320,6 +1423,15 @@
       document.getElementById('entryForm').reset();
       selectedClasses.clear();
       
+      // Reset trial selection to first option and hide trial info
+      const trialSelect = document.getElementById('trialSelection');
+      if (trialSelect && availableTrials.length > 0) {
+        trialSelect.value = availableTrials[0].id;
+        handleTrialSelection(availableTrials[0].id);
+      } else {
+        document.getElementById('trialInfoSection').style.display = 'none';
+      }
+      
       // Clear checkboxes and reset buttons
       document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         if (cb.id !== 'waiverAccepted') cb.checked = false;
@@ -1339,13 +1451,13 @@
       document.getElementById('successMessage').classList.add('hidden');
       document.getElementById('entryForm').style.display = 'block';
       
-      // Scroll to top and focus on registration
+      // Scroll to top and focus on trial selection
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
       setTimeout(() => {
         isAutoFilling = false;
-        const cwagsInput = document.getElementById('cwagsNumber');
-        if (cwagsInput) cwagsInput.focus();
+        const trialSelect = document.getElementById('trialSelection');
+        if (trialSelect) trialSelect.focus();
         checkFormValidity();
       }, 500);
     };
