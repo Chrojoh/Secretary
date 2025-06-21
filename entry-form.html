@@ -768,7 +768,6 @@
         
         if (!auth.currentUser) {
           console.log("⏳ Waiting for authentication...");
-          setTimeout(loadAllTrials, 1000);
           return;
         }
 
@@ -783,6 +782,7 @@
           allTrials.push({ id: doc.id, ...doc.data() });
         });
 
+        console.log(`✅ Loaded ${allTrials.length} trials`);
         populateTrialSelector();
         
         if (allTrials.length === 0) {
@@ -790,8 +790,6 @@
           window.location.href = 'main-dashboard.html';
           return;
         }
-        
-        console.log(`✅ Loaded ${allTrials.length} trials`);
         
       } catch (error) {
         console.error("❌ Error loading trials:", error);
@@ -802,7 +800,12 @@
     // Populate trial selector dropdown
     function populateTrialSelector() {
       const selector = document.getElementById('trialSelector');
-      if (!selector) return;
+      if (!selector) {
+        console.error("❌ Trial selector element not found");
+        return;
+      }
+
+      console.log("🔄 Populating trial selector with", allTrials.length, "trials");
 
       // Clear existing options
       selector.innerHTML = '<option value="">Select a trial...</option>';
@@ -824,11 +827,13 @@
         
         option.textContent = displayName;
         selector.appendChild(option);
+        console.log("✅ Added trial option:", displayName);
       });
 
       // Auto-select if only one trial
       if (allTrials.length === 1) {
         selector.value = allTrials[0].id;
+        console.log("🎯 Auto-selecting single trial:", allTrials[0].clubName);
         onTrialSelected();
       }
     }
@@ -837,6 +842,8 @@
     function onTrialSelected() {
       const selector = document.getElementById('trialSelector');
       const selectedTrialId = selector.value;
+      
+      console.log("🎯 Trial selection changed:", selectedTrialId);
       
       if (!selectedTrialId) {
         currentTrialData = null;
@@ -849,9 +856,18 @@
       
       if (currentTrialData) {
         console.log("✅ Trial selected:", currentTrialData.clubName);
+        console.log("📊 Trial data:", currentTrialData);
         populateTrialInfo();
         populateClasses();
         checkFormValidity();
+        
+        // Focus on registration number input
+        setTimeout(() => {
+          const cwagsInput = document.getElementById('cwagsNumber');
+          if (cwagsInput) cwagsInput.focus();
+        }, 100);
+      } else {
+        console.error("❌ Could not find selected trial:", selectedTrialId);
       }
     }
 
@@ -886,7 +902,12 @@
 
     // Populate trial information
     function populateTrialInfo() {
-      if (!currentTrialData) return;
+      if (!currentTrialData) {
+        console.log("❌ No trial data to populate");
+        return;
+      }
+
+      console.log("🔄 Populating trial info for:", currentTrialData.clubName);
 
       document.getElementById('trialTitle').textContent = 
         `🏆 ${currentTrialData.clubName || 'Trial'} Entry Form`;
@@ -901,9 +922,13 @@
           .map(day => new Date(day.date).toLocaleDateString())
           .join(', ');
         document.getElementById('trialDates').textContent = dates || 'TBD';
+      } else {
+        document.getElementById('trialDates').textContent = 'TBD';
       }
 
-      document.getElementById('trialLocation').textContent = 'TBD';
+      document.getElementById('trialLocation').textContent = currentTrialData.location || 'TBD';
+      
+      console.log("✅ Trial info populated");
     }
 
     // Populate classes organized by day, class, and judge with FEO/Regular buttons
@@ -1349,19 +1374,15 @@
     window.addEventListener('load', () => {
       console.log("🚀 Page loaded, initializing entry form...");
       loadRegistrationData();
-      setTimeout(() => {
-        loadTrialData();
-        setupEventListeners();
-      }, 1000);
+      // Set up basic event listeners first
+      setupEventListeners();
     });
 
     // Initialize auth state listener
     auth.onAuthStateChanged((user) => {
       if (user) {
         console.log("✅ User authenticated, loading trial data...");
-        if (!currentTrialData) {
-          loadTrialData();
-        }
+        loadTrialData();
       } else {
         console.log("❌ User not authenticated");
         window.location.href = 'index.html';
