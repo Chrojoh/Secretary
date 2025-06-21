@@ -191,31 +191,122 @@
       transition: background-color 2s ease;
     }
     
-    .checkbox-group {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
+    .day-section {
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
     }
     
-    .checkbox-item {
+    .day-header {
+      background: #007bff;
+      color: white;
+      padding: 1rem 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .day-content {
+      background: white;
+      padding: 1rem;
+    }
+    
+    .class-section {
+      border: 1px solid #28a745;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    
+    .class-header {
+      background: #28a745;
+      color: white;
+      padding: 0.8rem 1rem;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .class-content {
+      background: #f8f9fa;
+      padding: 0.8rem;
+    }
+    
+    .round-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.8rem;
+      gap: 0.8rem;
+      padding: 0.6rem;
       background: white;
-      border-radius: 6px;
-      border: 2px solid #e1e5e9;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
       transition: all 0.3s ease;
     }
     
-    .checkbox-item:hover {
+    .round-item:hover {
       border-color: #667eea;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
     }
     
-    .checkbox-item input[type="checkbox"]:checked + label {
+    .round-item input[type="checkbox"] {
+      transform: scale(1.2);
+    }
+    
+    .round-item label {
+      flex: 1;
+      cursor: pointer;
+      margin: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .round-info {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .round-number {
+      background: #667eea;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
       font-weight: 600;
+    }
+    
+    .judge-name {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .entry-fee-tag {
+      background: #28a745;
+      color: white;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .round-item input[type="checkbox"]:checked + label {
+      font-weight: 600;
+    }
+    
+    .round-item input[type="checkbox"]:checked + label .judge-name {
       color: #667eea;
+    }
+    
+    .no-classes-message {
+      text-align: center;
+      padding: 2rem;
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 6px;
+      color: #856404;
     }
     
     .entry-summary {
@@ -441,10 +532,10 @@
         <!-- Class Selection -->
         <div class="form-section">
           <h3>🎯 Class Entries</h3>
-          <p style="margin-bottom: 1rem; color: #666;">Select the classes you wish to enter:</p>
-          <div class="checkbox-group" id="classSelection">
-            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #666;">
-              Loading available classes...
+          <p style="margin-bottom: 1rem; color: #666;">Select the specific class/judge combinations you wish to enter:</p>
+          <div id="classSelection">
+            <div style="text-align: center; padding: 2rem; color: #666;">
+              Loading available classes by day and judge...
             </div>
           </div>
         </div>
@@ -741,7 +832,7 @@
       document.getElementById('trialLocation').textContent = 'TBD';
     }
 
-    // Populate classes
+    // Populate classes organized by day, class, and judge
     function populateClasses() {
       const classSelection = document.getElementById('classSelection');
       if (!classSelection) {
@@ -751,94 +842,201 @@
 
       if (!currentTrialData || !currentTrialData.days) {
         classSelection.innerHTML = `
-          <div style="grid-column: 1 / -1; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; text-align: center;">
+          <div class="no-classes-message">
             ⚠️ No trial data available. Please check your trial setup.
           </div>
         `;
         return;
       }
 
-      const allClasses = new Set();
+      console.log("📅 Processing trial days and classes...", currentTrialData.days);
+      
+      let hasAnyClasses = false;
+      let classSelectionHTML = '';
 
-      // Extract all unique classes
-      currentTrialData.days.forEach(day => {
-        if (day && day.classes && Array.isArray(day.classes)) {
-          day.classes.forEach(cls => {
-            if (cls && cls.className && cls.className.trim()) {
-              allClasses.add(cls.className.trim());
+      // Process each day
+      currentTrialData.days.forEach((day, dayIndex) => {
+        if (!day || !day.classes || !Array.isArray(day.classes) || day.classes.length === 0) {
+          return; // Skip days with no classes
+        }
+
+        hasAnyClasses = true;
+        
+        // Format the date
+        const dayDate = day.date ? new Date(day.date).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }) : `Day ${dayIndex + 1}`;
+
+        classSelectionHTML += `
+          <div class="day-section">
+            <div class="day-header">
+              📅 ${dayDate}
+            </div>
+            <div class="day-content">
+        `;
+
+        // Group classes by name for this day
+        const classGroups = new Map();
+        
+        day.classes.forEach((cls, classIndex) => {
+          if (cls && cls.className && cls.className.trim()) {
+            const className = cls.className.trim();
+            if (!classGroups.has(className)) {
+              classGroups.set(className, []);
+            }
+            classGroups.get(className).push({...cls, dayIndex, classIndex});
+          }
+        });
+
+        // Process each class group
+        classGroups.forEach((classInstances, className) => {
+          classSelectionHTML += `
+            <div class="class-section">
+              <div class="class-header">
+                <span>🎯 ${className}</span>
+                <span>${classInstances.length} round${classInstances.length > 1 ? 's' : ''}</span>
+              </div>
+              <div class="class-content">
+          `;
+
+          // Process each round for this class
+          classInstances.forEach((classInstance, instanceIndex) => {
+            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
+              classInstance.rounds.forEach((round, roundIndex) => {
+                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
+                const roundNumber = round.roundNumber || (roundIndex + 1);
+                const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}`;
+                const entryValue = JSON.stringify({
+                  dayIndex,
+                  classIndex: classInstance.classIndex,
+                  roundIndex,
+                  className,
+                  judge: judgeName,
+                  roundNumber,
+                  date: day.date || `Day ${dayIndex + 1}`
+                });
+
+                classSelectionHTML += `
+                  <div class="round-item">
+                    <input type="checkbox" id="${uniqueId}" value='${entryValue}'>
+                    <label for="${uniqueId}">
+                      <div class="round-info">
+                        <span class="round-number">Round ${roundNumber}</span>
+                        <span class="judge-name">${judgeName}</span>
+                      </div>
+                      <span class="entry-fee-tag">Entry</span>
+                    </label>
+                  </div>
+                `;
+              });
+            } else {
+              // Class with no rounds defined - create a default entry
+              const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_0`;
+              const entryValue = JSON.stringify({
+                dayIndex,
+                classIndex: classInstance.classIndex,
+                roundIndex: 0,
+                className,
+                judge: 'Judge TBD',
+                roundNumber: 1,
+                date: day.date || `Day ${dayIndex + 1}`
+              });
+
+              classSelectionHTML += `
+                <div class="round-item">
+                  <input type="checkbox" id="${uniqueId}" value='${entryValue}'>
+                  <label for="${uniqueId}">
+                    <div class="round-info">
+                      <span class="round-number">Round 1</span>
+                      <span class="judge-name">Judge TBD</span>
+                    </div>
+                    <span class="entry-fee-tag">Entry</span>
+                  </label>
+                </div>
+              `;
             }
           });
-        }
+
+          classSelectionHTML += `
+              </div>
+            </div>
+          `;
+        });
+
+        classSelectionHTML += `
+            </div>
+          </div>
+        `;
       });
 
-      // Clear existing content
-      classSelection.innerHTML = '';
-
-      if (allClasses.size === 0) {
+      if (!hasAnyClasses) {
         classSelection.innerHTML = `
-          <div style="grid-column: 1 / -1; padding: 1rem; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; text-align: center;">
-            ⚠️ No classes found in trial data.
+          <div class="no-classes-message">
+            ⚠️ No classes found in trial data. Please create classes in your trial setup.
           </div>
         `;
         return;
       }
 
-      // Create checkboxes for each class
-      Array.from(allClasses).sort().forEach((className, index) => {
-        const checkboxItem = document.createElement('div');
-        checkboxItem.className = 'checkbox-item';
-        
-        const uniqueId = `class_${index}`;
-        
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = uniqueId;
-        checkbox.value = className;
+      classSelection.innerHTML = classSelectionHTML;
+
+      // Add event listeners to all checkboxes
+      classSelection.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', updateClassSelection);
-        
-        const label = document.createElement('label');
-        label.htmlFor = uniqueId;
-        label.textContent = className;
-        label.style.cursor = 'pointer';
-        
-        checkboxItem.appendChild(checkbox);
-        checkboxItem.appendChild(label);
-        classSelection.appendChild(checkboxItem);
       });
 
-      console.log(`✅ Populated ${allClasses.size} classes`);
+      console.log(`✅ Populated classes organized by day, class, and judge`);
     }
 
-    // Update class selection
+    // Update class selection with detailed entry tracking
     function updateClassSelection(event) {
+      const entryData = JSON.parse(event.target.value);
+      
       if (event.target.checked) {
         selectedClasses.add(event.target.value);
+        console.log(`✅ Added entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge})`);
       } else {
         selectedClasses.delete(event.target.value);
+        console.log(`❌ Removed entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge})`);
       }
       
       updateEntrySummary();
       checkFormValidity();
     }
 
-    // Update entry summary
+    // Update entry summary with detailed breakdown
     function updateEntrySummary() {
-      const classCount = selectedClasses.size;
+      const entryCount = selectedClasses.size;
       const isJunior = document.getElementById('juniorHandler').value === 'Yes';
       const isExhibition = document.getElementById('entryType').value === 'Exhibition';
       
       let totalFee = 0;
       
       if (isExhibition) {
-        totalFee = fees.exhibition * classCount;
+        totalFee = fees.exhibition * entryCount;
       } else if (isJunior) {
-        totalFee = fees.juniorHandler * classCount;
-      } else if (classCount > 0) {
-        totalFee = fees.firstClass + (fees.additionalClass * (classCount - 1));
+        totalFee = fees.juniorHandler * entryCount;
+      } else if (entryCount > 0) {
+        totalFee = fees.firstClass + (fees.additionalClass * (entryCount - 1));
       }
       
-      document.getElementById('selectedClassCount').textContent = classCount;
-      document.getElementById('calculatedFee').textContent = `$${totalFee.toFixed(2)}`;
+      // Count unique classes (for display purposes)
+      const uniqueClasses = new Set();
+      selectedClasses.forEach(entryJson => {
+        try {
+          const entry = JSON.parse(entryJson);
+          uniqueClasses.add(entry.className);
+        } catch (e) {
+          console.warn("Error parsing entry data:", e);
+        }
+      });
+      
+      document.getElementById('selectedClassCount').textContent = 
+        `${entryCount} entries (${uniqueClasses.size} classes)`;
+      document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
       document.getElementById('summaryEntryType').textContent = document.getElementById('entryType').value;
       document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
     }
@@ -939,6 +1137,16 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
         
+        // Process selected classes for storage
+        const selectedEntries = Array.from(selectedClasses).map(entryJson => {
+          try {
+            return JSON.parse(entryJson);
+          } catch (e) {
+            console.warn("Error parsing entry data:", e);
+            return null;
+          }
+        }).filter(entry => entry !== null);
+
         const entryData = {
           trialId: currentTrialData.id,
           cwagsNumber: document.getElementById('cwagsNumber').value,
@@ -950,7 +1158,10 @@
           dogBreed: document.getElementById('dogBreed').value,
           dogBirthdate: document.getElementById('dogBirthdate').value,
           dogSex: document.getElementById('dogSex').value,
-          selectedClasses: Array.from(selectedClasses),
+          selectedEntries: selectedEntries, // Detailed entry data with day/class/judge/round
+          selectedClasses: selectedEntries.map(e => e.className), // Simple class names for compatibility
+          entryCount: selectedEntries.length,
+          uniqueClassCount: new Set(selectedEntries.map(e => e.className)).size,
           juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
           entryType: document.getElementById('entryType').value,
           waiverAccepted: true,
