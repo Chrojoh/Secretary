@@ -1376,10 +1376,45 @@
     document.getElementById('entryForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
-      if (!checkFormValidity()) {
-        alert("Please complete all required fields and accept the waiver.");
+      // Check form validity manually instead of relying on checkFormValidity function
+      const trialSelected = document.getElementById('trialSelection').value.trim();
+      const waiverAccepted = document.getElementById('waiverAccepted').checked;
+      const cwagsNumber = document.getElementById('cwagsNumber').value.trim();
+      const handlerName = document.getElementById('handlerName').value.trim();
+      const handlerEmail = document.getElementById('handlerEmail').value.trim();
+      const handlerPhone = document.getElementById('handlerPhone').value.trim();
+      const dogCallName = document.getElementById('dogCallName').value.trim();
+      const hasClasses = selectedClasses.size > 0;
+      
+      console.log("📋 Form submission validation:");
+      console.log("- Trial selected:", !!trialSelected);
+      console.log("- Waiver accepted:", waiverAccepted);
+      console.log("- C-WAGS number:", !!cwagsNumber);
+      console.log("- Handler name:", !!handlerName);
+      console.log("- Handler email:", !!handlerEmail);
+      console.log("- Handler phone:", !!handlerPhone);
+      console.log("- Dog call name:", !!dogCallName);
+      console.log("- Has classes:", hasClasses, "(count:", selectedClasses.size, ")");
+      
+      const isFormValid = trialSelected && waiverAccepted && cwagsNumber && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
+      
+      if (!isFormValid) {
+        let missingFields = [];
+        if (!trialSelected) missingFields.push("Trial selection");
+        if (!waiverAccepted) missingFields.push("Waiver acceptance");
+        if (!cwagsNumber) missingFields.push("C-WAGS number");
+        if (!handlerName) missingFields.push("Handler name");
+        if (!handlerEmail) missingFields.push("Handler email");
+        if (!handlerPhone) missingFields.push("Handler phone");
+        if (!dogCallName) missingFields.push("Dog call name");
+        if (!hasClasses) missingFields.push("Class selection");
+        
+        console.log("❌ Form submission blocked. Missing:", missingFields);
+        alert("Please complete all required fields and accept the waiver. Missing: " + missingFields.join(", "));
         return;
       }
+      
+      console.log("✅ Form submission proceeding...");
       
       try {
         const submitBtn = document.getElementById('submitBtn');
@@ -1398,12 +1433,12 @@
 
         const entryData = {
           trialId: currentTrialData.id,
-          cwagsNumber: document.getElementById('cwagsNumber').value,
-          handlerName: document.getElementById('handlerName').value,
-          handlerPhone: document.getElementById('handlerPhone').value,
-          handlerEmail: document.getElementById('handlerEmail').value,
+          cwagsNumber: cwagsNumber,
+          handlerName: handlerName,
+          handlerPhone: handlerPhone,
+          handlerEmail: handlerEmail,
           emergencyContact: document.getElementById('emergencyContact').value,
-          dogCallName: document.getElementById('dogCallName').value,
+          dogCallName: dogCallName,
           dogBreed: document.getElementById('dogBreed').value,
           dogBirthdate: document.getElementById('dogBirthdate').value,
           dogSex: document.getElementById('dogSex').value,
@@ -1419,6 +1454,8 @@
           submittedAt: new Date(),
           submittedBy: auth.currentUser ? auth.currentUser.uid : 'manual'
         };
+        
+        console.log("💾 Submitting entry data:", entryData);
         
         // Save entry
         const docRef = await addDoc(collection(db, "entries"), entryData);
