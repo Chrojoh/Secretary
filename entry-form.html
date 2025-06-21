@@ -1046,14 +1046,13 @@
                         <input type="checkbox" id="${uniqueId}_regular" value='${regularEntryValue}'>
                         <span class="entry-tag regular">Regular</span>
                       </label>
-                      ${feoAvailable ? `
-                        <label class="entry-button feo" for="${uniqueId}_feo">
+                      ${feoAvailable ? 
+                        `<label class="entry-button feo" for="${uniqueId}_feo">
                           <input type="checkbox" id="${uniqueId}_feo" value='${feoEntryValue}'>
                           <span class="entry-tag feo">FEO</span>
-                        </label>
-                      ` : `
-                        <span class="entry-tag unavailable">FEO N/A</span>
-                      `}
+                        </label>` : 
+                        `<span class="entry-tag unavailable">FEO N/A</span>`
+                      }
                     </div>
                   </div>
                 `;
