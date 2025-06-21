@@ -338,6 +338,179 @@
             opacity: 0.9;
         }
 
+        /* PDF Editor Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 2% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+
+        .score-entry-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .scent-locations {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .scent-location-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+
+        .scent-location-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .scent-location-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .entrants-scoring {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .entrant-row {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .entrant-header {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .entrant-scoring-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) 2fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .scent-result-group {
+            text-align: center;
+        }
+
+        .scent-result-group label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #6c757d;
+        }
+
+        .scent-checkboxes {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        .checkbox-option span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .fault-input, .time-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .pass-fail-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .pass-fail-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pass-fail-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
         @media print {
             body {
                 background: white;
@@ -357,8 +530,14 @@
                 border: none;
                 box-shadow: none;
             }
+
+            .modal {
+                display: none !important;
+            }
         }
     </style>
+    <!-- Add PDF-lib for PDF generation -->
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -408,6 +587,58 @@
         <div id="scoreSheetsContainer" style="display: none;"></div>
     </div>
 
+    <!-- Score Entry Modal -->
+    <div id="scoreEntryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Score Sheet</h2>
+                <span class="close" onclick="closeScoreModal()">&times;</span>
+            </div>
+            
+            <div id="scoreEntryForm" class="score-entry-form">
+                <!-- Scent Locations Section -->
+                <div>
+                    <h3>🎯 Scent Locations</h3>
+                    <div class="scent-locations">
+                        <div class="scent-location-group">
+                            <label for="scent1Location">Scent 1 Located in/on:</label>
+                            <input type="text" id="scent1Location" placeholder="Enter location...">
+                        </div>
+                        <div class="scent-location-group">
+                            <label for="scent2Location">Scent 2 Located in/on:</label>
+                            <input type="text" id="scent2Location" placeholder="Enter location...">
+                        </div>
+                        <div class="scent-location-group">
+                            <label for="scent3Location">Scent 3 Located in/on:</label>
+                            <input type="text" id="scent3Location" placeholder="Enter location...">
+                        </div>
+                        <div class="scent-location-group">
+                            <label for="scent4Location">Scent 4 Located in/on:</label>
+                            <input type="text" id="scent4Location" placeholder="Enter location...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entrants Scoring Section -->
+                <div>
+                    <h3>📊 Team Scoring</h3>
+                    <div id="entrantsScoring" class="entrants-scoring">
+                        <!-- Dynamic entrant rows will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeScoreModal()">Cancel</button>
+                    <div>
+                        <button class="btn btn-warning" onclick="saveScores()">💾 Save Scores</button>
+                        <button class="btn btn-success" onclick="generateFilledPDF()">📄 Download Filled PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // Firebase imports
         import { auth, db } from './js/firebase.js';
@@ -419,6 +650,8 @@
         let entries = [];
         let runningOrderData = {};
         let generatedSheets = [];
+        let currentEditingSheet = null;
+        let currentScoreData = {};
 
         // Initialize the application
         async function init() {
@@ -1090,19 +1323,23 @@
             } else {
                 sheets.forEach(sheet => {
                     const createdDate = sheet.createdAt ? sheet.createdAt.toDate().toLocaleDateString() : 'Unknown';
+                    const hasScores = sheet.scoreData && Object.keys(sheet.scoreData).length > 0;
+                    const statusClass = hasScores ? 'status-completed' : sheet.status;
+                    const statusText = hasScores ? 'SCORED' : sheet.status.toUpperCase();
+                    
                     html += `
                         <div class="score-sheet-item">
                             <div class="score-sheet-info">
                                 <div class="score-sheet-title">${sheet.trialName} - ${sheet.judge} - ${sheet.classRound}</div>
                                 <div class="score-sheet-details">
                                     ${sheet.entrants.length} entrants • ${sheet.date} • Created: ${createdDate}
-                                    <span class="status-badge status-${sheet.status}">${sheet.status.toUpperCase()}</span>
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
                                 </div>
                             </div>
                             <div class="score-sheet-actions">
                                 <button class="btn btn-secondary" onclick="previewStoredSheet('${sheet.id}')">Preview</button>
                                 <button class="btn btn-success" onclick="printStoredSheet('${sheet.id}')">Print</button>
-                                <button class="btn btn-warning" onclick="editScores('${sheet.id}')">Edit Scores</button>
+                                <button class="btn btn-warning" onclick="editScores('${sheet.id}')">✏️ Edit Scores</button>
                                 <button class="btn btn-danger" onclick="deleteSheet('${sheet.id}')">Delete</button>
                             </div>
                         </div>
@@ -1158,9 +1395,443 @@
             }
         };
 
-        // Edit scores (placeholder for future functionality)
-        window.editScores = function(sheetId) {
-            alert('Score editing functionality will be implemented in a future update. This will allow you to digitally enter and track scoring data.');
+        // Edit scores - Open the scoring modal
+        window.editScores = async function(sheetId) {
+            try {
+                const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
+                if (!sheetDoc.exists()) {
+                    alert('Score sheet not found');
+                    return;
+                }
+
+                currentEditingSheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                
+                // Load existing score data if available
+                currentScoreData = currentEditingSheet.scoreData || {};
+                
+                // Populate the scoring form
+                populateScoringForm();
+                
+                // Show the modal
+                document.getElementById('scoreEntryModal').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading sheet for editing:', error);
+                alert('Error loading sheet: ' + error.message);
+            }
+        };
+
+        // Populate the scoring form with sheet data
+        function populateScoringForm() {
+            if (!currentEditingSheet) return;
+
+            // Set scent locations
+            document.getElementById('scent1Location').value = currentScoreData.scent1Location || '';
+            document.getElementById('scent2Location').value = currentScoreData.scent2Location || '';
+            document.getElementById('scent3Location').value = currentScoreData.scent3Location || '';
+            document.getElementById('scent4Location').value = currentScoreData.scent4Location || '';
+
+            // Generate entrant scoring rows
+            const entrantsContainer = document.getElementById('entrantsScoring');
+            let html = '';
+
+            currentEditingSheet.entrants.forEach((entrant, index) => {
+                const entrantKey = `entrant_${index}`;
+                const entrantScores = currentScoreData[entrantKey] || {};
+                
+                html += `
+                    <div class="entrant-row">
+                        <div class="entrant-header">
+                            ${index + 1}. ${entrant.handler} - ${entrant.dog}
+                        </div>
+                        <div class="entrant-scoring-grid">
+                            <!-- Scent 1 -->
+                            <div class="scent-result-group">
+                                <label>Scent 1</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent1_found" ${entrantScores.scent1Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent1_not_found" ${entrantScores.scent1NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scent 2 -->
+                            <div class="scent-result-group">
+                                <label>Scent 2</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent2_found" ${entrantScores.scent2Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent2_not_found" ${entrantScores.scent2NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scent 3 -->
+                            <div class="scent-result-group">
+                                <label>Scent 3</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent3_found" ${entrantScores.scent3Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent3_not_found" ${entrantScores.scent3NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scent 4 -->
+                            <div class="scent-result-group">
+                                <label>Scent 4</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent4_found" ${entrantScores.scent4Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent4_not_found" ${entrantScores.scent4NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Faults -->
+                            <div>
+                                <label>Faults</label>
+                                <input type="text" class="fault-input" id="${entrantKey}_faults" 
+                                       value="${entrantScores.faults || ''}" placeholder="Enter faults...">
+                            </div>
+                            
+                            <!-- Time -->
+                            <div>
+                                <label>Time</label>
+                                <input type="text" class="time-input" id="${entrantKey}_time" 
+                                       value="${entrantScores.time || ''}" placeholder="MM:SS">
+                            </div>
+                            
+                            <!-- Pass/Fail -->
+                            <div class="pass-fail-group">
+                                <div class="pass-fail-option">
+                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_pass" 
+                                           value="pass" ${entrantScores.result === 'pass' ? 'checked' : ''}>
+                                    <label for="${entrantKey}_pass">Pass</label>
+                                </div>
+                                <div class="pass-fail-option">
+                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_fail" 
+                                           value="fail" ${entrantScores.result === 'fail' ? 'checked' : ''}>
+                                    <label for="${entrantKey}_fail">Fail</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            entrantsContainer.innerHTML = html;
+
+            // Add event listeners for mutual exclusivity of checkboxes
+            currentEditingSheet.entrants.forEach((entrant, index) => {
+                const entrantKey = `entrant_${index}`;
+                
+                // For each scent, make found/not found mutually exclusive
+                for (let scent = 1; scent <= 4; scent++) {
+                    const foundCheckbox = document.getElementById(`${entrantKey}_scent${scent}_found`);
+                    const notFoundCheckbox = document.getElementById(`${entrantKey}_scent${scent}_not_found`);
+                    
+                    if (foundCheckbox && notFoundCheckbox) {
+                        foundCheckbox.addEventListener('change', function() {
+                            if (this.checked) {
+                                notFoundCheckbox.checked = false;
+                            }
+                        });
+                        
+                        notFoundCheckbox.addEventListener('change', function() {
+                            if (this.checked) {
+                                foundCheckbox.checked = false;
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        // Close score modal
+        window.closeScoreModal = function() {
+            document.getElementById('scoreEntryModal').style.display = 'none';
+            currentEditingSheet = null;
+            currentScoreData = {};
+        };
+
+        // Save scores to database
+        window.saveScores = async function() {
+            if (!currentEditingSheet) {
+                alert('No sheet selected for editing');
+                return;
+            }
+
+            try {
+                // Collect all score data
+                const scoreData = {
+                    scent1Location: document.getElementById('scent1Location').value,
+                    scent2Location: document.getElementById('scent2Location').value,
+                    scent3Location: document.getElementById('scent3Location').value,
+                    scent4Location: document.getElementById('scent4Location').value
+                };
+
+                // Collect entrant scores
+                currentEditingSheet.entrants.forEach((entrant, index) => {
+                    const entrantKey = `entrant_${index}`;
+                    
+                    scoreData[entrantKey] = {
+                        handler: entrant.handler,
+                        dog: entrant.dog,
+                        scent1Found: document.getElementById(`${entrantKey}_scent1_found`)?.checked || false,
+                        scent1NotFound: document.getElementById(`${entrantKey}_scent1_not_found`)?.checked || false,
+                        scent2Found: document.getElementById(`${entrantKey}_scent2_found`)?.checked || false,
+                        scent2NotFound: document.getElementById(`${entrantKey}_scent2_not_found`)?.checked || false,
+                        scent3Found: document.getElementById(`${entrantKey}_scent3_found`)?.checked || false,
+                        scent3NotFound: document.getElementById(`${entrantKey}_scent3_not_found`)?.checked || false,
+                        scent4Found: document.getElementById(`${entrantKey}_scent4_found`)?.checked || false,
+                        scent4NotFound: document.getElementById(`${entrantKey}_scent4_not_found`)?.checked || false,
+                        faults: document.getElementById(`${entrantKey}_faults`)?.value || '',
+                        time: document.getElementById(`${entrantKey}_time`)?.value || '',
+                        result: document.querySelector(`input[name="${entrantKey}_result"]:checked`)?.value || ''
+                    };
+                });
+
+                // Update the sheet in Firebase
+                await updateDoc(doc(db, 'scoreSheets', currentEditingSheet.id), {
+                    scoreData: scoreData,
+                    status: 'scored',
+                    scoredAt: new Date(),
+                    lastModified: new Date()
+                });
+
+                alert('Scores saved successfully!');
+                closeScoreModal();
+                
+                // Refresh the stored sheets view
+                viewStoredSheets();
+
+            } catch (error) {
+                console.error('Error saving scores:', error);
+                alert('Error saving scores: ' + error.message);
+            }
+        };
+
+        // Generate filled PDF
+        window.generateFilledPDF = async function() {
+            if (!currentEditingSheet) {
+                alert('No sheet selected');
+                return;
+            }
+
+            try {
+                // Create a new PDF document
+                const pdfDoc = await PDFLib.PDFDocument.create();
+                const page = pdfDoc.addPage([612, 792]); // 8.5 x 11 inches
+                
+                // Get fonts
+                const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+                const boldFont = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+                // Set up drawing
+                const { width, height } = page.getSize();
+                let yPosition = height - 50;
+
+                // Header
+                page.drawText('C-WAGS Score Sheet', {
+                    x: 50,
+                    y: yPosition,
+                    size: 16,
+                    font: boldFont,
+                });
+                yPosition -= 30;
+
+                page.drawText(`Date: ${currentEditingSheet.date}`, {
+                    x: 50,
+                    y: yPosition,
+                    size: 12,
+                    font: font,
+                });
+                yPosition -= 20;
+
+                page.drawText(`Class: ${currentEditingSheet.className}`, {
+                    x: 50,
+                    y: yPosition,
+                    size: 12,
+                    font: boldFont,
+                });
+                yPosition -= 20;
+
+                page.drawText(`Judge: ${currentEditingSheet.judge}`, {
+                    x: 50,
+                    y: yPosition,
+                    size: 12,
+                    font: boldFont,
+                });
+                yPosition -= 30;
+
+                page.drawText(`Round: ${currentEditingSheet.roundNumber}`, {
+                    x: 50,
+                    y: yPosition,
+                    size: 12,
+                    font: boldFont,
+                });
+                yPosition -= 40;
+
+                // Scent locations
+                page.drawText('Scent Locations:', {
+                    x: 50,
+                    y: yPosition,
+                    size: 12,
+                    font: boldFont,
+                });
+                yPosition -= 20;
+
+                const scentLocations = [
+                    document.getElementById('scent1Location').value,
+                    document.getElementById('scent2Location').value,
+                    document.getElementById('scent3Location').value,
+                    document.getElementById('scent4Location').value
+                ];
+
+                scentLocations.forEach((location, index) => {
+                    page.drawText(`Scent ${index + 1}: ${location || 'Not specified'}`, {
+                        x: 70,
+                        y: yPosition,
+                        size: 10,
+                        font: font,
+                    });
+                    yPosition -= 15;
+                });
+
+                yPosition -= 20;
+
+                // Results table header
+                page.drawText('Results:', {
+                    x: 50,
+                    y: yPosition,
+                    size: 12,
+                    font: boldFont,
+                });
+                yPosition -= 25;
+
+                // Table headers
+                const tableHeaders = ['Team', 'Dog - Handler', 'Scent 1', 'Scent 2', 'Scent 3', 'Scent 4', 'Faults', 'Time', 'Result'];
+                const columnWidths = [40, 120, 50, 50, 50, 50, 80, 60, 60];
+                let xPosition = 50;
+
+                // Draw table header
+                tableHeaders.forEach((header, index) => {
+                    page.drawText(header, {
+                        x: xPosition,
+                        y: yPosition,
+                        size: 9,
+                        font: boldFont,
+                    });
+                    xPosition += columnWidths[index];
+                });
+                
+                yPosition -= 20;
+
+                // Draw entrant data
+                currentEditingSheet.entrants.forEach((entrant, index) => {
+                    const entrantKey = `entrant_${index}`;
+                    const entrantScores = currentScoreData[entrantKey] || {};
+                    
+                    // Collect current form data
+                    const scent1Result = document.getElementById(`${entrantKey}_scent1_found`)?.checked ? '✓' : 
+                                       document.getElementById(`${entrantKey}_scent1_not_found`)?.checked ? '✗' : '';
+                    const scent2Result = document.getElementById(`${entrantKey}_scent2_found`)?.checked ? '✓' : 
+                                       document.getElementById(`${entrantKey}_scent2_not_found`)?.checked ? '✗' : '';
+                    const scent3Result = document.getElementById(`${entrantKey}_scent3_found`)?.checked ? '✓' : 
+                                       document.getElementById(`${entrantKey}_scent3_not_found`)?.checked ? '✗' : '';
+                    const scent4Result = document.getElementById(`${entrantKey}_scent4_found`)?.checked ? '✓' : 
+                                       document.getElementById(`${entrantKey}_scent4_not_found`)?.checked ? '✗' : '';
+                    const faults = document.getElementById(`${entrantKey}_faults`)?.value || '';
+                    const time = document.getElementById(`${entrantKey}_time`)?.value || '';
+                    const result = document.querySelector(`input[name="${entrantKey}_result"]:checked`)?.value || '';
+
+                    const rowData = [
+                        (index + 1).toString(),
+                        `${entrant.handler} - ${entrant.dog}`,
+                        scent1Result,
+                        scent2Result,
+                        scent3Result,
+                        scent4Result,
+                        faults,
+                        time,
+                        result.toUpperCase()
+                    ];
+
+                    xPosition = 50;
+                    rowData.forEach((data, colIndex) => {
+                        // Truncate long text to fit in columns
+                        let displayText = data;
+                        if (colIndex === 1 && data.length > 18) { // Handler-Dog column
+                            displayText = data.substring(0, 15) + '...';
+                        } else if (colIndex === 6 && data.length > 12) { // Faults column
+                            displayText = data.substring(0, 9) + '...';
+                        }
+
+                        page.drawText(displayText, {
+                            x: xPosition,
+                            y: yPosition,
+                            size: 8,
+                            font: font,
+                        });
+                        xPosition += columnWidths[colIndex];
+                    });
+                    
+                    yPosition -= 15;
+
+                    // Check if we need a new page
+                    if (yPosition < 100) {
+                        const newPage = pdfDoc.addPage([612, 792]);
+                        yPosition = height - 50;
+                        // Continue on new page...
+                    }
+                });
+
+                // Add footer
+                page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
+                    x: 50,
+                    y: 50,
+                    size: 8,
+                    font: font,
+                });
+
+                // Generate PDF bytes
+                const pdfBytes = await pdfDoc.save();
+                
+                // Create download link
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${currentEditingSheet.trialName}_${currentEditingSheet.judge}_${currentEditingSheet.classRound}_Scored.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                alert('Filled PDF generated and downloaded successfully!');
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF: ' + error.message);
+            }
         };
 
         // Delete sheet
@@ -1186,6 +1857,14 @@
         window.generateAllScoreSheets = generateAllScoreSheets;
         window.printScoreSheets = printScoreSheets;
 
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('scoreEntryModal');
+            if (event.target === modal) {
+                closeScoreModal();
+            }
+        };
+
         // Initialize when auth is ready
         auth.onAuthStateChanged(async (user) => {
             if (user) {
@@ -1196,4 +1875,4 @@
         });
     </script>
 </body>
-</html>>
+</html>
