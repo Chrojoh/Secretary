@@ -1366,10 +1366,30 @@ function generateFillableScoreSheetHTML(sheetData) {
             }
         };
 
-        // Edit scores (placeholder for future functionality)
-        window.editScores = function(sheetId) {
-            alert('Score editing functionality will be implemented in a future update. This will allow you to digitally enter and track scoring data.');
-        };
+       // Edit scores - Simple fillable form approach
+window.editScores = async function(sheetId) {
+    try {
+        const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
+        if (!sheetDoc.exists()) {
+            alert('Score sheet not found');
+            return;
+        }
+
+        const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
+        const container = document.getElementById('scoreSheetsContainer');
+        
+        // Generate fillable score sheet HTML
+        container.innerHTML = generateFillableScoreSheetHTML(sheet);
+        container.style.display = 'block';
+        
+        // Scroll to the form
+        container.scrollIntoView({ behavior: 'smooth' });
+        
+    } catch (error) {
+        console.error('Error loading sheet for editing:', error);
+        alert('Error loading sheet: ' + error.message);
+    }
+};
 
         // Delete sheet
         window.deleteSheet = async function(sheetId) {
