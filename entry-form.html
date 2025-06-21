@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trial Entry Form</title>
-  <link rel="stylesheet" href="css/style.css">
   <style>
     * {
       margin: 0;
@@ -11,106 +12,59 @@
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f7fa;
-      line-height: 1.6;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem 1rem;
     }
     
     .container {
-      max-width: 800px;
+      max-width: 1000px;
       margin: 0 auto;
-      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
     
     .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #1a1a2e;
       color: white;
       padding: 2rem;
-      border-radius: 12px 12px 0 0;
       text-align: center;
     }
     
-    .trial-info {
-      background: white;
-      padding: 1.5rem;
-      border-left: 4px solid #667eea;
-      margin-bottom: 2rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
     }
     
-    .trial-details {
+    .trial-info {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-    }
-    
-    .entry-form {
-      background: white;
-      border-radius: 0 0 12px 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    
-    .waiver-section {
-      background: #fff9e6;
-      border: 2px solid #ffc107;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .waiver-section h3 {
-      color: #e65100;
-      margin-bottom: 1rem;
-    }
-    
-    .waiver-content {
-      background: white;
-      padding: 1rem;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-    
-    .waiver-agreement {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.8rem;
       margin-top: 1rem;
-      padding: 1rem;
-      background: #f8f9fa;
-      border-radius: 6px;
+      font-size: 0.9rem;
     }
     
-    .waiver-agreement input[type="checkbox"] {
-      margin-top: 0.2rem;
-      transform: scale(1.2);
+    .form-container {
+      padding: 2rem;
     }
     
     .form-section {
       margin-bottom: 2rem;
       padding: 1.5rem;
-      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
       border-radius: 8px;
-      border-left: 4px solid #28a745;
-    }
-    
-    .form-section.primary {
-      border-left-color: #007bff;
-      background: #f0f8ff;
+      background: #fafafa;
     }
     
     .form-section h3 {
-      color: #28a745;
+      color: #1a1a2e;
       margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .form-section.primary h3 {
-      color: #007bff;
+      font-size: 1.3rem;
+      border-bottom: 2px solid #667eea;
+      padding-bottom: 0.5rem;
     }
     
     .form-row {
@@ -125,12 +79,8 @@
       flex-direction: column;
     }
     
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
-    
     .form-group label {
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: 0.5rem;
       color: #333;
     }
@@ -140,164 +90,238 @@
       color: #e74c3c;
     }
     
-    .form-group input, .form-group select, .form-group textarea {
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
       padding: 0.8rem;
-      border: 2px solid #e1e5e9;
+      border: 2px solid #ddd;
       border-radius: 6px;
       font-size: 1rem;
       transition: border-color 0.3s ease;
     }
     
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
       outline: none;
       border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
     .lookup-status {
-      margin-top: 0.5rem;
       padding: 0.8rem;
       border-radius: 6px;
-      font-size: 0.9rem;
-      display: none;
+      margin: 1rem 0;
+      font-weight: 500;
     }
     
     .lookup-status.loading {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
+      background: #e3f2fd;
+      color: #1976d2;
+      border: 1px solid #bbdefb;
     }
     
     .lookup-status.success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
+      background: #e8f5e8;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
     }
     
-    .lookup-status.info {
-      background: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
+    .lookup-status.error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
     }
     
-    .lookup-status.warning {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    
-    .auto-filled {
-      background-color: #e8f5e8 !important;
-      transition: background-color 2s ease;
-    }
-    
-    .day-section {
-      border: 2px solid #007bff;
+    .waiver-section {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
       border-radius: 8px;
-      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .waiver-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+    
+    .waiver-checkbox input[type="checkbox"] {
+      margin-top: 0.2rem;
+    }
+    
+    .waiver-checkbox label {
+      font-weight: 600;
+      color: #856404;
+    }
+    
+    /* Class Selection Styles */
+    .day-section {
+      margin-bottom: 2rem;
+      border: 2px solid #667eea;
+      border-radius: 8px;
       overflow: hidden;
     }
     
     .day-header {
-      background: #007bff;
+      background: #667eea;
       color: white;
-      padding: 1rem 1.5rem;
-      font-weight: 600;
-      font-size: 1.1rem;
-    }
-    
-    .day-content {
-      background: white;
       padding: 1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-align: center;
     }
     
-    .class-section {
-      border: 1px solid #28a745;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      overflow: hidden;
+    .classes-container {
+      background: white;
+    }
+    
+    .class-group {
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .class-group:last-child {
+      border-bottom: none;
     }
     
     .class-header {
-      background: #28a745;
-      color: white;
-      padding: 0.8rem 1rem;
-      font-weight: 500;
+      background: #f8f9ff;
+      padding: 1rem;
+      border-bottom: 1px solid #e0e0e0;
+      font-weight: 600;
+      color: #333;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 0.5rem;
     }
     
     .class-content {
-      background: #f8f9fa;
-      padding: 0.8rem;
+      padding: 0;
     }
     
     .round-item {
       display: flex;
       align-items: center;
-      gap: 0.8rem;
-      padding: 0.6rem;
-      background: white;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
-      transition: all 0.3s ease;
+      justify-content: space-between;
+      padding: 1rem;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background-color 0.2s ease;
     }
     
     .round-item:hover {
-      border-color: #667eea;
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+      background: #f8f9ff;
+      box-shadow: inset 0 0 8px rgba(102, 126, 234, 0.1);
     }
     
-    .round-item input[type="checkbox"] {
-      transform: scale(1.2);
-    }
-    
-    .round-item label {
-      flex: 1;
-      cursor: pointer;
-      margin: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .round-item:last-child {
+      border-bottom: none;
     }
     
     .round-info {
       display: flex;
       gap: 1rem;
       align-items: center;
+      flex: 1;
     }
     
     .round-number {
       background: #667eea;
       color: white;
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.85rem;
       font-weight: 600;
+      min-width: 70px;
+      text-align: center;
     }
     
     .judge-name {
       font-weight: 500;
       color: #333;
+      font-size: 1rem;
     }
     
-    .entry-fee-tag {
+    .entry-buttons {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    
+    .entry-button {
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .entry-button input[type="checkbox"] {
+      display: none;
+    }
+    
+    .entry-tag {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 2px solid;
+      transition: all 0.3s ease;
+      min-width: 100px;
+      text-align: center;
+    }
+    
+    .entry-tag.regular {
+      background: white;
+      color: #28a745;
+      border-color: #28a745;
+    }
+    
+    .entry-button.regular:hover .entry-tag.regular {
+      background: #f8f9fa;
+      transform: translateY(-1px);
+    }
+    
+    .entry-button input[type="checkbox"]:checked + .entry-tag.regular {
       background: #28a745;
       color: white;
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.8rem;
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+    
+    .entry-tag.feo {
+      background: white;
+      color: #ffc107;
+      border-color: #ffc107;
+    }
+    
+    .entry-button.feo:hover .entry-tag.feo {
+      background: #fffbf0;
+      transform: translateY(-1px);
+    }
+    
+    .entry-button input[type="checkbox"]:checked + .entry-tag.feo {
+      background: #ffc107;
+      color: #333;
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    }
+    
+    .entry-tag.unavailable {
+      background: #f8f9fa;
+      color: #6c757d;
+      border: 2px solid #dee2e6;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
       font-weight: 500;
+      border-radius: 6px;
+      min-width: 100px;
+      text-align: center;
     }
-    
-    .round-item input[type="checkbox"]:checked + label {
-      font-weight: 600;
-    }
-    
-    .round-item input[type="checkbox"]:checked + label .judge-name {
-      color: #667eea;
+
+    .entry-status {
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-left: 0.5rem;
     }
     
     .no-classes-message {
@@ -319,52 +343,66 @@
     
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      margin-top: 1rem;
     }
     
     .summary-item {
-      background: white;
-      padding: 1rem;
-      border-radius: 6px;
-      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #c3e6cb;
+    }
+    
+    .summary-item:last-child {
+      border-bottom: none;
     }
     
     .summary-item strong {
-      display: block;
+      color: #155724;
+    }
+    
+    .summary-item span {
+      font-weight: 600;
       color: #28a745;
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
     }
     
     .button-group {
       display: flex;
       gap: 1rem;
       justify-content: center;
-      margin-top: 2rem;
       flex-wrap: wrap;
+      margin-top: 2rem;
     }
     
     .btn {
       padding: 1rem 2rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
-      min-width: 150px;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
     }
     
     .btn-primary {
-      background: linear-gradient(45deg, #28a745, #20c997);
+      background: #28a745;
       color: white;
     }
     
-    .btn-primary:hover:not(:disabled) {
+    .btn-primary:hover {
+      background: #218838;
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+    
+    .btn-primary:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
     }
     
     .btn-secondary {
@@ -374,103 +412,85 @@
     
     .btn-secondary:hover {
       background: #5a6268;
-      transform: translateY(-1px);
-    }
-    
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-    
-    .success-message {
-      background: #d4edda;
-      border: 2px solid #28a745;
-      color: #155724;
-      padding: 2rem;
-      border-radius: 8px;
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .hidden {
-      display: none;
+      transform: translateY(-2px);
     }
     
     @media (max-width: 768px) {
-      .container {
-        padding: 10px;
+      body {
+        padding: 1rem 0.5rem;
       }
       
-      .form-row, .checkbox-group, .summary-grid {
+      .header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .trial-info {
         grid-template-columns: 1fr;
+        text-align: left;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .round-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+      }
+      
+      .round-info {
+        justify-content: center;
+      }
+      
+      .entry-buttons {
+        justify-content: center;
       }
       
       .button-group {
         flex-direction: column;
+      }
+      
+      .summary-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <div class="header">
       <h1 id="trialTitle">🏆 Trial Entry Form</h1>
-      <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
-    </div>
-
-    <!-- Trial Information -->
-    <div class="trial-info">
-      <h3>📋 Trial Information</h3>
-      <div class="trial-details">
+      <div class="trial-info">
         <div><strong>Club:</strong> <span id="clubName">Loading...</span></div>
         <div><strong>Dates:</strong> <span id="trialDates">Loading...</span></div>
-        <div><strong>Location:</strong> <span id="trialLocation">Loading...</span></div>
         <div><strong>Secretary:</strong> <span id="trialSecretary">Loading...</span></div>
+        <div><strong>Location:</strong> <span id="trialLocation">Loading...</span></div>
       </div>
     </div>
-
-    <div class="entry-form">
-      <!-- Success Message -->
-      <div id="successMessage" class="success-message hidden">
-        <h3>✅ Entry Submitted Successfully!</h3>
-        <p>The entry has been recorded for this trial.</p>
-        <button class="btn btn-primary" onclick="resetForm()">Enter Another Participant</button>
-      </div>
-
-      <!-- Waiver Section -->
-      <div class="waiver-section">
-        <h3>⚠️ Liability Waiver & Release</h3>
-        <div class="waiver-content">
-          <p><strong>WAIVER AND RELEASE OF LIABILITY</strong></p>
-          <p>I understand that participation in dog training and scent work activities involves inherent risks including but not limited to: dogs working in close proximity to each other, off-leash activities, and interaction with other dogs and handlers.</p>
-          <p>I acknowledge that I participate at my own risk and agree to hold harmless the hosting club, property owners, judges, and event organizers from any claims, damages, or injuries that may occur.</p>
-        </div>
-        <div class="waiver-agreement">
-          <input type="checkbox" id="waiverAccepted" required>
-          <label for="waiverAccepted">
-            <strong>I have read, understood, and agree to the terms of this waiver and release of liability.</strong>
-          </label>
-        </div>
-      </div>
-
-      <!-- Entry Form -->
+    
+    <div class="form-container">
       <form id="entryForm">
-        <!-- Registration Number - FIRST -->
-        <div class="form-section primary">
+        <!-- Waiver Section -->
+        <div class="waiver-section">
+          <h3>⚖️ Waiver and Release</h3>
+          <p>By entering this trial, I agree that I am familiar with the rules and regulations of C-WAGS and agree to abide by them. I acknowledge that participation in this event is undertaken at my own risk and agree to hold harmless the trial-giving club, its officers, directors, agents, and the owners of the trial site from any loss, damage, or claim that may be alleged to have been caused directly or indirectly by any act of my dog or myself.</p>
+          <div class="waiver-checkbox">
+            <input type="checkbox" id="waiverAccepted" required>
+            <label for="waiverAccepted">I accept the waiver and release terms above *</label>
+          </div>
+        </div>
+
+        <!-- Registration Lookup -->
+        <div class="form-section">
           <h3>🔍 Registration Lookup</h3>
           <div class="form-row">
-            <div class="form-group required full-width">
+            <div class="form-group required">
               <label>C-WAGS Registration Number</label>
-              <input type="text" id="cwagsNumber" required placeholder="XX-XXXX-XX" 
-                     style="font-size: 1.2rem; font-weight: bold; background: #f0f8ff;">
-              <small style="color: #666; margin-top: 0.5rem; display: block;">
-                💡 Enter registration number first - handler and dog info will auto-fill
-              </small>
+              <input type="text" id="cwagsNumber" required placeholder="Enter C-WAGS number for auto-fill">
             </div>
           </div>
-          <div id="lookupStatus" class="lookup-status"></div>
+          <div id="lookupStatus" class="lookup-status" style="display: none;"></div>
         </div>
 
         <!-- Handler Information -->
@@ -479,11 +499,11 @@
           <div class="form-row">
             <div class="form-group required">
               <label>Handler Name</label>
-              <input type="text" id="handlerName" required placeholder="Will auto-fill from registration">
+              <input type="text" id="handlerName" required placeholder="First and Last Name">
             </div>
             <div class="form-group required">
               <label>Phone Number</label>
-              <input type="tel" id="handlerPhone" required placeholder="(xxx) xxx-xxxx">
+              <input type="tel" id="handlerPhone" required placeholder="(555) 123-4567">
             </div>
           </div>
           <div class="form-row">
@@ -532,7 +552,7 @@
         <!-- Class Selection -->
         <div class="form-section">
           <h3>🎯 Class Entries</h3>
-          <p style="margin-bottom: 1rem; color: #666;">Select the specific class/judge combinations you wish to enter:</p>
+          <p style="margin-bottom: 1rem; color: #666;">Select Regular or FEO entries for specific class/judge combinations:</p>
           <div id="classSelection">
             <div style="text-align: center; padding: 2rem; color: #666;">
               Loading available classes by day and judge...
@@ -552,11 +572,8 @@
               </select>
             </div>
             <div class="form-group">
-              <label>Entry Type</label>
-              <select id="entryType">
-                <option value="Regular">Regular Entry</option>
-                <option value="Exhibition">Exhibition Only</option>
-              </select>
+              <label>Special Needs/Requests</label>
+              <input type="text" id="specialNeeds" placeholder="Any special accommodations needed">
             </div>
           </div>
         </div>
@@ -566,16 +583,20 @@
           <h3>💰 Entry Summary</h3>
           <div class="summary-grid">
             <div class="summary-item">
-              <strong>Classes Selected</strong>
-              <span id="selectedClassCount">0</span>
+              <strong>Regular Entries</strong>
+              <span id="regularEntryCount">0</span>
+            </div>
+            <div class="summary-item">
+              <strong>FEO Entries</strong>
+              <span id="feoEntryCount">0</span>
+            </div>
+            <div class="summary-item">
+              <strong>Total Entries</strong>
+              <span id="totalEntryCount">0</span>
             </div>
             <div class="summary-item">
               <strong>Entry Fee</strong>
               <span id="calculatedFee">$0.00</span>
-            </div>
-            <div class="summary-item">
-              <strong>Entry Type</strong>
-              <span id="summaryEntryType">Regular</span>
             </div>
             <div class="summary-item">
               <strong>Junior Handler</strong>
@@ -604,7 +625,7 @@
     import { auth, db } from './js/firebase.js';
     import { collection, query, where, getDocs, addDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-    console.log("🎯 Entry form loaded");
+    console.log("🎯 Updated Entry form loaded with FEO/Regular buttons");
 
     // Global variables
     let currentTrialData = null;
@@ -612,14 +633,82 @@
     let selectedClasses = new Set();
     let registrationData = [];
     let isAutoFilling = false;
-
-    // Fee structure
-    const fees = {
-      firstClass: 35.00,
-      additionalClass: 25.00,
-      juniorHandler: 20.00,
-      exhibition: 15.00
+    let trialFees = {
+      fee1: 35.00,  // First dog, first class
+      fee2: 25.00,  // Same dog, additional class  
+      fee3: 30.00,  // Additional dog, same handler
+      fee4: 20.00,  // Junior Handler
+      fee5: 15.00   // Exhibition Only
     };
+
+    // Load trial data and extract pricing
+    async function loadTrialData() {
+      try {
+        console.log("🔄 Loading trial data and pricing...");
+        
+        if (!auth.currentUser) {
+          console.log("⏳ Waiting for authentication...");
+          setTimeout(loadTrialData, 1000);
+          return;
+        }
+
+        const q = query(
+          collection(db, "trials"), 
+          where("userId", "==", auth.currentUser.uid)
+        );
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+          throw new Error("No trial data found. Please create a trial first.");
+        }
+
+        const doc = querySnapshot.docs[0];
+        currentTrialData = { id: doc.id, ...doc.data() };
+        console.log("✅ Trial data loaded:", currentTrialData);
+        
+        // Load application data to get pricing
+        await loadApplicationData();
+        
+        populateTrialInfo();
+        populateClasses();
+        await loadRegistrationData();
+        setupEventListeners();
+        
+      } catch (error) {
+        console.error("❌ Error loading trial data:", error);
+        alert("Error loading trial data: " + error.message);
+      }
+    }
+
+    // Load application data to get fee structure
+    async function loadApplicationData() {
+      try {
+        const appQuery = query(
+          collection(db, "applications"), 
+          where("userId", "==", auth.currentUser.uid)
+        );
+        const appSnapshot = await getDocs(appQuery);
+        
+        if (!appSnapshot.empty) {
+          const appDoc = appSnapshot.docs[0];
+          currentApplicationData = { id: appDoc.id, ...appDoc.data() };
+          
+          // Extract fee structure from application data
+          if (currentApplicationData.fees) {
+            const fees = currentApplicationData.fees;
+            trialFees.fee1 = parseFloat(fees.fee1?.replace(/[$,]/g, '') || 35);
+            trialFees.fee2 = parseFloat(fees.fee2?.replace(/[$,]/g, '') || 25);
+            trialFees.fee3 = parseFloat(fees.fee3?.replace(/[$,]/g, '') || 30);
+            trialFees.fee4 = parseFloat(fees.fee4?.replace(/[$,]/g, '') || 20);
+            trialFees.fee5 = parseFloat(fees.fee5?.replace(/[$,]/g, '') || 15);
+            
+            console.log("✅ Loaded fee structure from premium:", trialFees);
+          }
+        }
+      } catch (error) {
+        console.warn("⚠️ Could not load application data, using default fees:", error);
+      }
+    }
 
     // Load registration data from data.json
     async function loadRegistrationData() {
@@ -644,170 +733,95 @@
       statusDiv.innerHTML = message;
       statusDiv.style.display = 'block';
       
-      if (type !== 'loading') {
+      if (type === 'success' || type === 'error') {
         setTimeout(() => {
           statusDiv.style.display = 'none';
-        }, 4000);
+        }, 3000);
       }
     }
 
-    // Lookup registration in data.json
-    function lookupInDataJson(registrationNumber) {
-      if (!registrationNumber || !registrationData.length) return null;
+    // Auto-fill from registration data
+    function lookupRegistration(cwagsNumber) {
+      if (!cwagsNumber || cwagsNumber.length < 3) {
+        showLookupStatus("Enter at least 3 characters to search", 'error');
+        return;
+      }
       
-      const normalizedReg = registrationNumber.trim().toLowerCase();
-      return registrationData.find(record => 
-        record.Registration && record.Registration.toLowerCase() === normalizedReg
+      showLookupStatus("🔍 Searching registration database...", 'loading');
+      
+      const matches = registrationData.filter(record => 
+        record.cwagsNumber && record.cwagsNumber.toLowerCase().includes(cwagsNumber.toLowerCase())
       );
-    }
-
-    // Load saved data from Firebase
-    async function loadSavedRegistrationData(registrationNumber) {
-      try {
-        if (!registrationNumber) return null;
-        
-        const docRef = doc(db, "registrations", registrationNumber);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          console.log("✅ Found saved data for registration:", registrationNumber);
-          return docSnap.data();
-        }
-        return null;
-      } catch (error) {
-        console.error("Error loading saved registration data:", error);
-        return null;
+      
+      if (matches.length === 0) {
+        showLookupStatus("❌ No registration found. Please enter details manually.", 'error');
+        return;
       }
+      
+      if (matches.length > 1) {
+        showLookupStatus(`⚠️ Multiple matches found (${matches.length}). Using first match.`, 'loading');
+      }
+      
+      const record = matches[0];
+      fillFormFromRecord(record);
+      showLookupStatus(`✅ Registration found and auto-filled: ${record.dogName}`, 'success');
     }
 
-    // Auto-fill from registration number
-    async function autoFillFromRegistration(registrationNumber) {
-      if (!registrationNumber || isAutoFilling) return;
-      
+    // Fill form from registration record
+    function fillFormFromRecord(record) {
       isAutoFilling = true;
-      showLookupStatus('🔍 Looking up registration...', 'loading');
       
       try {
-        // First try Firebase (saved data)
-        const savedData = await loadSavedRegistrationData(registrationNumber);
+        document.getElementById('handlerName').value = record.handlerName || '';
+        document.getElementById('handlerPhone').value = record.handlerPhone || '';
+        document.getElementById('handlerEmail').value = record.handlerEmail || '';
+        document.getElementById('dogCallName').value = record.dogName || '';
+        document.getElementById('dogBreed').value = record.breed || '';
         
-        if (savedData) {
-          showLookupStatus('✅ Found saved data - auto-filling form', 'success');
-          populateForm(savedData);
-        } else {
-          // Try data.json
-          const jsonData = lookupInDataJson(registrationNumber);
-          
-          if (jsonData) {
-            showLookupStatus('📋 Found in database - auto-filling basic info', 'info');
-            
-            // Auto-fill from data.json
-            if (jsonData.Handler) {
-              fillField('handlerName', jsonData.Handler);
-            }
-            if (jsonData['Call Name']) {
-              fillField('dogCallName', jsonData['Call Name']);
-            }
-          } else {
-            showLookupStatus('⚠️ Registration not found - please fill manually', 'warning');
-          }
+        if (record.birthdate) {
+          document.getElementById('dogBirthdate').value = record.birthdate;
         }
+        
+        if (record.sex) {
+          document.getElementById('dogSex').value = record.sex;
+        }
+        
+        console.log("✅ Form auto-filled from registration data");
       } catch (error) {
-        console.error("Error in auto-fill:", error);
-        showLookupStatus('❌ Error looking up registration', 'warning');
+        console.error("❌ Error auto-filling form:", error);
       } finally {
         isAutoFilling = false;
+        checkFormValidity();
       }
     }
 
-    // Fill individual field with visual feedback
-    function fillField(fieldId, value) {
-      const field = document.getElementById(fieldId);
-      if (field && value && (!field.value || field.value.trim() === '')) {
-        field.value = value;
-        field.classList.add('auto-filled');
-        setTimeout(() => {
-          field.classList.remove('auto-filled');
-        }, 2000);
-      }
-    }
-
-    // Populate form with saved data
-    function populateForm(data) {
-      if (!data || isAutoFilling) return;
+    // Setup event listeners
+    function setupEventListeners() {
+      // C-WAGS number lookup
+      const cwagsInput = document.getElementById('cwagsNumber');
+      let debounceTimer;
       
-      fillField('handlerName', data.handlerName);
-      fillField('handlerPhone', data.handlerPhone);
-      fillField('handlerEmail', data.handlerEmail);
-      fillField('emergencyContact', data.emergencyContact);
-      fillField('dogCallName', data.dogCallName);
-      fillField('dogBreed', data.dogBreed);
-      fillField('dogBirthdate', data.dogBirthdate);
-      
-      if (data.dogSex) {
-        const sexField = document.getElementById('dogSex');
-        if (sexField) sexField.value = data.dogSex;
-      }
-      
-      checkFormValidity();
-    }
-
-    // Load trial data
-    async function loadTrialData() {
-      try {
-        await loadRegistrationData();
-        
-        // Wait for auth
-        await new Promise((resolve) => {
-          if (auth.currentUser) {
-            resolve();
-          } else {
-            const unsubscribe = auth.onAuthStateChanged((user) => {
-              unsubscribe();
-              resolve();
-            });
+      cwagsInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          const value = e.target.value.trim();
+          if (value.length >= 3) {
+            lookupRegistration(value);
           }
-        });
+        }, 500);
+      });
 
-        if (!auth.currentUser) {
-          alert("Please log in to access the entry form");
-          window.location.href = 'index.html';
-          return;
-        }
+      // Form validation on input changes
+      document.querySelectorAll('input, select').forEach(element => {
+        element.addEventListener('input', checkFormValidity);
+        element.addEventListener('change', checkFormValidity);
+      });
 
-        // Load most recent trial
-        const trialsQuery = query(
-          collection(db, "trials"),
-          where("createdBy", "==", auth.currentUser.uid)
-        );
-        
-        const trialsSnapshot = await getDocs(trialsQuery);
-        
-        if (!trialsSnapshot.empty) {
-          const trials = [];
-          trialsSnapshot.forEach(doc => {
-            trials.push({ id: doc.id, ...doc.data() });
-          });
-          
-          trials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
-          currentTrialData = trials[0];
-          
-          console.log("✅ Loaded trial data:", currentTrialData);
-          populateTrialInfo();
-          populateClasses();
-        } else {
-          alert("No trial found. Please create a trial first.");
-          window.location.href = 'main-dashboard.html';
-          return;
-        }
+      // Junior handler and entry type changes
+      document.getElementById('juniorHandler').addEventListener('change', updateEntrySummary);
 
-        setupEventListeners();
-        document.getElementById('cwagsNumber').focus();
-        
-      } catch (error) {
-        console.error("❌ Error loading trial data:", error);
-        alert("Error loading trial data: " + error.message);
-      }
+      // Form submission
+      document.getElementById('entryForm').addEventListener('submit', handleFormSubmission);
     }
 
     // Populate trial information
@@ -829,10 +843,10 @@
         document.getElementById('trialDates').textContent = dates || 'TBD';
       }
 
-      document.getElementById('trialLocation').textContent = 'TBD';
+      document.getElementById('trialLocation').textContent = currentTrialData.location || 'TBD';
     }
 
-    // Populate classes organized by day, class, and judge
+    // Populate classes organized by day, class, and judge with FEO/Regular buttons
     function populateClasses() {
       const classSelection = document.getElementById('classSelection');
       if (!classSelection) {
@@ -849,7 +863,7 @@
         return;
       }
 
-      console.log("📅 Processing trial days and classes...", currentTrialData.days);
+      console.log("📅 Processing trial days and classes with FEO/Regular options...", currentTrialData.days);
       
       let hasAnyClasses = false;
       let classSelectionHTML = '';
@@ -863,41 +877,41 @@
         hasAnyClasses = true;
         
         // Format the date
-        const dayDate = day.date ? new Date(day.date).toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }) : `Day ${dayIndex + 1}`;
+        const dayDate = day.date ? 
+          new Date(day.date).toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }) : 
+          `Day ${dayIndex + 1}`;
 
         classSelectionHTML += `
           <div class="day-section">
             <div class="day-header">
               📅 ${dayDate}
             </div>
-            <div class="day-content">
+            <div class="classes-container">
         `;
 
-        // Group classes by name for this day
-        const classGroups = new Map();
-        
-        day.classes.forEach((cls, classIndex) => {
-          if (cls && cls.className && cls.className.trim()) {
-            const className = cls.className.trim();
-            if (!classGroups.has(className)) {
-              classGroups.set(className, []);
-            }
-            classGroups.get(className).push({...cls, dayIndex, classIndex});
+        // Group classes by name for better organization
+        const classMap = new Map();
+        day.classes.forEach((cls, index) => {
+          if (!cls || !cls.name) return;
+          
+          const className = cls.name;
+          if (!classMap.has(className)) {
+            classMap.set(className, []);
           }
+          classMap.get(className).push({ ...cls, classIndex: index });
         });
 
-        // Process each class group
-        classGroups.forEach((classInstances, className) => {
+        // Process each unique class
+        classMap.forEach((classInstances, className) => {
           classSelectionHTML += `
-            <div class="class-section">
+            <div class="class-group">
               <div class="class-header">
-                <span>🎯 ${className}</span>
-                <span>${classInstances.length} round${classInstances.length > 1 ? 's' : ''}</span>
+                🏆 ${className} <span style="font-weight: normal; color: #666;">(${classInstances.length} instance${classInstances.length > 1 ? 's' : ''})</span>
               </div>
               <div class="class-content">
           `;
@@ -908,53 +922,96 @@
               classInstance.rounds.forEach((round, roundIndex) => {
                 const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
                 const roundNumber = round.roundNumber || (roundIndex + 1);
+                const feoAvailable = round.feo !== false; // FEO available unless explicitly disabled
                 const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}`;
-                const entryValue = JSON.stringify({
+                
+                const regularEntryValue = JSON.stringify({
                   dayIndex,
                   classIndex: classInstance.classIndex,
                   roundIndex,
                   className,
                   judge: judgeName,
                   roundNumber,
-                  date: day.date || `Day ${dayIndex + 1}`
+                  date: day.date || `Day ${dayIndex + 1}`,
+                  entryType: 'Regular'
+                });
+                
+                const feoEntryValue = JSON.stringify({
+                  dayIndex,
+                  classIndex: classInstance.classIndex,
+                  roundIndex,
+                  className,
+                  judge: judgeName,
+                  roundNumber,
+                  date: day.date || `Day ${dayIndex + 1}`,
+                  entryType: 'FEO'
                 });
 
                 classSelectionHTML += `
                   <div class="round-item">
-                    <input type="checkbox" id="${uniqueId}" value='${entryValue}'>
-                    <label for="${uniqueId}">
-                      <div class="round-info">
-                        <span class="round-number">Round ${roundNumber}</span>
-                        <span class="judge-name">${judgeName}</span>
-                      </div>
-                      <span class="entry-fee-tag">Entry</span>
-                    </label>
+                    <div class="round-info">
+                      <span class="round-number">Round ${roundNumber}</span>
+                      <span class="judge-name">${judgeName}</span>
+                    </div>
+                    <div class="entry-buttons">
+                      <label class="entry-button regular" for="${uniqueId}_regular">
+                        <input type="checkbox" id="${uniqueId}_regular" value='${regularEntryValue}'>
+                        <span class="entry-tag regular">Regular</span>
+                      </label>
+                      ${feoAvailable ? `
+                        <label class="entry-button feo" for="${uniqueId}_feo">
+                          <input type="checkbox" id="${uniqueId}_feo" value='${feoEntryValue}'>
+                          <span class="entry-tag feo">FEO</span>
+                        </label>
+                      ` : `
+                        <span class="entry-tag unavailable">FEO N/A</span>
+                      `}
+                      <span class="entry-status" id="status_${uniqueId}"></span>
+                    </div>
                   </div>
                 `;
               });
             } else {
               // Class with no rounds defined - create a default entry
               const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_0`;
-              const entryValue = JSON.stringify({
+              const regularEntryValue = JSON.stringify({
                 dayIndex,
                 classIndex: classInstance.classIndex,
                 roundIndex: 0,
                 className,
                 judge: 'Judge TBD',
                 roundNumber: 1,
-                date: day.date || `Day ${dayIndex + 1}`
+                date: day.date || `Day ${dayIndex + 1}`,
+                entryType: 'Regular'
+              });
+              const feoEntryValue = JSON.stringify({
+                dayIndex,
+                classIndex: classInstance.classIndex,
+                roundIndex: 0,
+                className,
+                judge: 'Judge TBD',
+                roundNumber: 1,
+                date: day.date || `Day ${dayIndex + 1}`,
+                entryType: 'FEO'
               });
 
               classSelectionHTML += `
                 <div class="round-item">
-                  <input type="checkbox" id="${uniqueId}" value='${entryValue}'>
-                  <label for="${uniqueId}">
-                    <div class="round-info">
-                      <span class="round-number">Round 1</span>
-                      <span class="judge-name">Judge TBD</span>
-                    </div>
-                    <span class="entry-fee-tag">Entry</span>
-                  </label>
+                  <div class="round-info">
+                    <span class="round-number">Round 1</span>
+                    <span class="judge-name">Judge TBD</span>
+                  </div>
+                  <div class="entry-buttons">
+                    <label class="entry-button regular" for="${uniqueId}_regular">
+                      <input type="checkbox" id="${uniqueId}_regular" value='${regularEntryValue}'>
+                      <span class="entry-tag regular">Regular</span>
+                    </label>
+                    <label class="entry-button feo" for="${uniqueId}_feo">
+                      <input type="checkbox" id="${uniqueId}_feo" value='${feoEntryValue}'>
+                      <span class="entry-tag feo">FEO</span>
+                    </label>
+                    <span class="entry-status" id="status_${uniqueId}"></span>
+                  </div>
                 </div>
               `;
             }
@@ -988,56 +1045,86 @@
         checkbox.addEventListener('change', updateClassSelection);
       });
 
-      console.log(`✅ Populated classes organized by day, class, and judge`);
+      console.log(`✅ Populated classes with FEO/Regular buttons organized by day, class, and judge`);
     }
 
     // Update class selection with detailed entry tracking
     function updateClassSelection(event) {
       const entryData = JSON.parse(event.target.value);
+      const uniqueId = event.target.id.replace(/_regular|_feo$/, '');
+      const statusElement = document.getElementById(`status_${uniqueId}`);
       
       if (event.target.checked) {
         selectedClasses.add(event.target.value);
-        console.log(`✅ Added entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge})`);
+        console.log(`✅ Added entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType}`);
+        
+        if (statusElement) {
+          statusElement.textContent = '✓ Entered';
+          statusElement.style.color = '#28a745';
+        }
       } else {
         selectedClasses.delete(event.target.value);
-        console.log(`❌ Removed entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge})`);
+        console.log(`❌ Removed entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType}`);
+        
+        // Check if any other entry for this round is still selected
+        const otherEntryId = event.target.id.includes('_regular') ? 
+          event.target.id.replace('_regular', '_feo') : 
+          event.target.id.replace('_feo', '_regular');
+        const otherEntry = document.getElementById(otherEntryId);
+        
+        if (statusElement && (!otherEntry || !otherEntry.checked)) {
+          statusElement.textContent = '';
+        }
       }
       
       updateEntrySummary();
       checkFormValidity();
     }
 
-    // Update entry summary with detailed breakdown
+    // Update entry summary with detailed breakdown using premium pricing
     function updateEntrySummary() {
-      const entryCount = selectedClasses.size;
       const isJunior = document.getElementById('juniorHandler').value === 'Yes';
-      const isExhibition = document.getElementById('entryType').value === 'Exhibition';
       
-      let totalFee = 0;
+      // Count regular and FEO entries separately
+      let regularEntries = 0;
+      let feoEntries = 0;
       
-      if (isExhibition) {
-        totalFee = fees.exhibition * entryCount;
-      } else if (isJunior) {
-        totalFee = fees.juniorHandler * entryCount;
-      } else if (entryCount > 0) {
-        totalFee = fees.firstClass + (fees.additionalClass * (entryCount - 1));
-      }
-      
-      // Count unique classes (for display purposes)
-      const uniqueClasses = new Set();
       selectedClasses.forEach(entryJson => {
         try {
           const entry = JSON.parse(entryJson);
-          uniqueClasses.add(entry.className);
+          if (entry.entryType === 'FEO') {
+            feoEntries++;
+          } else {
+            regularEntries++;
+          }
         } catch (e) {
           console.warn("Error parsing entry data:", e);
         }
       });
       
-      document.getElementById('selectedClassCount').textContent = 
-        `${entryCount} entries (${uniqueClasses.size} classes)`;
+      const totalEntries = regularEntries + feoEntries;
+      
+      // Calculate fees using premium pricing structure
+      let totalFee = 0;
+      
+      if (isJunior) {
+        // Junior handler discount applies to all entries
+        totalFee = trialFees.fee4 * totalEntries;
+      } else {
+        // Regular pricing: first class full price, additional classes discounted
+        if (totalEntries > 0) {
+          totalFee = trialFees.fee1; // First entry at full price
+          if (totalEntries > 1) {
+            totalFee += trialFees.fee2 * (totalEntries - 1); // Additional entries at reduced price
+          }
+        }
+      }
+      
+      // Update display
+      document.getElementById('regularEntryCount').textContent = regularEntries;
+      document.getElementById('feoEntryCount').textContent = feoEntries;
+      document.getElementById('totalEntryCount').textContent = totalEntries;
       document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
-      document.getElementById('summaryEntryType').textContent = document.getElementById('entryType').value;
       document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
     }
 
@@ -1051,194 +1138,112 @@
       const handlerEmail = document.getElementById('handlerEmail').value.trim();
       const handlerPhone = document.getElementById('handlerPhone').value.trim();
       const dogCallName = document.getElementById('dogCallName').value.trim();
-      const hasClasses = selectedClasses.size > 0;
+      const hasEntries = selectedClasses.size > 0;
       
-      const isValid = waiverAccepted && cwagsNumber && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
+      const isValid = waiverAccepted && cwagsNumber && handlerName && 
+                     handlerEmail && handlerPhone && dogCallName && hasEntries;
       
       document.getElementById('submitBtn').disabled = !isValid;
     }
 
-    // Setup event listeners
-    function setupEventListeners() {
-      // Registration number lookup with debouncing
-      let registrationTimeout;
-      const cwagsInput = document.getElementById('cwagsNumber');
-      if (cwagsInput) {
-        cwagsInput.addEventListener('input', function(e) {
-          const registrationNumber = e.target.value.trim();
-          
-          clearTimeout(registrationTimeout);
-          
-          if (registrationNumber.length >= 3) {
-            registrationTimeout = setTimeout(() => {
-              autoFillFromRegistration(registrationNumber);
-            }, 500);
-          }
-          
-          checkFormValidity();
-        });
-      }
-
-      // Fee calculation listeners
-      const juniorHandler = document.getElementById('juniorHandler');
-      const entryType = document.getElementById('entryType');
+    // Handle form submission
+    async function handleFormSubmission(event) {
+      event.preventDefault();
       
-      if (juniorHandler) juniorHandler.addEventListener('change', updateEntrySummary);
-      if (entryType) entryType.addEventListener('change', updateEntrySummary);
-      
-      // Form validation listeners
-      const validationFields = ['waiverAccepted', 'cwagsNumber', 'handlerName', 'handlerEmail', 'handlerPhone', 'dogCallName'];
-      validationFields.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-          element.addEventListener('change', checkFormValidity);
-          element.addEventListener('input', checkFormValidity);
-        }
-      });
-    }
-
-    // Save registration data for future use
-    async function saveRegistrationData(registrationNumber, formData) {
-      try {
-        if (!registrationNumber || !auth.currentUser) return;
-        
-        const registrationDoc = {
-          cwagsNumber: registrationNumber,
-          handlerName: formData.handlerName,
-          handlerPhone: formData.handlerPhone,
-          handlerEmail: formData.handlerEmail,
-          emergencyContact: formData.emergencyContact,
-          dogCallName: formData.dogCallName,
-          dogBreed: formData.dogBreed,
-          dogBirthdate: formData.dogBirthdate,
-          dogSex: formData.dogSex,
-          lastUpdated: new Date(),
-          lastTrialId: currentTrialData?.id
-        };
-        
-        await setDoc(doc(db, "registrations", registrationNumber), registrationDoc);
-        console.log("✅ Saved registration data for:", registrationNumber);
-      } catch (error) {
-        console.error("Error saving registration data:", error);
-      }
-    }
-
-    // Form submission
-    document.getElementById('entryForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      if (!checkFormValidity()) {
-        alert("Please complete all required fields and accept the waiver.");
+      if (!auth.currentUser) {
+        alert("Please log in to submit entries.");
         return;
       }
       
       try {
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting...';
-        
-        // Process selected classes for storage
-        const selectedEntries = Array.from(selectedClasses).map(entryJson => {
-          try {
-            return JSON.parse(entryJson);
-          } catch (e) {
-            console.warn("Error parsing entry data:", e);
-            return null;
-          }
-        }).filter(entry => entry !== null);
-
+        // Prepare entry data
         const entryData = {
+          userId: auth.currentUser.uid,
           trialId: currentTrialData.id,
-          cwagsNumber: document.getElementById('cwagsNumber').value,
-          handlerName: document.getElementById('handlerName').value,
-          handlerPhone: document.getElementById('handlerPhone').value,
-          handlerEmail: document.getElementById('handlerEmail').value,
-          emergencyContact: document.getElementById('emergencyContact').value,
-          dogCallName: document.getElementById('dogCallName').value,
-          dogBreed: document.getElementById('dogBreed').value,
+          submissionDate: new Date().toISOString(),
+          
+          // Handler information
+          cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
+          handlerName: document.getElementById('handlerName').value.trim(),
+          handlerPhone: document.getElementById('handlerPhone').value.trim(),
+          handlerEmail: document.getElementById('handlerEmail').value.trim(),
+          emergencyContact: document.getElementById('emergencyContact').value.trim(),
+          
+          // Dog information
+          dogCallName: document.getElementById('dogCallName').value.trim(),
+          dogBreed: document.getElementById('dogBreed').value.trim(),
           dogBirthdate: document.getElementById('dogBirthdate').value,
           dogSex: document.getElementById('dogSex').value,
-          selectedEntries: selectedEntries, // Detailed entry data with day/class/judge/round
-          selectedClasses: selectedEntries.map(e => e.className), // Simple class names for compatibility
-          entryCount: selectedEntries.length,
-          uniqueClassCount: new Set(selectedEntries.map(e => e.className)).size,
+          
+          // Entry details
           juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
-          entryType: document.getElementById('entryType').value,
-          waiverAccepted: true,
-          entryFee: document.getElementById('calculatedFee').textContent,
-          submittedAt: new Date(),
-          submittedBy: auth.currentUser ? auth.currentUser.uid : 'manual'
+          specialNeeds: document.getElementById('specialNeeds').value.trim(),
+          waiverAccepted: document.getElementById('waiverAccepted').checked,
+          
+          // Class entries
+          entries: Array.from(selectedClasses).map(entryJson => JSON.parse(entryJson)),
+          
+          // Fee calculation
+          totalFee: parseFloat(document.getElementById('calculatedFee').textContent.replace(', '')),
+          
+          // Entry summary
+          regularEntries: parseInt(document.getElementById('regularEntryCount').textContent),
+          feoEntries: parseInt(document.getElementById('feoEntryCount').textContent),
+          totalEntries: parseInt(document.getElementById('totalEntryCount').textContent)
         };
         
-        // Save entry
+        console.log("📝 Submitting entry:", entryData);
+        
+        // Submit to Firestore
         const docRef = await addDoc(collection(db, "entries"), entryData);
-        console.log("✅ Entry submitted with ID:", docRef.id);
         
-        // Save registration data for future use
-        await saveRegistrationData(entryData.cwagsNumber, entryData);
+        console.log("✅ Entry submitted successfully:", docRef.id);
+        alert("Entry submitted successfully! Entry ID: " + docRef.id);
         
-        // Show success message
-        document.getElementById('entryForm').style.display = 'none';
-        document.getElementById('successMessage').classList.remove('hidden');
-        
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Reset form
+        resetForm();
         
       } catch (error) {
         console.error("❌ Error submitting entry:", error);
         alert("Error submitting entry: " + error.message);
-        
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Entry';
       }
-    });
+    }
 
-    // Reset form function
+    // Reset form
     window.resetForm = function() {
-      isAutoFilling = true;
-      
       document.getElementById('entryForm').reset();
       selectedClasses.clear();
+      updateEntrySummary();
+      checkFormValidity();
       
-      // Clear checkboxes
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        if (cb.id !== 'waiverAccepted') cb.checked = false;
+      // Clear status indicators
+      document.querySelectorAll('.entry-status').forEach(status => {
+        status.textContent = '';
       });
       
-      // Clear lookup status
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) statusDiv.style.display = 'none';
-      
-      updateEntrySummary();
-      
-      // Hide success message and show form
-      document.getElementById('successMessage').classList.add('hidden');
-      document.getElementById('entryForm').style.display = 'block';
-      
-      // Scroll to top and focus on registration
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      setTimeout(() => {
-        isAutoFilling = false;
-        const cwagsInput = document.getElementById('cwagsNumber');
-        if (cwagsInput) cwagsInput.focus();
-        checkFormValidity();
-      }, 500);
+      console.log("🔄 Form reset");
     };
 
-    // Initialize the form when auth is ready
-    auth.onAuthStateChanged(user => {
+    // Initialize when page loads
+    window.addEventListener('load', () => {
+      console.log("🚀 Page loaded, initializing entry form...");
+      setTimeout(loadTrialData, 1000);
+    });
+
+    // Initialize auth state listener
+    auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log("👤 User authenticated, loading trial data...");
-        loadTrialData();
+        console.log("✅ User authenticated, loading trial data...");
+        if (!currentTrialData) {
+          loadTrialData();
+        }
       } else {
-        console.log("❌ No user found, redirecting to login");
+        console.log("❌ User not authenticated");
         window.location.href = 'index.html';
       }
     });
 
-    console.log("✅ Entry form system ready");
+    console.log("Entry form with FEO/Regular buttons and premium pricing ready");
   </script>
 </body>
 </html>
