@@ -365,7 +365,59 @@
             flex-wrap: wrap;
         }
 
-        @media (max-width: 768px) {
+        .lookup-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .lookup-status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .lookup-status.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            display: block;
+        }
+
+        .lookup-status.loading {
+            background: #e7f3ff;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            display: block;
+        }
+
+        .auto-filled {
+            background: #e7f3ff !important;
+            border-color: #0066cc !important;
+            animation: autoFillGlow 2s ease-in-out;
+        }
+
+        @keyframes autoFillGlow {
+            0% { box-shadow: 0 0 5px rgba(0, 102, 204, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 102, 204, 0.8); }
+            100% { box-shadow: none; }
+        }
+
+        .form-section.primary {
+            background: #f0f8ff;
+            border: 2px solid #0066cc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-section.primary h3 {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+        }
             .container {
                 margin: 10px;
                 border-radius: 8px;
@@ -466,6 +518,21 @@
 
             <!-- Entry Form -->
             <form id="entryForm">
+                <!-- Registration Number Lookup -->
+                <div class="form-section primary">
+                    <h3>🔍 Registration Lookup</h3>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>C-WAGS Registration Number (optional)</label>
+                            <input type="text" id="cwagsNumber" placeholder="XX-XXXX-XX" 
+                                   style="font-size: 1.1rem; font-weight: bold; background: #f0f8ff;">
+                            <small style="color: #666; margin-top: 0.5rem; display: block;">
+                                💡 Enter registration number first - handler and dog info will auto-fill if found
+                            </small>
+                        </div>
+                    </div>
+                    <div id="lookupStatus" class="lookup-status"></div>
+                </div>
                 <!-- Handler Information -->
                 <div class="form-section">
                     <h3>👤 Handler Information</h3>
@@ -604,9 +671,28 @@
         let currentTrialData = null;
         let selectedClasses = new Set();
         let isSecretary = false;
+        let registrationData = [];
+        let isAutoFilling = false;
+
+        // Load registration data from data.json
+        async function loadRegistrationData() {
+            try {
+                console.log("📊 Loading registration data...");
+                const response = await fetch('./js/data.json');
+                const data = await response.json();
+                registrationData = data || [];
+                console.log(`✅ Loaded ${registrationData.length} registration records`);
+            } catch (error) {
+                console.warn("⚠️ Could not load registration data:", error);
+                registrationData = [];
+            }
+        }
 
         // Initialize the application
         async function init() {
+            // Load registration data first
+            await loadRegistrationData();
+
             // Check URL parameters for entry link
             const urlParams = new URLSearchParams(window.location.search);
             const entryId = urlParams.get('entry');
@@ -895,6 +981,27 @@
                 button.addEventListener('click', handleEntryButtonClick);
             });
 
+            // Registration number lookup with debouncing
+            let registrationTimeout;
+            const cwagsInput = document.getElementById('cwagsNumber');
+            if (cwagsInput) {
+                cwagsInput.addEventListener('input', function(e) {
+                    const registrationNumber = e.target.value.trim();
+                    
+                    clearTimeout(registrationTimeout);
+                    
+                    if (registrationNumber.length >= 3) {
+                        registrationTimeout = setTimeout(() => {
+                            autoFillFromRegistration(registrationNumber);
+                        }, 500);
+                    } else {
+                        hideLookupStatus();
+                    }
+                    
+                    checkFormValidity();
+                });
+            }
+
             // Form validation
             document.getElementById('entryForm').addEventListener('input', checkFormValidity);
             document.getElementById('waiverAccepted').addEventListener('change', checkFormValidity);
@@ -902,6 +1009,100 @@
 
             // Form submission
             document.getElementById('entryForm').addEventListener('submit', handleFormSubmit);
+        }
+
+        // Auto-fill from registration data
+        async function autoFillFromRegistration(registrationNumber) {
+            if (isAutoFilling) return;
+            
+            showLookupStatus('🔍 Looking up registration...', 'loading');
+            
+            try {
+                isAutoFilling = true;
+                
+                // Normalize the registration number for comparison
+                const normalizedInput = registrationNumber.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                
+                console.log("🔍 Looking up registration:", normalizedInput);
+                
+                // Search through registration data
+                const matchingRegistration = registrationData.find(record => {
+                    const normalizedRecord = (record.cwagsNumber || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                    return normalizedRecord === normalizedInput;
+                });
+                
+                if (matchingRegistration) {
+                    console.log("✅ Found matching registration:", matchingRegistration);
+                    showLookupStatus('✅ Registration found! Auto-filling information...', 'success');
+                    
+                    // Fill the form with found data
+                    populateForm(matchingRegistration);
+                } else {
+                    console.log("❌ No matching registration found for:", normalizedInput);
+                    showLookupStatus('ℹ️ Registration number not found in our records. You can still continue with manual entry.', 'warning');
+                }
+                
+            } catch (error) {
+                console.error("❌ Error during registration lookup:", error);
+                showLookupStatus('❌ Error looking up registration', 'warning');
+            } finally {
+                isAutoFilling = false;
+            }
+        }
+
+        // Show lookup status
+        function showLookupStatus(message, type = 'loading') {
+            const statusDiv = document.getElementById('lookupStatus');
+            if (statusDiv) {
+                statusDiv.textContent = message;
+                statusDiv.className = `lookup-status ${type}`;
+            }
+        }
+
+        // Hide lookup status
+        function hideLookupStatus() {
+            const statusDiv = document.getElementById('lookupStatus');
+            if (statusDiv) {
+                statusDiv.style.display = 'none';
+            }
+        }
+
+        // Fill individual field with visual feedback
+        function fillField(fieldId, value) {
+            const field = document.getElementById(fieldId);
+            if (field && value && (!field.value || field.value.trim() === '')) {
+                field.value = value;
+                field.classList.add('auto-filled');
+                setTimeout(() => {
+                    field.classList.remove('auto-filled');
+                }, 2000);
+            }
+        }
+
+        // Populate form with registration data
+        function populateForm(data) {
+            if (!data || isAutoFilling === false) return;
+            
+            fillField('handlerName', data.handlerName);
+            fillField('handlerPhone', data.handlerPhone);
+            fillField('handlerEmail', data.handlerEmail);
+            fillField('emergencyContact', data.emergencyContact);
+            fillField('dogCallName', data.dogCallName);
+            fillField('dogBreed', data.dogBreed);
+            fillField('dogBirthdate', data.dogBirthdate);
+            
+            if (data.dogSex) {
+                const sexField = document.getElementById('dogSex');
+                if (sexField && (!sexField.value || sexField.value === '')) {
+                    sexField.value = data.dogSex;
+                    sexField.classList.add('auto-filled');
+                    setTimeout(() => {
+                        sexField.classList.remove('auto-filled');
+                    }, 2000);
+                }
+            }
+            
+            checkFormValidity();
         }
 
         // Handle entry button clicks
