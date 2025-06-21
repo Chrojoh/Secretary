@@ -4,166 +4,198 @@
   <title>Trial Secretary Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
+    * {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      box-sizing: border-box;
     }
     
-    .dashboard-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      overflow: hidden;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     
     .header {
-      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-      color: white;
-      padding: 30px;
-      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     }
     
-    .header h1 {
-      margin: 0;
-      font-size: 32px;
-    }
-    
-    .welcome-msg {
-      margin: 10px 0 0 0;
-      font-size: 18px;
-      opacity: 0.9;
-    }
-    
-    .nav-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      padding: 30px;
-    }
-    
-    .nav-card {
-      background: #f8f9fa;
-      border: 2px solid #e9ecef;
-      border-radius: 12px;
-      padding: 25px;
-      text-align: center;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    
-    .nav-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-      border-color: #4CAF50;
-    }
-    
-    .nav-card h3 {
-      margin: 0 0 15px 0;
-      color: #333;
-      font-size: 20px;
-    }
-    
-    .nav-card p {
-      color: #666;
-      margin: 0 0 20px 0;
-      line-height: 1.5;
-    }
-    
-    .nav-button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      width: 100%;
-      transition: background-color 0.3s;
-    }
-    
-    .nav-button:hover {
-      background: #45a049;
-    }
-    
-    .nav-button.secondary {
-      background: #2196F3;
-    }
-    
-    .nav-button.secondary:hover {
-      background: #1976D2;
-    }
-    
-    .nav-button.tertiary {
-      background: #ff9800;
-    }
-    
-    .nav-button.tertiary:hover {
-      background: #f57c00;
-    }
-    
-    .user-info {
-      background: #e8f5e8;
-      padding: 20px;
-      margin: 20px 30px;
-      border-radius: 8px;
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     
+    .welcome-msg {
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
     .user-details {
-      font-weight: bold;
-      color: #2e7d32;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.9rem;
     }
     
     .logout-btn {
-      background: #f44336;
+      background: rgba(255, 255, 255, 0.2);
       color: white;
-      border: none;
-      padding: 8px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.5rem 1rem;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 14px;
+      transition: all 0.3s ease;
     }
     
     .logout-btn:hover {
-      background: #d32f2f;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+    
+    .container {
+      flex: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      width: 100%;
     }
     
     .quick-stats {
-      background: #fff3e0;
-      padding: 20px;
-      margin: 20px 30px;
-      border-radius: 8px;
-      border-left: 5px solid #ff9800;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     }
     
-    .quick-stats h3 {
-      margin: 0 0 10px 0;
-      color: #f57c00;
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .nav-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .nav-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      background: white;
+    }
+    
+    .nav-card h3 {
+      color: #333;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+    
+    .nav-card p {
+      color: #666;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    
+    .nav-button {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    
+    .nav-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .nav-button.secondary {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+    }
+    
+    .nav-button.tertiary {
+      background: linear-gradient(45deg, #ff9800, #f57c00);
+    }
+    
+    .emergency-logout {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      z-index: 9999;
+    }
+    
+    .emergency-logout:hover {
+      background: #d32f2f;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .nav-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="dashboard-container">
-    <div class="header">
-      <h1>🐕 Trial Secretary Dashboard</h1>
-      <div class="welcome-msg">Welcome back, <span id="username">User</span>!</div>
-    </div>
-    
-    <div class="user-info">
-      <div class="user-details">
-        Logged in as: <span id="userEmail">Loading...</span>
+  <!-- Emergency logout button for stuck sessions -->
+  <button class="emergency-logout" onclick="emergencyLogout()">🚨 Force Logout</button>
+  
+  <div class="header">
+    <div class="header-content">
+      <div class="welcome-msg">
+        Welcome, <span id="username">User</span>!
       </div>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+      
+      <div class="user-info">
+        <div class="user-details">
+          Logged in as: <span id="userEmail">Loading...</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
     </div>
-    
+  </div>
+
+  <div class="container">
     <div class="quick-stats">
       <h3>📊 Quick Stats</h3>
       <div id="statsContent">Loading your trial statistics...</div>
@@ -196,12 +228,6 @@
         <button class="nav-button secondary">Generate Premium</button>
       </div>
       
-      <div class="nav-card" onclick="location.href='trial-app.html'">
-        <h3>📋 C-WAGS Application</h3>
-        <p>Official C-WAGS trial application form</p>
-        <button class="nav-button tertiary">C-WAGS Form</button>
-      </div>
-      
       <div class="nav-card" onclick="location.href='waiver-generator.html'">
         <h3>📝 Waiver Generator</h3>
         <p>Create liability waivers for your events</p>
@@ -214,12 +240,6 @@
         <p>Entry forms, results tracking, and more</p>
         <button class="nav-button tertiary">Quick Access</button>
       </div>
-      
-      <div class="nav-card" onclick="location.href='fresh.html'">
-        <h3>🛠️ Emergency Tools</h3>
-        <p>Backup tools and system utilities</p>
-        <button class="nav-button tertiary">Emergency Mode</button>
-      </div>
     </div>
   </div>
 
@@ -228,19 +248,76 @@
     import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
     import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-    console.log("Dashboard loading...");
+    console.log("🚀 Dashboard loading...");
 
-    let authCheckComplete = false;
+    let authInitialized = false;
+    let currentUser = null;
 
-    // Safe auth state listener
+    // Clear any stuck authentication states
+    function clearAuthState() {
+      console.log("🧹 Clearing authentication state...");
+      // Clear any localStorage/sessionStorage that might be holding stale auth
+      localStorage.clear();
+      sessionStorage.clear();
+    }
+
+    // Emergency logout function for stuck sessions
+    window.emergencyLogout = async function() {
+      console.log("🚨 Emergency logout triggered");
+      try {
+        clearAuthState();
+        await signOut(auth);
+        
+        // Force redirect after short delay
+        setTimeout(() => {
+          window.location.replace('index.html');
+        }, 500);
+        
+      } catch (error) {
+        console.error("Emergency logout error:", error);
+        // Force redirect even if signOut fails
+        window.location.replace('index.html');
+      }
+    };
+
+    // Normal logout function
+    window.logout = async function() {
+      if (confirm("Are you sure you want to logout?")) {
+        try {
+          console.log("👋 Logging out...");
+          
+          // Clear any local state first
+          clearAuthState();
+          
+          // Sign out from Firebase
+          await signOut(auth);
+          
+          console.log("✅ Logout successful");
+          
+          // Force redirect
+          window.location.replace('index.html');
+          
+        } catch (error) {
+          console.error("❌ Logout error:", error);
+          alert("Error logging out: " + error.message);
+          
+          // Try emergency logout if normal logout fails
+          emergencyLogout();
+        }
+      }
+    };
+
+    // Single auth state listener
     auth.onAuthStateChanged(async (user) => {
-      if (authCheckComplete) return; // Prevent multiple executions
-      authCheckComplete = true;
-
-      console.log("Auth state changed:", user ? "logged in" : "not logged in");
-
+      if (authInitialized) return; // Prevent multiple initializations
+      
+      console.log("🔐 Auth state changed:", user ? "logged in" : "not logged in");
+      
       if (user) {
-        console.log("User authenticated:", user.email);
+        authInitialized = true;
+        currentUser = user;
+        
+        console.log("✅ User authenticated:", user.email);
         
         // Update UI with user info
         const username = user.email.split('@')[0];
@@ -251,16 +328,20 @@
         await loadUserStats(user);
         
       } else {
-        console.log("No user found, redirecting to login");
-        // Small delay to prevent rapid redirects
+        console.log("❌ No user found, redirecting to login");
+        clearAuthState();
+        
+        // Short delay to prevent rapid redirects
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.replace('index.html');
         }, 1000);
       }
     });
 
     async function loadUserStats(user) {
       try {
+        console.log("📊 Loading user statistics...");
+        
         // Count trials
         const trialsQuery = query(
           collection(db, "trials"),
@@ -293,32 +374,29 @@
         `;
         
         document.getElementById('statsContent').innerHTML = statsHTML;
+        console.log("✅ Stats loaded successfully");
         
       } catch (error) {
-        console.error("Error loading stats:", error);
+        console.error("❌ Error loading stats:", error);
         document.getElementById('statsContent').innerHTML = 
           '<p style="color: #666;">Unable to load statistics</p>';
       }
     }
 
-    window.logout = async function() {
-      if (confirm("Are you sure you want to logout?")) {
-        try {
-          console.log("Logging out...");
-          await signOut(auth);
-          window.location.href = 'index.html';
-        } catch (error) {
-          console.error("Logout error:", error);
-          alert("Error logging out: " + error.message);
-        }
-      }
-    };
-
     window.showQuickTools = function() {
       alert("Quick Tools coming soon! For now, use the individual tools from the dashboard.");
     };
 
-    console.log("Dashboard script loaded successfully");
+    // Prevent back button to login after authentication
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted && currentUser) {
+        console.log("📄 Page restored from cache, checking auth state");
+        // Refresh the page to ensure proper auth state
+        window.location.reload();
+      }
+    });
+
+    console.log("✅ Dashboard script loaded successfully");
   </script>
 </body>
 </html>
