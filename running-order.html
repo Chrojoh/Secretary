@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Running Order Sheet Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #212529;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .running-order-grid {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .day-section {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        .day-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .judge-section {
+            margin: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .judge-header {
+            background: #e9ecef;
+            padding: 12px 15px;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .class-rounds {
+            padding: 15px;
+        }
+
+        .class-round {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .class-round:last-child {
+            margin-bottom: 0;
+        }
+
+        .class-round-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .entrants-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .entrant-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: move;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .entrant-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+
+        .entrant-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .entrant-item.feo {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .entrant-item.regular {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .entrant-number {
+            background: #495057;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .entrant-name {
+            flex: 1;
+        }
+
+        .move-controls {
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .entrant-item:hover .move-controls {
+            opacity: 1;
+        }
+
+        .move-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .move-btn:hover {
+            background: #495057;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .confirm-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 2px solid #dee2e6;
+        }
+
+        .confirm-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .date-selector {
+            margin-bottom: 15px;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border: none;
+                max-width: none;
+                padding: 20px;
+            }
+            
+            .controls, .btn, .confirm-section {
+                display: none;
+            }
+            
+            .move-controls {
+                display: none !important;
+            }
+            
+            .day-section {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            
+            .judge-section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Running Order Sheet Generator</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="trialSelect">Select Trial:</label>
+                <select id="trialSelect">
+                    <option value="">Loading trials...</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="sortBy">Sort Entrants By:</label>
+                <select id="sortBy">
+                    <option value="handler">Handler Name</option>
+                    <option value="dog">Dog Call Name</option>
+                    <option value="entry">Entry Order</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn" onclick="loadTrialEntries()" id="loadBtn">Load Trial Entries</button>
+            <button class="btn btn-secondary" onclick="window.print()">Print</button>
+            <button class="btn btn-warning" onclick="resetOrder()">Reset Order</button>
+        </div>
+
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div>Loading trial entries...</div>
+        </div>
+
+        <div id="stats" class="stats" style="display: none;"></div>
+        <div id="runningOrder" class="running-order-grid"></div>
+
+        <div id="confirmSection" class="confirm-section" style="display: none;">
+            <h3>📋 Confirm Running Order</h3>
+            <div id="dateSelector" class="date-selector" style="display: none;">
+                <label for="confirmDateSelect">Select Date to Confirm:</label>
+                <select id="confirmDateSelect">
+                    <option value="">Select a date...</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-success" onclick="confirmRunningOrder()" id="confirmBtn">
+                    Confirm Running Order
+                </button>
+                <button class="btn btn-secondary" onclick="saveRunningOrder()">
+                    Save Draft
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports (assuming these are available)
+        import { auth, db } from './js/firebase.js';
+        import { collection, query, where, getDocs, doc, getDoc, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+        let trials = [];
+        let currentTrial = null;
+        let entries = [];
+        let originalOrder = {};
+        let runningOrderData = {};
+
+        // Initialize the application
+        async function init() {
+            try {
+                await loadTrials();
+            } catch (error) {
+                console.error('Error initializing:', error);
+                showError('Error loading trials: ' + error.message);
+            }
+        }
+
+        // Load available trials
+        async function loadTrials() {
+            try {
+                if (!auth.currentUser) {
+                    showError('Please log in to access trials');
+                    return;
+                }
+
+                const q = query(
+                    collection(db, "trials"),
+                    where("createdBy", "==", auth.currentUser.uid)
+                );
+                
+                const snapshot = await getDocs(q);
+                trials = [];
+                
+                snapshot.forEach(doc => {
+                    trials.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort by creation date (most recent first)
+                trials.sort((a, b) => {
+                    const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+                    const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+                    return dateB - dateA;
+                });
+
+                populateTrialSelector();
+            } catch (error) {
+                console.error('Error loading trials:', error);
+                showError('Error loading trials: ' + error.message);
+            }
+        }
+
+        // Populate trial selector dropdown
+        function populateTrialSelector() {
+            const trialSelect = document.getElementById('trialSelect');
+            trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+
+            trials.forEach(trial => {
+                const option = document.createElement('option');
+                option.value = trial.id;
+                
+                let trialLabel = trial.clubName || 'Unnamed Trial';
+                
+                if (trial.days && trial.days.length > 0) {
+                    const dates = trial.days
+                        .filter(day => day.date)
+                        .map(day => new Date(day.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }))
+                        .join(', ');
+                    if (dates) {
+                        trialLabel += ` (${dates})`;
+                    }
+                }
+                
+                option.textContent = trialLabel;
+                trialSelect.appendChild(option);
+            });
+
+            // Auto-select the most recent trial
+            if (trials.length > 0) {
+                trialSelect.value = trials[0].id;
+                currentTrial = trials[0];
+            }
+        }
+
+        // Load trial entries
+        async function loadTrialEntries() {
+            const trialId = document.getElementById('trialSelect').value;
+            if (!trialId) {
+                showError('Please select a trial');
+                return;
+            }
+
+            currentTrial = trials.find(t => t.id === trialId);
+            if (!currentTrial) {
+                showError('Trial not found');
+                return;
+            }
+
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('loadBtn').disabled = true;
+
+            try {
+                // Load entries for this trial
+                const q = query(
+                    collection(db, "entries"),
+                    where("trialId", "==", trialId)
+                );
+                
+                const snapshot = await getDocs(q);
+                entries = [];
+                
+                snapshot.forEach(doc => {
+                    const entryData = doc.data();
+                    // Process selectedEntries if available
+                    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                        entryData.selectedEntries.forEach(selectedEntry => {
+                            entries.push({
+                                id: doc.id,
+                                ...selectedEntry,
+                                handlerName: entryData.handlerName,
+                                dogCallName: entryData.dogCallName,
+                                cwagsNumber: entryData.cwagsNumber,
+                                submittedAt: entryData.submittedAt
+                            });
+                        });
+                    }
+                });
+
+                console.log('Loaded entries:', entries);
+
+                if (entries.length === 0) {
+                    showError('No entries found for this trial');
+                    return;
+                }
+
+                // Generate running order
+                generateRunningOrder();
+                setupConfirmSection();
+
+            } catch (error) {
+                console.error('Error loading entries:', error);
+                showError('Error loading entries: ' + error.message);
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('loadBtn').disabled = false;
+            }
+        }
+
+        // Generate running order
+        function generateRunningOrder() {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            // Group entries by date -> judge -> class/round
+            const groupedEntries = groupEntries(entries, sortBy);
+            
+            // Store original order
+            originalOrder = JSON.parse(JSON.stringify(groupedEntries));
+            runningOrderData = groupedEntries;
+
+            // Generate statistics
+            generateStats();
+
+            // Display the running order
+            displayRunningOrder(groupedEntries);
+        }
+
+        // Group entries
+        function groupEntries(entries, sortBy) {
+            const grouped = {};
+
+            entries.forEach(entry => {
+                const date = entry.date || 'Unknown Date';
+                const judge = entry.judge || 'Judge TBD';
+                const classRound = `${entry.className || 'Unknown Class'} - Round ${entry.roundNumber || 1}`;
+
+                // Initialize nested structure
+                if (!grouped[date]) grouped[date] = {};
+                if (!grouped[date][judge]) grouped[date][judge] = {};
+                if (!grouped[date][judge][classRound]) grouped[date][judge][classRound] = [];
+
+                // Add entrant info
+                const entrantName = getEntrantName(entry);
+                grouped[date][judge][classRound].push({
+                    id: `${entry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
+                    name: entrantName,
+                    entryType: entry.entryType || 'regular',
+                    handler: entry.handlerName || 'Unknown Handler',
+                    dog: entry.dogCallName || 'Unknown Dog',
+                    cwagsNumber: entry.cwagsNumber || '',
+                    originalEntry: entry
+                });
+            });
+
+            // Sort entrants within each class/round
+            Object.keys(grouped).forEach(date => {
+                Object.keys(grouped[date]).forEach(judge => {
+                    Object.keys(grouped[date][judge]).forEach(classRound => {
+                        grouped[date][judge][classRound].sort((a, b) => {
+                            if (sortBy === 'handler') {
+                                return a.handler.localeCompare(b.handler);
+                            } else if (sortBy === 'dog') {
+                                return a.dog.localeCompare(b.dog);
+                            }
+                            return 0; // Keep original order for 'entry'
+                        });
+                    });
+                });
+            });
+
+            return grouped;
+        }
+
+        function getEntrantName(entry) {
+            const handler = entry.handlerName || 'Unknown Handler';
+            const dog = entry.dogCallName || 'Unknown Dog';
+            return `${handler} - ${dog}`;
+        }
+
+        // Display running order with drag & drop
+        function displayRunningOrder(groupedEntries) {
+            const container = document.getElementById('runningOrder');
+            let html = '';
+
+            // Sort dates chronologically
+            const sortedDates = Object.keys(groupedEntries).sort((a, b) => {
+                const dateA = new Date(a);
+                const dateB = new Date(b);
+                return dateA - dateB;
+            });
+
+            sortedDates.forEach(date => {
+                html += `
+                    <div class="day-section">
+                        <div class="day-header">${date}</div>
+                `;
+
+                // Sort judges alphabetically
+                const sortedJudges = Object.keys(groupedEntries[date]).sort();
+
+                sortedJudges.forEach(judge => {
+                    html += `
+                        <div class="judge-section">
+                            <div class="judge-header">${judge}</div>
+                            <div class="class-rounds">
+                    `;
+
+                    // Sort class/rounds
+                    const sortedClassRounds = Object.keys(groupedEntries[date][judge]).sort();
+
+                    sortedClassRounds.forEach(classRound => {
+                        const entrants = groupedEntries[date][judge][classRound];
+                        
+                        html += `
+                            <div class="class-round">
+                                <div class="class-round-title">${classRound}</div>
+                                <div class="entrants-list" data-date="${date}" data-judge="${judge}" data-class-round="${classRound}">
+                        `;
+
+                        entrants.forEach((entrant, index) => {
+                            html += `
+                                <div class="entrant-item ${entrant.entryType}" draggable="true" data-entrant-id="${entrant.id}">
+                                    <div class="entrant-number">${index + 1}</div>
+                                    <div class="entrant-name">${entrant.name}</div>
+                                    <div class="move-controls">
+                                        <button class="move-btn" onclick="moveEntrant('${entrant.id}', 'up')" title="Move Up">↑</button>
+                                        <button class="move-btn" onclick="moveEntrant('${entrant.id}', 'down')" title="Move Down">↓</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        html += `
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+            setupDragAndDrop();
+        }
+
+        // Setup drag and drop functionality
+        function setupDragAndDrop() {
+            const entrantItems = document.querySelectorAll('.entrant-item');
+            const entrantLists = document.querySelectorAll('.entrants-list');
+
+            entrantItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+
+            entrantLists.forEach(list => {
+                list.addEventListener('dragover', handleDragOver);
+                list.addEventListener('drop', handleDrop);
+                list.addEventListener('dragenter', handleDragEnter);
+                list.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        let draggedElement = null;
+        let draggedData = null;
+
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            draggedData = {
+                id: e.target.dataset.entrantId,
+                sourceList: e.target.closest('.entrants-list')
+            };
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedElement = null;
+            draggedData = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+        }
+
+        function handleDragLeave(e) {
+            // Implementation if needed
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            if (!draggedElement || !draggedData) return;
+
+            const targetList = e.target.closest('.entrants-list');
+            if (!targetList) return;
+
+            const targetDate = targetList.dataset.date;
+            const targetJudge = targetList.dataset.judge;
+            const targetClassRound = targetList.dataset.classRound;
+
+            const sourceDate = draggedData.sourceList.dataset.date;
+            const sourceJudge = draggedData.sourceList.dataset.judge;
+            const sourceClassRound = draggedData.sourceList.dataset.classRound;
+
+            // Find the entrant in our data
+            const sourceEntrants = runningOrderData[sourceDate][sourceJudge][sourceClassRound];
+            const entrantIndex = sourceEntrants.findIndex(e => e.id === draggedData.id);
+            
+            if (entrantIndex === -1) return;
+
+            const entrant = sourceEntrants.splice(entrantIndex, 1)[0];
+
+            // Add to target location
+            if (!runningOrderData[targetDate]) runningOrderData[targetDate] = {};
+            if (!runningOrderData[targetDate][targetJudge]) runningOrderData[targetDate][targetJudge] = {};
+            if (!runningOrderData[targetDate][targetJudge][targetClassRound]) runningOrderData[targetDate][targetJudge][targetClassRound] = [];
+
+            // Determine insertion position
+            const afterElement = getDragAfterElement(targetList, e.clientY);
+            if (afterElement == null) {
+                runningOrderData[targetDate][targetJudge][targetClassRound].push(entrant);
+            } else {
+                const afterIndex = Array.from(targetList.children).indexOf(afterElement);
+                runningOrderData[targetDate][targetJudge][targetClassRound].splice(afterIndex, 0, entrant);
+            }
+
+            // Refresh display
+            displayRunningOrder(runningOrderData);
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.entrant-item:not(.dragging)')];
+            
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        // Move entrant up/down
+        window.moveEntrant = function(entrantId, direction) {
+            // Find the entrant in our data structure
+            let found = false;
+            Object.keys(runningOrderData).forEach(date => {
+                Object.keys(runningOrderData[date]).forEach(judge => {
+                    Object.keys(runningOrderData[date][judge]).forEach(classRound => {
+                        const entrants = runningOrderData[date][judge][classRound];
+                        const index = entrants.findIndex(e => e.id === entrantId);
+                        
+                        if (index !== -1) {
+                            found = true;
+                            if (direction === 'up' && index > 0) {
+                                [entrants[index], entrants[index - 1]] = [entrants[index - 1], entrants[index]];
+                            } else if (direction === 'down' && index < entrants.length - 1) {
+                                [entrants[index], entrants[index + 1]] = [entrants[index + 1], entrants[index]];
+                            }
+                        }
+                    });
+                });
+            });
+
+            if (found) {
+                displayRunningOrder(runningOrderData);
+            }
+        };
+
+        // Save running order as draft
+        window.saveRunningOrder = async function() {
+            if (!currentTrial) {
+                alert('No trial selected');
+                return;
+            }
+
+            try {
+                const draftDoc = {
+                    trialId: currentTrial.id,
+                    trialName: currentTrial.clubName || 'Unnamed Trial',
+                    runningOrder: runningOrderData,
+                    savedAt: new Date(),
+                    savedBy: auth.currentUser.uid,
+                    status: 'draft'
+                };
+
+                await addDoc(collection(db, 'runningOrderDrafts'), draftDoc);
+                alert('Running order saved as draft!');
+
+            } catch (error) {
+                console.error('Error saving draft:', error);
+                alert('Error saving draft: ' + error.message);
+            }
+        };
+
+        // Generate statistics
+        function generateStats() {
+            const totalEntries = entries.length;
+            const uniqueHandlers = new Set(entries.map(e => e.handlerName)).size;
+            const uniqueDogs = new Set(entries.map(e => e.dogCallName)).size;
+            const regularEntries = entries.filter(e => e.entryType === 'regular').length;
+            const feoEntries = entries.filter(e => e.entryType === 'feo').length;
+
+            const statsContainer = document.getElementById('stats');
+            statsContainer.style.display = 'grid';
+            statsContainer.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-number">${totalEntries}</span>
+                    <span class="stat-label">Total Entries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueHandlers}</span>
+                    <span class="stat-label">Handlers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueDogs}</span>
+                    <span class="stat-label">Dogs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${regularEntries}</span>
+                    <span class="stat-label">Regular</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${feoEntries}</span>
+                    <span class="stat-label">FEO</span>
+                </div>
+            `;
+        }
+
+        // Show error message
+        function showError(message) {
+            const container = document.getElementById('runningOrder');
+            container.innerHTML = `
+                <div class="no-data">
+                    ❌ ${message}
+                </div>
+            `;
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('confirmSection').style.display = 'none';
+        }
+
+        // Handle trial selection change
+        document.getElementById('trialSelect').addEventListener('change', function() {
+            const trialId = this.value;
+            if (trialId) {
+                currentTrial = trials.find(t => t.id === trialId);
+                // Clear previous data
+                document.getElementById('runningOrder').innerHTML = '';
+                document.getElementById('stats').style.display = 'none';
+                document.getElementById('confirmSection').style.display = 'none';
+            }
+        });
+
+        // Handle sort change
+        document.getElementById('sortBy').addEventListener('change', function() {
+            if (entries.length > 0) {
+                generateRunningOrder();
+            }
+        });
+
+        // Initialize when auth is ready
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                await init();
+            } else {
+                showError('Please log in to access running orders');
+            }
+        });
+
+        // Make functions available globally
+        window.loadTrialEntries = loadTrialEntries;
+    </script>
+</body>
+</html> Reset order to original
+        window.resetOrder = function() {
+            if (confirm('Reset to original entry order?')) {
+                runningOrderData = JSON.parse(JSON.stringify(originalOrder));
+                displayRunningOrder(runningOrderData);
+            }
+        };
+
+        // Setup confirm section
+        function setupConfirmSection() {
+            const confirmSection = document.getElementById('confirmSection');
+            const dateSelector = document.getElementById('dateSelector');
+            const confirmDateSelect = document.getElementById('confirmDateSelect');
+
+            // Check if this is a multi-day trial (league)
+            const dates = Object.keys(runningOrderData);
+            
+            if (dates.length > 1) {
+                // Multi-day trial - show date selector
+                dateSelector.style.display = 'block';
+                confirmDateSelect.innerHTML = '<option value="">Select a date...</option>';
+                
+                dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    confirmDateSelect.appendChild(option);
+                });
+            } else {
+                // Single day trial - hide date selector
+                dateSelector.style.display = 'none';
+            }
+
+            confirmSection.style.display = 'block';
+        }
+
+        // Confirm running order
+        window.confirmRunningOrder = async function() {
+            const dates = Object.keys(runningOrderData);
+            let dateToConfirm = null;
+
+            if (dates.length > 1) {
+                dateToConfirm = document.getElementById('confirmDateSelect').value;
+                if (!dateToConfirm) {
+                    alert('Please select a date to confirm');
+                    return;
+                }
+            } else {
+                dateToConfirm = dates[0];
+            }
+
+            if (!dateToConfirm || !runningOrderData[dateToConfirm]) {
+                alert('Invalid date selection');
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmBtn');
+            const originalText = confirmBtn.textContent;
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Confirming...';
+
+            try {
+                // Save the confirmed running order
+                const runningOrderDoc = {
+                    trialId: currentTrial.id,
+                    trialName: currentTrial.clubName || 'Unnamed Trial',
+                    date: dateToConfirm,
+                    runningOrder: runningOrderData[dateToConfirm],
+                    confirmedAt: new Date(),
+                    confirmedBy: auth.currentUser.uid,
+                    status: 'confirmed'
+                };
+
+                await addDoc(collection(db, 'runningOrders'), runningOrderDoc);
+                
+                alert(`Running order confirmed for ${dateToConfirm}!`);
+                
+                // If multi-day, remove confirmed date from selector
+                if (dates.length > 1) {
+                    const confirmDateSelect = document.getElementById('confirmDateSelect');
+                    const option = confirmDateSelect.querySelector(`option[value="${dateToConfirm}"]`);
+                    if (option) {
+                        option.remove();
+                    }
+                    confirmDateSelect.value = '';
+                }
+
+            } catch (error) {
+                console.error('Error confirming running order:', error);
+                alert('Error confirming running order: ' + error.message);
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = originalText;
+            }
+        };
+
+        //
