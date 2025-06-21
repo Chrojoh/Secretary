@@ -420,6 +420,9 @@
         let runningOrderData = {};
         let generatedSheets = [];
 
+        // Store scores in memory as user types
+        let currentFillableScores = {};
+
         // Initialize the application
         async function init() {
             try {
@@ -457,156 +460,126 @@
                     return dateB - dateA;
                 });
 
-                populateTrialSelector();
+                // Populate trial dropdown
+                const trialSelect = document.getElementById('trialSelect');
+                trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+                
+                trials.forEach(trial => {
+                    const option = document.createElement('option');
+                    option.value = trial.id;
+                    option.textContent = `${trial.clubName} - ${trial.secretary}`;
+                    trialSelect.appendChild(option);
+                });
+
+                // Set up trial selection handler
+                trialSelect.addEventListener('change', async function() {
+                    const trialId = this.value;
+                    if (trialId) {
+                        currentTrial = trials.find(t => t.id === trialId);
+                        await populateDates();
+                    } else {
+                        currentTrial = null;
+                        document.getElementById('dateSelect').innerHTML = '<option value="">Select trial first...</option>';
+                        document.getElementById('judgeSelect').innerHTML = '<option value="">All Judges</option>';
+                    }
+                });
+
             } catch (error) {
                 console.error('Error loading trials:', error);
                 showError('Error loading trials: ' + error.message);
             }
         }
 
-        // Populate trial selector dropdown
-        function populateTrialSelector() {
-            const trialSelect = document.getElementById('trialSelect');
-            trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+        // Populate dates for selected trial
+        async function populateDates() {
+            if (!currentTrial) return;
 
-            trials.forEach(trial => {
-                const option = document.createElement('option');
-                option.value = trial.id;
-                
-                let trialLabel = trial.clubName || 'Unnamed Trial';
-                
-                if (trial.days && trial.days.length > 0) {
-                    const dates = trial.days
-                        .filter(day => day.date)
-                        .map(day => new Date(day.date).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric' 
-                        }))
-                        .join(', ');
-                    if (dates) {
-                        trialLabel += ` (${dates})`;
-                    }
-                }
-                
-                option.textContent = trialLabel;
-                trialSelect.appendChild(option);
-            });
-
-            // Handle trial selection change
-            trialSelect.addEventListener('change', function() {
-                const trialId = this.value;
-                if (trialId) {
-                    currentTrial = trials.find(t => t.id === trialId);
-                    populateDateSelector();
-                    populateJudgeSelector();
-                } else {
-                    currentTrial = null;
-                    document.getElementById('dateSelect').innerHTML = '<option value="">Select trial first...</option>';
-                    document.getElementById('judgeSelect').innerHTML = '<option value="">All Judges</option>';
-                }
-            });
-        }
-
-        // Populate date selector based on selected trial
-        function populateDateSelector() {
             const dateSelect = document.getElementById('dateSelect');
             dateSelect.innerHTML = '<option value="">Select a date...</option>';
 
-            if (currentTrial && currentTrial.days) {
-                currentTrial.days.forEach(day => {
-                    if (day.date) {
-                        const option = document.createElement('option');
-                        option.value = day.date;
-                        option.textContent = new Date(day.date).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        });
-                        dateSelect.appendChild(option);
-                    }
-                });
-            }
+            // Extract dates from trial structure
+            const dates = new Set();
+            currentTrial.days?.forEach(day => {
+                if (day.date) {
+                    dates.add(day.date);
+                }
+            });
+
+            // Add dates to dropdown
+            Array.from(dates).sort().forEach(date => {
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = new Date(date).toLocaleDateString();
+                dateSelect.appendChild(option);
+            });
+
+            // Set up date selection handler
+            dateSelect.addEventListener('change', async function() {
+                const selectedDate = this.value;
+                if (selectedDate) {
+                    await populateJudges(selectedDate);
+                }
+            });
         }
 
-        // Populate judge selector based on selected trial
-        function populateJudgeSelector() {
+        // Populate judges for selected date
+        async function populateJudges(selectedDate) {
+            if (!currentTrial) return;
+
             const judgeSelect = document.getElementById('judgeSelect');
             judgeSelect.innerHTML = '<option value="">All Judges</option>';
 
-            if (currentTrial && currentTrial.days) {
-                const judges = new Set();
-                currentTrial.days.forEach(day => {
-                    if (day.classes) {
-                        day.classes.forEach(cls => {
-                            if (cls.rounds) {
-                                cls.rounds.forEach(round => {
-                                    if (round.judge && round.judge.trim()) {
-                                        judges.add(round.judge.trim());
-                                    }
-                                });
+            const judges = new Set();
+
+            // Extract judges from trial structure for the selected date
+            currentTrial.days?.forEach(day => {
+                if (day.date === selectedDate) {
+                    day.classes?.forEach(cls => {
+                        cls.rounds?.forEach(round => {
+                            if (round.judge) {
+                                judges.add(round.judge);
                             }
                         });
-                    }
-                });
+                    });
+                }
+            });
 
-                Array.from(judges).sort().forEach(judge => {
-                    const option = document.createElement('option');
-                    option.value = judge;
-                    option.textContent = judge;
-                    judgeSelect.appendChild(option);
-                });
-            }
+            // Add judges to dropdown
+            Array.from(judges).sort().forEach(judge => {
+                const option = document.createElement('option');
+                option.value = judge;
+                option.textContent = judge;
+                judgeSelect.appendChild(option);
+            });
         }
 
-        // Load trial data and entries
-        async function loadTrialData() {
+        // Load trial data including entries
+        window.loadTrialData = async function() {
             const trialId = document.getElementById('trialSelect').value;
             const selectedDate = document.getElementById('dateSelect').value;
 
-            if (!trialId) {
-                alert('Please select a trial');
+            if (!trialId || !selectedDate) {
+                alert('Please select both a trial and a date');
                 return;
             }
 
-            if (!selectedDate) {
-                alert('Please select a date');
-                return;
-            }
-
-            document.getElementById('loadingIndicator').style.display = 'block';
             document.getElementById('loadBtn').disabled = true;
+            document.getElementById('loadingIndicator').style.display = 'block';
 
             try {
                 // Load entries for this trial
-                const q = query(
+                const entriesQuery = query(
                     collection(db, "entries"),
-                    where("trialId", "==", trialId)
+                    where("trialId", "==", trialId),
+                    where("date", "==", selectedDate)
                 );
                 
-                const snapshot = await getDocs(q);
+                const entriesSnapshot = await getDocs(entriesQuery);
                 entries = [];
                 
-                snapshot.forEach(doc => {
-                    const entryData = doc.data();
-                    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-                        entryData.selectedEntries.forEach(selectedEntry => {
-                            entries.push({
-                                id: doc.id,
-                                ...selectedEntry,
-                                handlerName: entryData.handlerName,
-                                dogCallName: entryData.dogCallName,
-                                cwagsNumber: entryData.cwagsNumber,
-                                submittedAt: entryData.submittedAt
-                            });
-                        });
-                    }
+                entriesSnapshot.forEach(doc => {
+                    entries.push({ id: doc.id, ...doc.data() });
                 });
-
-                // Filter entries for selected date
-                entries = entries.filter(entry => entry.date === selectedDate);
-
-                console.log('Loaded entries for date:', selectedDate, entries);
 
                 if (entries.length === 0) {
                     showError('No entries found for the selected date');
@@ -892,244 +865,221 @@
                         <tbody>
             `;
 
-            // Generate fillable score sheet HTML (for editing)
-function generateFillableScoreSheetHTML(sheetData) {
-    const entrantCount = sheetData.entrants.length;
-    
-    // Calculate optimal font sizes and spacing based on entrant count
-    let scoringTableFontSize = '9px';
-    let cellPadding = '4px';
-    let rowHeight = '40px';
-    
-    if (entrantCount > 12) {
-        scoringTableFontSize = '7px';
-        cellPadding = '2px';
-        rowHeight = '30px';
-    } else if (entrantCount > 8) {
-        scoringTableFontSize = '8px';
-        cellPadding = '3px';
-        rowHeight = '35px';
-    }
-
-    // Load existing scores if they exist
-    const scores = sheetData.scores || {};
-
-    let html = `
-        <div class="score-sheet" style="border: 2px solid #007bff; background: #f8f9fa;">
-            <div style="background: #007bff; color: white; padding: 10px; margin: -20px -20px 20px -20px; text-align: center;">
-                <h3 style="margin: 0;">✏️ FILLABLE SCORE SHEET - Enter scores from judge's physical sheet</h3>
-                <p style="margin: 5px 0 0 0; font-size: 14px;">Fill in the 4 scent locations, mark scent results, enter faults, times, and Pass/Fail</p>
-            </div>
-            
-            <div class="score-sheet-header">
-                <div style="text-align: right; font-size: 8px;">Copyright © by Canine-Work And Games, LLC, 2024</div>
-                <div class="cwags-logo">
-                    <img src="./images/cwags-logo.png" alt="C-WAGS Logo" />
-                </div>
-                <div class="score-sheet-title-text">${sheetData.className} Score Sheet</div>
-                <div class="score-sheet-date">Date: ${sheetData.date}</div>
-                <div class="score-sheet-class">CLASS: ${sheetData.className}</div>
-                <div class="score-sheet-class">JUDGE: ${sheetData.judge}</div>
+            // Add entrant rows - use actual count or minimum 8, whichever is larger
+            const minRows = Math.max(8, entrantCount);
+            for (let i = 0; i < minRows; i++) {
+                const entrant = sheetData.entrants[i];
+                const teamName = entrant ? `${entrant.name}` : `Team ${i + 1}`;
                 
-                <div class="score-sheet-rounds">
-                    <label>Round</label>
-                    <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '1' ? 'checked' : ''}> 1
-                    <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '2' ? 'checked' : ''}> 2
-                    <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '3' ? 'checked' : ''}> 3
-                    <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '4' ? 'checked' : ''}> 4
+                html += `
+                    <tr style="height: ${rowHeight};">
+                        <td style="font-weight: bold; padding: ${cellPadding}; text-align: center;">${i + 1}</td>
+                        <td style="font-weight: bold; padding: ${cellPadding}; font-size: 8px; ${!entrant ? 'color: #999;' : ''}">${teamName}</td>
+                        <td class="scent-cell"></td>
+                        <td class="scent-cell"></td>
+                        <td class="scent-cell"></td>
+                        <td class="scent-cell"></td>
+                        <td class="scent-cell"></td>
+                        <td class="scent-cell"></td>
+                        <td class="scent-cell"></td>
+                        <td class="scent-cell"></td>
+                    </tr>
+                `;
+            }
+
+            html += `
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            `;
 
-            <table class="scent-info-table">
-                <tr>
-                    <th style="background: #fff3cd;">Scent 1</th>
-                    <th style="background: #fff3cd;">Scent 2</th>
-                    <th style="background: #fff3cd;">Scent 3</th>
-                    <th style="background: #fff3cd;">Scent 4</th>
-                </tr>
-                <tr>
-                    <td style="background: #fff3cd;">Located in/on:</td>
-                    <td style="background: #fff3cd;">Located in/on:</td>
-                    <td style="background: #fff3cd;">Located in/on:</td>
-                    <td style="background: #fff3cd;">Located in/on:</td>
-                </tr>
-                <tr>
-                    <td style="height: 30px; background: white;">
-                        <input type="text" id="scent1Location" 
-                               value="${scores.scent1Location || ''}" 
-                               placeholder="Enter scent 1 location"
-                               style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
-                    </td>
-                    <td style="height: 30px; background: white;">
-                        <input type="text" id="scent2Location" 
-                               value="${scores.scent2Location || ''}" 
-                               placeholder="Enter scent 2 location"
-                               style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
-                    </td>
-                    <td style="height: 30px; background: white;">
-                        <input type="text" id="scent3Location" 
-                               value="${scores.scent3Location || ''}" 
-                               placeholder="Enter scent 3 location"
-                               style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
-                    </td>
-                    <td style="height: 30px; background: white;">
-                        <input type="text" id="scent4Location" 
-                               value="${scores.scent4Location || ''}" 
-                               placeholder="Enter scent 4 location"
-                               style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
-                    </td>
-                </tr>
-            </table>
+            return html;
+        }
 
-            <div class="faults-section">
-                <strong>Faults:</strong> Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior; 
-                Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert"; 
-                SR crossing line less than half.
-            </div>
-
-            <table class="scoring-table" style="font-size: ${scoringTableFontSize};">
-                <thead>
-                    <tr>
-                        <th rowspan="2">Team</th>
-                        <th rowspan="2">Dog - Handler</th>
-                        <th colspan="4">Scent Results</th>
-                        <th rowspan="2">Fault</th>
-                        <th rowspan="2">Fault</th>
-                        <th rowspan="2">Time</th>
-                        <th rowspan="2">Pass/Fail</th>
-                    </tr>
-                    <tr>
-                        <th>Scent 1</th>
-                        <th>Scent 2</th>
-                        <th>Scent 3</th>
-                        <th>Scent 4</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-
-    // Add entrant rows - use actual count or minimum 8, whichever is larger
-    const minRows = Math.max(8, entrantCount);
-    for (let i = 0; i < minRows; i++) {
-        const entrant = sheetData.entrants[i];
-        const teamName = entrant ? `${entrant.name}` : `Team ${i + 1}`;
-        const entrantScores = scores[i] || {};
-        
-        html += `
-            <tr style="height: ${rowHeight}; ${entrant ? 'background: white;' : 'background: #f8f9fa;'}">
-                <td style="font-weight: bold; padding: ${cellPadding}; text-align: center;">${i + 1}</td>
-                <td style="font-weight: bold; padding: ${cellPadding}; font-size: 8px; ${!entrant ? 'color: #999;' : ''}">${teamName}</td>
-                <td style="padding: 2px;">
-                    <input type="text" 
-                           value="${entrantScores.scent1 || ''}" 
-                           onchange="updateEntrantScore(${i}, 'scent1', this.value)"
-                           placeholder="✓ or X"
-                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
-                </td>
-                <td style="padding: 2px;">
-                    <input type="text" 
-                           value="${entrantScores.scent2 || ''}" 
-                           onchange="updateEntrantScore(${i}, 'scent2', this.value)"
-                           placeholder="✓ or X"
-                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
-                </td>
-                <td style="padding: 2px;">
-                    <input type="text" 
-                           value="${entrantScores.scent3 || ''}" 
-                           onchange="updateEntrantScore(${i}, 'scent3', this.value)"
-                           placeholder="✓ or X"
-                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
-                </td>
-                <td style="padding: 2px;">
-                    <input type="text" 
-                           value="${entrantScores.scent4 || ''}" 
-                           onchange="updateEntrantScore(${i}, 'scent4', this.value)"
-                           placeholder="✓ or X"
-                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
-                </td>
-                <td style="padding: 2px;">
-                    <input type="text" 
-                           value="${entrantScores.fault1 || ''}" 
-                           onchange="updateEntrantScore(${i}, 'fault1', this.value)"
-                           placeholder="Fault type"
-                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 9px;">
-                </td>
-                <td style="padding: 2px;">
-                    <input type="text" 
-                           value="${entrantScores.fault2 || ''}" 
-                           onchange="updateEntrantScore(${i}, 'fault2', this.value)"
-                           placeholder="Fault type"
-                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 9px;">
-                </td>
-                <td style="padding: 2px;">
-                    <input type="text" 
-                           value="${entrantScores.time || ''}" 
-                           onchange="updateEntrantScore(${i}, 'time', this.value)"
-                           placeholder="mm:ss"
-                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
-                </td>
-                <td style="padding: 2px;">
-                    <select onchange="updateEntrantScore(${i}, 'passFail', this.value)"
-                            style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px; font-weight: bold;">
-                        <option value="">-</option>
-                        <option value="Pass" ${entrantScores.passFail === 'Pass' ? 'selected' : ''} style="background: #d4edda;">Pass</option>
-                        <option value="Fail" ${entrantScores.passFail === 'Fail' ? 'selected' : ''} style="background: #f8d7da;">Fail</option>
-                    </select>
-                </td>
-            </tr>
-        `;
-    }
-
-    html += `
-                </tbody>
-            </table>
+        // Generate fillable score sheet HTML (for editing)
+        function generateFillableScoreSheetHTML(sheetData) {
+            const entrantCount = sheetData.entrants.length;
             
-            <div style="margin-top: 20px; text-align: center; padding: 20px; background: white; border: 2px solid #28a745; border-radius: 8px;">
-                <button onclick="saveFillableScores('${sheetData.id}')" 
-                        style="background: #28a745; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
-                    💾 Save All Scores
-                </button>
-                <button onclick="clearScores()" 
-                        style="background: #6c757d; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 5px; cursor: pointer;">
-                    🗑️ Clear Form
-                </button>
-            </div>
-        </div>
-    `;
+            // Calculate optimal font sizes and spacing based on entrant count
+            let scoringTableFontSize = '9px';
+            let cellPadding = '4px';
+            let rowHeight = '40px';
+            
+            if (entrantCount > 12) {
+                scoringTableFontSize = '7px';
+                cellPadding = '2px';
+                rowHeight = '30px';
+            } else if (entrantCount > 8) {
+                scoringTableFontSize = '8px';
+                cellPadding = '3px';
+                rowHeight = '35px';
+            }
 
-    return html;
-}
+            // Load existing scores if they exist
+            const scores = sheetData.scores || {};
+
+            let html = `
+                <div class="score-sheet" style="border: 2px solid #007bff; background: #f8f9fa;">
+                    <div style="background: #007bff; color: white; padding: 10px; margin: -20px -20px 20px -20px; text-align: center;">
+                        <h3 style="margin: 0;">✏️ FILLABLE SCORE SHEET - Enter scores from judge's physical sheet</h3>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">Fill in the 4 scent locations, mark scent results, enter faults, times, and Pass/Fail</p>
+                    </div>
+                    
+                    <div class="score-sheet-header">
+                        <div style="text-align: right; font-size: 8px;">Copyright © by Canine-Work And Games, LLC, 2024</div>
+                        <div class="cwags-logo">
+                            <img src="./images/cwags-logo.png" alt="C-WAGS Logo" />
+                        </div>
+                        <div class="score-sheet-title-text">${sheetData.className} Score Sheet</div>
+                        <div class="score-sheet-date">Date: ${sheetData.date}</div>
+                        <div class="score-sheet-class">CLASS: ${sheetData.className}</div>
+                        <div class="score-sheet-class">JUDGE: ${sheetData.judge}</div>
+                        
+                        <div class="score-sheet-rounds">
+                            <label>Round</label>
+                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '1' ? 'checked' : ''}> 1
+                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '2' ? 'checked' : ''}> 2
+                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '3' ? 'checked' : ''}> 3
+                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '4' ? 'checked' : ''}> 4
+                        </div>
+                    </div>
+
+                    <table class="scent-info-table">
+                        <tr>
+                            <th style="background: #fff3cd;">Scent 1</th>
+                            <th style="background: #fff3cd;">Scent 2</th>
+                            <th style="background: #fff3cd;">Scent 3</th>
+                            <th style="background: #fff3cd;">Scent 4</th>
+                        </tr>
+                        <tr>
+                            <td style="background: #fff3cd;">Located in/on:</td>
+                            <td style="background: #fff3cd;">Located in/on:</td>
+                            <td style="background: #fff3cd;">Located in/on:</td>
+                            <td style="background: #fff3cd;">Located in/on:</td>
+                        </tr>
+                        <tr>
+                            <td style="height: 30px; background: white;">
+                                <input type="text" id="scent1Location" 
+                                       value="${scores.scent1Location || ''}" 
+                                       placeholder="Enter scent 1 location"
+                                       style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
+                            </td>
+                            <td style="height: 30px; background: white;">
+                                <input type="text" id="scent2Location" 
+                                       value="${scores.scent2Location || ''}" 
+                                       placeholder="Enter scent 2 location"
+                                       style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
+                            </td>
+                            <td style="height: 30px; background: white;">
+                                <input type="text" id="scent3Location" 
+                                       value="${scores.scent3Location || ''}" 
+                                       placeholder="Enter scent 3 location"
+                                       style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
+                            </td>
+                            <td style="height: 30px; background: white;">
+                                <input type="text" id="scent4Location" 
+                                       value="${scores.scent4Location || ''}" 
+                                       placeholder="Enter scent 4 location"
+                                       style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="faults-section">
+                        <strong>Faults:</strong> Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior; 
+                        Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert"; 
+                        SR crossing line less than half.
+                    </div>
+
+                    <table class="scoring-table" style="font-size: ${scoringTableFontSize};">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Team</th>
+                                <th rowspan="2">Dog - Handler</th>
+                                <th colspan="4">Scent Results</th>
+                                <th rowspan="2">Fault</th>
+                                <th rowspan="2">Fault</th>
+                                <th rowspan="2">Time</th>
+                                <th rowspan="2">Pass/Fail</th>
+                            </tr>
+                            <tr>
+                                <th>Scent 1</th>
+                                <th>Scent 2</th>
+                                <th>Scent 3</th>
+                                <th>Scent 4</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
 
             // Add entrant rows - use actual count or minimum 8, whichever is larger
             const minRows = Math.max(8, entrantCount);
             for (let i = 0; i < minRows; i++) {
                 const entrant = sheetData.entrants[i];
-                const teamName = entrant ? `${entrant.handler} - ${entrant.dog}` : '';
+                const teamName = entrant ? `${entrant.name}` : `Team ${i + 1}`;
+                const entrantScores = scores[i] || {};
                 
                 html += `
-                    <tr>
-                        <td class="team-name-cell" style="padding: ${cellPadding};">${i + 1}</td>
-                        <td class="team-name-cell" style="padding: ${cellPadding};">${teamName}</td>
-                        <td class="scent-cell" style="padding: ${cellPadding};">
-                            <div>Scent 1</div>
-                            <div style="height: 12px;"></div>
+                    <tr style="height: ${rowHeight}; ${entrant ? 'background: white;' : 'background: #f8f9fa;'}">
+                        <td style="font-weight: bold; padding: ${cellPadding}; text-align: center;">${i + 1}</td>
+                        <td style="font-weight: bold; padding: ${cellPadding}; font-size: 8px; ${!entrant ? 'color: #999;' : ''}">${teamName}</td>
+                        <td style="padding: 2px;">
+                            <input type="text" 
+                                   value="${entrantScores.scent1 || ''}" 
+                                   onchange="updateEntrantScore(${i}, 'scent1', this.value)"
+                                   placeholder="✓ or X"
+                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
                         </td>
-                        <td class="scent-cell" style="padding: ${cellPadding};">
-                            <div>Scent 2</div>
-                            <div style="height: 12px;"></div>
+                        <td style="padding: 2px;">
+                            <input type="text" 
+                                   value="${entrantScores.scent2 || ''}" 
+                                   onchange="updateEntrantScore(${i}, 'scent2', this.value)"
+                                   placeholder="✓ or X"
+                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
                         </td>
-                        <td class="scent-cell" style="padding: ${cellPadding};">
-                            <div>Scent 3</div>
-                            <div style="height: 12px;"></div>
+                        <td style="padding: 2px;">
+                            <input type="text" 
+                                   value="${entrantScores.scent3 || ''}" 
+                                   onchange="updateEntrantScore(${i}, 'scent3', this.value)"
+                                   placeholder="✓ or X"
+                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
                         </td>
-                        <td class="scent-cell" style="padding: ${cellPadding};">
-                            <div>Scent 4</div>
-                            <div style="height: 12px;"></div>
+                        <td style="padding: 2px;">
+                            <input type="text" 
+                                   value="${entrantScores.scent4 || ''}" 
+                                   onchange="updateEntrantScore(${i}, 'scent4', this.value)"
+                                   placeholder="✓ or X"
+                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
                         </td>
-                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
-                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
-                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
-                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
+                        <td style="padding: 2px;">
+                            <input type="text" 
+                                   value="${entrantScores.fault1 || ''}" 
+                                   onchange="updateEntrantScore(${i}, 'fault1', this.value)"
+                                   placeholder="Fault type"
+                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 9px;">
+                        </td>
+                        <td style="padding: 2px;">
+                            <input type="text" 
+                                   value="${entrantScores.fault2 || ''}" 
+                                   onchange="updateEntrantScore(${i}, 'fault2', this.value)"
+                                   placeholder="Fault type"
+                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 9px;">
+                        </td>
+                        <td style="padding: 2px;">
+                            <input type="text" 
+                                   value="${entrantScores.time || ''}" 
+                                   onchange="updateEntrantScore(${i}, 'time', this.value)"
+                                   placeholder="mm:ss"
+                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                        </td>
+                        <td style="padding: 2px;">
+                            <select onchange="updateEntrantScore(${i}, 'passFail', this.value)"
+                                    style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px; font-weight: bold;">
+                                <option value="">-</option>
+                                <option value="Pass" ${entrantScores.passFail === 'Pass' ? 'selected' : ''} style="background: #d4edda;">Pass</option>
+                                <option value="Fail" ${entrantScores.passFail === 'Fail' ? 'selected' : ''} style="background: #f8d7da;">Fail</option>
+                            </select>
+                        </td>
                     </tr>
                 `;
             }
@@ -1138,8 +1088,15 @@ function generateFillableScoreSheetHTML(sheetData) {
                         </tbody>
                     </table>
                     
-                    <div style="margin-top: 20px; text-align: center; font-size: 8px;">
-                        Copyright © by Canine-Work And Games, LLC, 2024
+                    <div style="margin-top: 20px; text-align: center; padding: 20px; background: white; border: 2px solid #28a745; border-radius: 8px;">
+                        <button onclick="saveFillableScores('${sheetData.id}')" 
+                                style="background: #28a745; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                            💾 Save All Scores
+                        </button>
+                        <button onclick="clearScores()" 
+                                style="background: #6c757d; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 5px; cursor: pointer;">
+                            🗑️ Clear Form
+                        </button>
                     </div>
                 </div>
             `;
@@ -1147,111 +1104,62 @@ function generateFillableScoreSheetHTML(sheetData) {
             return html;
         }
 
-        // Store scores in memory as user types
-let currentFillableScores = {};
-
-window.updateEntrantScore = function(entrantIndex, field, value) {
-    if (!currentFillableScores[entrantIndex]) {
-        currentFillableScores[entrantIndex] = {};
-    }
-    currentFillableScores[entrantIndex][field] = value;
-};
-
-window.saveFillableScores = async function(sheetId) {
-    try {
-        // Get scent locations
-        const scent1Location = document.getElementById('scent1Location')?.value || '';
-        const scent2Location = document.getElementById('scent2Location')?.value || '';
-        const scent3Location = document.getElementById('scent3Location')?.value || '';
-        const scent4Location = document.getElementById('scent4Location')?.value || '';
-        
-        // Combine all scores
-        const allScores = {
-            ...currentFillableScores,
-            scent1Location,
-            scent2Location,
-            scent3Location,
-            scent4Location
+        window.updateEntrantScore = function(entrantIndex, field, value) {
+            if (!currentFillableScores[entrantIndex]) {
+                currentFillableScores[entrantIndex] = {};
+            }
+            currentFillableScores[entrantIndex][field] = value;
         };
-        
-        // Update the sheet in database
-        await updateDoc(doc(db, 'scoreSheets', sheetId), {
-            scores: allScores,
-            status: 'completed',
-            lastModified: new Date()
-        });
-        
-        alert('✅ Scores saved successfully!');
-        
-        // Refresh the stored sheets view if it's displayed
-        if (document.getElementById('storedSheetsSection').style.display === 'block') {
-            viewStoredSheets();
-        }
-        
-    } catch (error) {
-        console.error('Error saving scores:', error);
-        alert('Error saving scores: ' + error.message);
-    }
-};
 
-window.clearScores = function() {
-    if (confirm('Are you sure you want to clear all entered scores?')) {
-        currentFillableScores = {};
-        
-        // Clear all input fields
-        const inputs = document.querySelectorAll('.score-sheet input, .score-sheet select');
-        inputs.forEach(input => {
-            if (input.type === 'checkbox') return; // Don't clear round checkboxes
-            input.value = '';
-        });
-    }
-};
+        window.saveFillableScores = async function(sheetId) {
+            try {
+                // Get scent locations
+                const scent1Location = document.getElementById('scent1Location')?.value || '';
+                const scent2Location = document.getElementById('scent2Location')?.value || '';
+                const scent3Location = document.getElementById('scent3Location')?.value || '';
+                const scent4Location = document.getElementById('scent4Location')?.value || '';
+                
+                // Combine all scores
+                const allScores = {
+                    ...currentFillableScores,
+                    scent1Location,
+                    scent2Location,
+                    scent3Location,
+                    scent4Location
+                };
+                
+                // Update the sheet in database
+                await updateDoc(doc(db, 'scoreSheets', sheetId), {
+                    scores: allScores,
+                    status: 'completed',
+                    lastModified: new Date()
+                });
+                
+                alert('✅ Scores saved successfully!');
+                
+                // Refresh the stored sheets view if it's displayed
+                if (document.getElementById('scoreSheetsSection').style.display === 'block') {
+                    viewStoredSheets();
+                }
+                
+            } catch (error) {
+                console.error('Error saving scores:', error);
+                alert('Error saving scores: ' + error.message);
+            }
+        };
 
-        // Generate statistics
-        function generateStats() {
-            const totalEntries = entries.length;
-            const uniqueHandlers = new Set(entries.map(e => e.handlerName)).size;
-            const uniqueDogs = new Set(entries.map(e => e.dogCallName)).size;
-            const regularEntries = entries.filter(e => e.entryType === 'regular').length;
-            const feoEntries = entries.filter(e => e.entryType === 'feo').length;
-
-            const statsContainer = document.getElementById('stats');
-            statsContainer.style.display = 'grid';
-            statsContainer.innerHTML = `
-                <div class="stat-item">
-                    <span class="stat-number">${totalEntries}</span>
-                    <span class="stat-label">Total Entries</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${uniqueHandlers}</span>
-                    <span class="stat-label">Handlers</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${uniqueDogs}</span>
-                    <span class="stat-label">Dogs</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${regularEntries}</span>
-                    <span class="stat-label">Regular</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${feoEntries}</span>
-                    <span class="stat-label">FEO</span>
-                </div>
-            `;
-        }
-
-        // Show error message
-        function showError(message) {
-            const container = document.getElementById('scoreSheetsSection');
-            container.innerHTML = `
-                <div class="no-data">
-                    ❌ ${message}
-                </div>
-            `;
-            container.style.display = 'block';
-            document.getElementById('stats').style.display = 'none';
-        }
+        window.clearScores = function() {
+            if (confirm('Are you sure you want to clear all entered scores?')) {
+                currentFillableScores = {};
+                
+                // Clear all input fields
+                const inputs = document.querySelectorAll('.score-sheet input, .score-sheet select');
+                inputs.forEach(input => {
+                    if (input.type === 'checkbox') return; // Don't clear round checkboxes
+                    input.value = '';
+                });
+            }
+        };
 
         // Preview single sheet
         window.previewSheet = function(sheetId) {
@@ -1357,7 +1265,8 @@ window.clearScores = function() {
                 html = '<div class="no-data">No stored score sheets found.</div>';
             } else {
                 sheets.forEach(sheet => {
-                    const createdDate = sheet.createdAt ? sheet.createdAt.toDate().toLocaleDateString() : 'Unknown';
+                    const createdDate = sheet.createdAt ? 
+                        sheet.createdAt.toDate().toLocaleDateString() : 'Unknown';
                     html += `
                         <div class="score-sheet-item">
                             <div class="score-sheet-info">
@@ -1426,30 +1335,30 @@ window.clearScores = function() {
             }
         };
 
-       // Edit scores - Simple fillable form approach
-window.editScores = async function(sheetId) {
-    try {
-        const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
-        if (!sheetDoc.exists()) {
-            alert('Score sheet not found');
-            return;
-        }
+        // Edit scores - Simple fillable form approach
+        window.editScores = async function(sheetId) {
+            try {
+                const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
+                if (!sheetDoc.exists()) {
+                    alert('Score sheet not found');
+                    return;
+                }
 
-        const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
-        const container = document.getElementById('scoreSheetsContainer');
-        
-        // Generate fillable score sheet HTML
-        container.innerHTML = generateFillableScoreSheetHTML(sheet);
-        container.style.display = 'block';
-        
-        // Scroll to the form
-        container.scrollIntoView({ behavior: 'smooth' });
-        
-    } catch (error) {
-        console.error('Error loading sheet for editing:', error);
-        alert('Error loading sheet: ' + error.message);
-    }
-};
+                const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                const container = document.getElementById('scoreSheetsContainer');
+                
+                // Generate fillable score sheet HTML
+                container.innerHTML = generateFillableScoreSheetHTML(sheet);
+                container.style.display = 'block';
+                
+                // Scroll to the form
+                container.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error loading sheet for editing:', error);
+                alert('Error loading sheet: ' + error.message);
+            }
+        };
 
         // Delete sheet
         window.deleteSheet = async function(sheetId) {
@@ -1469,6 +1378,52 @@ window.editScores = async function(sheetId) {
             }
         };
 
+        // Generate statistics
+        function generateStats() {
+            const totalEntries = entries.length;
+            const uniqueHandlers = new Set(entries.map(e => e.handlerName)).size;
+            const uniqueDogs = new Set(entries.map(e => e.dogCallName)).size;
+            const regularEntries = entries.filter(e => e.entryType === 'regular').length;
+            const feoEntries = entries.filter(e => e.entryType === 'feo').length;
+
+            const statsContainer = document.getElementById('stats');
+            statsContainer.style.display = 'grid';
+            statsContainer.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-number">${totalEntries}</span>
+                    <span class="stat-label">Total Entries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueHandlers}</span>
+                    <span class="stat-label">Handlers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueDogs}</span>
+                    <span class="stat-label">Dogs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${regularEntries}</span>
+                    <span class="stat-label">Regular</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${feoEntries}</span>
+                    <span class="stat-label">FEO</span>
+                </div>
+            `;
+        }
+
+        // Show error message
+        function showError(message) {
+            const container = document.getElementById('scoreSheetsSection');
+            container.innerHTML = `
+                <div class="no-data">
+                    ❌ ${message}
+                </div>
+            `;
+            container.style.display = 'block';
+            document.getElementById('stats').style.display = 'none';
+        }
+
         // Make main functions available globally
         window.loadTrialData = loadTrialData;
         window.generateAllScoreSheets = generateAllScoreSheets;
@@ -1484,4 +1439,4 @@ window.editScores = async function(sheetId) {
         });
     </script>
 </body>
-</html>>
+</html>
