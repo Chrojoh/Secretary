@@ -1629,7 +1629,7 @@
             }
         };
 
-        // Generate filled PDF
+        // Generate filled PDF that matches the printed score sheet exactly
         window.generateFilledPDF = async function() {
             if (!currentEditingSheet) {
                 alert('No sheet selected');
@@ -1637,68 +1637,180 @@
             }
 
             try {
-                // Create a new PDF document
+                // Create a new PDF document (8.5 x 11 inches)
                 const pdfDoc = await PDFLib.PDFDocument.create();
-                const page = pdfDoc.addPage([612, 792]); // 8.5 x 11 inches
+                const page = pdfDoc.addPage([612, 792]);
                 
                 // Get fonts
                 const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
                 const boldFont = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
 
-                // Set up drawing
                 const { width, height } = page.getSize();
-                let yPosition = height - 50;
+                let yPos = height - 40;
 
-                // Header
-                page.drawText('C-WAGS Score Sheet', {
-                    x: 50,
-                    y: yPosition,
+                // Draw border around entire page
+                page.drawRectangle({
+                    x: 30,
+                    y: 30,
+                    width: width - 60,
+                    height: height - 60,
+                    borderColor: PDFLib.rgb(0, 0, 0),
+                    borderWidth: 1,
+                });
+
+                // Header section
+                // Copyright notice (top right)
+                page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
+                    x: width - 280,
+                    y: yPos,
+                    size: 8,
+                    font: font,
+                });
+                yPos -= 25;
+
+                // Title
+                page.drawText(`${currentEditingSheet.className} Score Sheet`, {
+                    x: width / 2 - 100,
+                    y: yPos,
                     size: 16,
                     font: boldFont,
                 });
-                yPosition -= 30;
+                yPos -= 25;
 
+                // Date
                 page.drawText(`Date: ${currentEditingSheet.date}`, {
-                    x: 50,
-                    y: yPosition,
+                    x: width / 2 - 80,
+                    y: yPos,
                     size: 12,
                     font: font,
                 });
-                yPosition -= 20;
+                yPos -= 20;
 
-                page.drawText(`Class: ${currentEditingSheet.className}`, {
-                    x: 50,
-                    y: yPosition,
-                    size: 12,
+                // Class
+                page.drawText(`CLASS: ${currentEditingSheet.className}`, {
+                    x: width / 2 - 60,
+                    y: yPos,
+                    size: 14,
                     font: boldFont,
                 });
-                yPosition -= 20;
+                yPos -= 20;
 
-                page.drawText(`Judge: ${currentEditingSheet.judge}`, {
-                    x: 50,
-                    y: yPosition,
-                    size: 12,
+                // Judge
+                page.drawText(`JUDGE: ${currentEditingSheet.judge}`, {
+                    x: width / 2 - 60,
+                    y: yPos,
+                    size: 14,
                     font: boldFont,
                 });
-                yPosition -= 30;
+                yPos -= 30;
 
-                page.drawText(`Round: ${currentEditingSheet.roundNumber}`, {
+                // Round checkboxes
+                page.drawText('Round', {
                     x: 50,
-                    y: yPosition,
-                    size: 12,
+                    y: yPos,
+                    size: 10,
                     font: boldFont,
                 });
-                yPosition -= 40;
 
-                // Scent locations
-                page.drawText('Scent Locations:', {
-                    x: 50,
-                    y: yPosition,
-                    size: 12,
-                    font: boldFont,
+                const rounds = ['1', '2', '3', '4'];
+                let roundX = 100;
+                rounds.forEach((round, index) => {
+                    // Draw checkbox
+                    page.drawRectangle({
+                        x: roundX,
+                        y: yPos - 3,
+                        width: 12,
+                        height: 12,
+                        borderColor: PDFLib.rgb(0, 0, 0),
+                        borderWidth: 1,
+                    });
+                    
+                    // Check the appropriate round
+                    if (round === currentEditingSheet.roundNumber) {
+                        page.drawText('X', {
+                            x: roundX + 3,
+                            y: yPos - 1,
+                            size: 9,
+                            font: boldFont,
+                        });
+                    }
+                    
+                    page.drawText(round, {
+                        x: roundX + 20,
+                        y: yPos,
+                        size: 10,
+                        font: font,
+                    });
+                    roundX += 60;
                 });
-                yPosition -= 20;
+                yPos -= 35;
 
+                // Scent information table
+                const scentTableY = yPos;
+                const scentTableHeight = 60;
+                const colWidth = (width - 100) / 4;
+
+                // Draw scent table border
+                page.drawRectangle({
+                    x: 50,
+                    y: scentTableY - scentTableHeight,
+                    width: width - 100,
+                    height: scentTableHeight,
+                    borderColor: PDFLib.rgb(0, 0, 0),
+                    borderWidth: 1,
+                });
+
+                // Scent table headers
+                const scentHeaders = ['Scent 1', 'Scent 2', 'Scent 3', 'Scent 4'];
+                scentHeaders.forEach((header, index) => {
+                    const x = 50 + (index * colWidth);
+                    
+                    // Draw column separator
+                    if (index > 0) {
+                        page.drawLine({
+                            start: { x: x, y: scentTableY },
+                            end: { x: x, y: scentTableY - scentTableHeight },
+                            thickness: 1,
+                            color: PDFLib.rgb(0, 0, 0),
+                        });
+                    }
+                    
+                    // Header background
+                    page.drawRectangle({
+                        x: x,
+                        y: scentTableY - 20,
+                        width: colWidth,
+                        height: 20,
+                        color: PDFLib.rgb(0.94, 0.94, 0.94),
+                    });
+                    
+                    page.drawText(header, {
+                        x: x + colWidth/2 - 20,
+                        y: scentTableY - 15,
+                        size: 10,
+                        font: boldFont,
+                    });
+                });
+
+                // "Located in/on:" row
+                page.drawLine({
+                    start: { x: 50, y: scentTableY - 20 },
+                    end: { x: width - 50, y: scentTableY - 20 },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
+                scentHeaders.forEach((header, index) => {
+                    const x = 50 + (index * colWidth);
+                    page.drawText('Located in/on:', {
+                        x: x + 5,
+                        y: scentTableY - 35,
+                        size: 9,
+                        font: font,
+                    });
+                });
+
+                // Fill in scent locations
                 const scentLocations = [
                     document.getElementById('scent1Location').value,
                     document.getElementById('scent2Location').value,
@@ -1706,108 +1818,214 @@
                     document.getElementById('scent4Location').value
                 ];
 
+                page.drawLine({
+                    start: { x: 50, y: scentTableY - 40 },
+                    end: { x: width - 50, y: scentTableY - 40 },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
                 scentLocations.forEach((location, index) => {
-                    page.drawText(`Scent ${index + 1}: ${location || 'Not specified'}`, {
-                        x: 70,
-                        y: yPosition,
-                        size: 10,
+                    const x = 50 + (index * colWidth);
+                    const text = location || '';
+                    page.drawText(text.length > 12 ? text.substring(0, 12) + '...' : text, {
+                        x: x + 5,
+                        y: scentTableY - 55,
+                        size: 8,
                         font: font,
                     });
-                    yPosition -= 15;
                 });
 
-                yPosition -= 20;
+                yPos = scentTableY - scentTableHeight - 20;
 
-                // Results table header
-                page.drawText('Results:', {
+                // Faults section
+                page.drawText('Faults: Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior;', {
                     x: 50,
-                    y: yPosition,
-                    size: 12,
+                    y: yPos,
+                    size: 9,
                     font: boldFont,
                 });
-                yPosition -= 25;
-
-                // Table headers
-                const tableHeaders = ['Team', 'Dog - Handler', 'Scent 1', 'Scent 2', 'Scent 3', 'Scent 4', 'Faults', 'Time', 'Result'];
-                const columnWidths = [35, 110, 55, 55, 55, 55, 75, 50, 55];
-                let xPosition = 50;
-
-                // Draw table header
-                tableHeaders.forEach((header, index) => {
-                    page.drawText(header, {
-                        x: xPosition,
-                        y: yPosition,
-                        size: 9,
-                        font: boldFont,
-                    });
-                    xPosition += columnWidths[index];
-                });
-                
-                yPosition -= 20;
-
-                // Draw entrant data
-                currentEditingSheet.entrants.forEach((entrant, index) => {
-                    const entrantKey = `entrant_${index}`;
-                    const entrantScores = currentScoreData[entrantKey] || {};
-                    
-                    // Collect current form data using standard ASCII characters
-                    const scent1Result = document.getElementById(`${entrantKey}_scent1_found`)?.checked ? 'FOUND' : 
-                                       document.getElementById(`${entrantKey}_scent1_not_found`)?.checked ? 'X' : '';
-                    const scent2Result = document.getElementById(`${entrantKey}_scent2_found`)?.checked ? 'FOUND' : 
-                                       document.getElementById(`${entrantKey}_scent2_not_found`)?.checked ? 'X' : '';
-                    const scent3Result = document.getElementById(`${entrantKey}_scent3_found`)?.checked ? 'FOUND' : 
-                                       document.getElementById(`${entrantKey}_scent3_not_found`)?.checked ? 'X' : '';
-                    const scent4Result = document.getElementById(`${entrantKey}_scent4_found`)?.checked ? 'FOUND' : 
-                                       document.getElementById(`${entrantKey}_scent4_not_found`)?.checked ? 'X' : '';
-                    const faults = document.getElementById(`${entrantKey}_faults`)?.value || '';
-                    const time = document.getElementById(`${entrantKey}_time`)?.value || '';
-                    const result = document.querySelector(`input[name="${entrantKey}_result"]:checked`)?.value || '';
-
-                    const rowData = [
-                        (index + 1).toString(),
-                        `${entrant.handler} - ${entrant.dog}`,
-                        scent1Result,
-                        scent2Result,
-                        scent3Result,
-                        scent4Result,
-                        faults,
-                        time,
-                        result.toUpperCase()
-                    ];
-
-                    xPosition = 50;
-                    rowData.forEach((data, colIndex) => {
-                        // Truncate long text to fit in columns
-                        let displayText = data;
-                        if (colIndex === 1 && data.length > 18) { // Handler-Dog column
-                            displayText = data.substring(0, 15) + '...';
-                        } else if (colIndex === 6 && data.length > 12) { // Faults column
-                            displayText = data.substring(0, 9) + '...';
-                        }
-
-                        page.drawText(displayText, {
-                            x: xPosition,
-                            y: yPosition,
-                            size: 8,
-                            font: font,
-                        });
-                        xPosition += columnWidths[colIndex];
-                    });
-                    
-                    yPosition -= 15;
-
-                    // Check if we need a new page
-                    if (yPosition < 100) {
-                        const newPage = pdfDoc.addPage([612, 792]);
-                        yPosition = height - 50;
-                        // Continue on new page...
-                    }
-                });
-
-                // Add footer
-                page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
+                yPos -= 12;
+                page.drawText('Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert";', {
                     x: 50,
-                    y: 50,
+                    y: yPos,
+                    size: 9,
+                    font: boldFont,
+                });
+                yPos -= 12;
+                page.drawText('SR crossing line less than half.', {
+                    x: 50,
+                    y: yPos,
+                    size: 9,
+                    font: boldFont,
+                });
+                yPos -= 25;
+
+                // Main scoring table
+                const tableStartY = yPos;
+                const tableWidth = width - 100;
+                const teamColWidth = 40;
+                const nameColWidth = 140;
+                const scentColWidth = 45;
+                const faultColWidth = 60;
+                const timeColWidth = 50;
+                const resultColWidth = 50;
+
+                // Table header
+                const headers = ['Team', 'Dog - Handler', 'Scent Results', '', '', '', 'Fault', 'Fault', 'Time', 'Pass/Fail'];
+                const subHeaders = ['', '', 'Scent 1', 'Scent 2', 'Scent 3', 'Scent 4', '', '', '', ''];
+                const columnWidths = [teamColWidth, nameColWidth, scentColWidth, scentColWidth, scentColWidth, scentColWidth, faultColWidth/2, faultColWidth/2, timeColWidth, resultColWidth];
+
+                // Draw main table border
+                const rowHeight = 25;
+                const headerHeight = 40;
+                const totalRows = Math.max(8, currentEditingSheet.entrants.length);
+                const tableHeight = headerHeight + (totalRows * rowHeight);
+
+                page.drawRectangle({
+                    x: 50,
+                    y: tableStartY - tableHeight,
+                    width: tableWidth,
+                    height: tableHeight,
+                    borderColor: PDFLib.rgb(0, 0, 0),
+                    borderWidth: 1,
+                });
+
+                // Draw header background
+                page.drawRectangle({
+                    x: 50,
+                    y: tableStartY - headerHeight,
+                    width: tableWidth,
+                    height: headerHeight,
+                    color: PDFLib.rgb(0.94, 0.94, 0.94),
+                });
+
+                // Draw column separators and headers
+                let currentX = 50;
+                headers.forEach((header, index) => {
+                    if (index > 0) {
+                        page.drawLine({
+                            start: { x: currentX, y: tableStartY },
+                            end: { x: currentX, y: tableStartY - tableHeight },
+                            thickness: 1,
+                            color: PDFLib.rgb(0, 0, 0),
+                        });
+                    }
+
+                    // Main header
+                    if (header) {
+                        page.drawText(header, {
+                            x: currentX + 2,
+                            y: tableStartY - 15,
+                            size: 8,
+                            font: boldFont,
+                        });
+                    }
+
+                    // Sub header
+                    if (subHeaders[index]) {
+                        page.drawText(subHeaders[index], {
+                            x: currentX + 2,
+                            y: tableStartY - 30,
+                            size: 8,
+                            font: boldFont,
+                        });
+                    }
+
+                    currentX += columnWidths[index];
+                });
+
+                // Draw horizontal line separating headers from data
+                page.drawLine({
+                    start: { x: 50, y: tableStartY - headerHeight },
+                    end: { x: width - 50, y: tableStartY - headerHeight },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
+                // Draw sub-header separator line
+                page.drawLine({
+                    start: { x: 50, y: tableStartY - 20 },
+                    end: { x: width - 50, y: tableStartY - 20 },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
+                // Fill in entrant data
+                for (let i = 0; i < totalRows; i++) {
+                    const rowY = tableStartY - headerHeight - ((i + 1) * rowHeight);
+                    
+                    // Draw row separator
+                    page.drawLine({
+                        start: { x: 50, y: rowY },
+                        end: { x: width - 50, y: rowY },
+                        thickness: 1,
+                        color: PDFLib.rgb(0, 0, 0),
+                    });
+
+                    if (i < currentEditingSheet.entrants.length) {
+                        const entrant = currentEditingSheet.entrants[i];
+                        const entrantKey = `entrant_${i}`;
+                        
+                        // Get the current form data
+                        const scent1Result = document.getElementById(`${entrantKey}_scent1_found`)?.checked ? 'FOUND' : 
+                                           document.getElementById(`${entrantKey}_scent1_not_found`)?.checked ? 'X' : '';
+                        const scent2Result = document.getElementById(`${entrantKey}_scent2_found`)?.checked ? 'FOUND' : 
+                                           document.getElementById(`${entrantKey}_scent2_not_found`)?.checked ? 'X' : '';
+                        const scent3Result = document.getElementById(`${entrantKey}_scent3_found`)?.checked ? 'FOUND' : 
+                                           document.getElementById(`${entrantKey}_scent3_not_found`)?.checked ? 'X' : '';
+                        const scent4Result = document.getElementById(`${entrantKey}_scent4_found`)?.checked ? 'FOUND' : 
+                                           document.getElementById(`${entrantKey}_scent4_not_found`)?.checked ? 'X' : '';
+                        const faults = document.getElementById(`${entrantKey}_faults`)?.value || '';
+                        const time = document.getElementById(`${entrantKey}_time`)?.value || '';
+                        const result = document.querySelector(`input[name="${entrantKey}_result"]:checked`)?.value || '';
+
+                        const rowData = [
+                            (i + 1).toString(),
+                            `${entrant.handler} - ${entrant.dog}`,
+                            scent1Result,
+                            scent2Result,
+                            scent3Result,
+                            scent4Result,
+                            faults.length > 8 ? faults.substring(0, 6) + '..' : faults,
+                            '', // Second fault column (empty for now)
+                            time,
+                            result.toUpperCase()
+                        ];
+
+                        currentX = 50;
+                        rowData.forEach((data, colIndex) => {
+                            let displayText = data;
+                            if (colIndex === 1 && data.length > 20) { // Handler-Dog column
+                                displayText = data.substring(0, 17) + '...';
+                            }
+
+                            // Background color for team name cells
+                            if (colIndex === 0 || colIndex === 1) {
+                                page.drawRectangle({
+                                    x: currentX,
+                                    y: rowY,
+                                    width: columnWidths[colIndex],
+                                    height: rowHeight,
+                                    color: PDFLib.rgb(0.97, 0.97, 0.97),
+                                });
+                            }
+
+                            page.drawText(displayText, {
+                                x: currentX + 2,
+                                y: rowY + rowHeight/2 - 4,
+                                size: colIndex === 1 ? 7 : 8,
+                                font: (colIndex === 0 || colIndex === 1) ? boldFont : font,
+                            });
+                            currentX += columnWidths[colIndex];
+                        });
+                    }
+                }
+
+                // Footer copyright
+                page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
+                    x: width / 2 - 100,
+                    y: 40,
                     size: 8,
                     font: font,
                 });
