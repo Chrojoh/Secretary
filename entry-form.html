@@ -864,7 +864,7 @@
           classMap.get(className).push({ ...cls, classIndex: index });
         });
 
-        // Process each unique class
+                  // Process each unique class
         classMap.forEach((classInstances, className) => {
           classSelectionHTML += `
             <div class="class-section">
@@ -876,3 +876,387 @@
               </div>
               <div class="class-content">
           `;
+
+          // Process each round for this class
+          classInstances.forEach((classInstance, instanceIndex) => {
+            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
+              classInstance.rounds.forEach((round, roundIndex) => {
+                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
+                const roundNumber = round.roundNumber || (roundIndex + 1);
+                const feoAvailable = round.feo !== false; // FEO available unless explicitly disabled
+                const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}`;
+                
+                const regularEntryValue = JSON.stringify({
+                  dayIndex,
+                  classIndex: classInstance.classIndex,
+                  roundIndex,
+                  className,
+                  judge: judgeName,
+                  roundNumber,
+                  date: day.date || `Day ${dayIndex + 1}`,
+                  entryType: 'Regular'
+                });
+                
+                const feoEntryValue = JSON.stringify({
+                  dayIndex,
+                  classIndex: classInstance.classIndex,
+                  roundIndex,
+                  className,
+                  judge: judgeName,
+                  roundNumber,
+                  date: day.date || `Day ${dayIndex + 1}`,
+                  entryType: 'FEO'
+                });
+
+                classSelectionHTML += `
+                  <div class="round-item">
+                    <div class="round-info">
+                      <span class="round-number">Round ${roundNumber}</span>
+                      <span class="judge-name">${judgeName}</span>
+                    </div>
+                    <div class="entry-buttons">
+                      <label class="entry-button regular" for="${uniqueId}_regular">
+                        <input type="checkbox" id="${uniqueId}_regular" value='${regularEntryValue}'>
+                        <span class="entry-tag regular">Regular</span>
+                      </label>
+                      ${feoAvailable ? `
+                        <label class="entry-button feo" for="${uniqueId}_feo">
+                          <input type="checkbox" id="${uniqueId}_feo" value='${feoEntryValue}'>
+                          <span class="entry-tag feo">FEO</span>
+                        </label>
+                      ` : `
+                        <span class="entry-tag unavailable">FEO N/A</span>
+                      `}
+                    </div>
+                  </div>
+                `;
+              });
+            } else {
+              // Class with no rounds defined - create a default entry
+              const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_0`;
+              const regularEntryValue = JSON.stringify({
+                dayIndex,
+                classIndex: classInstance.classIndex,
+                roundIndex: 0,
+                className,
+                judge: 'Judge TBD',
+                roundNumber: 1,
+                date: day.date || `Day ${dayIndex + 1}`,
+                entryType: 'Regular'
+              });
+              const feoEntryValue = JSON.stringify({
+                dayIndex,
+                classIndex: classInstance.classIndex,
+                roundIndex: 0,
+                className,
+                judge: 'Judge TBD',
+                roundNumber: 1,
+                date: day.date || `Day ${dayIndex + 1}`,
+                entryType: 'FEO'
+              });
+
+              classSelectionHTML += `
+                <div class="round-item">
+                  <div class="round-info">
+                    <span class="round-number">Round 1</span>
+                    <span class="judge-name">Judge TBD</span>
+                  </div>
+                  <div class="entry-buttons">
+                    <label class="entry-button regular" for="${uniqueId}_regular">
+                      <input type="checkbox" id="${uniqueId}_regular" value='${regularEntryValue}'>
+                      <span class="entry-tag regular">Regular</span>
+                    </label>
+                    <label class="entry-button feo" for="${uniqueId}_feo">
+                      <input type="checkbox" id="${uniqueId}_feo" value='${feoEntryValue}'>
+                      <span class="entry-tag feo">FEO</span>
+                    </label>
+                  </div>
+                </div>
+              `;
+            }
+          });
+
+          classSelectionHTML += `
+              </div>
+            </div>
+          `;
+        });
+
+        classSelectionHTML += `
+            </div>
+          </div>
+        `;
+      });
+
+      if (!hasAnyClasses) {
+        classSelection.innerHTML = `
+          <div class="no-classes-message">
+            ⚠️ No classes found in trial data. Please create classes in your trial setup.
+          </div>
+        `;
+        return;
+      }
+
+      classSelection.innerHTML = classSelectionHTML;
+
+      // Add event listeners to all checkboxes
+      classSelection.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', updateClassSelection);
+      });
+
+      console.log(`✅ Populated classes with FEO/Regular buttons organized by day, class, and judge`);
+    }
+
+    // Update class selection with detailed entry tracking
+    function updateClassSelection(event) {
+      const entryData = JSON.parse(event.target.value);
+      
+      if (event.target.checked) {
+        selectedClasses.add(event.target.value);
+        console.log(`✅ Added entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType}`);
+      } else {
+        selectedClasses.delete(event.target.value);
+        console.log(`❌ Removed entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType}`);
+      }
+      
+      updateEntrySummary();
+      checkFormValidity();
+    }
+
+    // Update entry summary with detailed breakdown
+    function updateEntrySummary() {
+      const entryCount = selectedClasses.size;
+      const isJunior = document.getElementById('juniorHandler').value === 'Yes';
+      
+      let totalFee = 0;
+      
+      if (isJunior) {
+        totalFee = fees.juniorHandler * entryCount;
+      } else if (entryCount > 0) {
+        totalFee = fees.firstClass + (fees.additionalClass * (entryCount - 1));
+      }
+      
+      // Count unique classes (for display purposes)
+      const uniqueClasses = new Set();
+      selectedClasses.forEach(entryJson => {
+        try {
+          const entry = JSON.parse(entryJson);
+          uniqueClasses.add(entry.className);
+        } catch (e) {
+          console.warn("Error parsing entry data:", e);
+        }
+      });
+      
+      document.getElementById('selectedClassCount').textContent = 
+        `${entryCount} entries (${uniqueClasses.size} classes)`;
+      document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
+      document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
+    }
+
+    // Check form validity
+    function checkFormValidity() {
+      if (isAutoFilling) return;
+      
+      const waiverAccepted = document.getElementById('waiverAccepted').checked;
+      const cwagsNumber = document.getElementById('cwagsNumber').value.trim();
+      const handlerName = document.getElementById('handlerName').value.trim();
+      const handlerEmail = document.getElementById('handlerEmail').value.trim();
+      const handlerPhone = document.getElementById('handlerPhone').value.trim();
+      const dogCallName = document.getElementById('dogCallName').value.trim();
+      const hasEntries = selectedClasses.size > 0;
+      
+      const isValid = waiverAccepted && cwagsNumber && handlerName && 
+                     handlerEmail && handlerPhone && dogCallName && hasEntries;
+      
+      document.getElementById('submitBtn').disabled = !isValid;
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // C-WAGS number lookup
+      const cwagsInput = document.getElementById('cwagsNumber');
+      let debounceTimer;
+      
+      cwagsInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          const value = e.target.value.trim();
+          if (value.length >= 3) {
+            lookupRegistration(value);
+          }
+        }, 500);
+      });
+
+      // Form validation on input changes
+      document.querySelectorAll('input, select').forEach(element => {
+        element.addEventListener('input', checkFormValidity);
+        element.addEventListener('change', checkFormValidity);
+      });
+
+      // Junior handler changes
+      document.getElementById('juniorHandler').addEventListener('change', updateEntrySummary);
+
+      // Form submission
+      document.getElementById('entryForm').addEventListener('submit', handleFormSubmission);
+    }
+
+    // Handle form submission
+    async function handleFormSubmission(event) {
+      event.preventDefault();
+      
+      if (!auth.currentUser) {
+        alert("Please log in to submit entries.");
+        return;
+      }
+      
+      if (!checkFormValidity()) {
+        alert("Please complete all required fields and accept the waiver.");
+        return;
+      }
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      
+      try {
+        // Prepare entry data
+        const entryData = {
+          userId: auth.currentUser.uid,
+          trialId: currentTrialData.id,
+          submissionDate: new Date().toISOString(),
+          
+          // Handler information
+          cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
+          handlerName: document.getElementById('handlerName').value.trim(),
+          handlerPhone: document.getElementById('handlerPhone').value.trim(),
+          handlerEmail: document.getElementById('handlerEmail').value.trim(),
+          emergencyContact: document.getElementById('emergencyContact').value.trim(),
+          
+          // Dog information
+          dogCallName: document.getElementById('dogCallName').value.trim(),
+          dogBreed: document.getElementById('dogBreed').value.trim(),
+          dogBirthdate: document.getElementById('dogBirthdate').value,
+          dogSex: document.getElementById('dogSex').value,
+          
+          // Entry details
+          juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
+          specialRequests: document.getElementById('specialRequests').value.trim(),
+          waiverAccepted: document.getElementById('waiverAccepted').checked,
+          
+          // Class entries
+          entries: Array.from(selectedClasses).map(entryJson => JSON.parse(entryJson)),
+          
+          // Fee calculation
+          totalFee: parseFloat(document.getElementById('calculatedFee').textContent.replace(', '')),
+          totalEntries: selectedClasses.size
+        };
+        
+        console.log("📝 Submitting entry:", entryData);
+        
+        // Submit to Firestore
+        const docRef = await addDoc(collection(db, "entries"), entryData);
+        
+        console.log("✅ Entry submitted successfully:", docRef.id);
+        
+        // Save registration data for future use
+        await saveRegistrationData(entryData.cwagsNumber, entryData);
+        
+        // Show success message
+        document.getElementById('entryForm').style.display = 'none';
+        document.getElementById('successMessage').classList.remove('hidden');
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+      } catch (error) {
+        console.error("❌ Error submitting entry:", error);
+        alert("Error submitting entry: " + error.message);
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Entry';
+      }
+    }
+
+    // Save registration data for future use
+    async function saveRegistrationData(registrationNumber, formData) {
+      try {
+        if (!registrationNumber || !auth.currentUser) return;
+        
+        const registrationDoc = {
+          cwagsNumber: registrationNumber,
+          handlerName: formData.handlerName,
+          handlerPhone: formData.handlerPhone,
+          handlerEmail: formData.handlerEmail,
+          emergencyContact: formData.emergencyContact,
+          dogCallName: formData.dogCallName,
+          dogBreed: formData.dogBreed,
+          dogBirthdate: formData.dogBirthdate,
+          dogSex: formData.dogSex,
+          lastUpdated: new Date(),
+          lastTrialId: currentTrialData?.id
+        };
+        
+        await setDoc(doc(db, "registrations", registrationNumber), registrationDoc);
+        console.log("✅ Saved registration data for:", registrationNumber);
+      } catch (error) {
+        console.error("Error saving registration data:", error);
+      }
+    }
+
+    // Reset form
+    window.resetForm = function() {
+      isAutoFilling = true;
+      
+      document.getElementById('entryForm').reset();
+      selectedClasses.clear();
+      
+      // Clear checkboxes
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        if (cb.id !== 'waiverAccepted') cb.checked = false;
+      });
+      
+      // Clear lookup status
+      const statusDiv = document.getElementById('lookupStatus');
+      if (statusDiv) statusDiv.style.display = 'none';
+      
+      updateEntrySummary();
+      
+      // Hide success message and show form
+      document.getElementById('successMessage').classList.add('hidden');
+      document.getElementById('entryForm').style.display = 'block';
+      
+      // Scroll to top and focus on registration
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      setTimeout(() => {
+        isAutoFilling = false;
+        const cwagsInput = document.getElementById('cwagsNumber');
+        if (cwagsInput) cwagsInput.focus();
+        checkFormValidity();
+      }, 500);
+    };
+
+    // Initialize when page loads
+    window.addEventListener('load', () => {
+      console.log("🚀 Page loaded, initializing entry form...");
+      loadRegistrationData();
+      setTimeout(loadTrialData, 1000);
+    });
+
+    // Initialize auth state listener
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log("✅ User authenticated, loading trial data...");
+        if (!currentTrialData) {
+          loadTrialData();
+        }
+      } else {
+        console.log("❌ User not authenticated");
+        window.location.href = 'index.html';
+      }
+    });
+
+    console.log("Entry form with FEO/Regular buttons ready");
+  </script>
+</body>
+</html>
