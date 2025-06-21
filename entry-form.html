@@ -1,1544 +1,1200 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Trial Entry Form</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f7fa;
-      line-height: 1.6;
-    }
-    
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 2rem;
-      border-radius: 12px 12px 0 0;
-      text-align: center;
-    }
-    
-    .trial-info {
-      background: white;
-      padding: 1.5rem;
-      border-left: 4px solid #667eea;
-      margin-bottom: 2rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .trial-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-    
-    .entry-form {
-      background: white;
-      border-radius: 0 0 12px 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    
-    .waiver-section {
-      background: #fff9e6;
-      border: 2px solid #ffc107;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .waiver-section h3 {
-      color: #e65100;
-      margin-bottom: 1rem;
-    }
-    
-    .waiver-content {
-      background: white;
-      padding: 1rem;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-    
-    .waiver-agreement {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.8rem;
-      margin-top: 1rem;
-      padding: 1rem;
-      background: #f8f9fa;
-      border-radius: 6px;
-    }
-    
-    .waiver-agreement input[type="checkbox"] {
-      margin-top: 0.2rem;
-      transform: scale(1.2);
-    }
-    
-    .form-section {
-      margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #28a745;
-    }
-    
-    .form-section.primary {
-      border-left-color: #007bff;
-      background: #f0f8ff;
-    }
-    
-    .form-section h3 {
-      color: #28a745;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
-    .form-section.primary h3 {
-      color: #007bff;
-    }
-    
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-    
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
-    
-    .form-group label {
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      color: #333;
-    }
-    
-    .form-group.required label::after {
-      content: " *";
-      color: #e74c3c;
-    }
-    
-    .form-group input, .form-group select, .form-group textarea {
-      padding: 0.8rem;
-      border: 2px solid #e1e5e9;
-      border-radius: 6px;
-      font-size: 1rem;
-      transition: border-color 0.3s ease;
-    }
-    
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    .lookup-status {
-      margin-top: 0.5rem;
-      padding: 0.8rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      display: none;
-    }
-    
-    .lookup-status.loading {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
-    }
-    
-    .lookup-status.success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
-    
-    .lookup-status.info {
-      background: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
-    }
-    
-    .lookup-status.warning {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    
-    .auto-filled {
-      background-color: #e8f5e8 !important;
-      transition: background-color 2s ease;
-    }
-    
-    .day-section {
-      border: 2px solid #007bff;
-      border-radius: 8px;
-      margin-bottom: 1.5rem;
-      overflow: hidden;
-    }
-    
-    .day-header {
-      background: #007bff;
-      color: white;
-      padding: 1rem 1.5rem;
-      font-weight: 600;
-      font-size: 1.1rem;
-    }
-    
-    .day-content {
-      background: white;
-      padding: 1rem;
-    }
-    
-    .class-section {
-      border: 1px solid #28a745;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      overflow: hidden;
-    }
-    
-    .class-header {
-      background: #28a745;
-      color: white;
-      padding: 0.8rem 1rem;
-      font-weight: 500;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .class-content {
-      background: #f8f9fa;
-      padding: 0.8rem;
-    }
-    
-    .round-item {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 0.6rem;
-      background: white;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
-      transition: all 0.3s ease;
-    }
-    
-    .round-item:hover {
-      border-color: #667eea;
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
-    }
-    
-    .round-item input[type="checkbox"] {
-      transform: scale(1.2);
-    }
-    
-    .round-item label {
-      flex: 1;
-      cursor: pointer;
-      margin: 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .round-info {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
-    
-    .round-number {
-      background: #667eea;
-      color: white;
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    
-    .judge-name {
-      font-weight: 500;
-      color: #333;
-    }
-    
-    .entry-options {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-    
-    .entry-btn {
-      padding: 0.3rem 0.8rem;
-      border-radius: 15px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      min-width: 60px;
-    }
-    
-    .entry-btn.regular {
-      background: #28a745;
-      color: white;
-    }
-    
-    .entry-btn.regular:hover {
-      background: #218838;
-      transform: translateY(-1px);
-    }
-    
-    .entry-btn.regular.selected {
-      background: #1e7e34;
-      box-shadow: 0 0 0 2px #28a745;
-    }
-    
-    .entry-btn.feo {
-      background: #ffc107;
-      color: #333;
-    }
-    
-    .entry-btn.feo:hover {
-      background: #e0a800;
-      transform: translateY(-1px);
-    }
-    
-    .entry-btn.feo.selected {
-      background: #d39e00;
-      box-shadow: 0 0 0 2px #ffc107;
-    }
-    
-    .round-item input[type="checkbox"]:checked + label {
-      font-weight: 600;
-    }
-    
-    .round-item input[type="checkbox"]:checked + label .judge-name {
-      color: #667eea;
-    }
-    
-    .no-classes-message {
-      text-align: center;
-      padding: 2rem;
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      border-radius: 6px;
-      color: #856404;
-    }
-    
-    .entry-summary {
-      background: #e8f5e8;
-      border: 2px solid #28a745;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    
-    .summary-item {
-      background: white;
-      padding: 1rem;
-      border-radius: 6px;
-      text-align: center;
-    }
-    
-    .summary-item strong {
-      display: block;
-      color: #28a745;
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 2rem;
-      flex-wrap: wrap;
-    }
-    
-    .btn {
-      padding: 1rem 2rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      min-width: 150px;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(45deg, #28a745, #20c997);
-      color: white;
-    }
-    
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
-    }
-    
-    .btn-secondary {
-      background: #6c757d;
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background: #5a6268;
-      transform: translateY(-1px);
-    }
-    
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-    
-    .success-message {
-      background: #d4edda;
-      border: 2px solid #28a745;
-      color: #155724;
-      padding: 2rem;
-      border-radius: 8px;
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .hidden {
-      display: none;
-    }
-    
-    @media (max-width: 768px) {
-      .container {
-        padding: 10px;
-      }
-      
-      .form-row, .checkbox-group, .summary-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .button-group {
-        flex-direction: column;
-      }
-      
-      .entry-options {
-        flex-direction: column;
-        gap: 0.3rem;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trial Entry Form</title>
+    <style>
+        /* Keep all existing styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .trial-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        /* New styles for shareable link section */
+        .shareable-link-section {
+            background: #e7f3ff;
+            border: 2px solid #0066cc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .shareable-link-section h3 {
+            color: #0066cc;
+            margin-bottom: 15px;
+        }
+
+        .link-display {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .link-url {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            word-break: break-all;
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+
+        .link-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-copy {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: #138496;
+        }
+
+        .btn-test {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-test:hover {
+            background: #218838;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            min-width: 150px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            min-width: 150px;
+        }
+
+        .form-container {
+            padding: 30px;
+            display: none;
+        }
+
+        .admin-only {
+            display: none;
+        }
+
+        .trial-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .trial-detail {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .edit-link-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .edit-link-section h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Entry form styles */
+        .waiver-section {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .waiver-content {
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .waiver-agreement {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .waiver-agreement input[type="checkbox"] {
+            margin-top: 4px;
+            width: auto;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+
+        .required label::after {
+            content: " *";
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .class-selection {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .day-section {
+            margin-bottom: 25px;
+        }
+
+        .day-header {
+            background: #667eea;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .class-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .class-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .entry-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .entry-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .entry-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .entry-btn.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .entry-btn.feo {
+            border-color: #ffc107;
+            color: #ffc107;
+        }
+
+        .entry-btn.feo:hover,
+        .entry-btn.feo.selected {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .entry-summary {
+            background: #e7f3ff;
+            border: 2px solid #0066cc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-item strong {
+            display: block;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #0066cc;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .trial-details {
+                grid-template-columns: 1fr;
+            }
+
+            .entry-options {
+                flex-direction: column;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .link-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1 id="trialTitle">🏆 Trial Entry Form</h1>
-      <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
-    </div>
-
-    <!-- Trial Selection -->
-    <div class="trial-info">
-      <h3>🎯 Select Trial</h3>
-      <div class="form-row">
-        <div class="form-group required full-width">
-          <label for="trialSelection">Choose which trial to enter:</label>
-          <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
-            <option value="">Loading available trials...</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Trial Information -->
-    <div class="trial-info" id="trialInfoSection" style="display: none;">
-      <h3>📋 Trial Information</h3>
-      <div class="trial-details">
-        <div><strong>Club:</strong> <span id="clubName">-</span></div>
-        <div><strong>Dates:</strong> <span id="trialDates">-</span></div>
-        <div><strong>Location:</strong> <span id="trialLocation">-</span></div>
-        <div><strong>Secretary:</strong> <span id="trialSecretary">-</span></div>
-      </div>
-    </div>
-
-    <div class="entry-form">
-      <!-- Success Message -->
-      <div id="successMessage" class="success-message hidden">
-        <h3>✅ Entry Submitted Successfully!</h3>
-        <p>The entry has been recorded for this trial.</p>
-        <button class="btn btn-primary" onclick="resetForm()">Enter Another Participant</button>
-      </div>
-
-      <!-- Waiver Section -->
-      <div class="waiver-section">
-        <h3>⚠️ Liability Waiver & Release</h3>
-        <div class="waiver-content">
-          <p><strong>WAIVER AND RELEASE OF LIABILITY</strong></p>
-          <p>I understand that participation in dog training and scent work activities involves inherent risks including but not limited to: dogs working in close proximity to each other, off-leash activities, and interaction with other dogs and handlers.</p>
-          <p>I acknowledge that I participate at my own risk and agree to hold harmless the hosting club, property owners, judges, and event organizers from any claims, damages, or injuries that may occur.</p>
-        </div>
-        <div class="waiver-agreement">
-          <input type="checkbox" id="waiverAccepted" required>
-          <label for="waiverAccepted">
-            <strong>I have read, understood, and agree to the terms of this waiver and release of liability.</strong>
-          </label>
-        </div>
-      </div>
-
-      <!-- Entry Form -->
-      <form id="entryForm">
-        <!-- Registration Number - FIRST -->
-        <div class="form-section primary">
-          <h3>🔍 Registration Lookup</h3>
-          <div class="form-row">
-            <div class="form-group required full-width">
-              <label>C-WAGS Registration Number</label>
-              <input type="text" id="cwagsNumber" required placeholder="XX-XXXX-XX" 
-                     style="font-size: 1.2rem; font-weight: bold; background: #f0f8ff;">
-              <small style="color: #666; margin-top: 0.5rem; display: block;">
-                💡 Enter registration number first - handler and dog info will auto-fill
-              </small>
-            </div>
-          </div>
-          <div id="lookupStatus" class="lookup-status"></div>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 id="trialTitle">🏆 Trial Entry Form</h1>
+            <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
         </div>
 
-        <!-- Handler Information -->
-        <div class="form-section">
-          <h3>👤 Handler Information</h3>
-          <div class="form-row">
-            <div class="form-group required">
-              <label>Handler Name</label>
-              <input type="text" id="handlerName" required placeholder="Will auto-fill from registration">
-            </div>
-            <div class="form-group required">
-              <label>Phone Number</label>
-              <input type="tel" id="handlerPhone" required placeholder="(xxx) xxx-xxxx">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group required">
-              <label>Email Address</label>
-              <input type="email" id="handlerEmail" required placeholder="handler@email.com">
-            </div>
-            <div class="form-group">
-              <label>Emergency Contact</label>
-              <input type="text" id="emergencyContact" placeholder="Name and phone number">
-            </div>
-          </div>
-        </div>
-
-        <!-- Dog Information -->
-        <div class="form-section">
-          <h3>🐕 Dog Information</h3>
-          <div class="form-row">
-            <div class="form-group required">
-              <label>Dog's Call Name</label>
-              <input type="text" id="dogCallName" required placeholder="Will auto-fill from registration">
-            </div>
-            <div class="form-group">
-              <label>Breed</label>
-              <input type="text" id="dogBreed" placeholder="Enter breed">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Date of Birth</label>
-              <input type="date" id="dogBirthdate">
-            </div>
-            <div class="form-group">
-              <label>Sex</label>
-              <select id="dogSex">
-                <option value="">Select...</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Male Neutered">Male Neutered</option>
-                <option value="Female Spayed">Female Spayed</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Class Selection -->
-        <div class="form-section">
-          <h3>🎯 Class Entries</h3>
-          <p style="margin-bottom: 1rem; color: #666;">Select the specific class/judge combinations you wish to enter:</p>
-          <div id="classSelection">
-            <div style="text-align: center; padding: 2rem; color: #666;">
-              Loading available classes by day and judge...
-            </div>
-          </div>
-        </div>
-
-        <!-- Additional Information -->
-        <div class="form-section">
-          <h3>📝 Additional Information</h3>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Junior Handler (Under 18)</label>
-              <select id="juniorHandler">
-                <option value="No">No</option>
-                <option value="Yes">Yes</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Entry Summary -->
-        <div class="entry-summary">
-          <h3>💰 Entry Summary</h3>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <strong>Classes Selected</strong>
-              <span id="selectedClassCount">0</span>
-            </div>
-            <div class="summary-item">
-              <strong>Entry Fee</strong>
-              <span id="calculatedFee">$0.00</span>
-            </div>
-            <div class="summary-item">
-              <strong>Junior Handler</strong>
-              <span id="summaryJuniorHandler">No</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Submit Buttons -->
-        <div class="button-group">
-          <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
-            Submit Entry
-          </button>
-          <button type="button" class="btn btn-secondary" onclick="resetForm()">
-            Clear Form
-          </button>
-          <button type="button" class="btn btn-secondary" onclick="location.href='main-dashboard.html'">
-            ← Back to Dashboard
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script type="module">
-    import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs, addDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-    console.log("🎯 Entry form loaded");
-
-    // Global variables
-    let currentTrialData = null;
-    let currentApplicationData = null;
-    let selectedClasses = new Set();
-    let registrationData = [];
-    let isAutoFilling = false;
-    let availableTrials = [];
-
-    // Fee structure
-    const fees = {
-      firstClass: 35.00,
-      additionalClass: 25.00,
-      juniorHandler: 20.00,
-      exhibition: 15.00
-    };
-
-    // Load registration data from data.json
-    async function loadRegistrationData() {
-      try {
-        console.log("📊 Loading registration data...");
-        const response = await fetch('./js/data.json');
-        const data = await response.json();
-        registrationData = data || [];
-        console.log(`✅ Loaded ${registrationData.length} registration records`);
-      } catch (error) {
-        console.warn("⚠️ Could not load registration data:", error);
-        registrationData = [];
-      }
-    }
-
-    // Show lookup status
-    function showLookupStatus(message, type = 'loading') {
-      const statusDiv = document.getElementById('lookupStatus');
-      if (!statusDiv) return;
-      
-      statusDiv.className = `lookup-status ${type}`;
-      statusDiv.innerHTML = message;
-      statusDiv.style.display = 'block';
-      
-      if (type !== 'loading') {
-        setTimeout(() => {
-          statusDiv.style.display = 'none';
-        }, 4000);
-      }
-    }
-
-    // Lookup registration in data.json
-    function lookupInDataJson(registrationNumber) {
-      if (!registrationNumber || !registrationData.length) return null;
-      
-      const normalizedReg = registrationNumber.trim().toLowerCase();
-      return registrationData.find(record => 
-        record.Registration && record.Registration.toLowerCase() === normalizedReg
-      );
-    }
-
-    // Load saved data from Firebase
-    async function loadSavedRegistrationData(registrationNumber) {
-      try {
-        if (!registrationNumber) return null;
-        
-        const docRef = doc(db, "registrations", registrationNumber);
-        const docSnap = await getDoc(docRef);
-        
-        if (docSnap.exists()) {
-          console.log("✅ Found saved data for registration:", registrationNumber);
-          return docSnap.data();
-        }
-        return null;
-      } catch (error) {
-        console.error("Error loading saved registration data:", error);
-        return null;
-      }
-    }
-
-    // Auto-fill from registration number
-    async function autoFillFromRegistration(registrationNumber) {
-      if (!registrationNumber || isAutoFilling) return;
-      
-      isAutoFilling = true;
-      showLookupStatus('🔍 Looking up registration...', 'loading');
-      
-      try {
-        // First try Firebase (saved data)
-        const savedData = await loadSavedRegistrationData(registrationNumber);
-        
-        if (savedData) {
-          showLookupStatus('✅ Found saved data - auto-filling form', 'success');
-          populateForm(savedData);
-        } else {
-          // Try data.json
-          const jsonData = lookupInDataJson(registrationNumber);
-          
-          if (jsonData) {
-            showLookupStatus('📋 Found in database - auto-filling basic info', 'info');
-            
-            // Auto-fill from data.json
-            if (jsonData.Handler) {
-              fillField('handlerName', jsonData.Handler);
-            }
-            if (jsonData['Call Name']) {
-              fillField('dogCallName', jsonData['Call Name']);
-            }
-          } else {
-            showLookupStatus('⚠️ Registration not found - please fill manually', 'warning');
-          }
-        }
-      } catch (error) {
-        console.error("Error in auto-fill:", error);
-        showLookupStatus('❌ Error looking up registration', 'warning');
-      } finally {
-        isAutoFilling = false;
-      }
-    }
-
-    // Fill individual field with visual feedback
-    function fillField(fieldId, value) {
-      const field = document.getElementById(fieldId);
-      if (field && value && (!field.value || field.value.trim() === '')) {
-        field.value = value;
-        field.classList.add('auto-filled');
-        setTimeout(() => {
-          field.classList.remove('auto-filled');
-        }, 2000);
-      }
-    }
-
-    // Populate form with saved data
-    function populateForm(data) {
-      if (!data || isAutoFilling) return;
-      
-      fillField('handlerName', data.handlerName);
-      fillField('handlerPhone', data.handlerPhone);
-      fillField('handlerEmail', data.handlerEmail);
-      fillField('emergencyContact', data.emergencyContact);
-      fillField('dogCallName', data.dogCallName);
-      fillField('dogBreed', data.dogBreed);
-      fillField('dogBirthdate', data.dogBirthdate);
-      
-      if (data.dogSex) {
-        const sexField = document.getElementById('dogSex');
-        if (sexField) sexField.value = data.dogSex;
-      }
-      
-      checkFormValidity();
-    }
-
-    // Load trial data and populate trial selector
-    async function loadTrialData() {
-      try {
-        await loadRegistrationData();
-        
-        // Wait for auth
-        await new Promise((resolve) => {
-          if (auth.currentUser) {
-            resolve();
-          } else {
-            const unsubscribe = auth.onAuthStateChanged((user) => {
-              unsubscribe();
-              resolve();
-            });
-          }
-        });
-
-        if (!auth.currentUser) {
-          alert("Please log in to access the entry form");
-          window.location.href = 'index.html';
-          return;
-        }
-
-        // Load all trials for this user
-        const trialsQuery = query(
-          collection(db, "trials"),
-          where("createdBy", "==", auth.currentUser.uid)
-        );
-        
-        const trialsSnapshot = await getDocs(trialsQuery);
-        
-        if (!trialsSnapshot.empty) {
-          availableTrials = [];
-          trialsSnapshot.forEach(doc => {
-            availableTrials.push({ id: doc.id, ...doc.data() });
-          });
-          
-          // Sort trials by creation date (most recent first)
-          availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
-          
-          console.log("✅ Loaded trials:", availableTrials);
-          populateTrialSelector();
-        } else {
-          alert("No trials found. Please create a trial first.");
-          window.location.href = 'main-dashboard.html';
-          return;
-        }
-
-        setupEventListeners();
-        
-      } catch (error) {
-        console.error("❌ Error loading trial data:", error);
-        alert("Error loading trial data: " + error.message);
-      }
-    }
-
-    // Populate the trial selector dropdown
-    function populateTrialSelector() {
-      const trialSelect = document.getElementById('trialSelection');
-      if (!trialSelect) return;
-
-      // Clear existing options
-      trialSelect.innerHTML = '<option value="">Select a trial...</option>';
-
-      // Add each trial as an option
-      availableTrials.forEach(trial => {
-        const option = document.createElement('option');
-        option.value = trial.id;
-        
-        // Create a descriptive label for the trial
-        let trialLabel = trial.clubName || 'Unnamed Trial';
-        
-        if (trial.days && trial.days.length > 0) {
-          const dates = trial.days
-            .filter(day => day.date)
-            .map(day => new Date(day.date).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric' 
-            }))
-            .join(', ');
-          if (dates) {
-            trialLabel += ` (${dates})`;
-          }
-        }
-        
-        option.textContent = trialLabel;
-        trialSelect.appendChild(option);
-      });
-
-      // Auto-select the most recent trial
-      if (availableTrials.length > 0) {
-        trialSelect.value = availableTrials[0].id;
-        handleTrialSelection(availableTrials[0].id);
-      }
-    }
-
-    // Handle trial selection change
-    function handleTrialSelection(trialId) {
-      if (!trialId) {
-        currentTrialData = null;
-        document.getElementById('trialInfoSection').style.display = 'none';
-        document.getElementById('classSelection').innerHTML = `
-          <div style="text-align: center; padding: 2rem; color: #666;">
-            Please select a trial to view available classes.
-          </div>
-        `;
-        checkFormValidity();
-        return;
-      }
-
-      // Find the selected trial
-      const selectedTrial = availableTrials.find(trial => trial.id === trialId);
-      if (!selectedTrial) {
-        console.error("❌ Trial not found:", trialId);
-        return;
-      }
-
-      currentTrialData = selectedTrial;
-      console.log("✅ Selected trial:", currentTrialData);
-      
-      // Clear previous selections
-      selectedClasses.clear();
-      document.querySelectorAll('.entry-btn').forEach(btn => {
-        btn.classList.remove('selected');
-      });
-      
-      // Update the form
-      populateTrialInfo();
-      populateClasses();
-      updateEntrySummary();
-      checkFormValidity();
-      
-      // Show trial info section
-      document.getElementById('trialInfoSection').style.display = 'block';
-    }
-
-    // Populate trial information
-    function populateTrialInfo() {
-      if (!currentTrialData) return;
-
-      document.getElementById('trialTitle').textContent = 
-        `🏆 ${currentTrialData.clubName || 'Trial'} Entry Form`;
-      
-      document.getElementById('clubName').textContent = currentTrialData.clubName || 'TBD';
-      document.getElementById('trialSecretary').textContent = currentTrialData.secretary || 'TBD';
-      
-      // Format dates
-      if (currentTrialData.days && currentTrialData.days.length > 0) {
-        const dates = currentTrialData.days
-          .filter(day => day.date)
-          .map(day => new Date(day.date).toLocaleDateString())
-          .join(', ');
-        document.getElementById('trialDates').textContent = dates || 'TBD';
-      } else {
-        document.getElementById('trialDates').textContent = 'TBD';
-      }
-
-      document.getElementById('trialLocation').textContent = 'TBD';
-    }
-
-    // Check if FEO is available for a specific round
-    function isFeoAvailable(round) {
-      return round && (round.feo === true || round.FEO === true);
-    }
-
-    // Populate classes organized by day, class, and judge
-    function populateClasses() {
-      const classSelection = document.getElementById('classSelection');
-      if (!classSelection) {
-        console.error("❌ classSelection element not found");
-        return;
-      }
-
-      if (!currentTrialData || !currentTrialData.days) {
-        classSelection.innerHTML = `
-          <div class="no-classes-message">
-            ⚠️ No trial data available. Please check your trial setup.
-          </div>
-        `;
-        return;
-      }
-
-      console.log("📅 Processing trial days and classes...", currentTrialData.days);
-      
-      let hasAnyClasses = false;
-      let classSelectionHTML = '';
-
-      // Process each day
-      currentTrialData.days.forEach((day, dayIndex) => {
-        if (!day || !day.classes || !Array.isArray(day.classes) || day.classes.length === 0) {
-          return; // Skip days with no classes
-        }
-
-        hasAnyClasses = true;
-        
-        // Format the date
-        const dayDate = day.date ? new Date(day.date).toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }) : `Day ${dayIndex + 1}`;
-
-        classSelectionHTML += `
-          <div class="day-section">
-            <div class="day-header">
-              📅 ${dayDate}
-            </div>
-            <div class="day-content">
-        `;
-
-        // Group classes by name for this day
-        const classGroups = new Map();
-        
-        day.classes.forEach((cls, classIndex) => {
-          if (cls && cls.className && cls.className.trim()) {
-            const className = cls.className.trim();
-            if (!classGroups.has(className)) {
-              classGroups.set(className, []);
-            }
-            classGroups.get(className).push({...cls, dayIndex, classIndex});
-          }
-        });
-
-        // Process each class group
-        classGroups.forEach((classInstances, className) => {
-          classSelectionHTML += `
-            <div class="class-section">
-              <div class="class-header">
-                <span>🎯 ${className}</span>
-                <span>${classInstances.length} round${classInstances.length > 1 ? 's' : ''}</span>
-              </div>
-              <div class="class-content">
-          `;
-
-          // Process each round for this class
-          classInstances.forEach((classInstance, instanceIndex) => {
-            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
-              classInstance.rounds.forEach((round, roundIndex) => {
-                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
-                const roundNumber = round.roundNumber || (roundIndex + 1);
-                const regularId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_regular`;
-                const feoId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_feo`;
-                
-                const baseEntryValue = {
-                  dayIndex,
-                  classIndex: classInstance.classIndex,
-                  roundIndex,
-                  className,
-                  judge: judgeName,
-                  roundNumber,
-                  date: day.date || `Day ${dayIndex + 1}`
-                };
-                
-                const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
-                const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
-                
-                const showFeo = isFeoAvailable(round); // Check FEO at round level
-
-                classSelectionHTML += `
-                  <div class="round-item">
-                    <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
-                    ${showFeo ? `<input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">` : ''}
-                    <label for="${regularId}" style="width: 100%; margin: 0; cursor: default;">
-                      <div class="round-info">
-                        <span class="round-number">Round ${roundNumber}</span>
-                        <span class="judge-name">${judgeName}</span>
-                      </div>
-                      <div class="entry-options">
-                        <button type="button" class="entry-btn regular" data-entry-id="${regularId}">Entry</button>
-                        ${showFeo ? `<button type="button" class="entry-btn feo" data-entry-id="${feoId}">FEO</button>` : ''}
-                      </div>
-                    </label>
-                  </div>
-                `;
-              });
-            } else {
-              // Class with no rounds defined - create a default entry
-              const regularId = `entry_${dayIndex}_${classInstance.classIndex}_0_regular`;
-              const feoId = `entry_${dayIndex}_${classInstance.classIndex}_0_feo`;
-              
-              const baseEntryValue = {
-                dayIndex,
-                classIndex: classInstance.classIndex,
-                roundIndex: 0,
-                className,
-                judge: 'Judge TBD',
-                roundNumber: 1,
-                date: day.date || `Day ${dayIndex + 1}`
-              };
-              
-              const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
-              const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
-              
-              // For classes with no rounds, assume no FEO unless specified
-              const showFeo = false;
-
-              classSelectionHTML += `
-                <div class="round-item">
-                  <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
-                  ${showFeo ? `<input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">` : ''}
-                  <label for="${regularId}" style="width: 100%; margin: 0; cursor: default;">
-                    <div class="round-info">
-                      <span class="round-number">Round 1</span>
-                      <span class="judge-name">Judge TBD</span>
-                    </div>
-                    <div class="entry-options">
-                      <button type="button" class="entry-btn regular" data-entry-id="${regularId}">Entry</button>
-                      ${showFeo ? `<button type="button" class="entry-btn feo" data-entry-id="${feoId}">FEO</button>` : ''}
-                    </div>
-                  </label>
+        <!-- Trial Selection (Always visible) -->
+        <div class="trial-info">
+            <h3>🎯 Select Trial</h3>
+            <div class="form-row">
+                <div class="form-group required full-width">
+                    <label for="trialSelection">Choose which trial to enter:</label>
+                    <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
+                        <option value="">Loading available trials...</option>
+                    </select>
                 </div>
-              `;
+            </div>
+        </div>
+
+        <!-- Shareable Link Section (Shown after trial selection for secretary) -->
+        <div class="shareable-link-section" id="shareableLinkSection">
+            <h3>🔗 Shareable Entry Link</h3>
+            <p>Share this link with participants so they can enter from home:</p>
+            <div class="link-display">
+                <div class="link-url" id="shareableUrl">
+                    <!-- Generated URL will appear here -->
+                </div>
+                <div class="link-actions">
+                    <button class="btn btn-copy" onclick="copyShareableLink()">📋 Copy Link</button>
+                    <button class="btn btn-test" onclick="testShareableLink()">🔗 Test Link</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trial Information -->
+        <div class="trial-info" id="trialInfoSection" style="display: none;">
+            <h3>📋 Trial Information</h3>
+            <div class="trial-details" id="trialDetails">
+                <!-- Trial details will be populated here -->
+            </div>
+        </div>
+
+        <!-- Form Container (Entry form content) -->
+        <div class="form-container" id="formContainer">
+            <!-- Waiver Section -->
+            <div class="waiver-section">
+                <h3>⚠️ Liability Waiver & Release</h3>
+                <div class="waiver-content">
+                    <p><strong>WAIVER AND RELEASE OF LIABILITY</strong></p>
+                    <p>I understand that participation in dog training and scent work activities involves inherent risks including but not limited to: dogs working in close proximity to each other, off-leash activities, and interaction with other dogs and handlers.</p>
+                    <p>I acknowledge that I participate at my own risk and agree to hold harmless the hosting club, property owners, judges, and event organizers from any claims, damages, or injuries that may occur.</p>
+                </div>
+                <div class="waiver-agreement">
+                    <input type="checkbox" id="waiverAccepted" required>
+                    <label for="waiverAccepted">
+                        <strong>I have read, understood, and agree to the terms of this waiver and release of liability.</strong>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Entry Form -->
+            <form id="entryForm">
+                <!-- Handler Information -->
+                <div class="form-section">
+                    <h3>👤 Handler Information</h3>
+                    <div class="form-row">
+                        <div class="form-group required">
+                            <label>Handler Name</label>
+                            <input type="text" id="handlerName" required>
+                        </div>
+                        <div class="form-group required">
+                            <label>Phone Number</label>
+                            <input type="tel" id="handlerPhone" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group required">
+                            <label>Email Address</label>
+                            <input type="email" id="handlerEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Emergency Contact</label>
+                            <input type="text" id="emergencyContact">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dog Information -->
+                <div class="form-section">
+                    <h3>🐕 Dog Information</h3>
+                    <div class="form-row">
+                        <div class="form-group required">
+                            <label>Dog's Call Name</label>
+                            <input type="text" id="dogCallName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Breed</label>
+                            <input type="text" id="dogBreed">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="dogBirthdate">
+                        </div>
+                        <div class="form-group">
+                            <label>Sex</label>
+                            <select id="dogSex">
+                                <option value="">Select...</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Male Neutered">Male Neutered</option>
+                                <option value="Female Spayed">Female Spayed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>C-WAGS Registration Number (if applicable)</label>
+                            <input type="text" id="cwagsNumber" placeholder="XX-XXXX-XX">
+                        </div>
+                        <div class="form-group">
+                            <label>Junior Handler (Under 18)</label>
+                            <select id="juniorHandler">
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Class Selection -->
+                <div class="form-section">
+                    <h3>🎯 Class Entries</h3>
+                    <p style="margin-bottom: 20px; color: #666;">Select the classes you wish to enter:</p>
+                    <div id="classSelection" class="class-selection">
+                        <!-- Classes will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Entry Summary -->
+                <div class="entry-summary">
+                    <h3>💰 Entry Summary</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <strong>Classes Selected</strong>
+                            <span class="summary-value" id="selectedClassCount">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>Entry Fee</strong>
+                            <span class="summary-value" id="calculatedFee">$0.00</span>
+                        </div>
+                        <div class="summary-item">
+                            <strong>Junior Handler</strong>
+                            <span class="summary-value" id="summaryJuniorHandler">No</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                        Submit Entry
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        Clear Form
+                    </button>
+                </div>
+            </form>
+
+            <!-- Edit Link Section (Shown after successful submission) -->
+            <div class="edit-link-section hidden" id="editLinkSection">
+                <h3>✅ Entry Submitted Successfully!</h3>
+                <p>Your entry has been recorded. Use this link to edit your entry in the future:</p>
+                <div class="link-display">
+                    <div class="link-url" id="editUrl">
+                        <!-- Edit URL will appear here -->
+                    </div>
+                    <div class="link-actions">
+                        <button class="btn btn-copy" onclick="copyEditLink()">📋 Copy Edit Link</button>
+                        <button class="btn btn-test" onclick="testEditLink()">🔗 Test Edit Link</button>
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-primary" onclick="resetForNewEntry()">Submit Another Entry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports
+        import { auth, db } from './js/firebase.js';
+        import { collection, query, where, getDocs, doc, getDoc, addDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+        // Global variables
+        let availableTrials = [];
+        let currentTrialData = null;
+        let selectedClasses = new Set();
+        let isSecretary = false;
+
+        // Initialize the application
+        async function init() {
+            // Check URL parameters for entry link
+            const urlParams = new URLSearchParams(window.location.search);
+            const entryId = urlParams.get('entry');
+            const trialId = urlParams.get('trial');
+
+            if (entryId) {
+                // Load existing entry for editing
+                await loadExistingEntry(entryId);
+            } else if (trialId) {
+                // Load specific trial for public entry
+                await loadSpecificTrial(trialId);
+            } else {
+                // Normal secretary view
+                isSecretary = true;
+                await loadTrials();
             }
-          });
-
-          classSelectionHTML += `
-              </div>
-            </div>
-          `;
-        });
-
-        classSelectionHTML += `
-            </div>
-          </div>
-        `;
-      });
-
-      if (!hasAnyClasses) {
-        classSelection.innerHTML = `
-          <div class="no-classes-message">
-            ⚠️ No classes found in trial data. Please create classes in your trial setup.
-          </div>
-        `;
-        return;
-      }
-
-      classSelection.innerHTML = classSelectionHTML;
-
-      // Add event listeners to all entry buttons
-      classSelection.querySelectorAll('.entry-btn').forEach(button => {
-        button.addEventListener('click', handleEntryButtonClick);
-      });
-
-      console.log(`✅ Populated classes organized by day, class, and judge with FEO button options`);
-    }
-
-    // Handle entry button clicks
-    function handleEntryButtonClick(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      
-      const button = event.target;
-      const entryId = button.dataset.entryId;
-      const checkbox = document.getElementById(entryId);
-      
-      if (!checkbox) {
-        console.log("❌ Checkbox not found for entry:", entryId);
-        return;
-      }
-      
-      // Toggle the checkbox state
-      checkbox.checked = !checkbox.checked;
-      
-      // Update button appearance
-      if (checkbox.checked) {
-        button.classList.add('selected');
-        console.log("✅ Selected entry:", entryId);
-      } else {
-        button.classList.remove('selected');
-        console.log("❌ Deselected entry:", entryId);
-      }
-      
-      // Trigger the selection update
-      updateClassSelection({ target: checkbox });
-      
-      // Force validation check after a brief delay
-      setTimeout(() => {
-        checkFormValidity();
-      }, 100);
-    }
-
-    // Update class selection with detailed entry tracking
-    function updateClassSelection(event) {
-      const entryData = JSON.parse(event.target.value);
-      
-      if (event.target.checked) {
-        selectedClasses.add(event.target.value);
-        console.log(`✅ Added entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType.toUpperCase()}`);
-      } else {
-        selectedClasses.delete(event.target.value);
-        console.log(`❌ Removed entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType.toUpperCase()}`);
-      }
-      
-      console.log("📊 Total selected classes:", selectedClasses.size);
-      
-      updateEntrySummary();
-      
-      // Force validation check
-      setTimeout(() => {
-        checkFormValidity();
-      }, 50);
-    }
-
-    // Update entry summary with detailed breakdown
-    function updateEntrySummary() {
-      const entryCount = selectedClasses.size;
-      const isJunior = document.getElementById('juniorHandler').value === 'Yes';
-      
-      let totalFee = 0;
-      let regularEntries = 0;
-      let feoEntries = 0;
-      
-      // Count regular vs FEO entries
-      selectedClasses.forEach(entryJson => {
-        try {
-          const entry = JSON.parse(entryJson);
-          if (entry.entryType === 'feo') {
-            feoEntries++;
-          } else {
-            regularEntries++;
-          }
-        } catch (e) {
-          console.warn("Error parsing entry data:", e);
-          regularEntries++; // Default to regular if parsing fails
         }
-      });
-      
-      if (isJunior) {
-        totalFee = fees.juniorHandler * regularEntries; // Only charge for regular entries if junior
-      } else if (regularEntries > 0) {
-        // Calculate fees for regular entries only (FEO entries are typically free)
-        totalFee = fees.firstClass + (fees.additionalClass * Math.max(0, regularEntries - 1));
-      }
-      
-      // Count unique classes (for display purposes)
-      const uniqueClasses = new Set();
-      selectedClasses.forEach(entryJson => {
-        try {
-          const entry = JSON.parse(entryJson);
-          uniqueClasses.add(entry.className);
-        } catch (e) {
-          console.warn("Error parsing entry data:", e);
+
+        // Load trials for secretary
+        async function loadTrials() {
+            try {
+                if (!auth.currentUser) {
+                    alert("Please log in to access the entry form");
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const q = query(
+                    collection(db, "trials"),
+                    where("createdBy", "==", auth.currentUser.uid)
+                );
+                
+                const snapshot = await getDocs(q);
+                availableTrials = [];
+                
+                snapshot.forEach(doc => {
+                    availableTrials.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort by creation date (most recent first)
+                availableTrials.sort((a, b) => {
+                    const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+                    const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+                    return dateB - dateA;
+                });
+
+                populateTrialSelector();
+            } catch (error) {
+                console.error('Error loading trials:', error);
+                alert('Error loading trials: ' + error.message);
+            }
         }
-      });
-      
-      let entryBreakdown = `${entryCount} entries (${uniqueClasses.size} classes)`;
-      if (feoEntries > 0) {
-        entryBreakdown += ` - ${regularEntries} Regular, ${feoEntries} FEO`;
-      }
-      
-      document.getElementById('selectedClassCount').textContent = entryBreakdown;
-      document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
-      document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
-    }
 
-    // Check form validity
-    function checkFormValidity() {
-      if (isAutoFilling) return;
-      
-      const trialSelected = document.getElementById('trialSelection').value.trim();
-      const waiverAccepted = document.getElementById('waiverAccepted').checked;
-      const cwagsNumber = document.getElementById('cwagsNumber').value.trim();
-      const handlerName = document.getElementById('handlerName').value.trim();
-      const handlerEmail = document.getElementById('handlerEmail').value.trim();
-      const handlerPhone = document.getElementById('handlerPhone').value.trim();
-      const dogCallName = document.getElementById('dogCallName').value.trim();
-      const hasClasses = selectedClasses.size > 0;
-      
-      console.log("🔍 Form validation check:");
-      console.log("Trial selected:", trialSelected, "(length:", trialSelected.length, ")");
-      console.log("Waiver accepted:", waiverAccepted);
-      console.log("C-WAGS number:", cwagsNumber, "(length:", cwagsNumber.length, ")");
-      console.log("Handler name:", handlerName, "(length:", handlerName.length, ")");
-      console.log("Handler email:", handlerEmail, "(length:", handlerEmail.length, ")");
-      console.log("Handler phone:", handlerPhone, "(length:", handlerPhone.length, ")");
-      console.log("Dog call name:", dogCallName, "(length:", dogCallName.length, ")");
-      console.log("Has classes:", hasClasses, "(count:", selectedClasses.size, ")");
-      
-      const isValid = trialSelected && waiverAccepted && cwagsNumber && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
-      
-      const submitBtn = document.getElementById('submitBtn');
-      if (submitBtn) {
-        submitBtn.disabled = !isValid;
-        if (!isValid && !isAutoFilling) {
-          // Help user identify what's missing
-          let missingFields = [];
-          if (!trialSelected) missingFields.push("Trial selection");
-          if (!waiverAccepted) missingFields.push("Waiver acceptance");
-          if (!cwagsNumber) missingFields.push("C-WAGS number");
-          if (!handlerName) missingFields.push("Handler name");
-          if (!handlerEmail) missingFields.push("Handler email");
-          if (!handlerPhone) missingFields.push("Handler phone");
-          if (!dogCallName) missingFields.push("Dog call name");
-          if (!hasClasses) missingFields.push("Class selection");
-          
-          console.log("❌ Missing required fields:", missingFields);
-        } else if (isValid) {
-          console.log("✅ Form is valid! Submit button enabled.");
+        // Load specific trial for public entry
+        async function loadSpecificTrial(trialId) {
+            try {
+                const trialDoc = await getDoc(doc(db, 'trials', trialId));
+                if (!trialDoc.exists()) {
+                    alert('Trial not found');
+                    return;
+                }
+
+                currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
+                populateTrialInfo();
+                showEntryForm();
+            } catch (error) {
+                console.error('Error loading specific trial:', error);
+                alert('Error loading trial: ' + error.message);
+            }
         }
-      }
-    }
 
-    // Setup event listeners
-    function setupEventListeners() {
-      // Trial selection listener
-      const trialSelect = document.getElementById('trialSelection');
-      if (trialSelect) {
-        trialSelect.addEventListener('change', function(e) {
-          handleTrialSelection(e.target.value);
-        });
-      }
+        // Load existing entry for editing
+        async function loadExistingEntry(entryId) {
+            try {
+                const entryDoc = await getDoc(doc(db, 'entries', entryId));
+                if (!entryDoc.exists()) {
+                    alert('Entry not found');
+                    return;
+                }
 
-      // Registration number lookup with debouncing
-      let registrationTimeout;
-      const cwagsInput = document.getElementById('cwagsNumber');
-      if (cwagsInput) {
-        cwagsInput.addEventListener('input', function(e) {
-          const registrationNumber = e.target.value.trim();
-          
-          clearTimeout(registrationTimeout);
-          
-          if (registrationNumber.length >= 3) {
-            registrationTimeout = setTimeout(() => {
-              autoFillFromRegistration(registrationNumber);
-            }, 500);
-          }
-          
-          checkFormValidity();
-        });
-      }
+                const entryData = entryDoc.data();
+                
+                // Load the trial
+                const trialDoc = await getDoc(doc(db, 'trials', entryData.trialId));
+                if (!trialDoc.exists()) {
+                    alert('Associated trial not found');
+                    return;
+                }
 
-      // Fee calculation listeners
-      const juniorHandler = document.getElementById('juniorHandler');
-      
-      if (juniorHandler) juniorHandler.addEventListener('change', updateEntrySummary);
-      
-      // Form validation listeners
-      const validationFields = ['trialSelection', 'waiverAccepted', 'cwagsNumber', 'handlerName', 'handlerEmail', 'handlerPhone', 'dogCallName'];
-      validationFields.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-          element.addEventListener('change', checkFormValidity);
-          element.addEventListener('input', checkFormValidity);
+                currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
+                
+                // Populate trial info and form
+                populateTrialInfo();
+                showEntryForm();
+                
+                // Fill form with existing data
+                populateFormWithEntryData(entryData);
+
+            } catch (error) {
+                console.error('Error loading existing entry:', error);
+                alert('Error loading entry: ' + error.message);
+            }
         }
-      });
-    }
 
-    // Save registration data for future use
-    async function saveRegistrationData(registrationNumber, formData) {
-      try {
-        if (!registrationNumber || !auth.currentUser) return;
-        
-        const registrationDoc = {
-          cwagsNumber: registrationNumber,
-          handlerName: formData.handlerName,
-          handlerPhone: formData.handlerPhone,
-          handlerEmail: formData.handlerEmail,
-          emergencyContact: formData.emergencyContact,
-          dogCallName: formData.dogCallName,
-          dogBreed: formData.dogBreed,
-          dogBirthdate: formData.dogBirthdate,
-          dogSex: formData.dogSex,
-          lastUpdated: new Date(),
-          lastTrialId: currentTrialData?.id
+        // Populate trial selector dropdown
+        function populateTrialSelector() {
+            const trialSelect = document.getElementById('trialSelection');
+            trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+
+            availableTrials.forEach(trial => {
+                const option = document.createElement('option');
+                option.value = trial.id;
+                
+                let trialLabel = trial.clubName || 'Unnamed Trial';
+                
+                if (trial.days && trial.days.length > 0) {
+                    const dates = trial.days
+                        .filter(day => day.date)
+                        .map(day => new Date(day.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }))
+                        .join(', ');
+                    if (dates) {
+                        trialLabel += ` (${dates})`;
+                    }
+                }
+                
+                option.textContent = trialLabel;
+                trialSelect.appendChild(option);
+            });
+
+            // Handle trial selection change
+            trialSelect.addEventListener('change', function() {
+                const trialId = this.value;
+                if (trialId) {
+                    currentTrialData = availableTrials.find(t => t.id === trialId);
+                    if (currentTrialData) {
+                        populateTrialInfo();
+                        generateShareableLink();
+                        showEntryForm();
+                    }
+                } else {
+                    hideTrialInfo();
+                    hideShareableLink();
+                    hideEntryForm();
+                }
+            });
+        }
+
+        // Generate shareable link
+        function generateShareableLink() {
+            if (!isSecretary || !currentTrialData) return;
+
+            const baseUrl = window.location.origin + window.location.pathname;
+            const shareableUrl = `${baseUrl}?trial=${currentTrialData.id}`;
+            
+            document.getElementById('shareableUrl').textContent = shareableUrl;
+            document.getElementById('shareableLinkSection').style.display = 'block';
+        }
+
+        // Populate trial information
+        function populateTrialInfo() {
+            if (!currentTrialData) return;
+
+            document.getElementById('trialTitle').textContent = `${currentTrialData.clubName || 'Trial'} Entry Form`;
+            
+            const dates = currentTrialData.days && currentTrialData.days.length > 0 
+                ? currentTrialData.days.filter(day => day.date).map(day => new Date(day.date).toLocaleDateString()).join(', ')
+                : 'No dates specified';
+
+            document.getElementById('trialDetails').innerHTML = `
+                <div class="trial-detail">
+                    <div><strong>Club:</strong> ${currentTrialData.clubName || 'TBD'}</div>
+                </div>
+                <div class="trial-detail">
+                    <div><strong>Dates:</strong> ${dates}</div>
+                </div>
+                <div class="trial-detail">
+                    <div><strong>Secretary:</strong> ${currentTrialData.secretary || 'TBD'}</div>
+                </div>
+                <div class="trial-detail">
+                    <div><strong>Location:</strong> TBD</div>
+                </div>
+            `;
+
+            document.getElementById('trialInfoSection').style.display = 'block';
+            populateClasses();
+        }
+
+        // Populate classes
+        function populateClasses() {
+            const classSelection = document.getElementById('classSelection');
+            let html = '';
+
+            if (!currentTrialData.days || currentTrialData.days.length === 0) {
+                html = '<div style="text-align: center; padding: 20px; color: #666;">No classes available for this trial.</div>';
+                classSelection.innerHTML = html;
+                return;
+            }
+
+            // Group classes by day
+            currentTrialData.days.forEach((day, dayIndex) => {
+                if (!day.classes || day.classes.length === 0) return;
+
+                const dayDate = day.date ? new Date(day.date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                }) : `Day ${dayIndex + 1}`;
+
+                html += `
+                    <div class="day-section">
+                        <div class="day-header">${dayDate}</div>
+                `;
+
+                // Group classes by name
+                const classGroups = new Map();
+                day.classes.forEach((cls, classIndex) => {
+                    if (cls && cls.className && cls.className.trim()) {
+                        const className = cls.className.trim();
+                        if (!classGroups.has(className)) {
+                            classGroups.set(className, []);
+                        }
+                        classGroups.get(className).push({...cls, dayIndex, classIndex});
+                    }
+                });
+
+                classGroups.forEach((classInstances, className) => {
+                    classInstances.forEach((classInstance, instanceIndex) => {
+                        if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
+                            classInstance.rounds.forEach((round, roundIndex) => {
+                                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
+                                const roundNumber = round.roundNumber || (roundIndex + 1);
+                                const regularId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_regular`;
+                                const feoId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_feo`;
+                                
+                                const baseEntryValue = {
+                                    dayIndex,
+                                    classIndex: classInstance.classIndex,
+                                    roundIndex,
+                                    className,
+                                    judge: judgeName,
+                                    roundNumber,
+                                    date: day.date || `Day ${dayIndex + 1}`
+                                };
+                                
+                                const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
+                                const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
+                                
+                                const showFeo = round.feo === true || round.FEO === true;
+
+                                html += `
+                                    <div class="class-item">
+                                        <div class="class-header">
+                                            <div class="class-name">${className} - Round ${roundNumber}</div>
+                                            <div class="judge-name">Judge: ${judgeName}</div>
+                                        </div>
+                                        <div class="entry-options">
+                                            <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
+                                            <button type="button" class="entry-btn regular" data-entry-id="${regularId}">Regular Entry</button>
+                                            ${showFeo ? `
+                                                <input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">
+                                                <button type="button" class="entry-btn feo" data-entry-id="${feoId}">FEO Entry</button>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        }
+                    });
+                });
+
+                html += `</div>`;
+            });
+
+            classSelection.innerHTML = html;
+            setupEventListeners();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Entry button clicks
+            document.querySelectorAll('.entry-btn').forEach(button => {
+                button.addEventListener('click', handleEntryButtonClick);
+            });
+
+            // Form validation
+            document.getElementById('entryForm').addEventListener('input', checkFormValidity);
+            document.getElementById('waiverAccepted').addEventListener('change', checkFormValidity);
+            document.getElementById('juniorHandler').addEventListener('change', updateEntrySummary);
+
+            // Form submission
+            document.getElementById('entryForm').addEventListener('submit', handleFormSubmit);
+        }
+
+        // Handle entry button clicks
+        function handleEntryButtonClick(event) {
+            event.preventDefault();
+            
+            const button = event.target;
+            const entryId = button.dataset.entryId;
+            const checkbox = document.getElementById(entryId);
+            
+            if (!checkbox) return;
+            
+            // Toggle selection
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                button.classList.add('selected');
+                selectedClasses.add(checkbox.value);
+            } else {
+                button.classList.remove('selected');
+                selectedClasses.delete(checkbox.value);
+            }
+            
+            updateEntrySummary();
+            checkFormValidity();
+        }
+
+        // Update entry summary
+        function updateEntrySummary() {
+            const entryCount = selectedClasses.size;
+            const isJunior = document.getElementById('juniorHandler').value === 'Yes';
+            
+            let totalFee = 0;
+            let regularEntries = 0;
+            let feoEntries = 0;
+            
+            selectedClasses.forEach(entryJson => {
+                try {
+                    const entry = JSON.parse(entryJson);
+                    if (entry.entryType === 'feo') {
+                        feoEntries++;
+                    } else {
+                        regularEntries++;
+                    }
+                } catch (e) {
+                    regularEntries++;
+                }
+            });
+            
+            // Fee calculation
+            if (isJunior) {
+                totalFee = 20.00 * regularEntries; // Junior handler fee
+            } else if (regularEntries > 0) {
+                totalFee = 35.00 + (25.00 * Math.max(0, regularEntries - 1)); // First class $35, additional $25
+            }
+            
+            const uniqueClasses = new Set();
+            selectedClasses.forEach(entryJson => {
+                try {
+                    const entry = JSON.parse(entryJson);
+                    uniqueClasses.add(entry.className);
+                } catch (e) {}
+            });
+            
+            let entryBreakdown = `${entryCount} entries (${uniqueClasses.size} classes)`;
+            if (feoEntries > 0) {
+                entryBreakdown += ` - ${regularEntries} Regular, ${feoEntries} FEO`;
+            }
+            
+            document.getElementById('selectedClassCount').textContent = entryBreakdown;
+            document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
+            document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
+        }
+
+        // Check form validity
+        function checkFormValidity() {
+            const waiverAccepted = document.getElementById('waiverAccepted').checked;
+            const handlerName = document.getElementById('handlerName').value.trim();
+            const handlerEmail = document.getElementById('handlerEmail').value.trim();
+            const handlerPhone = document.getElementById('handlerPhone').value.trim();
+            const dogCallName = document.getElementById('dogCallName').value.trim();
+            const hasClasses = selectedClasses.size > 0;
+            
+            const isValid = waiverAccepted && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
+            
+            document.getElementById('submitBtn').disabled = !isValid;
+        }
+
+        // Handle form submission
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                // Process selected classes
+                const selectedEntries = Array.from(selectedClasses).map(entryJson => {
+                    try {
+                        return JSON.parse(entryJson);
+                    } catch (e) {
+                        return null;
+                    }
+                }).filter(entry => entry !== null);
+
+                const entryData = {
+                    trialId: currentTrialData.id,
+                    handlerName: document.getElementById('handlerName').value.trim(),
+                    handlerPhone: document.getElementById('handlerPhone').value.trim(),
+                    handlerEmail: document.getElementById('handlerEmail').value.trim(),
+                    emergencyContact: document.getElementById('emergencyContact').value.trim(),
+                    dogCallName: document.getElementById('dogCallName').value.trim(),
+                    dogBreed: document.getElementById('dogBreed').value.trim(),
+                    dogBirthdate: document.getElementById('dogBirthdate').value,
+                    dogSex: document.getElementById('dogSex').value,
+                    cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
+                    selectedEntries: selectedEntries,
+                    selectedClasses: selectedEntries.map(e => e.className),
+                    entryCount: selectedEntries.length,
+                    uniqueClassCount: new Set(selectedEntries.map(e => e.className)).size,
+                    regularEntries: selectedEntries.filter(e => e.entryType === 'regular').length,
+                    feoEntries: selectedEntries.filter(e => e.entryType === 'feo').length,
+                    juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
+                    waiverAccepted: true,
+                    entryFee: document.getElementById('calculatedFee').textContent,
+                    submittedAt: new Date(),
+                    submittedBy: auth.currentUser ? auth.currentUser.uid : 'public_entry'
+                };
+
+                // Save entry
+                const docRef = await addDoc(collection(db, "entries"), entryData);
+                
+                // Generate edit link
+                generateEditLink(docRef.id);
+                
+                // Show success section
+                showSuccessSection();
+
+            } catch (error) {
+                console.error('Error submitting entry:', error);
+                alert('Error submitting entry: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Entry';
+            }
+        }
+
+        // Generate edit link after successful submission
+        function generateEditLink(entryId) {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const editUrl = `${baseUrl}?entry=${entryId}`;
+            
+            document.getElementById('editUrl').textContent = editUrl;
+        }
+
+        // Show success section
+        function showSuccessSection() {
+            document.getElementById('entryForm').style.display = 'none';
+            document.getElementById('editLinkSection').classList.remove('hidden');
+        }
+
+        // Populate form with existing entry data
+        function populateFormWithEntryData(entryData) {
+            document.getElementById('handlerName').value = entryData.handlerName || '';
+            document.getElementById('handlerPhone').value = entryData.handlerPhone || '';
+            document.getElementById('handlerEmail').value = entryData.handlerEmail || '';
+            document.getElementById('emergencyContact').value = entryData.emergencyContact || '';
+            document.getElementById('dogCallName').value = entryData.dogCallName || '';
+            document.getElementById('dogBreed').value = entryData.dogBreed || '';
+            document.getElementById('dogBirthdate').value = entryData.dogBirthdate || '';
+            document.getElementById('dogSex').value = entryData.dogSex || '';
+            document.getElementById('cwagsNumber').value = entryData.cwagsNumber || '';
+            document.getElementById('juniorHandler').value = entryData.juniorHandler ? 'Yes' : 'No';
+            document.getElementById('waiverAccepted').checked = true;
+
+            // Restore selected classes
+            if (entryData.selectedEntries) {
+                entryData.selectedEntries.forEach(entry => {
+                    const entryJson = JSON.stringify(entry);
+                    selectedClasses.add(entryJson);
+                    
+                    // Find and select the corresponding button
+                    const entryId = `entry_${entry.dayIndex}_${entry.classIndex}_${entry.roundIndex}_${entry.entryType}`;
+                    const button = document.querySelector(`[data-entry-id="${entryId}"]`);
+                    const checkbox = document.getElementById(entryId);
+                    
+                    if (button && checkbox) {
+                        button.classList.add('selected');
+                        checkbox.checked = true;
+                    }
+                });
+            }
+
+            updateEntrySummary();
+            checkFormValidity();
+        }
+
+        // Show/hide sections
+        function showEntryForm() {
+            document.getElementById('formContainer').style.display = 'block';
+        }
+
+        function hideEntryForm() {
+            document.getElementById('formContainer').style.display = 'none';
+        }
+
+        function hideTrialInfo() {
+            document.getElementById('trialInfoSection').style.display = 'none';
+        }
+
+        function hideShareableLink() {
+            document.getElementById('shareableLinkSection').style.display = 'none';
+        }
+
+        // Copy shareable link to clipboard
+        window.copyShareableLink = function() {
+            const url = document.getElementById('shareableUrl').textContent;
+            copyToClipboard(url, 'Shareable link copied to clipboard!');
         };
-        
-        await setDoc(doc(db, "registrations", registrationNumber), registrationDoc);
-        console.log("✅ Saved registration data for:", registrationNumber);
-      } catch (error) {
-        console.error("Error saving registration data:", error);
-      }
-    }
 
-    // Form submission
-    document.getElementById('entryForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      // Check form validity manually instead of relying on checkFormValidity function
-      const trialSelected = document.getElementById('trialSelection').value.trim();
-      const waiverAccepted = document.getElementById('waiverAccepted').checked;
-      const cwagsNumber = document.getElementById('cwagsNumber').value.trim();
-      const handlerName = document.getElementById('handlerName').value.trim();
-      const handlerEmail = document.getElementById('handlerEmail').value.trim();
-      const handlerPhone = document.getElementById('handlerPhone').value.trim();
-      const dogCallName = document.getElementById('dogCallName').value.trim();
-      const hasClasses = selectedClasses.size > 0;
-      
-      console.log("📋 Form submission validation:");
-      console.log("- Trial selected:", !!trialSelected);
-      console.log("- Waiver accepted:", waiverAccepted);
-      console.log("- C-WAGS number:", !!cwagsNumber);
-      console.log("- Handler name:", !!handlerName);
-      console.log("- Handler email:", !!handlerEmail);
-      console.log("- Handler phone:", !!handlerPhone);
-      console.log("- Dog call name:", !!dogCallName);
-      console.log("- Has classes:", hasClasses, "(count:", selectedClasses.size, ")");
-      
-      const isFormValid = trialSelected && waiverAccepted && cwagsNumber && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
-      
-      if (!isFormValid) {
-        let missingFields = [];
-        if (!trialSelected) missingFields.push("Trial selection");
-        if (!waiverAccepted) missingFields.push("Waiver acceptance");
-        if (!cwagsNumber) missingFields.push("C-WAGS number");
-        if (!handlerName) missingFields.push("Handler name");
-        if (!handlerEmail) missingFields.push("Handler email");
-        if (!handlerPhone) missingFields.push("Handler phone");
-        if (!dogCallName) missingFields.push("Dog call name");
-        if (!hasClasses) missingFields.push("Class selection");
-        
-        console.log("❌ Form submission blocked. Missing:", missingFields);
-        alert("Please complete all required fields and accept the waiver. Missing: " + missingFields.join(", "));
-        return;
-      }
-      
-      console.log("✅ Form submission proceeding...");
-      
-      try {
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting...';
-        
-        // Process selected classes for storage
-        const selectedEntries = Array.from(selectedClasses).map(entryJson => {
-          try {
-            return JSON.parse(entryJson);
-          } catch (e) {
-            console.warn("Error parsing entry data:", e);
-            return null;
-          }
-        }).filter(entry => entry !== null);
-
-        const entryData = {
-          trialId: currentTrialData.id,
-          cwagsNumber: cwagsNumber,
-          handlerName: handlerName,
-          handlerPhone: handlerPhone,
-          handlerEmail: handlerEmail,
-          emergencyContact: document.getElementById('emergencyContact').value,
-          dogCallName: dogCallName,
-          dogBreed: document.getElementById('dogBreed').value,
-          dogBirthdate: document.getElementById('dogBirthdate').value,
-          dogSex: document.getElementById('dogSex').value,
-          selectedEntries: selectedEntries, // Detailed entry data with day/class/judge/round/type
-          selectedClasses: selectedEntries.map(e => e.className), // Simple class names for compatibility
-          entryCount: selectedEntries.length,
-          uniqueClassCount: new Set(selectedEntries.map(e => e.className)).size,
-          regularEntries: selectedEntries.filter(e => e.entryType === 'regular').length,
-          feoEntries: selectedEntries.filter(e => e.entryType === 'feo').length,
-          juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
-          waiverAccepted: true,
-          entryFee: document.getElementById('calculatedFee').textContent,
-          submittedAt: new Date(),
-          submittedBy: auth.currentUser ? auth.currentUser.uid : 'manual'
+        // Test shareable link
+        window.testShareableLink = function() {
+            const url = document.getElementById('shareableUrl').textContent;
+            window.open(url, '_blank');
         };
-        
-        console.log("💾 Submitting entry data:", entryData);
-        
-        // Save entry
-        const docRef = await addDoc(collection(db, "entries"), entryData);
-        console.log("✅ Entry submitted with ID:", docRef.id);
-        
-        // Save registration data for future use
-        await saveRegistrationData(entryData.cwagsNumber, entryData);
-        
-        // Show success message
-        document.getElementById('entryForm').style.display = 'none';
-        document.getElementById('successMessage').classList.remove('hidden');
-        
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-      } catch (error) {
-        console.error("❌ Error submitting entry:", error);
-        alert("Error submitting entry: " + error.message);
-        
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Entry';
-      }
-    });
 
-    // Reset form function
-    window.resetForm = function() {
-      isAutoFilling = true;
-      
-      document.getElementById('entryForm').reset();
-      selectedClasses.clear();
-      
-      // Reset trial selection to first option and hide trial info
-      const trialSelect = document.getElementById('trialSelection');
-      if (trialSelect && availableTrials.length > 0) {
-        trialSelect.value = availableTrials[0].id;
-        handleTrialSelection(availableTrials[0].id);
-      } else {
-        document.getElementById('trialInfoSection').style.display = 'none';
-      }
-      
-      // Clear checkboxes and reset buttons
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        if (cb.id !== 'waiverAccepted') cb.checked = false;
-      });
-      
-      document.querySelectorAll('.entry-btn').forEach(btn => {
-        btn.classList.remove('selected');
-      });
-      
-      // Clear lookup status
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) statusDiv.style.display = 'none';
-      
-      updateEntrySummary();
-      
-      // Hide success message and show form
-      document.getElementById('successMessage').classList.add('hidden');
-      document.getElementById('entryForm').style.display = 'block';
-      
-      // Scroll to top and focus on trial selection
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      setTimeout(() => {
-        isAutoFilling = false;
-        const trialSelect = document.getElementById('trialSelection');
-        if (trialSelect) trialSelect.focus();
-        checkFormValidity();
-      }, 500);
-    };
+        // Copy edit link to clipboard
+        window.copyEditLink = function() {
+            const url = document.getElementById('editUrl').textContent;
+            copyToClipboard(url, 'Edit link copied to clipboard!');
+        };
 
-    // Initialize the form when auth is ready
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        console.log("👤 User authenticated, loading trial data...");
-        loadTrialData();
-      } else {
-        console.log("❌ No user found, redirecting to login");
-        window.location.href = 'index.html';
-      }
-    });
+        // Test edit link
+        window.testEditLink = function() {
+            const url = document.getElementById('editUrl').textContent;
+            window.open(url, '_blank');
+        };
 
-    console.log("✅ Entry form system ready with FEO support");
-  </script>
+        // Copy to clipboard utility
+        function copyToClipboard(text, successMessage) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert(successMessage);
+            }).catch(err => {
+                console.error('Error copying to clipboard:', err);
+                // Fallback method
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert(successMessage);
+            });
+        }
+
+        // Reset form for new entry
+        window.resetForNewEntry = function() {
+            document.getElementById('editLinkSection').classList.add('hidden');
+            document.getElementById('entryForm').style.display = 'block';
+            resetForm();
+        };
+
+        // Reset form
+        window.resetForm = function() {
+            document.getElementById('entryForm').reset();
+            selectedClasses.clear();
+            
+            document.querySelectorAll('.entry-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                if (cb.id !== 'waiverAccepted') cb.checked = false;
+            });
+            
+            updateEntrySummary();
+            checkFormValidity();
+        };
+
+        // Initialize when auth is ready (if secretary) or immediately (if public)
+        auth.onAuthStateChanged(async (user) => {
+            if (user || !isSecretary) {
+                await init();
+            } else if (isSecretary) {
+                alert("Please log in to access the entry form");
+                window.location.href = 'index.html';
+            }
+        });
+
+        // For public access, initialize immediately
+        if (window.location.search.includes('trial=') || window.location.search.includes('entry=')) {
+            init();
+        }
+    </script>
 </body>
 </html>
