@@ -112,128 +112,134 @@
             flex-wrap: wrap;
         }
 
-        .running-order-grid {
-            display: grid;
-            gap: 20px;
-            margin-top: 30px;
+        .running-order-table-container {
+            overflow-x: auto;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
         }
 
-        .day-section {
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #f8f9fa;
+        .running-order-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
         }
 
-        .day-header {
+        .running-order-table th,
+        .running-order-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: center;
+            vertical-align: top;
+            min-width: 150px;
+        }
+
+        .date-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px 20px;
-            font-size: 1.2rem;
             font-weight: 600;
-            text-align: center;
-        }
-
-        .judge-section {
-            margin: 15px;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            overflow: hidden;
-            background: white;
+            font-size: 1rem;
         }
 
         .judge-header {
             background: #e9ecef;
-            padding: 12px 15px;
-            font-weight: 600;
             color: #495057;
-            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            font-size: 0.95rem;
         }
 
-        .class-rounds {
-            padding: 15px;
+        .class-header {
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 500;
+            font-size: 0.9rem;
+            white-space: nowrap;
         }
 
-        .class-round {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
+        .entrant-cell {
+            padding: 4px;
+            height: 60px;
+            position: relative;
+        }
+
+        .entrant-cell.empty {
             background: #f8f9fa;
         }
 
-        .class-round:last-child {
-            margin-bottom: 0;
+        .entrant-cell.regular {
+            background: #d1ecf1;
         }
 
-        .class-round-title {
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
+        .entrant-cell.feo {
+            background: #fff3cd;
         }
 
-        .entrants-list {
+        .drop-zone {
+            width: 100%;
+            height: 100%;
+            border: 2px dashed transparent;
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .entrant-item {
             display: flex;
             align-items: center;
-            padding: 8px 12px;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            font-size: 14px;
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 13px;
             cursor: move;
             user-select: none;
             transition: all 0.2s ease;
+            height: 100%;
+            min-height: 50px;
         }
 
         .entrant-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transform: translateY(-1px);
+            border-color: #495057;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .entrant-item.dragging {
             opacity: 0.5;
-            transform: rotate(5deg);
-        }
-
-        .entrant-item.feo {
-            background: #fff3cd;
-            border-color: #ffeaa7;
-        }
-
-        .entrant-item.regular {
-            background: #d1ecf1;
-            border-color: #bee5eb;
+            transform: rotate(3deg);
         }
 
         .entrant-number {
             background: #495057;
             color: white;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            margin-right: 10px;
+            margin-right: 6px;
             flex-shrink: 0;
         }
 
         .entrant-name {
             flex: 1;
+            font-size: 12px;
+            line-height: 1.2;
+            word-break: break-word;
         }
 
         .move-controls {
             display: flex;
-            gap: 5px;
+            flex-direction: column;
+            gap: 2px;
             opacity: 0;
             transition: opacity 0.2s ease;
         }
@@ -246,11 +252,11 @@
             background: #6c757d;
             color: white;
             border: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -329,7 +335,7 @@
                 padding: 20px;
             }
             
-            .controls, .btn, .confirm-section {
+            .controls, .btn, .confirm-section, .button-group {
                 display: none;
             }
             
@@ -337,13 +343,56 @@
                 display: none !important;
             }
             
-            .day-section {
-                page-break-inside: avoid;
-                margin-bottom: 20px;
+            .running-order-table-container {
+                overflow: visible;
             }
             
-            .judge-section {
-                page-break-inside: avoid;
+            .running-order-table {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .running-order-table th,
+            .running-order-table td {
+                font-size: 10px;
+                padding: 4px;
+                min-width: auto;
+            }
+            
+            .entrant-item {
+                font-size: 10px;
+                min-height: auto;
+                height: auto;
+                padding: 2px 4px;
+            }
+            
+            .entrant-number {
+                width: 16px;
+                height: 16px;
+                font-size: 9px;
+                margin-right: 4px;
+            }
+            
+            .entrant-name {
+                font-size: 9px;
+            }
+            
+            .date-header {
+                background: #333 !important;
+                -webkit-print-color-adjust: exact;
+                color: white !important;
+            }
+            
+            .judge-header {
+                background: #666 !important;
+                -webkit-print-color-adjust: exact;
+                color: white !important;
+            }
+            
+            .class-header {
+                background: #999 !important;
+                -webkit-print-color-adjust: exact;
+                color: white !important;
             }
         }
     </style>
@@ -627,93 +676,140 @@
             return `${handler} - ${dog}`;
         }
 
-        // Display running order with drag & drop
+        // Display running order with drag & drop in column format
         function displayRunningOrder(groupedEntries) {
             const container = document.getElementById('runningOrder');
-            let html = '';
-
-            // Sort dates chronologically
-            const sortedDates = Object.keys(groupedEntries).sort((a, b) => {
-                const dateA = new Date(a);
-                const dateB = new Date(b);
-                return dateA - dateB;
+            
+            // Create a flat array of all class/round combinations
+            const columns = [];
+            
+            Object.keys(groupedEntries).forEach(date => {
+                Object.keys(groupedEntries[date]).forEach(judge => {
+                    Object.keys(groupedEntries[date][judge]).forEach(classRound => {
+                        columns.push({
+                            date: date,
+                            judge: judge,
+                            classRound: classRound,
+                            entrants: groupedEntries[date][judge][classRound]
+                        });
+                    });
+                });
             });
 
-            sortedDates.forEach(date => {
-                html += `
-                    <div class="day-section">
-                        <div class="day-header">${date}</div>
-                `;
+            if (columns.length === 0) {
+                container.innerHTML = '<div class="no-data">No entries to display</div>';
+                return;
+            }
 
-                // Sort judges alphabetically
-                const sortedJudges = Object.keys(groupedEntries[date]).sort();
+            // Create table structure
+            let html = `
+                <div class="running-order-table-container">
+                    <table class="running-order-table">
+                        <thead>
+                            <tr class="date-row">
+            `;
 
-                sortedJudges.forEach(judge => {
-                    html += `
-                        <div class="judge-section">
-                            <div class="judge-header">${judge}</div>
-                            <div class="class-rounds">
-                    `;
+            // Date headers
+            columns.forEach(col => {
+                html += `<th class="date-header">${col.date}</th>`;
+            });
 
-                    // Sort class/rounds
-                    const sortedClassRounds = Object.keys(groupedEntries[date][judge]).sort();
+            html += `
+                            </tr>
+                            <tr class="judge-row">
+            `;
 
-                    sortedClassRounds.forEach(classRound => {
-                        const entrants = groupedEntries[date][judge][classRound];
+            // Judge headers
+            columns.forEach(col => {
+                html += `<th class="judge-header">${col.judge}</th>`;
+            });
+
+            html += `
+                            </tr>
+                            <tr class="class-row">
+            `;
+
+            // Class/Round headers
+            columns.forEach(col => {
+                html += `<th class="class-header">${col.classRound}</th>`;
+            });
+
+            html += `
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            // Find the maximum number of entrants in any column
+            const maxEntrants = Math.max(...columns.map(col => col.entrants.length));
+
+            // Create rows for entrants
+            for (let rowIndex = 0; rowIndex < maxEntrants; rowIndex++) {
+                html += `<tr class="entrant-row">`;
+                
+                columns.forEach((col, colIndex) => {
+                    if (rowIndex < col.entrants.length) {
+                        const entrant = col.entrants[rowIndex];
+                        const entrantName = `${entrant.handler} - ${entrant.dog}`;
                         
                         html += `
-                            <div class="class-round">
-                                <div class="class-round-title">${classRound}</div>
-                                <div class="entrants-list" data-date="${date}" data-judge="${judge}" data-class-round="${classRound}">
-                        `;
-
-                        entrants.forEach((entrant, index) => {
-                            html += `
-                                <div class="entrant-item ${entrant.entryType}" draggable="true" data-entrant-id="${entrant.id}">
-                                    <div class="entrant-number">${index + 1}</div>
-                                    <div class="entrant-name">${entrant.name}</div>
+                            <td class="entrant-cell ${entrant.entryType}" 
+                                data-date="${col.date}" 
+                                data-judge="${col.judge}" 
+                                data-class-round="${col.classRound}"
+                                data-row-index="${rowIndex}">
+                                <div class="entrant-item" draggable="true" data-entrant-id="${entrant.id}">
+                                    <div class="entrant-number">${rowIndex + 1}</div>
+                                    <div class="entrant-name">${entrantName}</div>
                                     <div class="move-controls">
                                         <button class="move-btn" onclick="moveEntrant('${entrant.id}', 'up')" title="Move Up">↑</button>
                                         <button class="move-btn" onclick="moveEntrant('${entrant.id}', 'down')" title="Move Down">↓</button>
                                     </div>
                                 </div>
-                            `;
-                        });
-
-                        html += `
-                                </div>
-                            </div>
+                            </td>
                         `;
-                    });
-
-                    html += `
-                            </div>
-                        </div>
-                    `;
+                    } else {
+                        // Empty cell
+                        html += `
+                            <td class="entrant-cell empty" 
+                                data-date="${col.date}" 
+                                data-judge="${col.judge}" 
+                                data-class-round="${col.classRound}"
+                                data-row-index="${rowIndex}">
+                                <div class="drop-zone"></div>
+                            </td>
+                        `;
+                    }
                 });
+                
+                html += `</tr>`;
+            }
 
-                html += `</div>`;
-            });
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
 
             container.innerHTML = html;
             setupDragAndDrop();
         }
 
-        // Setup drag and drop functionality
+        // Setup drag and drop functionality for table layout
         function setupDragAndDrop() {
             const entrantItems = document.querySelectorAll('.entrant-item');
-            const entrantLists = document.querySelectorAll('.entrants-list');
+            const entrantCells = document.querySelectorAll('.entrant-cell');
 
             entrantItems.forEach(item => {
                 item.addEventListener('dragstart', handleDragStart);
                 item.addEventListener('dragend', handleDragEnd);
             });
 
-            entrantLists.forEach(list => {
-                list.addEventListener('dragover', handleDragOver);
-                list.addEventListener('drop', handleDrop);
-                list.addEventListener('dragenter', handleDragEnter);
-                list.addEventListener('dragleave', handleDragLeave);
+            entrantCells.forEach(cell => {
+                cell.addEventListener('dragover', handleDragOver);
+                cell.addEventListener('drop', handleDrop);
+                cell.addEventListener('dragenter', handleDragEnter);
+                cell.addEventListener('dragleave', handleDragLeave);
             });
         }
 
@@ -721,18 +817,29 @@
         let draggedData = null;
 
         function handleDragStart(e) {
-            draggedElement = e.target;
+            draggedElement = e.target.closest('.entrant-item');
+            const cell = draggedElement.closest('.entrant-cell');
             draggedData = {
-                id: e.target.dataset.entrantId,
-                sourceList: e.target.closest('.entrants-list')
+                id: draggedElement.dataset.entrantId,
+                sourceDate: cell.dataset.date,
+                sourceJudge: cell.dataset.judge,
+                sourceClassRound: cell.dataset.classRound,
+                sourceRowIndex: parseInt(cell.dataset.rowIndex)
             };
-            e.target.classList.add('dragging');
+            draggedElement.classList.add('dragging');
         }
 
         function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+            }
             draggedElement = null;
             draggedData = null;
+            
+            // Remove all drag-over classes
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.remove('drag-over');
+            });
         }
 
         function handleDragOver(e) {
@@ -741,10 +848,17 @@
 
         function handleDragEnter(e) {
             e.preventDefault();
+            const dropZone = e.target.closest('.entrant-cell')?.querySelector('.drop-zone');
+            if (dropZone) {
+                dropZone.classList.add('drag-over');
+            }
         }
 
         function handleDragLeave(e) {
-            // Implementation if needed
+            const dropZone = e.target.closest('.entrant-cell')?.querySelector('.drop-zone');
+            if (dropZone && !e.target.closest('.entrant-cell').contains(e.relatedTarget)) {
+                dropZone.classList.remove('drag-over');
+            }
         }
 
         function handleDrop(e) {
@@ -752,19 +866,16 @@
             
             if (!draggedElement || !draggedData) return;
 
-            const targetList = e.target.closest('.entrants-list');
-            if (!targetList) return;
+            const targetCell = e.target.closest('.entrant-cell');
+            if (!targetCell) return;
 
-            const targetDate = targetList.dataset.date;
-            const targetJudge = targetList.dataset.judge;
-            const targetClassRound = targetList.dataset.classRound;
+            const targetDate = targetCell.dataset.date;
+            const targetJudge = targetCell.dataset.judge;
+            const targetClassRound = targetCell.dataset.classRound;
+            const targetRowIndex = parseInt(targetCell.dataset.rowIndex);
 
-            const sourceDate = draggedData.sourceList.dataset.date;
-            const sourceJudge = draggedData.sourceList.dataset.judge;
-            const sourceClassRound = draggedData.sourceList.dataset.classRound;
-
-            // Find the entrant in our data
-            const sourceEntrants = runningOrderData[sourceDate][sourceJudge][sourceClassRound];
+            // Find and remove the entrant from source
+            const sourceEntrants = runningOrderData[draggedData.sourceDate][draggedData.sourceJudge][draggedData.sourceClassRound];
             const entrantIndex = sourceEntrants.findIndex(e => e.id === draggedData.id);
             
             if (entrantIndex === -1) return;
@@ -776,35 +887,21 @@
             if (!runningOrderData[targetDate][targetJudge]) runningOrderData[targetDate][targetJudge] = {};
             if (!runningOrderData[targetDate][targetJudge][targetClassRound]) runningOrderData[targetDate][targetJudge][targetClassRound] = [];
 
-            // Determine insertion position
-            const afterElement = getDragAfterElement(targetList, e.clientY);
-            if (afterElement == null) {
-                runningOrderData[targetDate][targetJudge][targetClassRound].push(entrant);
+            const targetEntrants = runningOrderData[targetDate][targetJudge][targetClassRound];
+
+            // If dropping on an empty cell, add at that position
+            if (targetRowIndex >= targetEntrants.length) {
+                targetEntrants.push(entrant);
             } else {
-                const afterIndex = Array.from(targetList.children).indexOf(afterElement);
-                runningOrderData[targetDate][targetJudge][targetClassRound].splice(afterIndex, 0, entrant);
+                // Insert at the target position
+                targetEntrants.splice(targetRowIndex, 0, entrant);
             }
 
             // Refresh display
             displayRunningOrder(runningOrderData);
         }
 
-        function getDragAfterElement(container, y) {
-            const draggableElements = [...container.querySelectorAll('.entrant-item:not(.dragging)')];
-            
-            return draggableElements.reduce((closest, child) => {
-                const box = child.getBoundingClientRect();
-                const offset = y - box.top - box.height / 2;
-                
-                if (offset < 0 && offset > closest.offset) {
-                    return { offset: offset, element: child };
-                } else {
-                    return closest;
-                }
-            }, { offset: Number.NEGATIVE_INFINITY }).element;
-        }
-
-        // Move entrant up/down
+        // Move entrant up/down within their column
         window.moveEntrant = function(entrantId, direction) {
             // Find the entrant in our data structure
             let found = false;
