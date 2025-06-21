@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Trial Secretary Dashboard</title>
+  <title>Trial Secretary Login</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     * {
@@ -15,388 +15,460 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
     
-    .header {
-      background: rgba(255, 255, 255, 0.1);
+    .login-container {
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
-      padding: 1rem 2rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
     }
     
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .login-header {
+      margin-bottom: 2rem;
     }
     
-    .welcome-msg {
-      color: white;
-      font-size: 1.2rem;
-      font-weight: 600;
+    .login-header h1 {
+      color: #333;
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+      font-weight: 700;
     }
     
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    
-    .user-details {
-      color: rgba(255, 255, 255, 0.9);
+    .login-header p {
+      color: #666;
       font-size: 0.9rem;
     }
     
-    .logout-btn {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.3s ease;
+    .form-group {
+      margin-bottom: 1.5rem;
+      text-align: left;
     }
     
-    .logout-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-1px);
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #333;
+      font-weight: 500;
+      font-size: 0.9rem;
     }
     
-    .container {
-      flex: 1;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
+    .form-group input {
       width: 100%;
-    }
-    
-    .quick-stats {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    }
-    
-    .nav-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-    
-    .nav-card {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 12px;
-      padding: 1.5rem;
-      cursor: pointer;
+      padding: 0.8rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 8px;
+      font-size: 1rem;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .nav-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
       background: white;
     }
     
-    .nav-card h3 {
-      color: #333;
-      margin-bottom: 0.5rem;
-      font-size: 1.1rem;
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
-    .nav-card p {
-      color: #666;
-      margin-bottom: 1rem;
-      line-height: 1.5;
+    .form-group input::placeholder {
+      color: #aaa;
     }
     
-    .nav-button {
+    .error-message {
+      color: #e74c3c;
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background: rgba(231, 76, 60, 0.1);
+      border-radius: 6px;
+      border-left: 4px solid #e74c3c;
+      display: none;
+    }
+    
+    .error-message.show {
+      display: block;
+    }
+    
+    .button-group {
+      margin-top: 2rem;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 0.8rem;
+    }
+    
+    .btn-primary {
       background: linear-gradient(45deg, #667eea, #764ba2);
       color: white;
-      border: none;
-      padding: 0.7rem 1.5rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      width: 100%;
     }
     
-    .nav-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
     }
     
-    .nav-button.secondary {
-      background: linear-gradient(45deg, #4CAF50, #45a049);
+    .btn-secondary {
+      background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
+      border: 2px solid #667eea;
     }
     
-    .nav-button.tertiary {
-      background: linear-gradient(45deg, #ff9800, #f57c00);
-    }
-    
-    .emergency-logout {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #f44336;
+    .btn-secondary:hover {
+      background: #667eea;
       color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      z-index: 9999;
+      transform: translateY(-1px);
     }
     
-    .emergency-logout:hover {
-      background: #d32f2f;
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
     }
     
-    @media (max-width: 768px) {
-      .container {
-        padding: 1rem;
-      }
-      
-      .nav-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .header-content {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
+    .divider {
+      margin: 1.5rem 0;
+      text-align: center;
+      position: relative;
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #e1e5e9;
+      z-index: 1;
+    }
+    
+    .divider span {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 0 1rem;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .footer-text {
+      margin-top: 2rem;
+      color: #666;
+      font-size: 0.8rem;
+    }
+    
+    .loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    
+    .loading .btn {
+      background: #ccc !important;
+    }
+    
+    @media (max-width: 480px) {
+      .login-container {
+        margin: 1rem;
+        padding: 2rem;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Emergency logout button for stuck sessions -->
-  <button class="emergency-logout" onclick="emergencyLogout()">🚨 Force Logout</button>
-  
-  <div class="header">
-    <div class="header-content">
-      <div class="welcome-msg">
-        Welcome, <span id="username">User</span>!
-      </div>
-      
-      <div class="user-info">
-        <div class="user-details">
-          Logged in as: <span id="userEmail">Loading...</span>
-        </div>
-        <button class="logout-btn" onclick="logout()">Logout</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="quick-stats">
-      <h3>📊 Quick Stats</h3>
-      <div id="statsContent">Loading your trial statistics...</div>
+  <div class="login-container">
+    <div class="login-header">
+      <h1>🏆 Trial Secretary</h1>
+      <p>Sign in to manage your C-WAGS trials</p>
     </div>
     
-    <div class="nav-grid">
-      <!-- Trial Management -->
-      <div class="nav-card" onclick="location.href='create-trial.html'">
-        <h3>🚀 Create Trial</h3>
-        <p>Set up a new trial with classes, judges, and schedules</p>
-        <button class="nav-button">Create New Trial</button>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter your username" required>
       </div>
       
-      <div class="nav-card" onclick="location.href='view-trials.html'">
-        <h3>📋 View Trials</h3>
-        <p>View, edit, and manage your existing trials</p>
-        <button class="nav-button">Manage Trials</button>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
       </div>
       
-      <!-- Applications & Documents -->
-      <div class="nav-card" onclick="location.href='trial-application.html'">
-        <h3>📄 Trial Application</h3>
-        <p>Complete C-WAGS trial application forms</p>
-        <button class="nav-button secondary">Create Application</button>
+      <div id="error" class="error-message"></div>
+      
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary" id="loginBtn">
+          Sign In
+        </button>
+        
+        <div class="divider">
+          <span>Don't have an account?</span>
+        </div>
+        
+        <button type="button" class="btn btn-secondary" onclick="showSignup()">
+          Create Account
+        </button>
+      </div>
+    </form>
+    
+    <!-- Signup Form (hidden by default) -->
+    <form id="signupForm" style="display: none;">
+      <div class="form-group">
+        <label for="signupUsername">Choose Username</label>
+        <input type="text" id="signupUsername" placeholder="Create a username" required>
       </div>
       
-      <div class="nav-card" onclick="location.href='premium-generator.html'">
-        <h3>🏆 Premium Generator</h3>
-        <p>Generate professional premium lists for your trials</p>
-        <button class="nav-button secondary">Generate Premium</button>
+      <div class="form-group">
+        <label for="signupPassword">Choose Password</label>
+        <input type="password" id="signupPassword" placeholder="Create a password" required>
       </div>
       
-      <div class="nav-card" onclick="location.href='waiver-generator.html'">
-        <h3>📝 Waiver Generator</h3>
-        <p>Create liability waivers for your events</p>
-        <button class="nav-button tertiary">Generate Waivers</button>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
       </div>
       
-      <!-- Quick Tools -->
-      <div class="nav-card" onclick="showQuickTools()">
-        <h3>⚡ Quick Tools</h3>
-        <p>Entry forms, results tracking, and more</p>
-        <button class="nav-button tertiary">Quick Access</button>
+      <div id="signupError" class="error-message"></div>
+      
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary" id="signupBtn">
+          Create Account
+        </button>
+        
+        <div class="divider">
+          <span>Already have an account?</span>
+        </div>
+        
+        <button type="button" class="btn btn-secondary" onclick="showLogin()">
+          Sign In
+        </button>
       </div>
+    </form>
+    
+    <div class="footer-text">
+      Secure authentication powered by Firebase
     </div>
   </div>
 
   <script type="module">
     import { auth, db } from './js/firebase.js';
-    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-    console.log("🚀 Dashboard loading...");
+    console.log("🔐 Login page loaded");
 
-    let authInitialized = false;
-    let currentUser = null;
-
-    // Clear any stuck authentication states
-    function clearAuthState() {
-      console.log("🧹 Clearing authentication state...");
-      // Clear any localStorage/sessionStorage that might be holding stale auth
-      localStorage.clear();
-      sessionStorage.clear();
+    function getEmailFromUsername(username) {
+      return `${username}@trial.local`;
     }
 
-    // Emergency logout function for stuck sessions
-    window.emergencyLogout = async function() {
-      console.log("🚨 Emergency logout triggered");
-      try {
-        clearAuthState();
-        await signOut(auth);
-        
-        // Force redirect after short delay
-        setTimeout(() => {
-          window.location.replace('index.html');
-        }, 500);
-        
-      } catch (error) {
-        console.error("Emergency logout error:", error);
-        // Force redirect even if signOut fails
-        window.location.replace('index.html');
-      }
-    };
-
-    // Normal logout function
-    window.logout = async function() {
-      if (confirm("Are you sure you want to logout?")) {
-        try {
-          console.log("👋 Logging out...");
-          
-          // Clear any local state first
-          clearAuthState();
-          
-          // Sign out from Firebase
-          await signOut(auth);
-          
-          console.log("✅ Logout successful");
-          
-          // Force redirect
-          window.location.replace('index.html');
-          
-        } catch (error) {
-          console.error("❌ Logout error:", error);
-          alert("Error logging out: " + error.message);
-          
-          // Try emergency logout if normal logout fails
-          emergencyLogout();
-        }
-      }
-    };
-
-    // Single auth state listener
-    auth.onAuthStateChanged(async (user) => {
-      if (authInitialized) return; // Prevent multiple initializations
+    function showError(message, isSignup = false) {
+      const errorElement = isSignup ? document.getElementById('signupError') : document.getElementById('error');
+      errorElement.textContent = message;
+      errorElement.classList.add('show');
       
-      console.log("🔐 Auth state changed:", user ? "logged in" : "not logged in");
+      // Hide error after 5 seconds
+      setTimeout(() => {
+        errorElement.classList.remove('show');
+      }, 5000);
+    }
+
+    function clearErrors() {
+      document.getElementById('error').classList.remove('show');
+      document.getElementById('signupError').classList.remove('show');
+    }
+
+    function setLoading(isLoading, isSignup = false) {
+      const container = document.querySelector('.login-container');
+      const btn = isSignup ? document.getElementById('signupBtn') : document.getElementById('loginBtn');
       
-      if (user) {
-        authInitialized = true;
-        currentUser = user;
-        
-        console.log("✅ User authenticated:", user.email);
-        
-        // Update UI with user info
-        const username = user.email.split('@')[0];
-        document.getElementById('username').textContent = username;
-        document.getElementById('userEmail').textContent = user.email;
-        
-        // Load user stats
-        await loadUserStats(user);
-        
+      if (isLoading) {
+        container.classList.add('loading');
+        btn.textContent = isSignup ? 'Creating Account...' : 'Signing In...';
+        btn.disabled = true;
       } else {
-        console.log("❌ No user found, redirecting to login");
-        clearAuthState();
-        
-        // Short delay to prevent rapid redirects
-        setTimeout(() => {
-          window.location.replace('index.html');
-        }, 1000);
-      }
-    });
-
-    async function loadUserStats(user) {
-      try {
-        console.log("📊 Loading user statistics...");
-        
-        // Count trials
-        const trialsQuery = query(
-          collection(db, "trials"),
-          where("createdBy", "==", user.uid)
-        );
-        const trialsSnapshot = await getDocs(trialsQuery);
-        
-        // Count applications  
-        const appsQuery = query(
-          collection(db, "applications"),
-          where("createdBy", "==", user.uid)
-        );
-        const appsSnapshot = await getDocs(appsQuery);
-
-        const statsHTML = `
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
-            <div style="text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #4CAF50;">${trialsSnapshot.size}</div>
-              <div style="font-size: 14px; color: #666;">Trials Created</div>
-            </div>
-            <div style="text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #2196F3;">${appsSnapshot.size}</div>
-              <div style="font-size: 14px; color: #666;">Applications</div>
-            </div>
-            <div style="text-align: center;">
-              <div style="font-size: 24px; font-weight: bold; color: #ff9800;">Active</div>
-              <div style="font-size: 14px; color: #666;">System Status</div>
-            </div>
-          </div>
-        `;
-        
-        document.getElementById('statsContent').innerHTML = statsHTML;
-        console.log("✅ Stats loaded successfully");
-        
-      } catch (error) {
-        console.error("❌ Error loading stats:", error);
-        document.getElementById('statsContent').innerHTML = 
-          '<p style="color: #666;">Unable to load statistics</p>';
+        container.classList.remove('loading');
+        btn.textContent = isSignup ? 'Create Account' : 'Sign In';
+        btn.disabled = false;
       }
     }
 
-    window.showQuickTools = function() {
-      alert("Quick Tools coming soon! For now, use the individual tools from the dashboard.");
-    };
-
-    // Prevent back button to login after authentication
-    window.addEventListener('pageshow', function(event) {
-      if (event.persisted && currentUser) {
-        console.log("📄 Page restored from cache, checking auth state");
-        // Refresh the page to ensure proper auth state
-        window.location.reload();
+    // Check if user is already logged in
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log("👤 User already logged in, redirecting to dashboard");
+        window.location.href = 'main-dashboard.html';
       }
     });
 
-    console.log("✅ Dashboard script loaded successfully");
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      clearErrors();
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      
+      if (!username) {
+        showError("Please enter a username");
+        return;
+      }
+      
+      if (!password) {
+        showError("Please enter a password");
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        console.log("🔐 Attempting login for username:", username);
+        
+        const email = getEmailFromUsername(username);
+        
+        // Check if username exists in Firestore
+        const usernameRef = doc(db, "usernames", username);
+        const usernameSnap = await getDoc(usernameRef);
+        
+        if (!usernameSnap.exists()) {
+          throw new Error("Username not found. Please check your username or create an account.");
+        }
+        
+        // Sign in with Firebase Auth
+        await signInWithEmailAndPassword(auth, email, password);
+        
+        console.log("✅ Login successful");
+        
+        // Redirect to main dashboard
+        window.location.href = 'main-dashboard.html';
+        
+      } catch (error) {
+        console.error("❌ Login error:", error);
+        
+        let errorMessage = error.message;
+        if (errorMessage.includes('user-not-found')) {
+          errorMessage = "Username not found. Please check your username.";
+        } else if (errorMessage.includes('wrong-password')) {
+          errorMessage = "Incorrect password. Please try again.";
+        } else if (errorMessage.includes('too-many-requests')) {
+          errorMessage = "Too many failed attempts. Please try again later.";
+        }
+        
+        showError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // Signup form handler
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      clearErrors();
+      
+      const username = document.getElementById('signupUsername').value.trim();
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      if (!username) {
+        showError("Please enter a username", true);
+        return;
+      }
+      
+      if (username.length < 3) {
+        showError("Username must be at least 3 characters long", true);
+        return;
+      }
+      
+      if (!password) {
+        showError("Please enter a password", true);
+        return;
+      }
+      
+      if (password.length < 6) {
+        showError("Password must be at least 6 characters long", true);
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showError("Passwords do not match", true);
+        return;
+      }
+      
+      setLoading(true, true);
+      
+      try {
+        console.log("📝 Creating account for username:", username);
+        
+        // Check if username already exists
+        const usernameRef = doc(db, "usernames", username);
+        const usernameSnap = await getDoc(usernameRef);
+        
+        if (usernameSnap.exists()) {
+          throw new Error("Username already exists. Please choose a different username.");
+        }
+        
+        const email = getEmailFromUsername(username);
+        
+        // Create user with Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Store username mapping in Firestore
+        await setDoc(doc(db, "usernames", username), { 
+          uid: userCredential.user.uid,
+          createdAt: new Date()
+        });
+        
+        console.log("✅ Account created successfully");
+        
+        // Redirect to main dashboard
+        window.location.href = 'main-dashboard.html';
+        
+      } catch (error) {
+        console.error("❌ Signup error:", error);
+        
+        let errorMessage = error.message;
+        if (errorMessage.includes('email-already-in-use')) {
+          errorMessage = "Username already exists. Please choose a different username.";
+        } else if (errorMessage.includes('weak-password')) {
+          errorMessage = "Password is too weak. Please use at least 6 characters.";
+        }
+        
+        showError(errorMessage, true);
+      } finally {
+        setLoading(false, true);
+      }
+    });
+
+    // Toggle between login and signup forms
+    window.showSignup = function() {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('signupForm').style.display = 'block';
+      clearErrors();
+      document.getElementById('signupUsername').focus();
+    };
+
+    window.showLogin = function() {
+      document.getElementById('signupForm').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'block';
+      clearErrors();
+      document.getElementById('username').focus();
+    };
+
+    // Focus on username field when page loads
+    document.getElementById('username').focus();
+    
+    console.log("✅ Login system ready");
   </script>
 </body>
 </html>
