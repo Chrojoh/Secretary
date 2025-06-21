@@ -289,21 +289,45 @@
       align-items: center;
     }
     
-    .entry-fee-tag {
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
+    .entry-btn {
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
       font-size: 0.8rem;
-      font-weight: 500;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 60px;
+    }
+    
+    .entry-btn.regular {
+      background: #28a745;
       color: white;
     }
     
-    .entry-fee-tag.regular {
-      background: #28a745;
+    .entry-btn.regular:hover {
+      background: #218838;
+      transform: translateY(-1px);
     }
     
-    .entry-fee-tag.feo {
+    .entry-btn.regular.selected {
+      background: #1e7e34;
+      box-shadow: 0 0 0 2px #28a745;
+    }
+    
+    .entry-btn.feo {
       background: #ffc107;
       color: #333;
+    }
+    
+    .entry-btn.feo:hover {
+      background: #e0a800;
+      transform: translateY(-1px);
+    }
+    
+    .entry-btn.feo.selected {
+      background: #d39e00;
+      box-shadow: 0 0 0 2px #ffc107;
     }
     
     .round-item input[type="checkbox"]:checked + label {
@@ -952,20 +976,16 @@
 
                 classSelectionHTML += `
                   <div class="round-item">
-                    <input type="checkbox" id="${regularId}" value='${regularEntryValue}'>
-                    <label for="${regularId}">
+                    <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
+                    ${showFeo ? `<input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">` : ''}
+                    <label for="${regularId}" style="width: 100%; margin: 0; cursor: default;">
                       <div class="round-info">
                         <span class="round-number">Round ${roundNumber}</span>
                         <span class="judge-name">${judgeName}</span>
                       </div>
                       <div class="entry-options">
-                        <span class="entry-fee-tag regular">Regular</span>
-                        ${showFeo ? `
-                          <input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="margin-left: 0.5rem;">
-                          <label for="${feoId}" style="margin: 0;">
-                            <span class="entry-fee-tag feo">FEO</span>
-                          </label>
-                        ` : ''}
+                        <button type="button" class="entry-btn regular" data-entry-id="${regularId}">Entry</button>
+                        ${showFeo ? `<button type="button" class="entry-btn feo" data-entry-id="${feoId}">FEO</button>` : ''}
                       </div>
                     </label>
                   </div>
@@ -993,20 +1013,16 @@
 
               classSelectionHTML += `
                 <div class="round-item">
-                  <input type="checkbox" id="${regularId}" value='${regularEntryValue}'>
-                  <label for="${regularId}">
+                  <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
+                  ${showFeo ? `<input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">` : ''}
+                  <label for="${regularId}" style="width: 100%; margin: 0; cursor: default;">
                     <div class="round-info">
                       <span class="round-number">Round 1</span>
                       <span class="judge-name">Judge TBD</span>
                     </div>
                     <div class="entry-options">
-                      <span class="entry-fee-tag regular">Regular</span>
-                      ${showFeo ? `
-                        <input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="margin-left: 0.5rem;">
-                        <label for="${feoId}" style="margin: 0;">
-                          <span class="entry-fee-tag feo">FEO</span>
-                        </label>
-                      ` : ''}
+                      <button type="button" class="entry-btn regular" data-entry-id="${regularId}">Entry</button>
+                      ${showFeo ? `<button type="button" class="entry-btn feo" data-entry-id="${feoId}">FEO</button>` : ''}
                     </div>
                   </label>
                 </div>
@@ -1037,12 +1053,37 @@
 
       classSelection.innerHTML = classSelectionHTML;
 
-      // Add event listeners to all checkboxes
-      classSelection.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', updateClassSelection);
+      // Add event listeners to all entry buttons
+      classSelection.querySelectorAll('.entry-btn').forEach(button => {
+        button.addEventListener('click', handleEntryButtonClick);
       });
 
-      console.log(`✅ Populated classes organized by day, class, and judge with FEO options`);
+      console.log(`✅ Populated classes organized by day, class, and judge with FEO button options`);
+    }
+
+    // Handle entry button clicks
+    function handleEntryButtonClick(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const button = event.target;
+      const entryId = button.dataset.entryId;
+      const checkbox = document.getElementById(entryId);
+      
+      if (!checkbox) return;
+      
+      // Toggle the checkbox state
+      checkbox.checked = !checkbox.checked;
+      
+      // Update button appearance
+      if (checkbox.checked) {
+        button.classList.add('selected');
+      } else {
+        button.classList.remove('selected');
+      }
+      
+      // Trigger the selection update
+      updateClassSelection({ target: checkbox });
     }
 
     // Update class selection with detailed entry tracking
@@ -1279,9 +1320,13 @@
       document.getElementById('entryForm').reset();
       selectedClasses.clear();
       
-      // Clear checkboxes
+      // Clear checkboxes and reset buttons
       document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         if (cb.id !== 'waiverAccepted') cb.checked = false;
+      });
+      
+      document.querySelectorAll('.entry-btn').forEach(btn => {
+        btn.classList.remove('selected');
       });
       
       // Clear lookup status
