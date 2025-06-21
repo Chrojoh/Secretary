@@ -555,6 +555,94 @@
             }
         }
 
+        // Setup confirm section
+        function setupConfirmSection() {
+            const confirmSection = document.getElementById('confirmSection');
+            const dateSelector = document.getElementById('dateSelector');
+            const confirmDateSelect = document.getElementById('confirmDateSelect');
+
+            // Check if this is a multi-day trial (league)
+            const dates = Object.keys(runningOrderData);
+            
+            if (dates.length > 1) {
+                // Multi-day trial - show date selector
+                dateSelector.style.display = 'block';
+                confirmDateSelect.innerHTML = '<option value="">Select a date...</option>';
+                
+                dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    confirmDateSelect.appendChild(option);
+                });
+            } else {
+                // Single day trial - hide date selector
+                dateSelector.style.display = 'none';
+            }
+
+            confirmSection.style.display = 'block';
+        }
+
+        // Confirm running order
+        window.confirmRunningOrder = async function() {
+            const dates = Object.keys(runningOrderData);
+            let dateToConfirm = null;
+
+            if (dates.length > 1) {
+                dateToConfirm = document.getElementById('confirmDateSelect').value;
+                if (!dateToConfirm) {
+                    alert('Please select a date to confirm');
+                    return;
+                }
+            } else {
+                dateToConfirm = dates[0];
+            }
+
+            if (!dateToConfirm || !runningOrderData[dateToConfirm]) {
+                alert('Invalid date selection');
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmBtn');
+            const originalText = confirmBtn.textContent;
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Confirming...';
+
+            try {
+                // Save the confirmed running order
+                const runningOrderDoc = {
+                    trialId: currentTrial.id,
+                    trialName: currentTrial.clubName || 'Unnamed Trial',
+                    date: dateToConfirm,
+                    runningOrder: runningOrderData[dateToConfirm],
+                    confirmedAt: new Date(),
+                    confirmedBy: auth.currentUser.uid,
+                    status: 'confirmed'
+                };
+
+                await addDoc(collection(db, 'runningOrders'), runningOrderDoc);
+                
+                alert(`Running order confirmed for ${dateToConfirm}!`);
+                
+                // If multi-day, remove confirmed date from selector
+                if (dates.length > 1) {
+                    const confirmDateSelect = document.getElementById('confirmDateSelect');
+                    const option = confirmDateSelect.querySelector(`option[value="${dateToConfirm}"]`);
+                    if (option) {
+                        option.remove();
+                    }
+                    confirmDateSelect.value = '';
+                }
+
+            } catch (error) {
+                console.error('Error confirming running order:', error);
+                alert('Error confirming running order: ' + error.message);
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = originalText;
+            }
+        }
+
         // Generate running order
         function generateRunningOrder() {
             const sortBy = document.getElementById('sortBy').value;
