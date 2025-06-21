@@ -498,7 +498,23 @@
 
       <!-- Entry Form -->
       <form id="entryForm">
-        <!-- Registration Number - FIRST -->
+        <!-- Trial Selection - FIRST -->
+        <div class="form-section primary">
+          <h3>🏆 Trial Selection</h3>
+          <div class="form-row">
+            <div class="form-group required full-width">
+              <label>Select Trial</label>
+              <select id="trialSelector" required style="font-size: 1.1rem; font-weight: bold; background: #f0f8ff;">
+                <option value="">Loading available trials...</option>
+              </select>
+              <small style="color: #666; margin-top: 0.5rem; display: block;">
+                💡 Select which trial you want to enter first
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registration Number - SECOND -->
         <div class="form-section primary">
           <h3>🔍 Registration Lookup</h3>
           <div class="form-row">
@@ -642,6 +658,7 @@
 
     // Global variables
     let currentTrialData = null;
+    let allTrials = [];
     let selectedClasses = new Set();
     let registrationData = [];
     let isAutoFilling = false;
@@ -744,14 +761,14 @@
       }
     }
 
-    // Load trial data
-    async function loadTrialData() {
+    // Load all trials for selection
+    async function loadAllTrials() {
       try {
-        console.log("🔄 Loading trial data...");
+        console.log("🔄 Loading all trials...");
         
         if (!auth.currentUser) {
           console.log("⏳ Waiting for authentication...");
-          setTimeout(loadTrialData, 1000);
+          setTimeout(loadAllTrials, 1000);
           return;
         }
 
@@ -761,25 +778,110 @@
         );
         const querySnapshot = await getDocs(q);
         
-        if (querySnapshot.empty) {
-          alert("No trial data found. Please create a trial first.");
+        allTrials = [];
+        querySnapshot.forEach((doc) => {
+          allTrials.push({ id: doc.id, ...doc.data() });
+        });
+
+        populateTrialSelector();
+        
+        if (allTrials.length === 0) {
+          alert("No trials found. Please create a trial first.");
           window.location.href = 'main-dashboard.html';
           return;
         }
-
-        const doc = querySnapshot.docs[0];
-        currentTrialData = { id: doc.id, ...doc.data() };
-        console.log("✅ Trial data loaded:", currentTrialData);
         
-        populateTrialInfo();
-        populateClasses();
-        setupEventListeners();
-        document.getElementById('cwagsNumber').focus();
+        console.log(`✅ Loaded ${allTrials.length} trials`);
         
       } catch (error) {
-        console.error("❌ Error loading trial data:", error);
-        alert("Error loading trial data: " + error.message);
+        console.error("❌ Error loading trials:", error);
+        alert("Error loading trials: " + error.message);
       }
+    }
+
+    // Populate trial selector dropdown
+    function populateTrialSelector() {
+      const selector = document.getElementById('trialSelector');
+      if (!selector) return;
+
+      // Clear existing options
+      selector.innerHTML = '<option value="">Select a trial...</option>';
+
+      // Add trials to selector
+      allTrials.forEach(trial => {
+        const option = document.createElement('option');
+        option.value = trial.id;
+        
+        // Format trial display name
+        let displayName = trial.clubName || 'Unnamed Trial';
+        if (trial.days && trial.days.length > 0) {
+          const firstDate = trial.days.find(day => day.date)?.date;
+          if (firstDate) {
+            const formattedDate = new Date(firstDate).toLocaleDateString();
+            displayName += ` - ${formattedDate}`;
+          }
+        }
+        
+        option.textContent = displayName;
+        selector.appendChild(option);
+      });
+
+      // Auto-select if only one trial
+      if (allTrials.length === 1) {
+        selector.value = allTrials[0].id;
+        onTrialSelected();
+      }
+    }
+
+    // Handle trial selection
+    function onTrialSelected() {
+      const selector = document.getElementById('trialSelector');
+      const selectedTrialId = selector.value;
+      
+      if (!selectedTrialId) {
+        currentTrialData = null;
+        clearTrialDependentData();
+        return;
+      }
+
+      // Find selected trial
+      currentTrialData = allTrials.find(trial => trial.id === selectedTrialId);
+      
+      if (currentTrialData) {
+        console.log("✅ Trial selected:", currentTrialData.clubName);
+        populateTrialInfo();
+        populateClasses();
+        checkFormValidity();
+      }
+    }
+
+    // Clear data that depends on trial selection
+    function clearTrialDependentData() {
+      selectedClasses.clear();
+      updateEntrySummary();
+      
+      // Clear trial info
+      document.getElementById('clubName').textContent = 'Please select a trial';
+      document.getElementById('trialDates').textContent = 'Please select a trial';
+      document.getElementById('trialLocation').textContent = 'Please select a trial';
+      document.getElementById('trialSecretary').textContent = 'Please select a trial';
+      
+      // Clear class selection
+      const classSelection = document.getElementById('classSelection');
+      if (classSelection) {
+        classSelection.innerHTML = `
+          <div style="text-align: center; padding: 2rem; color: #666;">
+            Please select a trial to view available classes
+          </div>
+        `;
+      }
+    }
+
+    // Load trial data (updated to use selected trial)
+    async function loadTrialData() {
+      // This function is now replaced by loadAllTrials and onTrialSelected
+      console.log("🔄 Loading trial system...");
+      await loadAllTrials();
     }
 
     // Populate trial information
@@ -1057,6 +1159,7 @@
     function checkFormValidity() {
       if (isAutoFilling) return;
       
+      const trialSelected = document.getElementById('trialSelector').value;
       const waiverAccepted = document.getElementById('waiverAccepted').checked;
       const cwagsNumber = document.getElementById('cwagsNumber').value.trim();
       const handlerName = document.getElementById('handlerName').value.trim();
@@ -1065,7 +1168,7 @@
       const dogCallName = document.getElementById('dogCallName').value.trim();
       const hasEntries = selectedClasses.size > 0;
       
-      const isValid = waiverAccepted && cwagsNumber && handlerName && 
+      const isValid = trialSelected && waiverAccepted && cwagsNumber && handlerName && 
                      handlerEmail && handlerPhone && dogCallName && hasEntries;
       
       document.getElementById('submitBtn').disabled = !isValid;
@@ -1073,6 +1176,12 @@
 
     // Setup event listeners
     function setupEventListeners() {
+      // Trial selector
+      const trialSelector = document.getElementById('trialSelector');
+      if (trialSelector) {
+        trialSelector.addEventListener('change', onTrialSelected);
+      }
+
       // C-WAGS number lookup
       const cwagsInput = document.getElementById('cwagsNumber');
       let debounceTimer;
@@ -1240,7 +1349,10 @@
     window.addEventListener('load', () => {
       console.log("🚀 Page loaded, initializing entry form...");
       loadRegistrationData();
-      setTimeout(loadTrialData, 1000);
+      setTimeout(() => {
+        loadTrialData();
+        setupEventListeners();
+      }, 1000);
     });
 
     // Initialize auth state listener
