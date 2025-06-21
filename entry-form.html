@@ -283,13 +283,27 @@
       color: #333;
     }
     
+    .entry-options {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    
     .entry-fee-tag {
-      background: #28a745;
-      color: white;
       padding: 0.2rem 0.6rem;
       border-radius: 12px;
       font-size: 0.8rem;
       font-weight: 500;
+      color: white;
+    }
+    
+    .entry-fee-tag.regular {
+      background: #28a745;
+    }
+    
+    .entry-fee-tag.feo {
+      background: #ffc107;
+      color: #333;
     }
     
     .round-item input[type="checkbox"]:checked + label {
@@ -408,6 +422,11 @@
       
       .button-group {
         flex-direction: column;
+      }
+      
+      .entry-options {
+        flex-direction: column;
+        gap: 0.3rem;
       }
     }
   </style>
@@ -832,6 +851,11 @@
       document.getElementById('trialLocation').textContent = 'TBD';
     }
 
+    // Check if FEO is available for a specific class
+    function isFeoAvailable(classData) {
+      return classData && classData.feoAvailable === true;
+    }
+
     // Populate classes organized by day, class, and judge
     function populateClasses() {
       const classSelection = document.getElementById('classSelection');
@@ -908,8 +932,10 @@
               classInstance.rounds.forEach((round, roundIndex) => {
                 const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
                 const roundNumber = round.roundNumber || (roundIndex + 1);
-                const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}`;
-                const entryValue = JSON.stringify({
+                const regularId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_regular`;
+                const feoId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_feo`;
+                
+                const baseEntryValue = {
                   dayIndex,
                   classIndex: classInstance.classIndex,
                   roundIndex,
@@ -917,25 +943,40 @@
                   judge: judgeName,
                   roundNumber,
                   date: day.date || `Day ${dayIndex + 1}`
-                });
+                };
+                
+                const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
+                const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
+                
+                const showFeo = isFeoAvailable(classInstance);
 
                 classSelectionHTML += `
                   <div class="round-item">
-                    <input type="checkbox" id="${uniqueId}" value='${entryValue}'>
-                    <label for="${uniqueId}">
+                    <input type="checkbox" id="${regularId}" value='${regularEntryValue}'>
+                    <label for="${regularId}">
                       <div class="round-info">
                         <span class="round-number">Round ${roundNumber}</span>
                         <span class="judge-name">${judgeName}</span>
                       </div>
-                      <span class="entry-fee-tag">Entry</span>
+                      <div class="entry-options">
+                        <span class="entry-fee-tag regular">Regular</span>
+                        ${showFeo ? `
+                          <input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="margin-left: 0.5rem;">
+                          <label for="${feoId}" style="margin: 0;">
+                            <span class="entry-fee-tag feo">FEO</span>
+                          </label>
+                        ` : ''}
+                      </div>
                     </label>
                   </div>
                 `;
               });
             } else {
               // Class with no rounds defined - create a default entry
-              const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_0`;
-              const entryValue = JSON.stringify({
+              const regularId = `entry_${dayIndex}_${classInstance.classIndex}_0_regular`;
+              const feoId = `entry_${dayIndex}_${classInstance.classIndex}_0_feo`;
+              
+              const baseEntryValue = {
                 dayIndex,
                 classIndex: classInstance.classIndex,
                 roundIndex: 0,
@@ -943,17 +984,30 @@
                 judge: 'Judge TBD',
                 roundNumber: 1,
                 date: day.date || `Day ${dayIndex + 1}`
-              });
+              };
+              
+              const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
+              const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
+              
+              const showFeo = isFeoAvailable(classInstance);
 
               classSelectionHTML += `
                 <div class="round-item">
-                  <input type="checkbox" id="${uniqueId}" value='${entryValue}'>
-                  <label for="${uniqueId}">
+                  <input type="checkbox" id="${regularId}" value='${regularEntryValue}'>
+                  <label for="${regularId}">
                     <div class="round-info">
                       <span class="round-number">Round 1</span>
                       <span class="judge-name">Judge TBD</span>
                     </div>
-                    <span class="entry-fee-tag">Entry</span>
+                    <div class="entry-options">
+                      <span class="entry-fee-tag regular">Regular</span>
+                      ${showFeo ? `
+                        <input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="margin-left: 0.5rem;">
+                        <label for="${feoId}" style="margin: 0;">
+                          <span class="entry-fee-tag feo">FEO</span>
+                        </label>
+                      ` : ''}
+                    </div>
                   </label>
                 </div>
               `;
@@ -988,7 +1042,7 @@
         checkbox.addEventListener('change', updateClassSelection);
       });
 
-      console.log(`✅ Populated classes organized by day, class, and judge`);
+      console.log(`✅ Populated classes organized by day, class, and judge with FEO options`);
     }
 
     // Update class selection with detailed entry tracking
@@ -997,10 +1051,10 @@
       
       if (event.target.checked) {
         selectedClasses.add(event.target.value);
-        console.log(`✅ Added entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge})`);
+        console.log(`✅ Added entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType.toUpperCase()}`);
       } else {
         selectedClasses.delete(event.target.value);
-        console.log(`❌ Removed entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge})`);
+        console.log(`❌ Removed entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType.toUpperCase()}`);
       }
       
       updateEntrySummary();
@@ -1014,12 +1068,30 @@
       const isExhibition = document.getElementById('entryType').value === 'Exhibition';
       
       let totalFee = 0;
+      let regularEntries = 0;
+      let feoEntries = 0;
+      
+      // Count regular vs FEO entries
+      selectedClasses.forEach(entryJson => {
+        try {
+          const entry = JSON.parse(entryJson);
+          if (entry.entryType === 'feo') {
+            feoEntries++;
+          } else {
+            regularEntries++;
+          }
+        } catch (e) {
+          console.warn("Error parsing entry data:", e);
+          regularEntries++; // Default to regular if parsing fails
+        }
+      });
       
       if (isExhibition) {
         totalFee = fees.exhibition * entryCount;
       } else if (isJunior) {
         totalFee = fees.juniorHandler * entryCount;
       } else if (entryCount > 0) {
+        // FEO entries are typically free or lower cost - keeping same pricing for now
         totalFee = fees.firstClass + (fees.additionalClass * (entryCount - 1));
       }
       
@@ -1034,8 +1106,12 @@
         }
       });
       
-      document.getElementById('selectedClassCount').textContent = 
-        `${entryCount} entries (${uniqueClasses.size} classes)`;
+      let entryBreakdown = `${entryCount} entries (${uniqueClasses.size} classes)`;
+      if (feoEntries > 0) {
+        entryBreakdown += ` - ${regularEntries} Regular, ${feoEntries} FEO`;
+      }
+      
+      document.getElementById('selectedClassCount').textContent = entryBreakdown;
       document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
       document.getElementById('summaryEntryType').textContent = document.getElementById('entryType').value;
       document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
@@ -1158,10 +1234,12 @@
           dogBreed: document.getElementById('dogBreed').value,
           dogBirthdate: document.getElementById('dogBirthdate').value,
           dogSex: document.getElementById('dogSex').value,
-          selectedEntries: selectedEntries, // Detailed entry data with day/class/judge/round
+          selectedEntries: selectedEntries, // Detailed entry data with day/class/judge/round/type
           selectedClasses: selectedEntries.map(e => e.className), // Simple class names for compatibility
           entryCount: selectedEntries.length,
           uniqueClassCount: new Set(selectedEntries.map(e => e.className)).size,
+          regularEntries: selectedEntries.filter(e => e.entryType === 'regular').length,
+          feoEntries: selectedEntries.filter(e => e.entryType === 'feo').length,
           juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
           entryType: document.getElementById('entryType').value,
           waiverAccepted: true,
@@ -1238,7 +1316,7 @@
       }
     });
 
-    console.log("✅ Entry form system ready");
+    console.log("✅ Entry form system ready with FEO support");
   </script>
 </body>
 </html>
