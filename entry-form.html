@@ -969,9 +969,9 @@
       document.getElementById('trialLocation').textContent = 'TBD';
     }
 
-    // Check if FEO is available for a specific class
-    function isFeoAvailable(classData) {
-      return classData && classData.feoAvailable === true;
+    // Check if FEO is available for a specific round
+    function isFeoAvailable(round) {
+      return round && (round.feo === true || round.FEO === true);
     }
 
     // Populate classes organized by day, class, and judge
@@ -1066,7 +1066,7 @@
                 const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
                 const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
                 
-                const showFeo = isFeoAvailable(classInstance);
+                const showFeo = isFeoAvailable(round); // Check FEO at round level
 
                 classSelectionHTML += `
                   <div class="round-item">
@@ -1103,7 +1103,8 @@
               const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
               const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
               
-              const showFeo = isFeoAvailable(classInstance);
+              // For classes with no rounds, assume no FEO unless specified
+              const showFeo = false;
 
               classSelectionHTML += `
                 <div class="round-item">
