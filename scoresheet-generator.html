@@ -892,6 +892,214 @@
                         <tbody>
             `;
 
+            // Generate fillable score sheet HTML (for editing)
+function generateFillableScoreSheetHTML(sheetData) {
+    const entrantCount = sheetData.entrants.length;
+    
+    // Calculate optimal font sizes and spacing based on entrant count
+    let scoringTableFontSize = '9px';
+    let cellPadding = '4px';
+    let rowHeight = '40px';
+    
+    if (entrantCount > 12) {
+        scoringTableFontSize = '7px';
+        cellPadding = '2px';
+        rowHeight = '30px';
+    } else if (entrantCount > 8) {
+        scoringTableFontSize = '8px';
+        cellPadding = '3px';
+        rowHeight = '35px';
+    }
+
+    // Load existing scores if they exist
+    const scores = sheetData.scores || {};
+
+    let html = `
+        <div class="score-sheet" style="border: 2px solid #007bff; background: #f8f9fa;">
+            <div style="background: #007bff; color: white; padding: 10px; margin: -20px -20px 20px -20px; text-align: center;">
+                <h3 style="margin: 0;">✏️ FILLABLE SCORE SHEET - Enter scores from judge's physical sheet</h3>
+                <p style="margin: 5px 0 0 0; font-size: 14px;">Fill in the 4 scent locations, mark scent results, enter faults, times, and Pass/Fail</p>
+            </div>
+            
+            <div class="score-sheet-header">
+                <div style="text-align: right; font-size: 8px;">Copyright © by Canine-Work And Games, LLC, 2024</div>
+                <div class="cwags-logo">
+                    <img src="./images/cwags-logo.png" alt="C-WAGS Logo" />
+                </div>
+                <div class="score-sheet-title-text">${sheetData.className} Score Sheet</div>
+                <div class="score-sheet-date">Date: ${sheetData.date}</div>
+                <div class="score-sheet-class">CLASS: ${sheetData.className}</div>
+                <div class="score-sheet-class">JUDGE: ${sheetData.judge}</div>
+                
+                <div class="score-sheet-rounds">
+                    <label>Round</label>
+                    <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '1' ? 'checked' : ''}> 1
+                    <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '2' ? 'checked' : ''}> 2
+                    <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '3' ? 'checked' : ''}> 3
+                    <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '4' ? 'checked' : ''}> 4
+                </div>
+            </div>
+
+            <table class="scent-info-table">
+                <tr>
+                    <th style="background: #fff3cd;">Scent 1</th>
+                    <th style="background: #fff3cd;">Scent 2</th>
+                    <th style="background: #fff3cd;">Scent 3</th>
+                    <th style="background: #fff3cd;">Scent 4</th>
+                </tr>
+                <tr>
+                    <td style="background: #fff3cd;">Located in/on:</td>
+                    <td style="background: #fff3cd;">Located in/on:</td>
+                    <td style="background: #fff3cd;">Located in/on:</td>
+                    <td style="background: #fff3cd;">Located in/on:</td>
+                </tr>
+                <tr>
+                    <td style="height: 30px; background: white;">
+                        <input type="text" id="scent1Location" 
+                               value="${scores.scent1Location || ''}" 
+                               placeholder="Enter scent 1 location"
+                               style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
+                    </td>
+                    <td style="height: 30px; background: white;">
+                        <input type="text" id="scent2Location" 
+                               value="${scores.scent2Location || ''}" 
+                               placeholder="Enter scent 2 location"
+                               style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
+                    </td>
+                    <td style="height: 30px; background: white;">
+                        <input type="text" id="scent3Location" 
+                               value="${scores.scent3Location || ''}" 
+                               placeholder="Enter scent 3 location"
+                               style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
+                    </td>
+                    <td style="height: 30px; background: white;">
+                        <input type="text" id="scent4Location" 
+                               value="${scores.scent4Location || ''}" 
+                               placeholder="Enter scent 4 location"
+                               style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
+                    </td>
+                </tr>
+            </table>
+
+            <div class="faults-section">
+                <strong>Faults:</strong> Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior; 
+                Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert"; 
+                SR crossing line less than half.
+            </div>
+
+            <table class="scoring-table" style="font-size: ${scoringTableFontSize};">
+                <thead>
+                    <tr>
+                        <th rowspan="2">Team</th>
+                        <th rowspan="2">Dog - Handler</th>
+                        <th colspan="4">Scent Results</th>
+                        <th rowspan="2">Fault</th>
+                        <th rowspan="2">Fault</th>
+                        <th rowspan="2">Time</th>
+                        <th rowspan="2">Pass/Fail</th>
+                    </tr>
+                    <tr>
+                        <th>Scent 1</th>
+                        <th>Scent 2</th>
+                        <th>Scent 3</th>
+                        <th>Scent 4</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    // Add entrant rows - use actual count or minimum 8, whichever is larger
+    const minRows = Math.max(8, entrantCount);
+    for (let i = 0; i < minRows; i++) {
+        const entrant = sheetData.entrants[i];
+        const teamName = entrant ? `${entrant.name}` : `Team ${i + 1}`;
+        const entrantScores = scores[i] || {};
+        
+        html += `
+            <tr style="height: ${rowHeight}; ${entrant ? 'background: white;' : 'background: #f8f9fa;'}">
+                <td style="font-weight: bold; padding: ${cellPadding}; text-align: center;">${i + 1}</td>
+                <td style="font-weight: bold; padding: ${cellPadding}; font-size: 8px; ${!entrant ? 'color: #999;' : ''}">${teamName}</td>
+                <td style="padding: 2px;">
+                    <input type="text" 
+                           value="${entrantScores.scent1 || ''}" 
+                           onchange="updateEntrantScore(${i}, 'scent1', this.value)"
+                           placeholder="✓ or X"
+                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                </td>
+                <td style="padding: 2px;">
+                    <input type="text" 
+                           value="${entrantScores.scent2 || ''}" 
+                           onchange="updateEntrantScore(${i}, 'scent2', this.value)"
+                           placeholder="✓ or X"
+                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                </td>
+                <td style="padding: 2px;">
+                    <input type="text" 
+                           value="${entrantScores.scent3 || ''}" 
+                           onchange="updateEntrantScore(${i}, 'scent3', this.value)"
+                           placeholder="✓ or X"
+                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                </td>
+                <td style="padding: 2px;">
+                    <input type="text" 
+                           value="${entrantScores.scent4 || ''}" 
+                           onchange="updateEntrantScore(${i}, 'scent4', this.value)"
+                           placeholder="✓ or X"
+                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                </td>
+                <td style="padding: 2px;">
+                    <input type="text" 
+                           value="${entrantScores.fault1 || ''}" 
+                           onchange="updateEntrantScore(${i}, 'fault1', this.value)"
+                           placeholder="Fault type"
+                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 9px;">
+                </td>
+                <td style="padding: 2px;">
+                    <input type="text" 
+                           value="${entrantScores.fault2 || ''}" 
+                           onchange="updateEntrantScore(${i}, 'fault2', this.value)"
+                           placeholder="Fault type"
+                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 9px;">
+                </td>
+                <td style="padding: 2px;">
+                    <input type="text" 
+                           value="${entrantScores.time || ''}" 
+                           onchange="updateEntrantScore(${i}, 'time', this.value)"
+                           placeholder="mm:ss"
+                           style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                </td>
+                <td style="padding: 2px;">
+                    <select onchange="updateEntrantScore(${i}, 'passFail', this.value)"
+                            style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px; font-weight: bold;">
+                        <option value="">-</option>
+                        <option value="Pass" ${entrantScores.passFail === 'Pass' ? 'selected' : ''} style="background: #d4edda;">Pass</option>
+                        <option value="Fail" ${entrantScores.passFail === 'Fail' ? 'selected' : ''} style="background: #f8d7da;">Fail</option>
+                    </select>
+                </td>
+            </tr>
+        `;
+    }
+
+    html += `
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 20px; text-align: center; padding: 20px; background: white; border: 2px solid #28a745; border-radius: 8px;">
+                <button onclick="saveFillableScores('${sheetData.id}')" 
+                        style="background: #28a745; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+                    💾 Save All Scores
+                </button>
+                <button onclick="clearScores()" 
+                        style="background: #6c757d; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 5px; cursor: pointer;">
+                    🗑️ Clear Form
+                </button>
+            </div>
+        </div>
+    `;
+
+    return html;
+}
+
             // Add entrant rows - use actual count or minimum 8, whichever is larger
             const minRows = Math.max(8, entrantCount);
             for (let i = 0; i < minRows; i++) {
