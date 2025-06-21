@@ -1154,7 +1154,10 @@
       const entryId = button.dataset.entryId;
       const checkbox = document.getElementById(entryId);
       
-      if (!checkbox) return;
+      if (!checkbox) {
+        console.log("❌ Checkbox not found for entry:", entryId);
+        return;
+      }
       
       // Toggle the checkbox state
       checkbox.checked = !checkbox.checked;
@@ -1162,12 +1165,19 @@
       // Update button appearance
       if (checkbox.checked) {
         button.classList.add('selected');
+        console.log("✅ Selected entry:", entryId);
       } else {
         button.classList.remove('selected');
+        console.log("❌ Deselected entry:", entryId);
       }
       
       // Trigger the selection update
       updateClassSelection({ target: checkbox });
+      
+      // Force validation check after a brief delay
+      setTimeout(() => {
+        checkFormValidity();
+      }, 100);
     }
 
     // Update class selection with detailed entry tracking
@@ -1182,8 +1192,14 @@
         console.log(`❌ Removed entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType.toUpperCase()}`);
       }
       
+      console.log("📊 Total selected classes:", selectedClasses.size);
+      
       updateEntrySummary();
-      checkFormValidity();
+      
+      // Force validation check
+      setTimeout(() => {
+        checkFormValidity();
+      }, 50);
     }
 
     // Update entry summary with detailed breakdown
