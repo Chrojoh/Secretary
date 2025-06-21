@@ -1729,7 +1729,7 @@
 
                 // Table headers
                 const tableHeaders = ['Team', 'Dog - Handler', 'Scent 1', 'Scent 2', 'Scent 3', 'Scent 4', 'Faults', 'Time', 'Result'];
-                const columnWidths = [40, 120, 50, 50, 50, 50, 80, 60, 60];
+                const columnWidths = [35, 110, 55, 55, 55, 55, 75, 50, 55];
                 let xPosition = 50;
 
                 // Draw table header
@@ -1750,15 +1750,15 @@
                     const entrantKey = `entrant_${index}`;
                     const entrantScores = currentScoreData[entrantKey] || {};
                     
-                    // Collect current form data
-                    const scent1Result = document.getElementById(`${entrantKey}_scent1_found`)?.checked ? '✓' : 
-                                       document.getElementById(`${entrantKey}_scent1_not_found`)?.checked ? '✗' : '';
-                    const scent2Result = document.getElementById(`${entrantKey}_scent2_found`)?.checked ? '✓' : 
-                                       document.getElementById(`${entrantKey}_scent2_not_found`)?.checked ? '✗' : '';
-                    const scent3Result = document.getElementById(`${entrantKey}_scent3_found`)?.checked ? '✓' : 
-                                       document.getElementById(`${entrantKey}_scent3_not_found`)?.checked ? '✗' : '';
-                    const scent4Result = document.getElementById(`${entrantKey}_scent4_found`)?.checked ? '✓' : 
-                                       document.getElementById(`${entrantKey}_scent4_not_found`)?.checked ? '✗' : '';
+                    // Collect current form data using standard ASCII characters
+                    const scent1Result = document.getElementById(`${entrantKey}_scent1_found`)?.checked ? 'FOUND' : 
+                                       document.getElementById(`${entrantKey}_scent1_not_found`)?.checked ? 'X' : '';
+                    const scent2Result = document.getElementById(`${entrantKey}_scent2_found`)?.checked ? 'FOUND' : 
+                                       document.getElementById(`${entrantKey}_scent2_not_found`)?.checked ? 'X' : '';
+                    const scent3Result = document.getElementById(`${entrantKey}_scent3_found`)?.checked ? 'FOUND' : 
+                                       document.getElementById(`${entrantKey}_scent3_not_found`)?.checked ? 'X' : '';
+                    const scent4Result = document.getElementById(`${entrantKey}_scent4_found`)?.checked ? 'FOUND' : 
+                                       document.getElementById(`${entrantKey}_scent4_not_found`)?.checked ? 'X' : '';
                     const faults = document.getElementById(`${entrantKey}_faults`)?.value || '';
                     const time = document.getElementById(`${entrantKey}_time`)?.value || '';
                     const result = document.querySelector(`input[name="${entrantKey}_result"]:checked`)?.value || '';
