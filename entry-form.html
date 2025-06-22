@@ -1,945 +1,405 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trial Entry Form</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 10px;
-    }
-    
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-      overflow: hidden;
-    }
-    
-    .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 2rem;
-      text-align: center;
-    }
-    
-    .header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-      font-weight: 700;
-    }
-    
-    .header p {
-      font-size: 1.1rem;
-      opacity: 0.9;
-    }
-    
-    .trial-info {
-      background: #f8f9fa;
-      padding: 1.5rem;
-      border-bottom: 1px solid #e9ecef;
-    }
-    
-    .trial-info h3 {
-      color: #495057;
-      margin-bottom: 1rem;
-      font-size: 1.3rem;
-    }
-    
-    .trial-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-    
-    .trial-details > div {
-      font-size: 0.95rem;
-    }
-    
-    .trial-details strong {
-      color: #495057;
-    }
-    
-    /* Shareable Link Section */
-    .shareable-link-section {
-      background: #e7f3ff;
-      border: 2px solid #0066cc;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px;
-      display: none;
-    }
-    
-    .shareable-link-section h3 {
-      color: #0066cc;
-      margin-bottom: 15px;
-    }
-    
-    .link-display {
-      background: white;
-      border: 1px solid #dee2e6;
-      border-radius: 6px;
-      padding: 15px;
-      margin-bottom: 15px;
-    }
-    
-    .link-url {
-      font-family: monospace;
-      background: #f8f9fa;
-      padding: 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      word-break: break-all;
-      color: #0066cc;
-      margin-bottom: 10px;
-    }
-    
-    .link-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    
-    .btn-copy, .btn-test {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-    }
-    
-    .btn-copy {
-      background: #17a2b8;
-      color: white;
-    }
-    
-    .btn-test {
-      background: #28a745;
-      color: white;
-    }
-    
-    .entry-form {
-      padding: 2rem;
-    }
-    
-    .form-section {
-      margin-bottom: 2rem;
-    }
-    
-    .form-section h3 {
-      color: #495057;
-      margin-bottom: 1rem;
-      font-size: 1.3rem;
-      border-bottom: 2px solid #e9ecef;
-      padding-bottom: 0.5rem;
-    }
-    
-    .form-section.primary {
-      background: #f0f8ff;
-      border: 2px solid #0066cc;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .form-section.primary h3 {
-      color: #0066cc;
-      border-bottom-color: #0066cc;
-    }
-    
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
-    
-    .form-group.required label::after {
-      content: " *";
-      color: #dc3545;
-      font-weight: bold;
-    }
-    
-    label {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #495057;
-    }
-    
-    input, select, textarea {
-      padding: 0.75rem;
-      border: 2px solid #e1e5e9;
-      border-radius: 6px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-    }
-    
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    .auto-filled {
-      background: #e7f3ff !important;
-      border-color: #0066cc !important;
-      animation: autoFillGlow 2s ease-in-out;
-    }
-    
-    @keyframes autoFillGlow {
-      0% { box-shadow: 0 0 5px rgba(0, 102, 204, 0.5); }
-      50% { box-shadow: 0 0 20px rgba(0, 102, 204, 0.8); }
-      100% { box-shadow: none; }
-    }
-    
-    .lookup-status {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 14px;
-      display: none;
-    }
-    
-    .lookup-status.success {
-      background: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-      display: block;
-    }
-    
-    .lookup-status.warning {
-      background: #fff3cd;
-      border: 1px solid #ffeaa7;
-      color: #856404;
-      display: block;
-    }
-    
-    .lookup-status.loading {
-      background: #e7f3ff;
-      border: 1px solid #bee5eb;
-      color: #0c5460;
-      display: block;
-    }
-    
-    .waiver-section {
-      background: #fff8e1;
-      border: 2px solid #ffc107;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .waiver-content {
-      margin-bottom: 1rem;
-      line-height: 1.6;
-    }
-    
-    .waiver-agreement {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.5rem;
-    }
-    
-    .waiver-agreement input[type="checkbox"] {
-      margin-top: 0.2rem;
-      width: auto;
-    }
-    
-    /* Class Selection - Match the screenshot style */
-    .day-section {
-      margin-bottom: 2rem;
-    }
-    
-    .day-header {
-      background: #007bff;
-      color: white;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-    }
-    
-    .class-section {
-      background: white;
-      border: 2px solid #e9ecef;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      overflow: hidden;
-    }
-    
-    .class-header {
-      background: #28a745;
-      color: white;
-      padding: 0.75rem 1rem;
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .class-content {
-      padding: 1rem;
-    }
-    
-    .round-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem;
-      border: 1px solid #e9ecef;
-      border-radius: 6px;
-      margin-bottom: 0.5rem;
-      background: #f8f9fa;
-    }
-    
-    .round-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-    
-    .round-number {
-      background: #007bff;
-      color: white;
-      padding: 0.25rem 0.75rem;
-      border-radius: 15px;
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-    
-    .judge-name {
-      font-weight: 500;
-      color: #495057;
-    }
-    
-    .entry-options {
-      display: flex;
-      gap: 0.5rem;
-    }
-    
-    .entry-btn {
-      padding: 0.5rem 1rem;
-      border: 2px solid #28a745;
-      background: white;
-      color: #28a745;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-    
-    .entry-btn:hover {
-      background: #28a745;
-      color: white;
-    }
-    
-    .entry-btn.selected {
-      background: #28a745;
-      color: white;
-    }
-    
-    .entry-btn.feo {
-      border-color: #ffc107;
-      color: #ffc107;
-    }
-    
-    .entry-btn.feo:hover,
-    .entry-btn.feo.selected {
-      background: #ffc107;
-      color: #212529;
-    }
-    
-    .entry-summary {
-      background: #e7f3ff;
-      border: 2px solid #0066cc;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-    }
-    
-    .summary-item {
-      text-align: center;
-    }
-    
-    .summary-item strong {
-      display: block;
-      color: #495057;
-      margin-bottom: 0.5rem;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 2rem;
-      flex-wrap: wrap;
-    }
-    
-    .btn {
-      padding: 1rem 2rem;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      min-width: 150px;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(45deg, #28a745, #20c997);
-      color: white;
-    }
-    
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
-    }
-    
-    .btn-secondary {
-      background: #6c757d;
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background: #5a6268;
-      transform: translateY(-1px);
-    }
-    
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-    
-    .success-message {
-      background: #d4edda;
-      border: 2px solid #28a745;
-      color: #155724;
-      padding: 2rem;
-      border-radius: 8px;
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .edit-link-section {
-      background: #fff3cd;
-      border: 2px solid #ffc107;
-      border-radius: 8px;
-      padding: 20px;
-      margin-top: 20px;
-      text-align: center;
-    }
-    
-    .edit-link-section h3 {
-      color: #856404;
-      margin-bottom: 10px;
-    }
-    
-    .hidden {
-      display: none;
-    }
-    
-    @media (max-width: 768px) {
-      .container {
-        padding: 10px;
-      }
-      
-      .form-row, .summary-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .button-group {
-        flex-direction: column;
-      }
-      
-      .entry-options {
-        flex-direction: column;
-        gap: 0.3rem;
-      }
-      
-      .round-item {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.5rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1 id="trialTitle">🏆 Trial Entry Form</h1>
-      <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
-    </div>
-<!-- Back to Dashboard Button (Secretary Only) -->
-<div id="backToDashboardSection" style="padding: 1rem; background: #f8f9fa; border-bottom: 1px solid #e9ecef; display: none;">
-  <button onclick="location.href='main-dashboard.html'" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-    ← Back to Dashboard
-  </button>
-</div>
-    <!-- Trial Selection (Secretary Only) -->
-    <div class="trial-info" id="trialSelectionSection">
-      <h3>🎯 Select Trial</h3>
-      <div class="form-row">
-        <div class="form-group required full-width">
-          <label for="trialSelection">Choose which trial to enter:</label>
-          <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
-            <option value="">Loading available trials...</option>
-          </select>
-        </div>
-      </div>
-    </div>
+// ========================================
+// CORE TIMEZONE-SAFE DATE UTILITIES
+// ========================================
 
-    <!-- Shareable Link Section (Secretary Only) -->
-    <div class="shareable-link-section" id="shareableLinkSection">
-      <h3>🔗 Shareable Entry Link</h3>
-      <p>Share this link with participants so they can enter from home:</p>
-      <div class="link-display">
-        <div class="link-url" id="shareableUrl">
-          <!-- Generated URL will appear here -->
-        </div>
-        <div class="link-actions">
-          <button class="btn-copy" onclick="copyShareableLink()">📋 Copy Link</button>
-          <button class="btn-test" onclick="testShareableLink()">🔗 Test Link</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Trial Information -->
-    <div class="trial-info" id="trialInfoSection" style="display: none;">
-      <h3>📋 Trial Information</h3>
-      <div class="trial-details">
-        <div><strong>Club:</strong> <span id="clubName">-</span></div>
-        <div><strong>Dates:</strong> <span id="trialDates">-</span></div>
-        <div><strong>Location:</strong> <span id="trialLocation">-</span></div>
-        <div><strong>Secretary:</strong> <span id="trialSecretary">-</span></div>
-      </div>
-    </div>
-
-    <div class="entry-form" id="entryFormContainer" style="display: none;">
-      <!-- Success Message -->
-      <div id="successMessage" class="success-message hidden">
-        <h3>✅ Entry Submitted Successfully!</h3>
-        <p>The entry has been recorded for this trial.</p>
-        <button class="btn btn-primary" onclick="resetForm()">Enter Another Participant</button>
-      </div>
-
-      <!-- Edit Link Section -->
-      <div class="edit-link-section hidden" id="editLinkSection">
-        <h3>✅ Entry Submitted Successfully!</h3>
-        <p>Your entry has been recorded. Use this link to edit your entry in the future:</p>
-        <div class="link-display">
-          <div class="link-url" id="editUrl">
-            <!-- Edit URL will appear here -->
-          </div>
-          <div class="link-actions">
-            <button class="btn-copy" onclick="copyEditLink()">📋 Copy Edit Link</button>
-            <button class="btn-test" onclick="testEditLink()">🔗 Test Edit Link</button>
-          </div>
-        </div>
-        <div style="margin-top: 15px;">
-          <button class="btn btn-primary" onclick="resetForNewEntry()">Submit Another Entry</button>
-        </div>
-      </div>
-
-      <!-- Waiver Section -->
-      <div class="waiver-section">
-        <h3>⚠️ Liability Waiver & Release</h3>
-        <div class="waiver-content">
-          <p><strong>WAIVER AND RELEASE OF LIABILITY</strong></p>
-          <p>I understand that participation in dog training and scent work activities involves inherent risks including but not limited to: dogs working in close proximity to each other, off-leash activities, and interaction with other dogs and handlers.</p>
-          <p>I acknowledge that I participate at my own risk and agree to hold harmless the hosting club, property owners, judges, and event organizers from any claims, damages, or injuries that may occur.</p>
-        </div>
-        <div class="waiver-agreement">
-          <input type="checkbox" id="waiverAccepted" required>
-          <label for="waiverAccepted">
-            <strong>I have read, understood, and agree to the terms of this waiver and release of liability.</strong>
-          </label>
-        </div>
-      </div>
-
-      <!-- Entry Form -->
-      <form id="entryForm">
-        <!-- Registration Number Lookup -->
-        <div class="form-section primary">
-          <h3>🔍 Registration Lookup</h3>
-          <div class="form-row">
-            <div class="form-group full-width">
-              <label>C-WAGS Registration Number (optional)</label>
-              <input type="text" id="cwagsNumber" placeholder="XX-XXXX-XX" 
-                     style="font-size: 1.2rem; font-weight: bold; background: #f0f8ff;">
-              <small style="color: #666; margin-top: 0.5rem; display: block;">
-                💡 Enter registration number first - handler and dog info will auto-fill if found
-              </small>
-            </div>
-          </div>
-          <div id="lookupStatus" class="lookup-status"></div>
-        </div>
-
-        <!-- Handler Information -->
-        <div class="form-section">
-          <h3>👤 Handler Information</h3>
-          <div class="form-row">
-            <div class="form-group required">
-              <label>Handler Name</label>
-              <input type="text" id="handlerName" required placeholder="Will auto-fill from registration">
-            </div>
-            <div class="form-group required">
-              <label>Phone Number</label>
-              <input type="tel" id="handlerPhone" required placeholder="(xxx) xxx-xxxx">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group required">
-              <label>Email Address</label>
-              <input type="email" id="handlerEmail" required placeholder="handler@email.com">
-            </div>
-            <div class="form-group">
-              <label>Emergency Contact</label>
-              <input type="text" id="emergencyContact" placeholder="Name and phone number">
-            </div>
-          </div>
-        </div>
-
-        <!-- Dog Information -->
-        <div class="form-section">
-          <h3>🐕 Dog Information</h3>
-          <div class="form-row">
-            <div class="form-group required">
-              <label>Dog's Call Name</label>
-              <input type="text" id="dogCallName" required placeholder="Will auto-fill from registration">
-            </div>
-            <div class="form-group">
-              <label>Breed</label>
-              <input type="text" id="dogBreed" placeholder="Enter breed">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Date of Birth</label>
-              <input type="date" id="dogBirthdate">
-            </div>
-            <div class="form-group">
-              <label>Sex</label>
-              <select id="dogSex">
-                <option value="">Select...</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Male Neutered">Male Neutered</option>
-                <option value="Female Spayed">Female Spayed</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Junior Handler (Under 18)</label>
-              <select id="juniorHandler">
-                <option value="No">No</option>
-                <option value="Yes">Yes</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Class Selection -->
-        <div class="form-section">
-          <h3>🎯 Class Entries</h3>
-          <p style="margin-bottom: 1rem; color: #666;">Select the specific class/judge combinations you wish to enter:</p>
-          <div id="classSelection">
-            <div style="text-align: center; padding: 2rem; color: #666;">
-              Loading available classes by day and judge...
-            </div>
-          </div>
-        </div>
-
-        <!-- Entry Summary -->
-        <div class="entry-summary">
-          <h3>💰 Entry Summary</h3>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <strong>Classes Selected</strong>
-              <span id="selectedClassCount">0</span>
-            </div>
-            <div class="summary-item">
-              <strong>Entry Fee</strong>
-              <span id="calculatedFee">$0.00</span>
-            </div>
-            <div class="summary-item">
-              <strong>Junior Handler</strong>
-              <span id="summaryJuniorHandler">No</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Submit Buttons -->
-        <div class="button-group">
-          <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
-            Submit Entry
-          </button>
-          <button type="button" class="btn btn-secondary" onclick="resetForm()">
-            Clear Form
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <script type="module">
-    import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-    console.log("🎯 Entry form loaded");
-
-    // ========================================
-    // TIMEZONE-SAFE DATE UTILITIES - CRITICAL FIX
-    // ========================================
-
-    /**
-     * Creates a date object that stays in local timezone
-     */
-    function createLocalDate(dateStr) {
-      if (!dateStr) return null;
-      const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
-      return new Date(dateWithTime);
+// Creates a date object that stays in local timezone
+function createLocalDate(dateStr) {
+    if (!dateStr) return null;
+    
+    // Always add noon time to prevent timezone shifts
+    if (typeof dateStr === 'string') {
+        const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+        return new Date(dateWithTime);
     }
+    
+    return new Date(dateStr);
+}
 
-    /**
-     * Formats a date to YYYY-MM-DD string in local timezone
-     */
-    function formatLocalDate(date) {
-      if (!date || !(date instanceof Date)) return '';
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
+// Formats a date to YYYY-MM-DD string in local timezone
+function formatLocalDate(date) {
+    if (!date || !(date instanceof Date)) return '';
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
 
-    /**
-     * Prepares date data for Firebase storage (prevents timezone conversion)
-     */
-    function prepareDateForFirebase(dateStr) {
-      if (!dateStr) return null;
-      const localDate = createLocalDate(dateStr);
-      return localDate;
-    }
+// Gets today's date in local timezone as YYYY-MM-DD string
+function getTodayLocal() {
+    const now = new Date();
+    return formatLocalDate(now);
+}
 
-    /**
-     * Retrieves date data from Firebase (converts back to local date string)
-     */
-    function getDateFromFirebase(firebaseDate) {
-      if (!firebaseDate) return '';
-      
-      let date;
-      if (firebaseDate.toDate) {
-        date = firebaseDate.toDate();
-      } else if (firebaseDate instanceof Date) {
-        date = firebaseDate;
-      } else if (typeof firebaseDate === 'string') {
-        date = createLocalDate(firebaseDate);
-      } else {
-        return '';
-      }
-      
-      return formatLocalDate(date);
-    }
-
-    /**
-     * Formats date for display with timezone consideration
-     */
-    function formatDateDisplay(dateInput, options = {}) {
-      let date;
-      
-      if (typeof dateInput === 'string') {
+// Formats date for display with timezone consideration
+function formatDateDisplay(dateInput, options = {}) {
+    let date;
+    
+    if (typeof dateInput === 'string') {
         date = createLocalDate(dateInput);
-      } else if (dateInput instanceof Date) {
+    } else if (dateInput instanceof Date) {
         date = new Date(dateInput);
-      } else {
+    } else {
         return 'Invalid Date';
-      }
-      
-      if (!date || isNaN(date.getTime())) return 'Invalid Date';
-      
-      const defaultOptions = {
+    }
+    
+    if (!date || isNaN(date.getTime())) return 'Invalid Date';
+    
+    const defaultOptions = {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      };
-      
-      const formatOptions = { ...defaultOptions, ...options };
-      return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
-    }
-
-    /**
-     * Test function to verify dates work correctly
-     */
-    function testDateHandling() {
-      console.log('=== Entry Form Date Handling Test ===');
-      
-      const testDate = '2024-03-15';
-      console.log('1. Original date string:', testDate);
-      
-      const forFirebase = prepareDateForFirebase(testDate);
-      console.log('2. Prepared for Firebase:', forFirebase);
-      
-      const fromFirebase = getDateFromFirebase(forFirebase);
-      console.log('3. Retrieved from Firebase:', fromFirebase);
-      
-      const display = formatDateDisplay(fromFirebase);
-      console.log('4. Formatted for display:', display);
-      
-      const matches = fromFirebase === testDate;
-      console.log('5. Round-trip successful:', matches);
-      
-      if (!matches) {
-        console.error('❌ Date handling is still broken!');
-      } else {
-        console.log('✅ Date handling is working correctly!');
-      }
-    }
-
-    // Test the date handling on page load
-    testDateHandling();
-
-    // Global variables
-    let currentTrialData = null;
-    let selectedClasses = new Set();
-    let registrationData = [];
-    let isAutoFilling = false;
-    let availableTrials = [];
-    let isSecretary = false;
-
-    // Fee structure
-    const fees = {
-      firstClass: 35.00,
-      additionalClass: 25.00,
-      juniorHandler: 20.00
     };
+    
+    const formatOptions = { ...defaultOptions, ...options };
+    return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+}
 
-    // Initialize the application
-    async function init() {
-      await loadRegistrationData();
+// Prepares date data for Firebase storage
+function prepareDateForFirebase(dateStr) {
+    if (!dateStr) return null;
+    
+    // Create a date that represents the exact local date at noon
+    const localDate = createLocalDate(dateStr);
+    
+    // Store as a Firestore Timestamp to maintain precision
+    return localDate;
+}
 
-      // Check URL parameters for entry link
-      const urlParams = new URLSearchParams(window.location.search);
-      const entryId = urlParams.get('entry');
-      const trialId = urlParams.get('trial');
-
-      if (entryId) {
-        // Load existing entry for editing
-        await loadExistingEntry(entryId);
-      } else if (trialId) {
-        // Load specific trial for public entry
-        await loadSpecificTrial(trialId);
-      } else {
-        // Normal secretary view
-        isSecretary = true;
-        setupSecretaryView();
-      }
+// Retrieves date data from Firebase
+function getDateFromFirebase(firebaseDate) {
+    if (!firebaseDate) return '';
+    
+    let date;
+    
+    // Handle Firestore Timestamps
+    if (firebaseDate.toDate) {
+        date = firebaseDate.toDate();
+    } else if (firebaseDate instanceof Date) {
+        date = firebaseDate;
+    } else if (typeof firebaseDate === 'string') {
+        date = createLocalDate(firebaseDate);
+    } else {
+        return '';
     }
+    
+    return formatLocalDate(date);
+}
 
-    // Load registration data from data.json
-    async function loadRegistrationData() {
-      try {
-        console.log("📊 Loading registration data...");
-        const response = await fetch('./js/data.json');
-        const data = await response.json();
-        registrationData = data || [];
-        console.log(`✅ Loaded ${registrationData.length} registration records`);
-      } catch (error) {
-        console.warn("⚠️ Could not load registration data:", error);
-        registrationData = [];
-      }
+// Entry Form specific save function
+function saveEntryData(entryData) {
+    // Fix selected entries dates
+    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+        entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+            ...entry,
+            date: entry.date ? prepareDateForFirebase(entry.date) : null
+        }));
     }
+    
+    // Save to Firebase...
+    return addDoc(collection(db, 'entries'), entryData);
+}
 
-    // Setup secretary view with TIMEZONE-SAFE date handling
-    async function setupSecretaryView() {
-      try {
-        // Wait for auth
-        await new Promise((resolve) => {
-          if (auth.currentUser) {
-            resolve();
-          } else {
-            const unsubscribe = auth.onAuthStateChanged((user) => {
-              unsubscribe();
-              resolve();
-            });
-          }
+// Entry Form specific load function
+function loadEntryData(entryDoc) {
+    const entryData = entryDoc.data();
+    
+    // Fix selected entries dates
+    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+        entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+            ...entry,
+            date: entry.date ? getDateFromFirebase(entry.date) : null
+        }));
+    }
+    
+    return entryData;
+}
+
+// Filter entries by date with timezone consideration
+function filterEntriesByDate(entries, targetDate) {
+    return entries.filter(entry => {
+        // Use timezone-safe comparison
+        const entryDate = getDateFromFirebase(entry.date);
+        const filterDate = formatLocalDate(createLocalDate(targetDate));
+        return entryDate === filterDate;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add the "Back to Dashboard" button at the top
+    const backButtonContainer = document.createElement('div');
+    backButtonContainer.style.marginBottom = '20px';
+    
+    const backButton = document.createElement('button');
+    backButton.textContent = 'Back to Dashboard';
+    backButton.classList.add('btn', 'btn-secondary');
+    backButton.addEventListener('click', function() {
+        window.location.href = '/dashboard';
+    });
+    
+    backButtonContainer.appendChild(backButton);
+    
+    // Get the main container and insert the back button at the top
+    const mainContainer = document.querySelector('.container') || document.body;
+    mainContainer.insertBefore(backButtonContainer, mainContainer.firstChild);
+    
+    // Rest of your entry form initialization code here
+    initializeEntryForm();
+});
+
+function initializeEntryForm() {
+    // Load trials from Firebase
+    loadTrials().then(trials => {
+        populateTrialDropdown(trials);
+        
+        // Event listener for trial selection
+        const trialSelect = document.getElementById('trialSelect');
+        trialSelect.addEventListener('change', function() {
+            const selectedTrialId = trialSelect.value;
+            if (selectedTrialId) {
+                const selectedTrial = trials.find(trial => trial.id === selectedTrialId);
+                if (selectedTrial) {
+                    populateDaysDropdown(selectedTrial.days);
+                }
+            }
         });
-
-        if (!auth.currentUser) {
-          alert("Please log in to access the entry form");
-          window.location.href = 'index.html';
-          return;
+        
+        // Event listener for day selection
+        const daySelect = document.getElementById('daySelect');
+        daySelect.addEventListener('change', function() {
+            const selectedDay = daySelect.value;
+            if (selectedDay) {
+                loadClassesForDay(selectedDay);
+            }
+        });
+        
+        // Other initialization code...
+    });
+    
+    // Form submission handling
+    const entryForm = document.getElementById('entryForm');
+    entryForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const entryData = collectFormData();
+        
+        // Apply date fix before saving
+        if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+                ...entry,
+                date: entry.date ? prepareDateForFirebase(entry.date) : null
+            }));
         }
+        
+        // Save to Firebase
+        saveEntryData(entryData).then(() => {
+            showSuccessMessage('Entry submitted successfully!');
+            entryForm.reset();
+        }).catch(error => {
+            showErrorMessage('Error submitting entry: ' + error.message);
+        });
+    });
+}
 
-        // Load trials for secretary
-        const trialsQuery = query(
-          collection(db, "trials"),
-          where("createdBy", "==", auth.currentUser.uid)
-        );
-        
-        const trialsSnapshot = await getDocs(trialsQuery);
-        
-        if (!trialsSnapshot.empty) {
-          availableTrials = [];
-          trialsSnapshot.forEach(doc => {
-            const trialData = doc.data();
+function loadTrials() {
+    // Fetch trials from Firebase
+    return getDocs(collection(db, 'trials')).then(snapshot => {
+        return snapshot.docs.map(doc => {
+            const data = doc.data();
             
-            // FIX: Process dates when loading trials from Firebase
-            if (trialData.days && Array.isArray(trialData.days)) {
-              trialData.days = trialData.days.map(day => ({
-                ...day,
-                date: day.date ? getDateFromFirebase(day.date) : null
-              }));
+            // Fix date handling for trial days
+            if (data.days && Array.isArray(data.days)) {
+                data.days = data.days.map(day => ({
+                    ...day,
+                    date: day.date ? getDateFromFirebase(day.date) : null
+                }));
             }
             
-            availableTrials.push({ id: doc.id, ...trialData });
-          });
-          
-          availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
-      
-      populateTrialSelector();
-      // Show back to dashboard button for secretaries
-      document.getElementById('backToDashboardSection').style.display = 'block';
-    } else {
-      alert("No trials found. Please create a trial first.");
-      window.location.href = 'main-dashboard.html';
-    }
-  } catch (error) {
-    console.error("❌ Error loading trial data:", error);
-    alert("Error loading trial data: " + error.message);
-  }
+            return {
+                id: doc.id,
+                ...data
+            };
+        });
+    });
 }
+
+function populateTrialDropdown(trials) {
+    const trialSelect = document.getElementById('trialSelect');
+    trialSelect.innerHTML = '<option value="">Select a Trial</option>';
+    
+    trials.forEach(trial => {
+        const option = document.createElement('option');
+        option.value = trial.id;
+        option.textContent = trial.name;
+        trialSelect.appendChild(option);
+    });
+}
+
+function populateDaysDropdown(days) {
+    const daySelect = document.getElementById('daySelect');
+    daySelect.innerHTML = '<option value="">Select a Day</option>';
+    
+    days.forEach(day => {
+        const option = document.createElement('option');
+        option.value = day.date;
+        // Use the date fix for display
+        option.textContent = formatDateDisplay(day.date);
+        daySelect.appendChild(option);
+    });
+}
+
+function loadClassesForDay(dayDate) {
+    // Clear previous class selections
+    const classesContainer = document.getElementById('classesContainer');
+    classesContainer.innerHTML = '';
+    
+    // Load classes for the selected day from Firebase
+    getDoc(doc(db, 'classes', dayDate)).then(doc => {
+        if (doc.exists()) {
+            const classes = doc.data().classes || [];
+            
+            // Display classes as checkboxes
+            classes.forEach(classItem => {
+                const classDiv = createClassCheckbox(classItem, dayDate);
+                classesContainer.appendChild(classDiv);
+            });
+        } else {
+            classesContainer.innerHTML = '<p>No classes available for this day.</p>';
+        }
+    }).catch(error => {
+        console.error("Error loading classes:", error);
+        classesContainer.innerHTML = '<p>Error loading classes. Please try again.</p>';
+    });
+}
+
+function createClassCheckbox(classItem, dayDate) {
+    const div = document.createElement('div');
+    div.className = 'form-check mb-3';
+    
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.className = 'form-check-input class-checkbox';
+    input.id = `class_${classItem.id}`;
+    input.dataset.classId = classItem.id;
+    input.dataset.className = classItem.name;
+    input.dataset.classPrice = classItem.price;
+    input.dataset.classDate = dayDate;
+    
+    const label = document.createElement('label');
+    label.className = 'form-check-label';
+    label.htmlFor = `class_${classItem.id}`;
+    label.textContent = `${classItem.name} - $${classItem.price}`;
+    
+    div.appendChild(input);
+    div.appendChild(label);
+    
+    return div;
+}
+
+function collectFormData() {
+    const formData = {
+        handler: document.getElementById('handlerName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        dogs: [],
+        selectedEntries: [],
+        submittedAt: new Date()
+    };
+    
+    // Collect dog information
+    const dogInputs = document.querySelectorAll('.dog-info');
+    dogInputs.forEach(dogDiv => {
+        const dogName = dogDiv.querySelector('.dog-name').value;
+        const dogBreed = dogDiv.querySelector('.dog-breed').value;
+        
+        if (dogName && dogBreed) {
+            formData.dogs.push({
+                name: dogName,
+                breed: dogBreed
+            });
+        }
+    });
+    
+    // Collect selected classes
+    const selectedClasses = document.querySelectorAll('.class-checkbox:checked');
+    selectedClasses.forEach(checkbox => {
+        formData.selectedEntries.push({
+            classId: checkbox.dataset.classId,
+            className: checkbox.dataset.className,
+            price: parseFloat(checkbox.dataset.classPrice),
+            date: checkbox.dataset.classDate,
+            dogName: document.getElementById('dogForClass_' + checkbox.dataset.classId).value
+        });
+    });
+    
+    return formData;
+}
+
+function showSuccessMessage(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success mt-3';
+    alertDiv.textContent = message;
+    
+    const formContainer = document.querySelector('.container');
+    formContainer.insertBefore(alertDiv, formContainer.firstChild);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+function showErrorMessage(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger mt-3';
+    alertDiv.textContent = message;
+    
+    const formContainer = document.querySelector('.container');
+    formContainer.insertBefore(alertDiv, formContainer.firstChild);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Add dog button handler
+document.getElementById('addDogBtn').addEventListener('click', function() {
+    const dogsContainer = document.getElementById('dogsContainer');
+    const dogCount = dogsContainer.children.length;
+    
+    const dogDiv = document.createElement('div');
+    dogDiv.className = 'dog-info card mb-3 p-3';
+    
+    dogDiv.innerHTML = `
+        <h5>Dog #${dogCount + 1}</h5>
+        <div class="mb-3">
+            <label for="dogName_${dogCount}" class="form-label">Dog's Name</label>
+            <input type="text" class="form-control dog-name" id="dogName_${dogCount}" required>
+        </div>
+        <div class="mb-3">
+            <label for="dogBreed_${dogCount}" class="form-label">Breed</label>
+            <input type="text" class="form-control dog-breed" id="dogBreed_${dogCount}" required>
+        </div>
+        <button type="button" class="btn btn-danger remove-dog-btn">Remove Dog</button>
+    `;
+    
+    dogsContainer.appendChild(dogDiv);
+    
+    // Add event listener to remove button
+    dogDiv.querySelector('.remove-dog-btn').addEventListener('click', function() {
+        dogDiv.remove();
+    });
+});
+
+// Initialize Firebase
+const firebaseConfig = {
+    // Your Firebase config here
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
