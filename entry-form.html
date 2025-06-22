@@ -929,4 +929,17 @@
             availableTrials.push({ id: doc.id, ...trialData });
           });
           
-          availableTrials.sort((a, b) => b
+          availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
+      
+      populateTrialSelector();
+      // Show back to dashboard button for secretaries
+      document.getElementById('backToDashboardSection').style.display = 'block';
+    } else {
+      alert("No trials found. Please create a trial first.");
+      window.location.href = 'main-dashboard.html';
+    }
+  } catch (error) {
+    console.error("❌ Error loading trial data:", error);
+    alert("Error loading trial data: " + error.message);
+  }
+}
