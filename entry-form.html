@@ -917,6 +917,8 @@
       const entryId = urlParams.get('entry');
       const trialId = urlParams.get('trial');
 
+      console.log("🔍 URL params - entryId:", entryId, "trialId:", trialId);
+
       if (entryId) {
         // Load existing entry for editing
         console.log("📝 Loading existing entry for editing:", entryId);
@@ -1024,12 +1026,17 @@
     // Setup secretary view
     async function setupSecretaryView() {
       try {
+        console.log("👨‍💼 Setting up secretary view...");
+        
         // Wait for auth
         await new Promise((resolve) => {
           if (auth.currentUser) {
+            console.log("✅ User already authenticated:", auth.currentUser.email);
             resolve();
           } else {
+            console.log("⏳ Waiting for authentication...");
             const unsubscribe = auth.onAuthStateChanged((user) => {
+              console.log("🔐 Auth state changed:", user ? user.email : 'no user');
               unsubscribe();
               resolve();
             });
@@ -1037,10 +1044,13 @@
         });
 
         if (!auth.currentUser) {
+          console.log("❌ No authenticated user, redirecting to login");
           alert("Please log in to access the entry form");
           window.location.href = 'index.html';
           return;
         }
+
+        console.log("🔍 Querying trials for user:", auth.currentUser.uid);
 
         // Load trials for secretary - using timezone-safe date handling
         const trialsQuery = query(
@@ -1050,10 +1060,13 @@
         
         const trialsSnapshot = await getDocs(trialsQuery);
         
+        console.log("📊 Query completed. Found", trialsSnapshot.size, "trials");
+        
         if (!trialsSnapshot.empty) {
           availableTrials = [];
           trialsSnapshot.forEach(doc => {
             const trialData = doc.data();
+            console.log("📋 Processing trial:", doc.id, trialData.clubName);
             
             // Fix date handling for trial days using global date fix
             if (trialData.days && Array.isArray(trialData.days)) {
@@ -1068,8 +1081,10 @@
           
           availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
           
+          console.log("✅ Processed", availableTrials.length, "trials, populating selector");
           populateTrialSelector();
         } else {
+          console.log("❌ No trials found for user");
           alert("No trials found. Please create a trial first.");
           window.location.href = 'main-dashboard.html';
         }
@@ -1333,10 +1348,18 @@
 
     // Populate trial selector dropdown
     function populateTrialSelector() {
+      console.log("🎯 Populating trial selector with", availableTrials.length, "trials");
+      
       const trialSelect = document.getElementById('trialSelection');
+      if (!trialSelect) {
+        console.error("❌ Could not find trialSelection element");
+        return;
+      }
+      
       trialSelect.innerHTML = '<option value="">Select a trial...</option>';
 
       availableTrials.forEach(trial => {
+        console.log("➕ Adding trial option:", trial.clubName);
         const option = document.createElement('option');
         option.value = trial.id;
         
@@ -1363,12 +1386,17 @@
         trialSelect.appendChild(option);
       });
 
+      console.log("✅ Trial selector populated with", trialSelect.options.length - 1, "options");
+
       // Handle trial selection change
       trialSelect.addEventListener('change', async function() {
         const trialId = this.value;
+        console.log("🎯 Trial selected:", trialId);
+        
         if (trialId) {
           currentTrialData = availableTrials.find(t => t.id === trialId);
           if (currentTrialData) {
+            console.log("✅ Found trial data:", currentTrialData.clubName);
             generateShareableLink();
             populateTrialInfo();
             showEntryForm();
@@ -1380,8 +1408,11 @@
             setTimeout(() => {
               setupFormEventListeners();
             }, 100);
+          } else {
+            console.error("❌ Could not find trial data for ID:", trialId);
           }
         } else {
+          console.log("🔄 Trial selection cleared");
           hideShareableLink();
           hideTrialInfo();
           hideEntryForm();
