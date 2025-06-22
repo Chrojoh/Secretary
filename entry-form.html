@@ -1371,7 +1371,7 @@
       });
 
       // Handle trial selection change
-      trialSelect.addEventListener('change', function() {
+      trialSelect.addEventListener('change', async function() {
         const trialId = this.value;
         if (trialId) {
           currentTrialData = availableTrials.find(t => t.id === trialId);
