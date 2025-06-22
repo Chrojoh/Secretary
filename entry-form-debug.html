@@ -476,14 +476,16 @@
                                         ${roundName}
                                         <div class="round-info">
                                             ${round.judge ? `Judge: ${round.judge}` : ''}
-                                            ${round.feo ? ' | FEO Available' : ''}
                                             ${round.time ? ` | Time: ${round.time}` : ''}
                                             ${round.maxDogs ? ` | Max Dogs: ${round.maxDogs}` : ''}
                                         </div>
                                     </div>
-                                    <button class="entry-button" onclick="enterRound('${dayIndex}', '${classIndex}', '${roundIndex}')">
-                                        Enter This Round
-                                    </button>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="entry-button" onclick="enterRound('${dayIndex}', '${classIndex}', '${roundIndex}', 'regular')">
+                                            Enter This Round
+                                        </button>
+                                        ${round.feo ? `<button class="entry-button" style="background: #FF9800;" onclick="enterRound('${dayIndex}', '${classIndex}', '${roundIndex}', 'feo')">Enter as FEO</button>` : ''}
+                                    </div>
                                 </div>`;
                             });
                         } else {
@@ -537,15 +539,15 @@
             document.querySelectorAll('.day-tab')[dayIndex].classList.add('active');
         };
 
-        window.enterRound = function(dayIndex, classIndex, roundIndex) {
+        window.enterRound = function(dayIndex, classIndex, roundIndex, entryType = 'regular') {
             const day = currentTrialData.days[dayIndex];
             const cls = day.classes[classIndex];
             const round = cls.rounds[roundIndex];
             const className = cls.className || cls.name || 'Unnamed Class';
             const roundName = round.name || round.roundName || `Round ${parseInt(roundIndex) + 1}`;
             
-            console.log(`🎯 Entering round: Day ${parseInt(dayIndex) + 1}, Class ${className}, Round ${roundName}`);
-            alert(`Entry for:\nClass: ${className}\nRound: ${roundName}\nJudge: ${round.judge || 'Not specified'}\n\nThis would open the entry form for this specific round.`);
+            console.log(`🎯 Entering round: Day ${parseInt(dayIndex) + 1}, Class ${className}, Round ${roundName}, Entry Type: ${entryType}`);
+            alert(`Entry for:\nClass: ${className}\nRound: ${roundName}\nJudge: ${round.judge || 'Not specified'}\nEntry Type: ${entryType.toUpperCase()}\n\nThis would open the entry form for this specific round.`);
         };
 
         window.enterClass = function(dayIndex, classIndex) {
