@@ -1379,6 +1379,48 @@
       populateClasses();
     }
 
+     // Secretary Fee Configuration Section - Add this before the populateClasses function
+function addSecretaryFeeConfiguration() {
+  // Only show fee configuration for secretaries
+  if (!isSecretary) return;
+  
+  const trialInfoSection = document.getElementById('trialInfoSection');
+  if (!trialInfoSection) return;
+  
+  const feeConfigSection = document.createElement('div');
+  feeConfigSection.className = 'fee-config-section';
+  feeConfigSection.id = 'feeConfigSection';
+  feeConfigSection.innerHTML = `
+    <div class="trial-info" style="background: #e8f4fd; border: 1px solid #b3d7f2;">
+      <h3>💰 Fee Configuration</h3>
+      <p style="color: #0066cc; margin-bottom: 1rem;">Set the entry fees for this trial. These will be used for automatic fee calculations.</p>
+      <div class="fee-config-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div class="form-group">
+          <label for="regularFee">Regular Entry Fee:</label>
+          <input type="number" id="regularFee" value="21" step="0.01" min="0" 
+                 style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;"
+                 onchange="updateFeeStructure()">
+        </div>
+        <div class="form-group">
+          <label for="feoFee">FEO Entry Fee:</label>
+          <input type="number" id="feoFee" value="15" step="0.01" min="0"
+                 style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;"
+                 onchange="updateFeeStructure()">
+        </div>
+        <div class="form-group">
+          <label for="juniorFee">Junior Handler Fee:</label>
+          <input type="number" id="juniorFee" value="20" step="0.01" min="0"
+                 style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;"
+                 onchange="updateFeeStructure()">
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Insert after trial info section
+  trialInfoSection.parentNode.insertBefore(feeConfigSection, trialInfoSection.nextSibling);
+}
+    
     // Populate classes with the exact style from screenshot and timezone-safe dates
     function populateClasses() {
       const classSelection = document.getElementById('classSelection');
