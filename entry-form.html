@@ -1111,13 +1111,6 @@
             }
           }
           
-          if (appData.fee3) {
-            const fee3Value = parseFloat(appData.fee3.replace(/[$,]/g, ''));
-            if (!isNaN(fee3Value) && fee3Value > 0) {
-              fees.additionalDog = fee3Value;
-            }
-          }
-          
           if (appData.fee4) {
             const fee4Value = parseFloat(appData.fee4.replace(/[$,]/g, ''));
             if (!isNaN(fee4Value) && fee4Value > 0) {
