@@ -1877,13 +1877,13 @@
             if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
               classInstance.rounds.forEach((round, roundIndex) => {
                 const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
-                const roundNumber = round.roundNumber || (roundIndex + 1);
+                const roundName = round.name || round.roundName || `Round ${roundIndex + 1}`;
                 
                 html += `
                   <div class="round-item">
                     <div class="round-details">
                       <span class="judge-name">Judge: ${judgeName}</span>
-                      <span>Round ${roundNumber}</span>
+                     <span>${roundName}</span>
                     </div>
                   </div>
                 `;
