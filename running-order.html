@@ -456,6 +456,85 @@
         import { auth, db } from './js/firebase.js';
         import { collection, query, where, getDocs, doc, getDoc, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
+        // ========================================
+        // TIMEZONE-SAFE DATE UTILITIES - CRITICAL FIX
+        // ========================================
+
+        /**
+         * Creates a date object that stays in local timezone
+         */
+        function createLocalDate(dateStr) {
+            if (!dateStr) return null;
+            const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+            return new Date(dateWithTime);
+        }
+
+        /**
+         * Formats a date to YYYY-MM-DD string in local timezone
+         */
+        function formatLocalDate(date) {
+            if (!date || !(date instanceof Date)) return '';
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        /**
+         * Prepares date data for Firebase storage (prevents timezone conversion)
+         */
+        function prepareDateForFirebase(dateStr) {
+            if (!dateStr) return null;
+            const localDate = createLocalDate(dateStr);
+            return localDate;
+        }
+
+        /**
+         * Retrieves date data from Firebase (converts back to local date string)
+         */
+        function getDateFromFirebase(firebaseDate) {
+            if (!firebaseDate) return '';
+            
+            let date;
+            if (firebaseDate.toDate) {
+                date = firebaseDate.toDate();
+            } else if (firebaseDate instanceof Date) {
+                date = firebaseDate;
+            } else if (typeof firebaseDate === 'string') {
+                date = createLocalDate(firebaseDate);
+            } else {
+                return '';
+            }
+            
+            return formatLocalDate(date);
+        }
+
+        /**
+         * Formats date for display with timezone consideration
+         */
+        function formatDateDisplay(dateInput, options = {}) {
+            let date;
+            
+            if (typeof dateInput === 'string') {
+                date = createLocalDate(dateInput);
+            } else if (dateInput instanceof Date) {
+                date = new Date(dateInput);
+            } else {
+                return 'Invalid Date';
+            }
+            
+            if (!date || isNaN(date.getTime())) return 'Invalid Date';
+            
+            const defaultOptions = {
+                month: 'short',
+                day: 'numeric',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            
+            const formatOptions = { ...defaultOptions, ...options };
+            return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+        }
+
         // Global variables
         let trials = [];
         let currentTrial = null;
@@ -490,7 +569,17 @@
                 trials = [];
                 
                 snapshot.forEach(doc => {
-                    trials.push({ id: doc.id, ...doc.data() });
+                    const trialData = doc.data();
+                    
+                    // FIX: Process dates when loading trials from Firebase
+                    if (trialData.days && Array.isArray(trialData.days)) {
+                        trialData.days = trialData.days.map(day => ({
+                            ...day,
+                            date: day.date ? getDateFromFirebase(day.date) : null
+                        }));
+                    }
+                    
+                    trials.push({ id: doc.id, ...trialData });
                 });
 
                 // Sort by creation date (most recent first)
@@ -521,7 +610,7 @@
                 if (trial.days && trial.days.length > 0) {
                     const dates = trial.days
                         .filter(day => day.date)
-                        .map(day => new Date(day.date).toLocaleDateString('en-US', { 
+                        .map(day => formatDateDisplay(day.date, { 
                             month: 'short', 
                             day: 'numeric' 
                         }))
@@ -574,14 +663,17 @@
                     // Process selectedEntries if available
                     if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
                         entryData.selectedEntries.forEach(selectedEntry => {
-                            entries.push({
+                            // FIX: Process entry dates when loading from Firebase
+                            const processedEntry = {
                                 id: doc.id,
                                 ...selectedEntry,
                                 handlerName: entryData.handlerName,
                                 dogCallName: entryData.dogCallName,
                                 cwagsNumber: entryData.cwagsNumber,
-                                submittedAt: entryData.submittedAt
-                            });
+                                submittedAt: entryData.submittedAt,
+                                date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : selectedEntry.date
+                            };
+                            entries.push(processedEntry);
                         });
                     }
                 });
@@ -964,7 +1056,7 @@
             confirmSection.style.display = 'block';
         }
 
-        // Confirm running order
+        // Confirm running order with TIMEZONE-SAFE date handling
         window.confirmRunningOrder = async function() {
             const dates = Object.keys(runningOrderData);
             let dateToConfirm = null;
@@ -990,11 +1082,11 @@
             confirmBtn.textContent = 'Confirming...';
 
             try {
-                // Save the confirmed running order
+                // Save the confirmed running order with timezone-safe date
                 const runningOrderDoc = {
                     trialId: currentTrial.id,
                     trialName: currentTrial.clubName || 'Unnamed Trial',
-                    date: dateToConfirm,
+                    date: prepareDateForFirebase(dateToConfirm), // FIX: Use timezone-safe date preparation
                     runningOrder: runningOrderData[dateToConfirm],
                     confirmedAt: new Date(),
                     confirmedBy: auth.currentUser.uid,
