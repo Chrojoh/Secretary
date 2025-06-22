@@ -1032,6 +1032,17 @@
     let isRegistrationDataLoaded = false;
     let formInitialized = false;
 
+    // NEW TABBED CLASS ENTRY VARIABLES
+    let selectedEntries = [];
+    let totalFee = 0;
+
+    // Fee structure - now configurable by secretary
+    let fees = {
+      regular: 35.00,
+      feo: 25.00,
+      juniorHandler: 20.00
+    };
+
     // Prerequisites mapping - hardcoded as they're always the same
     const prerequisites = {
         "Investigator 3": ["Patrol 1", "Detective 2"],  // Special case - either/or
@@ -1747,7 +1758,8 @@
         console.warn("⚠️ Could not save fees:", error);
       }
     }
-    
+    }
+
     // Show entry form - ENHANCED
     function showEntryForm() {
       console.log("📝 Showing entry form");
@@ -2159,7 +2171,10 @@
 
     // Initialize form
     document.addEventListener('DOMContentLoaded', function() {
-        updateEntrySummary();
+        // Only update summary if we're not in the middle of initialization
+        if (selectedEntries && selectedEntries.length > 0) {
+            updateEntrySummary();
+        }
     });
   </script>
 </body>
