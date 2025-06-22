@@ -1420,105 +1420,370 @@ function addSecretaryFeeConfiguration() {
   // Insert after trial info section
   trialInfoSection.parentNode.insertBefore(feeConfigSection, trialInfoSection.nextSibling);
 }
+
+// Update fee structure based on secretary input
+function updateFeeStructure() {
+  const regularFee = parseFloat(document.getElementById('regularFee')?.value || 21);
+  const feoFeeInput = parseFloat(document.getElementById('feoFee')?.value || 15);
+  const juniorFeeInput = parseFloat(document.getElementById('juniorFee')?.value || 20);
+  
+  // Update global fees object
+  window.fees = {
+    firstClass: regularFee,
+    FEO: feoFeeInput,
+    juniorHandler: juniorFeeInput
+  };
+  
+  // Recalculate any existing entry summary
+  if (typeof updateEntrySummary === 'function') {
+    updateEntrySummary();
+  }
+  
+  console.log("📊 Fee structure updated:", window.fees);
+}
+    
+     // Secretary Fee Configuration Section - Add this before the populateClasses function
+function addSecretaryFeeConfiguration() {
+  // Only show fee configuration for secretaries
+  if (!isSecretary) return;
+  
+  const trialInfoSection = document.getElementById('trialInfoSection');
+  if (!trialInfoSection) return;
+  
+  const feeConfigSection = document.createElement('div');
+  feeConfigSection.className = 'fee-config-section';
+  feeConfigSection.id = 'feeConfigSection';
+  feeConfigSection.innerHTML = `
+    <div class="trial-info" style="background: #e8f4fd; border: 1px solid #b3d7f2;">
+      <h3>💰 Fee Configuration</h3>
+      <p style="color: #0066cc; margin-bottom: 1rem;">Set the entry fees for this trial. These will be used for automatic fee calculations.</p>
+      <div class="fee-config-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div class="form-group">
+          <label for="regularFee">Regular Entry Fee:</label>
+          <input type="number" id="regularFee" value="21" step="0.01" min="0" 
+                 style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;"
+                 onchange="updateFeeStructure()">
+        </div>
+        <div class="form-group">
+          <label for="feoFee">FEO Entry Fee:</label>
+          <input type="number" id="feoFee" value="15" step="0.01" min="0"
+                 style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;"
+                 onchange="updateFeeStructure()">
+        </div>
+        <div class="form-group">
+          <label for="juniorFee">Junior Handler Fee:</label>
+          <input type="number" id="juniorFee" value="20" step="0.01" min="0"
+                 style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;"
+                 onchange="updateFeeStructure()">
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Insert after trial info section
+  trialInfoSection.parentNode.insertBefore(feeConfigSection, trialInfoSection.nextSibling);
+}
     
     // Populate classes with the exact style from screenshot and timezone-safe dates
-    function populateClasses() {
-      const classSelection = document.getElementById('classSelection');
-      let html = '';
+   function populateClasses() {
+  const classSelection = document.getElementById('classSelection');
+  let html = '';
 
-      if (!currentTrialData.days || currentTrialData.days.length === 0) {
-        html = '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
-        classSelection.innerHTML = html;
-        return;
+  if (!currentTrialData.days || currentTrialData.days.length === 0) {
+    html = '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
+    classSelection.innerHTML = html;
+    return;
+  }
+
+  // Create tabs structure
+  html += `
+    <style>
+      .submit-tabs-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+        border-bottom: 2px solid #e9ecef;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        margin-bottom: 0;
+        padding: 0 1rem;
       }
 
-      currentTrialData.days.forEach((day, dayIndex) => {
-        if (!day.classes || day.classes.length === 0) return;
+      .submit-entry-left {
+        flex-shrink: 0;
+        margin-right: 2rem;
+      }
 
-        // Use timezone-safe date formatting
-        const dayDate = day.date ? formatDateDisplay(day.date) : `Day ${dayIndex + 1}`;
+      .btn-submit-entry {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+      }
 
-        html += `
-          <div class="day-section">
-            <div class="day-header">📅 ${dayDate}</div>
-        `;
+      .btn-submit-entry:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
 
-        // Group classes by name
-        const classGroups = new Map();
-        day.classes.forEach((cls, classIndex) => {
-          if (cls && cls.className && cls.className.trim()) {
-            const className = cls.className.trim();
-            if (!classGroups.has(className)) {
-              classGroups.set(className, []);
-            }
-            classGroups.get(className).push({...cls, dayIndex, classIndex});
-          }
-        });
+      .btn-submit-entry:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
 
-        classGroups.forEach((classInstances, className) => {
-          html += `
-            <div class="class-section">
-              <div class="class-header">
-                <span>🎯 ${className}</span>
-                <span>${classInstances.length} round${classInstances.length > 1 ? 's' : ''}</span>
-              </div>
-              <div class="class-content">
-          `;
+      .day-tabs {
+        display: flex;
+        background: white;
+        overflow-x: auto;
+        margin: 0;
+        flex: 1;
+      }
 
-          classInstances.forEach((classInstance, instanceIndex) => {
-            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
-              classInstance.rounds.forEach((round, roundIndex) => {
-                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
-                const roundNumber = round.roundNumber || (roundIndex + 1);
-                const regularId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_regular`;
-                const feoId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_feo`;
-                
-                const baseEntryValue = {
-                  dayIndex,
-                  classIndex: classInstance.classIndex,
-                  roundIndex,
-                  className,
-                  judge: judgeName,
-                  roundNumber,
-                  date: prepareDateForFirebase(day.date) || `Day ${dayIndex + 1}` // Use timezone-safe date preparation
-                };
-                
-                const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
-                const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
-                
-                const showFeo = round.feo === true || round.FEO === true;
+      .day-tab {
+        background: none;
+        border: none;
+        padding: 1rem 1.5rem;
+        margin: 0;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        font-weight: 600;
+        color: #666;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        min-width: 120px;
+        flex-shrink: 0;
+      }
 
-                html += `
-                  <div class="round-item">
-                    <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
-                    ${showFeo ? `<input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">` : ''}
-                    
-                    <div class="round-info">
-                      <div class="round-number">Round ${roundNumber}</div>
-                      <div class="judge-name">${judgeName}</div>
-                    </div>
-                    <div class="entry-options">
-                      <button type="button" class="entry-btn regular" data-entry-id="${regularId}">Entry</button>
-                      ${showFeo ? `<button type="button" class="entry-btn feo" data-entry-id="${feoId}">FEO</button>` : ''}
-                    </div>
-                  </div>
-                `;
-              });
-            }
+      .day-tab:hover {
+        background: #f8f9fa;
+        color: #333;
+      }
+
+      .day-tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+        background: #f8f9fa;
+      }
+
+      .class-entries-container {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e9ecef;
+        border-top: none;
+        background: white;
+      }
+
+      .class-day-content {
+        display: none;
+        padding: 1rem;
+      }
+
+      .class-day-content.active {
+        display: block;
+      }
+    </style>
+  `;
+
+  // Add fee configuration for secretaries
+  addSecretaryFeeConfiguration();
+
+  // Create submit button and tabs structure
+  html += '<div class="submit-tabs-container">';
+  html += '<div class="submit-entry-left">';
+  html += '<button type="submit" class="btn-submit-entry" id="submitEntryBtn">Submit Entry</button>';
+  html += '</div>';
+  html += '<div class="day-tabs">';
+  
+  currentTrialData.days.forEach((day, dayIndex) => {
+    if (!day.classes || day.classes.length === 0) return;
+    
+    const dayDate = day.date ? 
+      formatDateDisplay(day.date, { 
+        weekday: 'short', 
+        month: 'short', 
+        day: 'numeric' 
+      }) : `Day ${dayIndex + 1}`;
+    
+    const activeClass = dayIndex === 0 ? ' active' : '';
+    html += `<button class="day-tab${activeClass}" onclick="showClassDay(${dayIndex})">
+               ${dayDate}
+             </button>`;
+  });
+  
+  html += '</div></div>'; // Close day-tabs and submit-tabs-container
+
+  // Create scrollable container
+  html += '<div class="class-entries-container">';
+
+  // Create content for each day
+  currentTrialData.days.forEach((day, dayIndex) => {
+    if (!day.classes || day.classes.length === 0) return;
+
+    const activeClass = dayIndex === 0 ? ' active' : '';
+    html += `<div class="class-day-content${activeClass}" id="class-day-${dayIndex}">`;
+
+    // Use timezone-safe date formatting for day header
+    const dayDate = day.date ? 
+      formatDateDisplay(day.date, { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }) : `Day ${dayIndex + 1}`;
+
+    day.classes.forEach((classItem, classIndex) => {
+      if (!classItem.className) return;
+
+      html += `
+        <div class="class-day" style="background: #f8f9fa; margin-bottom: 1.5rem; border-radius: 8px; padding: 1.5rem; border: 1px solid #e9ecef;">
+          <div class="class-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0; color: #333; font-size: 1.25rem;">${classItem.className}</h3>
+            <div class="class-fee" style="background: #667eea; color: white; padding: 0.5rem 1rem; border-radius: 20px; font-weight: 600;">
+              $<span class="regular-fee-display">${window.fees?.firstClass || 21}</span> / $<span class="feo-fee-display">${window.fees?.FEO || 15}</span> FEO
+            </div>
+          </div>
+      `;
+
+      if (classItem.rounds && classItem.rounds.length > 0) {
+        html += '<div class="rounds-container" style="background: white; border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">';
+        
+        classItem.rounds.forEach((round, roundIndex) => {
+          const judgeName = round.judge || 'TBD';
+          const roundNumber = roundIndex + 1;
+          
+          // Generate unique IDs for entry buttons
+          const regularId = `entry_${dayIndex}_${classIndex}_${roundIndex}_regular`;
+          const feoId = `entry_${dayIndex}_${classIndex}_${roundIndex}_feo`;
+          
+          // Create entry objects for the hidden checkboxes - using dynamic fees
+          const regularEntryValue = JSON.stringify({
+            dayIndex,
+            classIndex,
+            roundIndex,
+            className: classItem.className,
+            judgeName,
+            date: day.date,
+            entryType: 'regular',
+            fee: window.fees?.firstClass || 21.00
           });
-
+          
+          const feoEntryValue = JSON.stringify({
+            dayIndex,
+            classIndex,
+            roundIndex,
+            className: classItem.className,
+            judgeName,
+            date: day.date,
+            entryType: 'feo',
+            fee: window.fees?.FEO || 15.00
+          });
+          
+          // Determine if FEO should be shown
+          const showFeo = round.feo !== false;
+          
           html += `
+            <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
+            ${showFeo ? `<input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">` : ''}
+            
+            <div class="round-info" style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; margin-bottom: 0.5rem; background: #f8f9fa; border-radius: 4px;">
+              <div class="round-details" style="display: flex; align-items: center; gap: 1rem;">
+                <div class="round-number" style="font-weight: 600;">Round ${roundNumber}</div>
+                <div class="judge-name" style="color: #666;">${judgeName}</div>
+              </div>
+              <div class="entry-options" style="display: flex; gap: 0.5rem;">
+                <button type="button" class="entry-btn regular" data-entry-id="${regularId}" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.3s;">Entry</button>
+                ${showFeo ? `<button type="button" class="entry-btn feo" data-entry-id="${feoId}" style="background: #17a2b8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: 600; transition: all 0.3s;">FEO</button>` : ''}
               </div>
             </div>
           `;
         });
+        
+        html += '</div>'; // Close rounds-container
+      }
+      
+      html += '</div>'; // Close class-day
+    });
 
-        html += `</div>`;
-      });
+    html += '</div>'; // Close class-day-content
+  });
 
-      classSelection.innerHTML = html;
-      setupClassEventListeners();
-    }
+  html += '</div>'; // Close class-entries-container
+
+  classSelection.innerHTML = html;
+  setupClassEventListeners();
+}
+
+// Function to show specific day tab
+function showClassDay(dayIndex) {
+  // Hide all day content
+  document.querySelectorAll('.class-day-content').forEach(content => {
+    content.classList.remove('active');
+  });
+  
+  // Remove active class from all tabs
+  document.querySelectorAll('.day-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  
+  // Show selected day content
+  const selectedDay = document.getElementById(`class-day-${dayIndex}`);
+  if (selectedDay) {
+    selectedDay.classList.add('active');
+  }
+  
+  // Add active class to selected tab
+  const tabs = document.querySelectorAll('.day-tab');
+  if (tabs[dayIndex]) {
+    tabs[dayIndex].classList.add('active');
+  }
+}
+
+// Update fee displays when fees change
+function updateFeeDisplays() {
+  document.querySelectorAll('.regular-fee-display').forEach(span => {
+    span.textContent = window.fees?.firstClass || 21;
+  });
+  document.querySelectorAll('.feo-fee-display').forEach(span => {
+    span.textContent = window.fees?.FEO || 15;
+  });
+}
+
+// Enhanced populateTrialInfo to include fee configuration
+function enhancedPopulateTrialInfo() {
+  // Call original populateTrialInfo first
+  if (typeof populateTrialInfo === 'function') {
+    populateTrialInfo();
+  }
+  
+  // Add fee configuration after trial info is populated
+  setTimeout(() => {
+    addSecretaryFeeConfiguration();
+    updateFeeStructure(); // Initialize fees
+  }, 100);
+}
+
+// Make functions globally available
+window.showClassDay = showClassDay;
+window.updateFeeStructure = updateFeeStructure;
+window.updateFeeDisplays = updateFeeDisplays;
+window.addSecretaryFeeConfiguration = addSecretaryFeeConfiguration;
+
+// Instructions for implementation:
+// 1. Replace the existing populateClasses() function with this version
+// 2. Add the fee configuration functions above
+// 3. Update the fee structure initialization to use window.fees
+// 4. The submit button will appear to the left of the day tabs
+// 5. Secretary can set custom prices that will be used in calculations
 
     // Setup class selection event listeners - SEPARATED FOR CLARITY
     function setupClassEventListeners() {
