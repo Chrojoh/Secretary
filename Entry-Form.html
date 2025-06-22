@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trial Entry Form</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 10px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
+    .trial-info {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .trial-info h3 {
+      color: #495057;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    
+    .trial-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .trial-details > div {
+      font-size: 0.95rem;
+    }
+    
+    .trial-details strong {
+      color: #495057;
+    }
+    
+    /* Shareable Link Section */
+    .shareable-link-section {
+      background: #e7f3ff;
+      border: 2px solid #0066cc;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px;
+      display: none;
+    }
+    
+    .shareable-link-section h3 {
+      color: #0066cc;
+      margin-bottom: 15px;
+    }
+    
+    .link-display {
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .link-url {
+      font-family: monospace;
+      background: #f8f9fa;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      word-break: break-all;
+      color: #0066cc;
+      margin-bottom: 10px;
+    }
+    
+    .link-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-copy, .btn-test {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .btn-copy {
+      background: #17a2b8;
+      color: white;
+    }
+    
+    .btn-test {
+      background: #28a745;
+      color: white;
+    }
+    
+    .entry-form {
+      padding: 2rem;
+    }
+    
+    .form-section {
+      margin-bottom: 2rem;
+    }
+    
+    .form-section h3 {
+      color: #495057;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 0.5rem;
+    }
+    
+    .form-section.primary {
+      background: #f0f8ff;
+      border: 2px solid #0066cc;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .form-section.primary h3 {
+      color: #0066cc;
+      border-bottom-color: #0066cc;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .form-group.required label::after {
+      content: " *";
+      color: #dc3545;
+      font-weight: bold;
+    }
+    
+    label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #495057;
+    }
+    
+    input, select, textarea {
+      padding: 0.75rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .auto-filled {
+      background: #e7f3ff !important;
+      border-color: #0066cc !important;
+      animation: autoFillGlow 2s ease-in-out;
+    }
+    
+    @keyframes autoFillGlow {
+      0% { box-shadow: 0 0 5px rgba(0, 102, 204, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(0, 102, 204, 0.8); }
+      100% { box-shadow: none; }
+    }
+    
+    .lookup-status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .lookup-status.success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      display: block;
+    }
+    
+    .lookup-status.warning {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      display: block;
+    }
+    
+    .lookup-status.loading {
+      background: #e7f3ff;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+      display: block;
+    }
+    
+    .waiver-section {
+      background: #fff8e1;
+      border: 2px solid #ffc107;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .waiver-content {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    
+    .waiver-agreement {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .waiver-agreement input[type="checkbox"] {
+      margin-top: 0.2rem;
+      width: auto;
+    }
+    
+    /* Class Selection - Match the screenshot style */
+    .day-section {
+      margin-bottom: 2rem;
+    }
+    
+    .day-header {
+      background: #007bff;
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    
+    .class-section {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    
+    .class-header {
+      background: #28a745;
+      color: white;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .class-content {
+      padding: 1rem;
+    }
+    
+    .round-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      background: #f8f9fa;
+    }
+    
+    .round-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .round-number {
+      background: #007bff;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .judge-name {
+      font-weight: 500;
+      color: #495057;
+    }
+    
+    .entry-options {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .entry-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid #28a745;
+      background: white;
+      color: #28a745;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    
+    .entry-btn:hover {
+      background: #28a745;
+      color: white;
+    }
+    
+    .entry-btn.selected {
+      background: #28a745;
+      color: white;
+    }
+    
+    .entry-btn.feo {
+      border-color: #ffc107;
+      color: #ffc107;
+    }
+    
+    .entry-btn.feo:hover,
+    .entry-btn.feo.selected {
+      background: #ffc107;
+      color: #212529;
+    }
+    
+    .entry-summary {
+      background: #e7f3ff;
+      border: 2px solid #0066cc;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    
+    .summary-item {
+      text-align: center;
+    }
+    
+    .summary-item strong {
+      display: block;
+      color: #495057;
+      margin-bottom: 0.5rem;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 150px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(45deg, #28a745, #20c997);
+      color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-1px);
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .success-message {
+      background: #d4edda;
+      border: 2px solid #28a745;
+      color: #155724;
+      padding: 2rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .edit-link-section {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .edit-link-section h3 {
+      color: #856404;
+      margin-bottom: 10px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .form-row, .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .entry-options {
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      
+      .round-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1 id="trialTitle">🏆 Trial Entry Form</h1>
+      <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
+    </div>
+
+    <!-- Back to Dashboard Button (Secretary Only) - MOVED BEFORE TRIAL SELECTION -->
+    <div id="backToDashboardSection" style="padding: 1rem; background: #f8f9fa; border-bottom: 1px solid #e9ecef; display: none;">
+      <button onclick="location.href='main-dashboard.html'" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+        ← Back to Dashboard
+      </button>
+    </div>
+
+    <!-- Trial Selection (Secretary Only) -->
+    <div class="trial-info" id="trialSelectionSection">
+      <h3>🎯 Select Trial</h3>
+      <div class="form-row">
+        <div class="form-group required full-width">
+          <label for="trialSelection">Choose which trial to enter:</label>
+          <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
+            <option value="">Loading available trials...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shareable Link Section (Secretary Only) -->
+    <div class="shareable-link-section" id="shareableLinkSection">
+      <h3>🔗 Shareable Entry Link</h3>
+      <p>Share this link with participants so they can enter from home:</p>
+      <div class="link-display">
+        <div class="link-url" id="shareableUrl">
+          <!-- Generated URL will appear here -->
+        </div>
+        <div class="link-actions">
+          <button class="btn-copy" onclick="copyShareableLink()">📋 Copy Link</button>
+          <button class="btn-test" onclick="testShareableLink()">🔗 Test Link</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trial Information -->
+    <div class="trial-info" id="trialInfoSection" style="display: none;">
+      <h3>📋 Trial Information</h3>
+      <div class="trial-details">
+        <div><strong>Club:</strong> <span id="clubName">-</span></div>
+        <div><strong>Dates:</strong> <span id="trialDates">-</span></div>
+        <div><strong>Location:</strong> <span id="trialLocation">-</span></div>
+        <div><strong>Secretary:</strong> <span id="trialSecretary">-</span></div>
+      </div>
+    </div>
+
+    <div class="entry-form" id="entryFormContainer" style="display: none;">
+      <!-- Success Message -->
+      <div id="successMessage" class="success-message hidden">
+        <h3>✅ Entry Submitted Successfully!</h3>
+        <p>The entry has been recorded for this trial.</p>
+        <button class="btn btn-primary" onclick="resetForm()">Enter Another Participant</button>
+      </div>
+
+      <!-- Edit Link Section -->
+      <div class="edit-link-section hidden" id="editLinkSection">
+        <h3>✅ Entry Submitted Successfully!</h3>
+        <p>Your entry has been recorded. Use this link to edit your entry in the future:</p>
+        <div class="link-display">
+          <div class="link-url" id="editUrl">
+            <!-- Edit URL will appear here -->
+          </div>
+          <div class="link-actions">
+            <button class="btn-copy" onclick="copyEditLink()">📋 Copy Edit Link</button>
+            <button class="btn-test" onclick="testEditLink()">🔗 Test Edit Link</button>
+          </div>
+        </div>
+        <div style="margin-top: 15px;">
+          <button class="btn btn-primary" onclick="resetForNewEntry()">Submit Another Entry</button>
+        </div>
+      </div>
+
+      <!-- Waiver Section -->
+      <div class="waiver-section">
+        <h3>⚠️ Liability Waiver & Release</h3>
+        <div class="waiver-content">
+          <p><strong>WAIVER AND RELEASE OF LIABILITY</strong></p>
+          <p>I understand that participation in dog training and scent work activities involves inherent risks including but not limited to: dogs working in close proximity to each other, off-leash activities, and interaction with other dogs and handlers.</p>
+          <p>I acknowledge that I participate at my own risk and agree to hold harmless the hosting club, property owners, judges, and event organizers from any claims, damages, or injuries that may occur.</p>
+        </div>
+        <div class="waiver-agreement">
+          <input type="checkbox" id="waiverAccepted" required>
+          <label for="waiverAccepted">
+            <strong>I have read, understood, and agree to the terms of this waiver and release of liability.</strong>
+          </label>
+        </div>
+      </div>
+
+      <!-- Entry Form -->
+      <form id="entryForm">
+        <!-- Registration Number Lookup -->
+        <div class="form-section primary">
+          <h3>🔍 Registration Lookup</h3>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>C-WAGS Registration Number (optional)</label>
+              <input type="text" id="cwagsNumber" placeholder="XX-XXXX-XX" 
+                     style="font-size: 1.2rem; font-weight: bold; background: #f0f8ff;">
+              <small style="color: #666; margin-top: 0.5rem; display: block;">
+                💡 Enter registration number first - handler and dog info will auto-fill if found
+              </small>
+            </div>
+          </div>
+          <div id="lookupStatus" class="lookup-status"></div>
+        </div>
+
+        <!-- Handler Information -->
+        <div class="form-section">
+          <h3>👤 Handler Information</h3>
+          <div class="form-row">
+            <div class="form-group required">
+              <label>Handler Name</label>
+              <input type="text" id="handlerName" required placeholder="Will auto-fill from registration">
+            </div>
+            <div class="form-group required">
+              <label>Phone Number</label>
+              <input type="tel" id="handlerPhone" required placeholder="(xxx) xxx-xxxx">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group required">
+              <label>Email Address</label>
+              <input type="email" id="handlerEmail" required placeholder="handler@email.com">
+            </div>
+            <div class="form-group">
+              <label>Emergency Contact</label>
+              <input type="text" id="emergencyContact" placeholder="Name and phone number">
+            </div>
+          </div>
+        </div>
+
+        <!-- Dog Information -->
+        <div class="form-section">
+          <h3>🐕 Dog Information</h3>
+          <div class="form-row">
+            <div class="form-group required">
+              <label>Dog's Call Name</label>
+              <input type="text" id="dogCallName" required placeholder="Will auto-fill from registration">
+            </div>
+            <div class="form-group">
+              <label>Breed</label>
+              <input type="text" id="dogBreed" placeholder="Enter breed">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date of Birth</label>
+              <input type="date" id="dogBirthdate">
+            </div>
+            <div class="form-group">
+              <label>Sex</label>
+              <select id="dogSex">
+                <option value="">Select...</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Male Neutered">Male Neutered</option>
+                <option value="Female Spayed">Female Spayed</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Junior Handler (Under 18)</label>
+              <select id="juniorHandler">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Class Selection -->
+        <div class="form-section">
+          <h3>🎯 Class Entries</h3>
+          <p style="margin-bottom: 1rem; color: #666;">Select the specific class/judge combinations you wish to enter:</p>
+          <div id="classSelection">
+            <div style="text-align: center; padding: 2rem; color: #666;">
+              Loading available classes by day and judge...
+            </div>
+          </div>
+        </div>
+
+        <!-- Entry Summary -->
+        <div class="entry-summary">
+          <h3>💰 Entry Summary</h3>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <strong>Classes Selected</strong>
+              <span id="selectedClassCount">0</span>
+            </div>
+            <div class="summary-item">
+              <strong>Entry Fee</strong>
+              <span id="calculatedFee">$0.00</span>
+            </div>
+            <div class="summary-item">
+              <strong>Junior Handler</strong>
+              <span id="summaryJuniorHandler">No</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="button-group">
+          <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+            Submit Entry
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="resetForm()">
+            Clear Form
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { collection, query, where, getDocs, addDoc, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    console.log("🎯 Entry form loaded");
+
+    // ========================================
+    // GLOBAL DATE HANDLING FIX
+    // ========================================
+
+    /**
+     * CORE TIMEZONE-SAFE DATE UTILITIES
+     */
+
+    // Creates a date object that stays in local timezone
+    function createLocalDate(dateStr) {
+        if (!dateStr) return null;
+        
+        // Always add noon time to prevent timezone shifts
+        if (typeof dateStr === 'string') {
+            const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+            return new Date(dateWithTime);
+        }
+        
+        return new Date(dateStr);
+    }
+
+    // Formats a date to YYYY-MM-DD string in local timezone
+    function formatLocalDate(date) {
+        if (!date || !(date instanceof Date)) return '';
+        
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}`;
+    }
+
+    // Gets today's date in local timezone as YYYY-MM-DD string
+    function getTodayLocal() {
+        const now = new Date();
+        return formatLocalDate(now);
+    }
+
+    // Formats date for display with timezone consideration
+    function formatDateDisplay(dateInput, options = {}) {
+        let date;
+        
+        if (typeof dateInput === 'string') {
+            date = createLocalDate(dateInput);
+        } else if (dateInput instanceof Date) {
+            date = new Date(dateInput);
+        } else {
+            return 'Invalid Date';
+        }
+        
+        if (!date || isNaN(date.getTime())) return 'Invalid Date';
+        
+        const defaultOptions = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+        
+        const formatOptions = { ...defaultOptions, ...options };
+        return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+    }
+
+    /**
+     * Prepares date data for Firebase storage (prevents timezone conversion)
+     */
+    function prepareDateForFirebase(dateStr) {
+        if (!dateStr) return null;
+        
+        // Create a date that represents the exact local date at noon
+        const localDate = createLocalDate(dateStr);
+        
+        // Store as a Firestore Timestamp to maintain precision
+        return localDate;
+    }
+
+    /**
+     * Retrieves date data from Firebase (converts back to local date string)
+     */
+    function getDateFromFirebase(firebaseDate) {
+        if (!firebaseDate) return '';
+        
+        let date;
+        
+        // Handle Firestore Timestamps
+        if (firebaseDate.toDate) {
+            date = firebaseDate.toDate();
+        } else if (firebaseDate instanceof Date) {
+            date = firebaseDate;
+        } else if (typeof firebaseDate === 'string') {
+            date = createLocalDate(firebaseDate);
+        } else {
+            return '';
+        }
+        
+        return formatLocalDate(date);
+    }
+
+    /**
+     * ENTRY FORM FIXES
+     * Apply these changes to your entry forms
+     */
+
+    // When saving entry data:
+    function saveEntryData(entryData) {
+        // Fix selected entries dates
+        if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+                ...entry,
+                date: entry.date ? prepareDateForFirebase(entry.date) : null
+            }));
+        }
+        
+        // Save to Firebase...
+        return addDoc(collection(db, 'entries'), entryData);
+    }
+
+    // When loading entry data:
+    function loadEntryData(entryDoc) {
+        const entryData = entryDoc.data();
+        
+        // Fix selected entries dates
+        if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+                ...entry,
+                date: entry.date ? getDateFromFirebase(entry.date) : null
+            }));
+        }
+        
+        return entryData;
+    }
+
+    /**
+     * Test function to verify dates work correctly
+     */
+    function testDateHandling() {
+        console.log('=== Entry Form Date Handling Test ===');
+        
+        const testDate = '2024-03-15';
+        console.log('1. Original date string:', testDate);
+        
+        const forFirebase = prepareDateForFirebase(testDate);
+        console.log('2. Prepared for Firebase:', forFirebase);
+        
+        const fromFirebase = getDateFromFirebase(forFirebase);
+        console.log('3. Retrieved from Firebase:', fromFirebase);
+        
+        const display = formatDateDisplay(fromFirebase);
+        console.log('4. Formatted for display:', display);
+        
+        const matches = fromFirebase === testDate;
+        console.log('5. Round-trip successful:', matches);
+        
+        if (!matches) {
+            console.error('❌ Date handling is still broken!');
+        } else {
+            console.log('✅ Date handling is working correctly!');
+        }
+    }
+
+    // Test the date handling on page load
+    testDateHandling();
+
+    // Global variables
+    let currentTrialData = null;
+    let selectedClasses = new Set();
+    let registrationData = [];
+    let isAutoFilling = false;
+    let availableTrials = [];
+    let isSecretary = false;
+
+    // Fee structure
+    const fees = {
+      firstClass: 35.00,
+      additionalClass: 25.00,
+      juniorHandler: 20.00
+    };
+
+    // Initialize the application
+    async function init() {
+      await loadRegistrationData();
+
+      // Check URL parameters for entry link
+      const urlParams = new URLSearchParams(window.location.search);
+      const entryId = urlParams.get('entry');
+      const trialId = urlParams.get('trial');
+
+      if (entryId) {
+        // Load existing entry for editing
+        await loadExistingEntry(entryId);
+      } else if (trialId) {
+        // Load specific trial for public entry
+        await loadSpecificT
