@@ -743,11 +743,14 @@
       }
     }
 
-    let authCheckComplete = false;
-    let currentUser = null;
-    let availableTrials = [];
-    let currentTrialEntries = [];
-    let filteredEntries = [];
+    // Enhanced Fee structure - will be loaded from trial application data
+    let fees = {
+      firstClass: 35.00,
+      additionalClass: 25.00,
+      juniorHandler: 20.00,
+      additionalDog: 30.00,
+      exhibitionOnly: 15.00
+    };
 
     // Tab Management
     window.showTab = function(tabName) {
