@@ -1845,8 +1845,8 @@
         // Group classes by name
         const classGroups = new Map();
         day.classes.forEach((cls, classIndex) => {
-          if (cls && cls.className && cls.className.trim()) {
-            const className = cls.className.trim();
+     if (cls && (cls.className || cls.name) && (cls.className || cls.name).trim()) {
+  const className = (cls.className || cls.name).trim();
             if (!classGroups.has(className)) {
               classGroups.set(className, []);
             }
