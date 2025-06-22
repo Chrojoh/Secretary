@@ -1951,14 +1951,43 @@
     const hasTrialParam = urlParams.get('trial');
     const isPublicEntry = hasEntryParam || hasTrialParam;
 
+    console.log("🔍 URL Analysis:", {
+      hasEntryParam,
+      hasTrialParam, 
+      isPublicEntry,
+      currentURL: window.location.href
+    });
+
     if (isPublicEntry) {
       console.log("🔗 Public entry detected, initializing immediately");
       // For public entries, initialize immediately without waiting for auth
       init();
     } else {
       console.log("👨‍💼 Secretary mode, waiting for auth");
+      
+      // Set a timeout to prevent hanging forever
+      let authResolved = false;
+      
+      setTimeout(() => {
+        if (!authResolved) {
+          console.log("⏰ Auth timeout, checking current user state");
+          if (auth.currentUser) {
+            console.log("✅ Found current user after timeout, initializing");
+            authResolved = true;
+            init();
+          } else {
+            console.log("❌ No user found after timeout, redirecting");
+            alert("Authentication timeout. Please log in again.");
+            window.location.href = 'index.html';
+          }
+        }
+      }, 5000);
+      
       // For secretary mode, wait for auth
       auth.onAuthStateChanged(async (user) => {
+        if (authResolved) return; // Prevent double execution
+        authResolved = true;
+        
         if (user) {
           console.log("✅ User authenticated, initializing secretary mode");
           await init();
