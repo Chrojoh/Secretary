@@ -164,7 +164,7 @@ function populateScheduleTable() {
         }
       }
       
-      judgeCell.innerHTML = `<input type="text" value="${judgeValue}" placeholder="Judge">`;
+      judgeCell.innerHTML = `<input type="text" value="${judgeValue}" placeholder="">`;
       row.appendChild(judgeCell);
     }
     
