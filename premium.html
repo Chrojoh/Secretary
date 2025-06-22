@@ -369,56 +369,49 @@
     let currentApplicationData = null;
 
     // ROBUST DATE CONVERSION FUNCTION
-    function convertDateSafely(dateStr) {
-      console.log("🔧 Converting date:", dateStr);
-      
-      if (!dateStr || !dateStr.trim()) {
-        console.log("❌ Empty date string");
-        return "Date TBD";
+    function convertDateSafely(dateInput) {
+  if (!dateInput) return "Date TBD";
+  
+  try {
+    let processedDate;
+    
+    // Handle different date input types
+    if (dateInput instanceof Date) {
+      processedDate = dateInput;
+    } else if (dateInput && typeof dateInput.toDate === 'function') {
+      processedDate = dateInput.toDate();
+    } else if (typeof dateInput === 'string') {
+      const trimmedDate = dateInput.trim();
+      if (trimmedDate.includes('/')) {
+        const [month, day, year] = trimmedDate.split('/');
+        processedDate = new Date(year, month - 1, day);
+      } else if (trimmedDate.includes('-')) {
+        processedDate = new Date(trimmedDate + 'T12:00:00');
+      } else {
+        processedDate = new Date(trimmedDate);
       }
-      
-      try {
-        // Parse YYYY-MM-DD format manually
-        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-          const [year, month, day] = dateStr.split('-').map(num => parseInt(num, 10));
-          console.log("📅 Parsed components:", {year, month, day});
-          
-          // Create date in LOCAL timezone (month is 0-indexed)
-          const localDate = new Date(year, month - 1, day, 12, 0, 0);
-          console.log("🕐 Created local date:", localDate);
-          
-          // Format as readable date
-          const options = { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          };
-          const formatted = localDate.toLocaleDateString('en-US', options);
-          console.log("✅ Formatted date:", formatted);
-          return formatted;
-        }
-        
-        // Try other formats
-        const date = new Date(dateStr);
-        if (!isNaN(date.getTime())) {
-          const options = { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          };
-          return date.toLocaleDateString('en-US', options);
-        }
-        
-        console.log("⚠️ Could not parse date, returning original");
-        return dateStr;
-        
-      } catch (error) {
-        console.error("💥 Date conversion error:", error);
-        return dateStr || "Date TBD";
-      }
+    } else {
+      processedDate = new Date(dateInput);
     }
+    
+    if (!processedDate || isNaN(processedDate.getTime())) {
+      return dateInput.toString ? dateInput.toString() : "Date TBD";
+    }
+    
+    const options = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    
+    return processedDate.toLocaleDateString('en-US', options);
+    
+  } catch (error) {
+    console.error("Date conversion error:", error);
+    return dateInput.toString ? dateInput.toString() : "Date TBD";
+  }
+}
 
     function showLoadingIndicator() {
       const indicator = document.getElementById('loadingIndicator');
