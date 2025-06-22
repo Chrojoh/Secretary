@@ -71,6 +71,87 @@
 
     console.log("Script starting to load...");
 
+    // ========================================
+    // TIMEZONE-SAFE DATE UTILITIES - CRITICAL FIX
+    // ========================================
+
+    /**
+     * Creates a date object that stays in local timezone
+     */
+    function createLocalDate(dateStr) {
+      if (!dateStr) return null;
+      const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+      return new Date(dateWithTime);
+    }
+
+    /**
+     * Formats a date to YYYY-MM-DD string in local timezone
+     */
+    function formatLocalDate(date) {
+      if (!date || !(date instanceof Date)) return '';
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    /**
+     * Prepares date data for Firebase storage (prevents timezone conversion)
+     */
+    function prepareDateForFirebase(dateStr) {
+      if (!dateStr) return null;
+      const localDate = createLocalDate(dateStr);
+      return localDate;
+    }
+
+    /**
+     * Retrieves date data from Firebase (converts back to local date string)
+     */
+    function getDateFromFirebase(firebaseDate) {
+      if (!firebaseDate) return '';
+      
+      let date;
+      if (firebaseDate.toDate) {
+        date = firebaseDate.toDate();
+      } else if (firebaseDate instanceof Date) {
+        date = firebaseDate;
+      } else if (typeof firebaseDate === 'string') {
+        date = createLocalDate(firebaseDate);
+      } else {
+        return '';
+      }
+      
+      return formatLocalDate(date);
+    }
+
+    /**
+     * Test function to verify dates work correctly
+     */
+    function testDateHandling() {
+      console.log('=== Date Handling Test ===');
+      
+      const testDate = '2024-03-15';
+      console.log('1. Original date string:', testDate);
+      
+      const forFirebase = prepareDateForFirebase(testDate);
+      console.log('2. Prepared for Firebase:', forFirebase);
+      
+      const fromFirebase = getDateFromFirebase(forFirebase);
+      console.log('3. Retrieved from Firebase:', fromFirebase);
+      
+      const matches = fromFirebase === testDate;
+      console.log('4. Round-trip successful:', matches);
+      
+      if (!matches) {
+        console.error('❌ Date handling is still broken!');
+      } else {
+        console.log('✅ Date handling is working correctly!');
+      }
+    }
+
+    // Test the date handling on page load
+    testDateHandling();
+
     // Check if we're editing an existing trial
     const editTrialId = sessionStorage.getItem('editTrialId');
     let isEditMode = false;
@@ -137,6 +218,14 @@
           
           console.log("✅ Loaded trial for editing:", currentTrialData);
           
+          // FIX: Process dates when loading from Firebase
+          if (currentTrialData.days && Array.isArray(currentTrialData.days)) {
+            currentTrialData.days = currentTrialData.days.map(day => ({
+              ...day,
+              date: day.date ? getDateFromFirebase(day.date) : null
+            }));
+          }
+          
           // Populate form with existing data
           populateFormWithTrialData();
           
@@ -195,10 +284,10 @@
       console.log("📅 Populating days data...");
 
       currentTrialData.days.forEach((dayData, dayIndex) => {
-        // Set date
+        // Set date - now timezone-safe
         const dateInput = document.querySelector(`input[name="date${dayIndex}"]`);
         if (dateInput && dayData.date) {
-          dateInput.value = dayData.date;
+          dateInput.value = dayData.date; // Already processed by getDateFromFirebase
         }
 
         // Set number of classes and generate them
@@ -309,7 +398,7 @@
     // Start initialization
     initializePage();
 
-    // Form submission - save or update trial
+    // Form submission - save or update trial with TIMEZONE-SAFE dates
     document.getElementById('trialForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
@@ -354,10 +443,10 @@
         submitButton.textContent = isEditMode ? "Updating..." : "Saving...";
         submitButton.disabled = true;
         
-        // Collect ALL the trial data including classes, rounds, and judges
+        // Collect ALL the trial data including classes, rounds, and judges - WITH TIMEZONE-SAFE DATES
         const trialData = collectAllTrialData();
         
-        console.log("Saving complete trial data:", trialData);
+        console.log("Saving complete trial data with timezone-safe dates:", trialData);
         
         if (isEditMode && currentTrialData) {
           // Update existing trial
@@ -398,7 +487,7 @@
       }
     });
 
-    // Function to collect ALL trial data - classes, rounds, judges, everything
+    // Function to collect ALL trial data - WITH TIMEZONE-SAFE DATE HANDLING
     function collectAllTrialData() {
       const clubName = document.querySelector('input[name="clubName"]').value;
       const secretary = document.querySelector('input[name="secretary"]').value;
@@ -416,7 +505,8 @@
           
           const dayData = {
             dayNumber: dayIndex + 1,
-            date: dateInput ? dateInput.value : '',
+            // FIX: Use timezone-safe date preparation for Firebase
+            date: dateInput && dateInput.value ? prepareDateForFirebase(dateInput.value) : null,
             classes: []
           };
           
@@ -458,6 +548,13 @@
           days.push(dayData);
         });
       }
+      
+      console.log("🔧 Trial data with timezone-safe dates prepared:", {
+        clubName,
+        secretary,
+        numDays,
+        daysWithDates: days.map(d => ({ dayNumber: d.dayNumber, date: d.date }))
+      });
       
       return {
         clubName: clubName,
@@ -607,7 +704,7 @@
     window.generateClasses = generateClasses;
     window.generateRounds = generateRounds;
 
-    console.log("Create trial page script loaded successfully");
+    console.log("Create trial page script loaded successfully with timezone-safe date handling");
   </script>
 </body>
 </html>
