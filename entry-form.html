@@ -417,23 +417,21 @@
       font-size: 0.9rem;
     }
     
-    .rounds-container {
-      padding: 1rem;
-      background: #fff;
-    }
-    
     .round-item {
       background: #f0f8ff;
       border: 1px solid #dee2e6;
       border-radius: 6px;
       padding: 0.75rem;
       margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     
     .round-details {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: 0.25rem;
     }
     
     .judge-name {
@@ -441,13 +439,14 @@
       color: #495057;
     }
     
-    .entry-types {
-      background: #f8f9fa;
-      padding: 1rem;
+    .entry-options {
       display: flex;
-      gap: 1rem;
-      justify-content: center;
-      border-top: 1px solid #dee2e6;
+      gap: 0.5rem;
+    }
+    
+    .rounds-container {
+      padding: 1rem;
+      background: #fff;
     }
     
     .entry-option {
