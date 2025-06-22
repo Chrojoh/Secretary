@@ -923,11 +923,11 @@ function clearPremiumForm() {
     };
 
     // Auto-load trial data when page loads with longer delay to ensure auth is ready
-    window.addEventListener('load', () => {
-      console.log("🚀 Page loaded, auto-loading trial data...");
-      setTimeout(loadTrialData, 2000); // Increased delay for better reliability
-    });
-
+ // Replace the existing window.addEventListener('load', ...) with:
+window.addEventListener('load', () => {
+  console.log("🚀 Page loaded, loading trials...");
+  setTimeout(loadTrials, 1000);
+});
     console.log("Premium generator ready with improved auto-fill");
   </script>
 </body>
