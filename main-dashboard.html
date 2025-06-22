@@ -626,6 +626,13 @@
 
     console.log("Enhanced Dashboard loading...");
 
+    // Initialize variables first
+    let authCheckComplete = false;
+    let currentUser = null;
+    let availableTrials = [];
+    let currentTrialEntries = [];
+    let filteredEntries = [];
+
     // ========================================
     // GLOBAL DATE HANDLING FIX
     // ========================================
