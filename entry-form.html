@@ -799,15 +799,15 @@
               <label>Handler Name</label>
               <input type="text" id="handlerName" required placeholder="Will auto-fill from registration">
             </div>
-            <div class="form-group required">
+            <div class="form-group">
               <label>Phone Number</label>
-              <input type="tel" id="handlerPhone" required placeholder="(xxx) xxx-xxxx">
+              <input type="tel" id="handlerPhone" placeholder="(xxx) xxx-xxxx">
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group required">
+            <div class="form-group">
               <label>Email Address</label>
-              <input type="email" id="handlerEmail" required placeholder="handler@email.com">
+              <input type="email" id="handlerEmail" placeholder="handler@email.com">
             </div>
             <div class="form-group">
               <label>Emergency Contact</label>
@@ -901,7 +901,7 @@
 
   <script type="module">
     import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     // ========================================
     // GLOBAL DATE HANDLING FIX
@@ -1032,9 +1032,37 @@
     let isRegistrationDataLoaded = false;
     let formInitialized = false;
 
-    // NEW TABBED CLASS ENTRY VARIABLES
-    let selectedEntries = [];
-    let totalFee = 0;
+    // Prerequisites mapping - hardcoded as they're always the same
+    const prerequisites = {
+        "Investigator 3": ["Patrol 1", "Detective 2"],  // Special case - either/or
+        "Super Sleuth 4": ["Investigator 3"],
+        "Private Inv": ["Super Sleuth 4"],
+        "Det Diversions": ["Super Sleuth 4"],
+        "Ranger 2": ["Ranger 1"],
+        "Ranger 3": ["Ranger 2"],
+        "Ranger 4": ["Ranger 3"],
+        "Ranger 5": ["Ranger 4"],
+        "Dasher 4": ["Dasher 3"],
+        "Dasher 5": ["Dasher 4"],
+        "Dasher 6": ["Dasher 5"],
+        "Obedience 4": ["Obedience 3"],
+        "Obedience 5": ["Obedience 4"]
+    };
+
+    // Get prerequisites text for a class
+    function getPrerequisitesText(className) {
+        const prereqs = prerequisites[className];
+        if (!prereqs || prereqs.length === 0) {
+            return "Open to all levels";
+        }
+        
+        // Handle special either/or case
+        if (className === "Investigator 3") {
+            return "Requires: Patrol 1 OR Detective 2";
+        }
+        
+        return `Requires: ${prereqs.join(", ")}`;
+    }
 
     // Fee structure - now configurable by secretary
     let fees = {
@@ -1626,7 +1654,7 @@
       });
     }
 
-    // Setup fee change listeners for secretary
+    // Setup fee change listeners for secretary with persistence
     function setupFeeChangeListeners() {
       const regularFeeInput = document.getElementById('regularFee');
       const feoFeeInput = document.getElementById('feoFee');
@@ -1637,6 +1665,9 @@
         return;
       }
       
+      // Load saved fees for this trial if they exist
+      loadTrialFees();
+      
       function updateFees() {
         console.log("💰 Updating fees from inputs");
         fees.regular = parseFloat(regularFeeInput.value) || 35.00;
@@ -1644,6 +1675,9 @@
         fees.juniorHandler = parseFloat(juniorFeeInput.value) || 20.00;
         
         console.log("💰 New fees:", fees);
+        
+        // Save fees to trial data
+        saveTrialFees();
         
         // Regenerate classes with new fees
         if (currentTrialData) {
@@ -1666,7 +1700,55 @@
       
       console.log("✅ Fee change listeners setup complete");
     }
-    
+
+    // Load saved fees for the current trial
+    async function loadTrialFees() {
+      if (!currentTrialData || !currentTrialData.id) return;
+      
+      try {
+        // Check if trial has saved fees
+        if (currentTrialData.entryFees) {
+          fees.regular = currentTrialData.entryFees.regular || fees.regular;
+          fees.feo = currentTrialData.entryFees.feo || fees.feo;
+          fees.juniorHandler = currentTrialData.entryFees.juniorHandler || fees.juniorHandler;
+          
+          // Update the input fields
+          document.getElementById('regularFee').value = fees.regular.toFixed(2);
+          document.getElementById('feoFee').value = fees.feo.toFixed(2);
+          document.getElementById('juniorFee').value = fees.juniorHandler.toFixed(2);
+          
+          console.log("✅ Loaded saved fees for trial:", fees);
+        }
+      } catch (error) {
+        console.warn("⚠️ Could not load saved fees:", error);
+      }
+    }
+
+    // Save fees to trial data in Firebase
+    async function saveTrialFees() {
+      if (!currentTrialData || !currentTrialData.id || !isSecretary) return;
+      
+      try {
+        // Update the current trial data
+        currentTrialData.entryFees = {
+          regular: fees.regular,
+          feo: fees.feo,
+          juniorHandler: fees.juniorHandler,
+          updatedAt: new Date()
+        };
+        
+        // Save to Firebase
+        await updateDoc(doc(db, 'trials', currentTrialData.id), {
+          entryFees: currentTrialData.entryFees
+        });
+        
+        console.log("✅ Saved fees to trial data");
+      } catch (error) {
+        console.warn("⚠️ Could not save fees:", error);
+      }
+    }
+    }
+
     // Show entry form - ENHANCED
     function showEntryForm() {
       console.log("📝 Showing entry form");
@@ -1868,12 +1950,10 @@
     function checkFormValidity() {
       const waiverAccepted = document.getElementById('waiverAccepted').checked;
       const handlerName = document.getElementById('handlerName').value.trim();
-      const handlerEmail = document.getElementById('handlerEmail').value.trim();
-      const handlerPhone = document.getElementById('handlerPhone').value.trim();
       const dogCallName = document.getElementById('dogCallName').value.trim();
       const hasClasses = selectedEntries.length > 0;
       
-      const isValid = waiverAccepted && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
+      const isValid = waiverAccepted && handlerName && dogCallName && hasClasses;
       
       const submitBtn = document.getElementById('submitEntry');
       if (submitBtn) {
