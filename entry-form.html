@@ -2,588 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trial Entry Form</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        
-        .header-section {
-            margin-bottom: 30px;
-        }
-        
-        .back-button {
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-bottom: 20px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        
-        .back-button:hover {
-            background-color: #545b62;
-        }
-        
-        .form-container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        
-        .trial-selection {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        
-        .entry-day {
-            background-color: #e9ecef;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        
-        .entry-day h3 {
-            margin-top: 0;
-            color: #495057;
-        }
-        
-        .class-selection {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .class-option {
-            background-color: white;
-            border: 2px solid #ddd;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .class-option:hover {
-            border-color: #007bff;
-        }
-        
-        .class-option.selected {
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-        
-        .submit-section {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        .submit-btn {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .submit-btn:hover {
-            background-color: #218838;
-        }
-        
-        .submit-btn:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-        
-        .link-section {
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
-        
-        .share-link {
-            background-color: white;
-            padding: 10px;
-            border: 1px solid #28a745;
-            border-radius: 5px;
-            word-break: break-all;
-            font-family: monospace;
-        }
-        
-        .copy-btn {
-            background-color: #17a2b8;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 3px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        
-        .error {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        
-        .success {
-            color: #28a745;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-    </style>
-</head>
-<body>
-    <div class="header-section">
-        <a href="dashboard.html" class="back-button">← Back to Dashboard</a>
-    </div>
-
-    <div class="form-container">
-        <h1>Trial Entry Form</h1>
-        
-        <div class="link-section" id="shareLinkSection" style="display: none;">
-            <h3>Create a Shareable Link</h3>
-            <p>Use this link to share the entry form with participants:</p>
-            <div class="share-link" id="shareLink"></div>
-            <button class="copy-btn" onclick="copyShareLink()">Copy Link</button>
-        </div>
-
-        <form id="entryForm">
-            <div class="form-group">
-                <label for="handlerName">Handler Name *</label>
-                <input type="text" id="handlerName" name="handlerName" required>
-            </div>
-
-            <div class="form-group">
-                <label for="handlerEmail">Handler Email *</label>
-                <input type="email" id="handlerEmail" name="handlerEmail" required>
-            </div>
-
-            <div class="form-group">
-                <label for="dogName">Dog Name *</label>
-                <input type="text" id="dogName" name="dogName" required>
-            </div>
-
-            <div class="form-group">
-                <label for="dogBreed">Dog Breed</label>
-                <input type="text" id="dogBreed" name="dogBreed">
-            </div>
-
-            <div class="trial-selection">
-                <div class="form-group">
-                    <label for="trialSelect">Select Trial *</label>
-                    <select id="trialSelect" name="trialSelect" required onchange="loadTrialDays()">
-                        <option value="">-- Select a Trial --</option>
-                    </select>
-                </div>
-
-                <div id="trialDays" style="display: none;">
-                    <h3>Select Classes for Each Day</h3>
-                    <div id="daysContainer"></div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="specialRequests">Special Requests</label>
-                <textarea id="specialRequests" name="specialRequests" rows="3" placeholder="Any special accommodations or requests..."></textarea>
-            </div>
-
-            <div class="submit-section">
-                <button type="submit" class="submit-btn" id="submitBtn">Submit Entry</button>
-                <div id="submitMessage"></div>
-            </div>
-        </form>
-    </div>
-
-    <script type="module">
-        // ========================================
-        // GLOBAL DATE HANDLING FIX
-        // ========================================
-        
-        // Creates a date object that stays in local timezone
-        function createLocalDate(dateStr) {
-            if (!dateStr) return null;
-            
-            // Always add noon time to prevent timezone shifts
-            if (typeof dateStr === 'string') {
-                const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
-                return new Date(dateWithTime);
-            }
-            
-            return new Date(dateStr);
-        }
-
-        // Formats a date to YYYY-MM-DD string in local timezone
-        function formatLocalDate(date) {
-            if (!date || !(date instanceof Date)) return '';
-            
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            
-            return `${year}-${month}-${day}`;
-        }
-
-        // Formats date for display with timezone consideration
-        function formatDateDisplay(dateInput, options = {}) {
-            let date;
-            
-            if (typeof dateInput === 'string') {
-                date = createLocalDate(dateInput);
-            } else if (dateInput instanceof Date) {
-                date = new Date(dateInput);
-            } else {
-                return 'Invalid Date';
-            }
-            
-            if (!date || isNaN(date.getTime())) return 'Invalid Date';
-            
-            const defaultOptions = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-            };
-            
-            const formatOptions = { ...defaultOptions, ...options };
-            return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
-        }
-
-        // Prepares date data for Firebase storage
-        function prepareDateForFirebase(dateStr) {
-            if (!dateStr) return null;
-            const localDate = createLocalDate(dateStr);
-            return localDate;
-        }
-
-        // Retrieves date data from Firebase
-        function getDateFromFirebase(firebaseDate) {
-            if (!firebaseDate) return '';
-            
-            let date;
-            
-            if (firebaseDate.toDate) {
-                date = firebaseDate.toDate();
-            } else if (firebaseDate instanceof Date) {
-                date = firebaseDate;
-            } else if (typeof firebaseDate === 'string') {
-                date = createLocalDate(firebaseDate);
-            } else {
-                return '';
-            }
-            
-            return formatLocalDate(date);
-        }
-
-        // ========================================
-        // ENTRY FORM LOGIC
-        // ========================================
-
-        let availableTrials = [];
-        let selectedEntries = [];
-
-        // Mock data for demonstration
-        const mockTrials = [
-            {
-                id: 'trial1',
-                name: 'Spring Agility Trial 2024',
-                days: [
-                    {
-                        date: '2024-04-15',
-                        classes: ['Novice A', 'Novice B', 'Open', 'Excellent', 'Masters']
-                    },
-                    {
-                        date: '2024-04-16',
-                        classes: ['Novice A', 'Novice B', 'Open', 'Excellent', 'Masters', 'FAST']
-                    }
-                ]
-            },
-            {
-                id: 'trial2',
-                name: 'Summer Championship 2024',
-                days: [
-                    {
-                        date: '2024-06-20',
-                        classes: ['Open', 'Excellent', 'Masters', 'Premier']
-                    }
-                ]
-            }
-        ];
-
-        // Initialize form
-        function initializeForm() {
-            loadTrials();
-            generateShareableLink();
-        }
-
-        // Load available trials
-        function loadTrials() {
-            const trialSelect = document.getElementById('trialSelect');
-            
-            // Clear existing options
-            trialSelect.innerHTML = '<option value="">-- Select a Trial --</option>';
-            
-            // Add mock trials (replace with Firebase data)
-            mockTrials.forEach(trial => {
-                const option = document.createElement('option');
-                option.value = trial.id;
-                option.textContent = trial.name;
-                trialSelect.appendChild(option);
-            });
-        }
-
-        // Load trial days when trial is selected
-        window.loadTrialDays = function() {
-            const trialSelect = document.getElementById('trialSelect');
-            const trialDays = document.getElementById('trialDays');
-            const daysContainer = document.getElementById('daysContainer');
-            
-            if (!trialSelect.value) {
-                trialDays.style.display = 'none';
-                return;
-            }
-            
-            const selectedTrial = mockTrials.find(trial => trial.id === trialSelect.value);
-            if (!selectedTrial) return;
-            
-            // Clear previous days
-            daysContainer.innerHTML = '';
-            selectedEntries = [];
-            
-            // Create day selections
-            selectedTrial.days.forEach((day, dayIndex) => {
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'entry-day';
-                
-                // Use timezone-safe date formatting
-                const displayDate = formatDateDisplay(getDateFromFirebase(day.date));
-                
-                dayDiv.innerHTML = `
-                    <h3>${displayDate}</h3>
-                    <div class="class-selection" id="day${dayIndex}Classes">
-                        ${day.classes.map(className => `
-                            <div class="class-option" onclick="toggleClass('${dayIndex}', '${className}', '${day.date}')">
-                                ${className}
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-                
-                daysContainer.appendChild(dayDiv);
-            });
-            
-            trialDays.style.display = 'block';
-        }
-
-        // Toggle class selection
-        window.toggleClass = function(dayIndex, className, date) {
-            const classElement = event.target;
-            const entryKey = `${dayIndex}-${className}`;
-            
-            if (classElement.classList.contains('selected')) {
-                // Remove selection
-                classElement.classList.remove('selected');
-                selectedEntries = selectedEntries.filter(entry => entry.key !== entryKey);
-            } else {
-                // Add selection
-                classElement.classList.add('selected');
-                selectedEntries.push({
-                    key: entryKey,
-                    dayIndex: dayIndex,
-                    className: className,
-                    date: prepareDateForFirebase(date) // Use timezone-safe date preparation
-                });
-            }
-        }
-
-        // Generate shareable link
-        function generateShareableLink() {
-            const baseUrl = window.location.origin + window.location.pathname;
-            const shareLink = `${baseUrl}?mode=public`;
-            
-            document.getElementById('shareLink').textContent = shareLink;
-            document.getElementById('shareLinkSection').style.display = 'block';
-        }
-
-        // Copy share link to clipboard
-        window.copyShareLink = function() {
-            const shareLink = document.getElementById('shareLink').textContent;
-            navigator.clipboard.writeText(shareLink).then(() => {
-                alert('Link copied to clipboard!');
-            });
-        }
-
-        // Handle form submission
-        document.getElementById('entryForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('submitBtn');
-            const submitMessage = document.getElementById('submitMessage');
-            
-            // Validate form
-            if (selectedEntries.length === 0) {
-                submitMessage.innerHTML = '<div class="error">Please select at least one class.</div>';
-                return;
-            }
-            
-            // Disable submit button
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-            submitMessage.innerHTML = '';
-            
-            try {
-                // Prepare entry data with timezone-safe dates
-                const entryData = {
-                    handlerName: document.getElementById('handlerName').value,
-                    handlerEmail: document.getElementById('handlerEmail').value,
-                    dogName: document.getElementById('dogName').value,
-                    dogBreed: document.getElementById('dogBreed').value,
-                    trialId: document.getElementById('trialSelect').value,
-                    specialRequests: document.getElementById('specialRequests').value,
-                    selectedEntries: selectedEntries.map(entry => ({
-                        ...entry,
-                        date: entry.date // Already prepared with prepareDateForFirebase
-                    })),
-                    submittedAt: new Date()
-                };
-                
-                // Save to Firebase (replace with actual Firebase call)
-                await saveEntryData(entryData);
-                
-                submitMessage.innerHTML = '<div class="success">Entry submitted successfully!</div>';
-                
-                // Reset form
-                document.getElementById('entryForm').reset();
-                document.getElementById('trialDays').style.display = 'none';
-                selectedEntries = [];
-                
-            } catch (error) {
-                console.error('Error submitting entry:', error);
-                submitMessage.innerHTML = '<div class="error">Error submitting entry. Please try again.</div>';
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit Entry';
-            }
-        });
-
-        // Save entry data with timezone-safe date handling
-        async function saveEntryData(entryData) {
-            // Fix selected entries dates using the global date fix
-            if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-                entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
-                    ...entry,
-                    date: entry.date ? prepareDateForFirebase(entry.date) : null
-                }));
-            }
-            
-            // Mock save to Firebase - replace with actual Firebase code
-            console.log('Saving entry data:', entryData);
-            
-            // Simulate async operation
-            return new Promise(resolve => setTimeout(resolve, 1000));
-        }
-
-        // Load entry data with timezone-safe date handling
-        function loadEntryData(entryDoc) {
-            const entryData = entryDoc.data();
-            
-            // Fix selected entries dates using the global date fix
-            if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-                entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
-                    ...entry,
-                    date: entry.date ? getDateFromFirebase(entry.date) : null
-                }));
-            }
-            
-            return entryData;
-        }
-
-        // Test date handling function
-        function testDateHandling() {
-            console.log('=== Date Handling Test ===');
-            
-            const testDate = '2024-03-15';
-            console.log('1. Original date string:', testDate);
-            
-            const forFirebase = prepareDateForFirebase(testDate);
-            console.log('2. Prepared for Firebase:', forFirebase);
-            
-            const fromFirebase = getDateFromFirebase(forFirebase);
-            console.log('3. Retrieved from Firebase:', fromFirebase);
-            
-            const display = formatDateDisplay(fromFirebase);
-            console.log('4. Formatted for display:', display);
-            
-            const matches = fromFirebase === testDate;
-            console.log('5. Round-trip successful:', matches);
-            
-            if (!matches) {
-                console.error('❌ Date handling is still broken!');
-            } else {
-                console.log('✅ Date handling is working correctly!');
-            }
-        }
-
-        // Initialize when page loads
-        initializeForm();
-        
-        // Test date handling (remove in production)
-        testDateHandling();
-    </script>
-</body>
-</html>name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trial Entry Form</title>
   <style>
     * {
@@ -624,6 +43,33 @@
     .header p {
       font-size: 1.1rem;
       opacity: 0.9;
+    }
+
+    /* Back to Dashboard Button */
+    .back-to-dashboard {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      padding: 15px 20px;
+    }
+    
+    .back-button {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s ease;
+    }
+    
+    .back-button:hover {
+      background: #5a6268;
     }
     
     .trial-info {
@@ -1084,6 +530,13 @@
       <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
     </div>
 
+    <!-- Back to Dashboard Button -->
+    <div class="back-to-dashboard" id="backToDashboardSection">
+      <a href="main-dashboard.html" class="back-button">
+        ← Back to Dashboard
+      </a>
+    </div>
+
     <!-- Trial Selection (Secretary Only) -->
     <div class="trial-info" id="trialSelectionSection">
       <h3>🎯 Select Trial</h3>
@@ -1295,6 +748,123 @@
     import { auth, db } from './js/firebase.js';
     import { collection, query, where, getDocs, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
+    // ========================================
+    // GLOBAL DATE HANDLING FIX
+    // ========================================
+    
+    // Creates a date object that stays in local timezone
+    function createLocalDate(dateStr) {
+      if (!dateStr) return null;
+      
+      // Always add noon time to prevent timezone shifts
+      if (typeof dateStr === 'string') {
+        const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+        return new Date(dateWithTime);
+      }
+      
+      return new Date(dateStr);
+    }
+
+    // Formats a date to YYYY-MM-DD string in local timezone
+    function formatLocalDate(date) {
+      if (!date || !(date instanceof Date)) return '';
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
+    }
+
+    // Gets today's date in local timezone as YYYY-MM-DD string
+    function getTodayLocal() {
+      const now = new Date();
+      return formatLocalDate(now);
+    }
+
+    // Formats date for display with timezone consideration
+    function formatDateDisplay(dateInput, options = {}) {
+      let date;
+      
+      if (typeof dateInput === 'string') {
+        date = createLocalDate(dateInput);
+      } else if (dateInput instanceof Date) {
+        date = new Date(dateInput);
+      } else {
+        return 'Invalid Date';
+      }
+      
+      if (!date || isNaN(date.getTime())) return 'Invalid Date';
+      
+      const defaultOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+      
+      const formatOptions = { ...defaultOptions, ...options };
+      return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+    }
+
+    // Prepares date data for Firebase storage (prevents timezone conversion)
+    function prepareDateForFirebase(dateStr) {
+      if (!dateStr) return null;
+      
+      // Create a date that represents the exact local date at noon
+      const localDate = createLocalDate(dateStr);
+      
+      // Store as a Firestore Timestamp to maintain precision
+      return localDate;
+    }
+
+    // Retrieves date data from Firebase (converts back to local date string)
+    function getDateFromFirebase(firebaseDate) {
+      if (!firebaseDate) return '';
+      
+      let date;
+      
+      // Handle Firestore Timestamps
+      if (firebaseDate.toDate) {
+        date = firebaseDate.toDate();
+      } else if (firebaseDate instanceof Date) {
+        date = firebaseDate;
+      } else if (typeof firebaseDate === 'string') {
+        date = createLocalDate(firebaseDate);
+      } else {
+        return '';
+      }
+      
+      return formatLocalDate(date);
+    }
+
+    // Test date handling function
+    function testDateHandling() {
+      console.log('=== Date Handling Test ===');
+      
+      const testDate = '2024-03-15';
+      console.log('1. Original date string:', testDate);
+      
+      const forFirebase = prepareDateForFirebase(testDate);
+      console.log('2. Prepared for Firebase:', forFirebase);
+      
+      const fromFirebase = getDateFromFirebase(forFirebase);
+      console.log('3. Retrieved from Firebase:', fromFirebase);
+      
+      const display = formatDateDisplay(fromFirebase);
+      console.log('4. Formatted for display:', display);
+      
+      const matches = fromFirebase === testDate;
+      console.log('5. Round-trip successful:', matches);
+      
+      if (!matches) {
+        console.error('❌ Date handling is still broken!');
+      } else {
+        console.log('✅ Date handling is working correctly!');
+      }
+    }
+
     console.log("🎯 Entry form loaded");
 
     // Global variables
@@ -1332,6 +902,9 @@
         isSecretary = true;
         setupSecretaryView();
       }
+
+      // Test date handling (remove in production)
+      testDateHandling();
     }
 
     // Load registration data from data.json
@@ -1369,7 +942,7 @@
           return;
         }
 
-        // Load trials for secretary
+        // Load trials for secretary - using timezone-safe date handling
         const trialsQuery = query(
           collection(db, "trials"),
           where("createdBy", "==", auth.currentUser.uid)
@@ -1380,7 +953,17 @@
         if (!trialsSnapshot.empty) {
           availableTrials = [];
           trialsSnapshot.forEach(doc => {
-            availableTrials.push({ id: doc.id, ...doc.data() });
+            const trialData = doc.data();
+            
+            // Fix date handling for trial days using global date fix
+            if (trialData.days && Array.isArray(trialData.days)) {
+              trialData.days = trialData.days.map(day => ({
+                ...day,
+                date: day.date ? getDateFromFirebase(day.date) : null
+              }));
+            }
+            
+            availableTrials.push({ id: doc.id, ...trialData });
           });
           
           availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
@@ -1405,8 +988,19 @@
           return;
         }
 
-        currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
+        const trialData = trialDoc.data();
+        
+        // Fix date handling for trial days using global date fix
+        if (trialData.days && Array.isArray(trialData.days)) {
+          trialData.days = trialData.days.map(day => ({
+            ...day,
+            date: day.date ? getDateFromFirebase(day.date) : null
+          }));
+        }
+
+        currentTrialData = { id: trialDoc.id, ...trialData };
         document.getElementById('trialSelectionSection').style.display = 'none';
+        document.getElementById('backToDashboardSection').style.display = 'none'; // Hide back button for public entries
         populateTrialInfo();
         showEntryForm();
       } catch (error) {
@@ -1426,6 +1020,14 @@
 
         const entryData = entryDoc.data();
         
+        // Fix selected entries dates using global date fix
+        if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+          entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+            ...entry,
+            date: entry.date ? getDateFromFirebase(entry.date) : null
+          }));
+        }
+        
         // Load the trial
         const trialDoc = await getDoc(doc(db, 'trials', entryData.trialId));
         if (!trialDoc.exists()) {
@@ -1433,8 +1035,19 @@
           return;
         }
 
-        currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
+        const trialData = trialDoc.data();
+        
+        // Fix date handling for trial days
+        if (trialData.days && Array.isArray(trialData.days)) {
+          trialData.days = trialData.days.map(day => ({
+            ...day,
+            date: day.date ? getDateFromFirebase(day.date) : null
+          }));
+        }
+
+        currentTrialData = { id: trialDoc.id, ...trialData };
         document.getElementById('trialSelectionSection').style.display = 'none';
+        document.getElementById('backToDashboardSection').style.display = 'none'; // Hide back button for editing entries
         
         // Populate trial info and form
         populateTrialInfo();
@@ -1465,10 +1078,14 @@
         if (trial.days && trial.days.length > 0) {
           const dates = trial.days
             .filter(day => day.date)
-            .map(day => new Date(day.date).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric' 
-            }))
+            .map(day => {
+              // Use timezone-safe date formatting
+              const localDate = createLocalDate(day.date);
+              return localDate.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+              });
+            })
             .join(', ');
           if (dates) {
             trialLabel += ` (${dates})`;
@@ -1514,8 +1131,17 @@
 
       document.getElementById('trialTitle').textContent = `${currentTrialData.clubName || 'Trial'} Entry Form`;
       
+      // Use timezone-safe date formatting for trial dates
       const dates = currentTrialData.days && currentTrialData.days.length > 0 
-        ? currentTrialData.days.filter(day => day.date).map(day => new Date(day.date).toLocaleDateString()).join(', ')
+        ? currentTrialData.days
+            .filter(day => day.date)
+            .map(day => formatDateDisplay(day.date, { 
+              weekday: undefined, 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric' 
+            }))
+            .join(', ')
         : 'No dates specified';
 
       document.getElementById('clubName').textContent = currentTrialData.clubName || 'TBD';
@@ -1527,7 +1153,7 @@
       populateClasses();
     }
 
-    // Populate classes with the exact style from screenshot
+    // Populate classes with the exact style from screenshot and timezone-safe dates
     function populateClasses() {
       const classSelection = document.getElementById('classSelection');
       let html = '';
@@ -1541,12 +1167,8 @@
       currentTrialData.days.forEach((day, dayIndex) => {
         if (!day.classes || day.classes.length === 0) return;
 
-        const dayDate = day.date ? new Date(day.date).toLocaleDateString('en-US', {
-          weekday: 'long',
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric'
-        }) : `Day ${dayIndex + 1}`;
+        // Use timezone-safe date formatting
+        const dayDate = day.date ? formatDateDisplay(day.date) : `Day ${dayIndex + 1}`;
 
         html += `
           <div class="day-section">
@@ -1590,7 +1212,7 @@
                   className,
                   judge: judgeName,
                   roundNumber,
-                  date: day.date || `Day ${dayIndex + 1}`
+                  date: prepareDateForFirebase(day.date) || `Day ${dayIndex + 1}` // Use timezone-safe date preparation
                 };
                 
                 const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
@@ -1700,7 +1322,17 @@
               // Use the most recent entry
               const entries = [];
               entriesSnapshot.forEach(doc => {
-                entries.push(doc.data());
+                const entryData = doc.data();
+                
+                // Fix date handling for entry data
+                if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                  entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+                    ...entry,
+                    date: entry.date ? getDateFromFirebase(entry.date) : null
+                  }));
+                }
+                
+                entries.push(entryData);
               });
               entries.sort((a, b) => b.submittedAt?.toDate() - a.submittedAt?.toDate());
               matchingRegistration = entries[0];
@@ -1811,7 +1443,7 @@
       document.getElementById('submitBtn').disabled = !isValid;
     }
 
-    // Handle form submission
+    // Handle form submission with timezone-safe date handling
     async function handleFormSubmit(event) {
       event.preventDefault();
       
@@ -1839,7 +1471,10 @@
           dogBreed: document.getElementById('dogBreed').value.trim(),
           dogBirthdate: document.getElementById('dogBirthdate').value,
           dogSex: document.getElementById('dogSex').value,
-          selectedEntries: selectedEntries,
+          selectedEntries: selectedEntries.map(entry => ({
+            ...entry,
+            date: entry.date // Already prepared with prepareDateForFirebase
+          })),
           selectedClasses: selectedEntries.map(e => e.className),
           entryCount: selectedEntries.length,
           uniqueClassCount: new Set(selectedEntries.map(e => e.className)).size,
@@ -1854,12 +1489,11 @@
 
         console.log("💾 Submitting entry data:", entryData);
 
-        // Save entry
-        const docRef = await addDoc(collection(db, "entries"), entryData);
-        console.log("✅ Entry submitted with ID:", docRef.id);
-
+        // Save entry using timezone-safe date handling
+        await saveEntryData(entryData);
+        
         // Generate edit link
-        generateEditLink(docRef.id);
+        generateEditLink(entryData);
         
         // Show success
         showSuccessSection();
@@ -1872,10 +1506,27 @@
       }
     }
 
+    // Save entry data with timezone-safe date handling
+    async function saveEntryData(entryData) {
+      // Fix selected entries dates using the global date fix
+      if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+        entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+          ...entry,
+          date: entry.date ? prepareDateForFirebase(entry.date) : null
+        }));
+      }
+      
+      // Save to Firebase
+      const docRef = await addDoc(collection(db, "entries"), entryData);
+      console.log("✅ Entry submitted with ID:", docRef.id);
+      
+      return docRef;
+    }
+
     // Generate edit link
-    function generateEditLink(entryId) {
+    function generateEditLink(entryData) {
       const baseUrl = window.location.origin + window.location.pathname;
-      const editUrl = `${baseUrl}?entry=${entryId}`;
+      const editUrl = `${baseUrl}?entry=${entryData.id || 'new'}`;
       
       document.getElementById('editUrl').textContent = editUrl;
     }
@@ -1886,7 +1537,7 @@
       document.getElementById('editLinkSection').classList.remove('hidden');
     }
 
-    // Populate form with existing entry data
+    // Populate form with existing entry data using timezone-safe dates
     function populateFormWithEntryData(entryData) {
       document.getElementById('cwagsNumber').value = entryData.cwagsNumber || '';
       document.getElementById('handlerName').value = entryData.handlerName || '';
@@ -1900,10 +1551,16 @@
       document.getElementById('juniorHandler').value = entryData.juniorHandler ? 'Yes' : 'No';
       document.getElementById('waiverAccepted').checked = true;
 
-      // Restore selected classes
+      // Restore selected classes with timezone-safe date handling
       if (entryData.selectedEntries) {
         entryData.selectedEntries.forEach(entry => {
-          const entryJson = JSON.stringify(entry);
+          // Ensure dates are properly handled
+          const processedEntry = {
+            ...entry,
+            date: entry.date ? getDateFromFirebase(entry.date) : entry.date
+          };
+          
+          const entryJson = JSON.stringify(processedEntry);
           selectedClasses.add(entryJson);
           
           const entryId = `entry_${entry.dayIndex}_${entry.classIndex}_${entry.roundIndex}_${entry.entryType}`;
