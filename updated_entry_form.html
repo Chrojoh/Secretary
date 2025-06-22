@@ -1890,19 +1890,17 @@
               });
             }
           });
-
+// Always show Regular entry button
           html += `
-              </div>
-              <div class="entry-types">
                 <div class="entry-option">
                   <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg">
                     <input type="checkbox" 
                            id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg" 
                            data-class="${className}" 
-                           data-fee="${baseFee.toFixed(2)}" 
+                           data-fee="${fees.regular.toFixed(2)}" 
                            data-type="regular"
                            data-day="${dayIndex}">
-                    <span>Regular Entry</span>
+                    <span>Regular Entry ($${fees.regular.toFixed(2)})</span>
                   </label>
                 </div>
           `;
@@ -1919,15 +1917,14 @@
                     <input type="checkbox" 
                            id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo" 
                            data-class="${className}" 
-                           data-fee="${feoFee.toFixed(2)}" 
+                           data-fee="${fees.feo.toFixed(2)}" 
                            data-type="feo"
                            data-day="${dayIndex}">
-                    <span>FEO Entry</span>
+                    <span>FEO Entry ($${fees.feo.toFixed(2)})</span>
                   </label>
                 </div>
             `;
           }
-
           html += `
               </div>
             </div>
