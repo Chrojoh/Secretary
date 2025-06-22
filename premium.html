@@ -212,23 +212,71 @@
       .maps-link {
         display: none;
       }
+      .form-group {
+  margin: 15px 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-control {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.form-control:focus {
+  border-color: #4CAF50;
+  outline: none;
+}
+
+.generate-btn:disabled {
+  background-color: #ccc !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.loading-indicator {
+  color: #666;
+  font-style: italic;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+}
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="controls">
-      <h2>🏆 Premium Generator</h2>
-      
-      <div class="loading-indicator" id="loadingIndicator">
-        🔄 Auto-loading trial data...
-      </div>
-      
-      <button class="reload-btn" onclick="loadTrialData()">🔄 Reload Trial Data</button>
-      <button class="generate-btn" onclick="generatePremium()">Generate Premium</button>
-      <button class="print-btn" onclick="window.print()">Print Premium</button>
-      <button onclick="location.href='main-dashboard.html'" style="background-color: #757575; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px;">← Back to Dashboard</button>
-      
+  <h2>🏆 Premium Generator</h2>
+  
+  <!-- NEW: Trial Selection Dropdown -->
+  <div class="form-group">
+    <label for="trialSelect">Select Trial:</label>
+    <select id="trialSelect" class="form-control">
+      <option value="">Select a trial...</option>
+    </select>
+  </div>
+  
+  <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+    🔄 Loading trials...
+  </div>
+  
+  <button class="reload-btn" onclick="loadTrials()">🔄 Load Trials</button>
+  <button class="generate-btn" onclick="generatePremium()" id="generateBtn" disabled>Generate Premium</button>
+  <button class="print-btn" onclick="window.print()">Print Premium</button>
+  <button onclick="location.href='main-dashboard.html'" style="background-color: #666; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">← Back to Dashboard</button>
+</div>
       <div class="edit-form">
         <div>
           <label>Club Name:</label>
