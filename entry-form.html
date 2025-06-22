@@ -1215,7 +1215,7 @@
         if (registrationData && registrationData.length > 0) {
           console.log("🔍 Searching in local data.json...");
           matchingRegistration = registrationData.find(record => {
-            const normalizedRecord = (record.cwagsNumber || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const normalizedRecord = (record.Registration || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
             return normalizedRecord === normalizedInput;
           });
         }
@@ -1744,11 +1744,12 @@
       
       console.log("🔄 Populating form with auto-fill data:", data);
       
-      fillField('handlerName', data.handlerName);
+      // Map data.json field names to form fields
+      fillField('handlerName', data.Handler || data.handlerName);
       fillField('handlerPhone', data.handlerPhone);
       fillField('handlerEmail', data.handlerEmail);
       fillField('emergencyContact', data.emergencyContact);
-      fillField('dogCallName', data.dogCallName);
+      fillField('dogCallName', data['Call Name'] || data.dogCallName);
       fillField('dogBreed', data.dogBreed);
       fillField('dogBirthdate', data.dogBirthdate);
       
