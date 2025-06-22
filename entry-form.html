@@ -831,222 +831,18 @@
                 </div>
             </div>
 
-            <!-- Day Tabs -->
+            <!-- Day Tabs - Dynamically Generated -->
             <div class="day-tabs-container">
                 <div class="day-tabs" id="dayTabs">
-                    <button type="button" class="day-tab active" onclick="showDay(0)">Day 1 - March 15</button>
-                    <button type="button" class="day-tab" onclick="showDay(1)">Day 2 - March 16</button>
-                    <button type="button" class="day-tab" onclick="showDay(2)">Day 3 - March 17</button>
+                    <!-- Tabs will be generated from trial data -->
                 </div>
             </div>
 
-            <!-- Scrollable Class Entries -->
-            <div class="class-entries-container">
-                <!-- Day 1 Content -->
-                <div class="class-day-content active" id="day-0">
-                    <div class="class-item">
-                        <div class="class-header">
-                            <div class="class-name">Beginner Agility</div>
-                            <div class="class-fee">$25.00</div>
-                        </div>
-                        <div class="class-details">
-                            <div><strong>Level:</strong> Beginner</div>
-                            <div><strong>Handler Height:</strong> All heights</div>
-                            <div><strong>Jump Height:</strong> 4" to 20"</div>
-                        </div>
-                        <div class="rounds-container">
-                            <div class="round-item">
-                                <div class="round-details">
-                                    <span class="judge-name">Judge: Sarah Johnson</span>
-                                    <span>Round 1</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="entry-types">
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="beginner-reg">
-                                    <input type="checkbox" id="beginner-reg" data-class="Beginner Agility" data-fee="25.00" data-type="regular">
-                                    <span>Regular Entry</span>
-                                </label>
-                            </div>
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="beginner-feo">
-                                    <input type="checkbox" id="beginner-feo" data-class="Beginner Agility" data-fee="15.00" data-type="feo">
-                                    <span>FEO Entry</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="class-item">
-                        <div class="class-header">
-                            <div class="class-name">Intermediate Rally</div>
-                            <div class="class-fee">$30.00</div>
-                        </div>
-                        <div class="class-details">
-                            <div><strong>Level:</strong> Intermediate</div>
-                            <div><strong>Prerequisites:</strong> Beginner Rally Title</div>
-                            <div><strong>Equipment:</strong> Signs and obstacles</div>
-                        </div>
-                        <div class="rounds-container">
-                            <div class="round-item">
-                                <div class="round-details">
-                                    <span class="judge-name">Judge: Mike Davis</span>
-                                    <span>Round 1</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="entry-types">
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="rally-reg">
-                                    <input type="checkbox" id="rally-reg" data-class="Intermediate Rally" data-fee="30.00" data-type="regular">
-                                    <span>Regular Entry</span>
-                                </label>
-                            </div>
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="rally-feo">
-                                    <input type="checkbox" id="rally-feo" data-class="Intermediate Rally" data-fee="20.00" data-type="feo">
-                                    <span>FEO Entry</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Day 2 Content -->
-                <div class="class-day-content" id="day-1">
-                    <div class="class-item">
-                        <div class="class-header">
-                            <div class="class-name">Advanced Agility</div>
-                            <div class="class-fee">$35.00</div>
-                        </div>
-                        <div class="class-details">
-                            <div><strong>Level:</strong> Advanced</div>
-                            <div><strong>Prerequisites:</strong> Intermediate Agility Title</div>
-                            <div><strong>Jump Height:</strong> 8" to 24"</div>
-                        </div>
-                        <div class="rounds-container">
-                            <div class="round-item">
-                                <div class="round-details">
-                                    <span class="judge-name">Judge: Sarah Johnson</span>
-                                    <span>Round 1</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="entry-types">
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="advanced-reg">
-                                    <input type="checkbox" id="advanced-reg" data-class="Advanced Agility" data-fee="35.00" data-type="regular">
-                                    <span>Regular Entry</span>
-                                </label>
-                            </div>
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="advanced-feo">
-                                    <input type="checkbox" id="advanced-feo" data-class="Advanced Agility" data-fee="25.00" data-type="feo">
-                                    <span>FEO Entry</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="class-item">
-                        <div class="class-header">
-                            <div class="class-name">Scent Work Level 2</div>
-                            <div class="class-fee">$28.00</div>
-                        </div>
-                        <div class="class-details">
-                            <div><strong>Level:</strong> Level 2</div>
-                            <div><strong>Scent:</strong> Birch and Anise</div>
-                            <div><strong>Duration:</strong> 2 minutes</div>
-                        </div>
-                        <div class="rounds-container">
-                            <div class="round-item">
-                                <div class="round-details">
-                                    <span class="judge-name">Judge: Lisa Chen</span>
-                                    <span>Round 1</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="entry-types">
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="scent-reg">
-                                    <input type="checkbox" id="scent-reg" data-class="Scent Work Level 2" data-fee="28.00" data-type="regular">
-                                    <span>Regular Entry</span>
-                                </label>
-                            </div>
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="scent-feo">
-                                    <input type="checkbox" id="scent-feo" data-class="Scent Work Level 2" data-fee="18.00" data-type="feo">
-                                    <span>FEO Entry</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Day 3 Content -->
-                <div class="class-day-content" id="day-2">
-                    <div class="class-item">
-                        <div class="class-header">
-                            <div class="class-name">Master Rally</div>
-                            <div class="class-fee">$32.00</div>
-                        </div>
-                        <div class="class-details">
-                            <div><strong>Level:</strong> Master</div>
-                            <div><strong>Prerequisites:</strong> Advanced Rally Title</div>
-                            <div><strong>Duration:</strong> 3-4 minutes</div>
-                        </div>
-                        <div class="rounds-container">
-                            <div class="round-item">
-                                <div class="round-details">
-                                    <span class="judge-name">Judge: Mike Davis</span>
-                                    <span>Round 1</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="entry-types">
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="master-reg">
-                                    <input type="checkbox" id="master-reg" data-class="Master Rally" data-fee="32.00" data-type="regular">
-                                    <span>Regular Entry</span>
-                                </label>
-                            </div>
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="master-feo">
-                                    <input type="checkbox" id="master-feo" data-class="Master Rally" data-fee="22.00" data-type="feo">
-                                    <span>FEO Entry</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="class-item">
-                        <div class="class-header">
-                            <div class="class-name">Fun Match</div>
-                            <div class="class-fee">$15.00</div>
-                        </div>
-                        <div class="class-details">
-                            <div><strong>Level:</strong> All levels welcome</div>
-                            <div><strong>Format:</strong> Casual competition</div>
-                            <div><strong>Prizes:</strong> Ribbons for all participants</div>
-                        </div>
-                        <div class="rounds-container">
-                            <div class="round-item">
-                                <div class="round-details">
-                                    <span class="judge-name">Judge: Sarah Johnson</span>
-                                    <span>Round 1</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="entry-types">
-                            <div class="entry-option">
-                                <label class="entry-checkbox" for="fun-reg">
-                                    <input type="checkbox" id="fun-reg" data-class="Fun Match" data-fee="15.00" data-type="regular">
-                                    <span>Regular Entry</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Scrollable Class Entries - Dynamically Generated -->
+            <div class="class-entries-container" id="classEntriesContainer">
+                <!-- Content will be generated from trial data -->
+                <div style="text-align: center; padding: 2rem; color: #666;">
+                    Loading available classes...
                 </div>
             </div>
         </div>
@@ -1793,7 +1589,7 @@
       document.getElementById('shareableLinkSection').style.display = 'block';
     }
 
-    // Populate trial information
+    // Populate trial information and generate tabbed classes
     function populateTrialInfo() {
       if (!currentTrialData) return;
 
@@ -1819,8 +1615,151 @@
 
       document.getElementById('trialInfoSection').style.display = 'block';
       
+      // Generate the tabbed class interface from trial data
+      generateTabbedClasses();
+    }
+
+    // Generate tabbed classes from trial data
+    function generateTabbedClasses() {
+      console.log("🎯 Generating tabbed classes from trial data");
+      
+      if (!currentTrialData.days || currentTrialData.days.length === 0) {
+        document.getElementById('classEntriesContainer').innerHTML = 
+          '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
+        return;
+      }
+
+      // Generate day tabs
+      const dayTabsContainer = document.getElementById('dayTabs');
+      dayTabsContainer.innerHTML = '';
+
+      currentTrialData.days.forEach((day, dayIndex) => {
+        const dayDate = day.date ? formatDateDisplay(day.date, { 
+          weekday: undefined, 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        }) : `Day ${dayIndex + 1}`;
+
+        const tabButton = document.createElement('button');
+        tabButton.type = 'button';
+        tabButton.className = `day-tab ${dayIndex === 0 ? 'active' : ''}`;
+        tabButton.onclick = () => showDay(dayIndex);
+        tabButton.textContent = `Day ${dayIndex + 1} - ${dayDate}`;
+        
+        dayTabsContainer.appendChild(tabButton);
+      });
+
+      // Generate class content for each day
+      const classEntriesContainer = document.getElementById('classEntriesContainer');
+      let html = '';
+
+      currentTrialData.days.forEach((day, dayIndex) => {
+        if (!day.classes || day.classes.length === 0) return;
+
+        html += `<div class="class-day-content ${dayIndex === 0 ? 'active' : ''}" id="day-${dayIndex}">`;
+
+        // Group classes by name
+        const classGroups = new Map();
+        day.classes.forEach((cls, classIndex) => {
+          if (cls && cls.className && cls.className.trim()) {
+            const className = cls.className.trim();
+            if (!classGroups.has(className)) {
+              classGroups.set(className, []);
+            }
+            classGroups.get(className).push({...cls, dayIndex, classIndex});
+          }
+        });
+
+        classGroups.forEach((classInstances, className) => {
+          // Calculate base fee (use first instance's fee or default)
+          const baseFee = classInstances[0].entryFee || 25.00;
+          const feoFee = baseFee * 0.7; // FEO is typically 70% of regular fee
+
+          html += `
+            <div class="class-item">
+              <div class="class-header">
+                <div class="class-name">${className}</div>
+                <div class="class-fee">${baseFee.toFixed(2)}</div>
+              </div>
+              <div class="class-details">
+                <div><strong>Level:</strong> ${classInstances[0].level || 'All levels'}</div>
+                <div><strong>Rounds:</strong> ${classInstances.reduce((total, inst) => total + (inst.rounds ? inst.rounds.length : 0), 0)}</div>
+                <div><strong>Prerequisites:</strong> ${classInstances[0].prerequisites || 'None specified'}</div>
+              </div>
+              <div class="rounds-container">
+          `;
+
+          classInstances.forEach((classInstance, instanceIndex) => {
+            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
+              classInstance.rounds.forEach((round, roundIndex) => {
+                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
+                const roundNumber = round.roundNumber || (roundIndex + 1);
+                
+                html += `
+                  <div class="round-item">
+                    <div class="round-details">
+                      <span class="judge-name">Judge: ${judgeName}</span>
+                      <span>Round ${roundNumber}</span>
+                    </div>
+                  </div>
+                `;
+              });
+            }
+          });
+
+          html += `
+              </div>
+              <div class="entry-types">
+                <div class="entry-option">
+                  <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg">
+                    <input type="checkbox" 
+                           id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg" 
+                           data-class="${className}" 
+                           data-fee="${baseFee.toFixed(2)}" 
+                           data-type="regular"
+                           data-day="${dayIndex}">
+                    <span>Regular Entry</span>
+                  </label>
+                </div>
+          `;
+
+          // Check if FEO is available for this class
+          const hasFEO = classInstances.some(inst => 
+            inst.rounds && inst.rounds.some(round => round.feo === true || round.FEO === true)
+          );
+
+          if (hasFEO) {
+            html += `
+                <div class="entry-option">
+                  <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo">
+                    <input type="checkbox" 
+                           id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo" 
+                           data-class="${className}" 
+                           data-fee="${feoFee.toFixed(2)}" 
+                           data-type="feo"
+                           data-day="${dayIndex}">
+                    <span>FEO Entry</span>
+                  </label>
+                </div>
+            `;
+          }
+
+          html += `
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+      });
+
+      classEntriesContainer.innerHTML = html;
+      
       // Initialize the tabbed interface
       updateEntrySummary();
+      
+      console.log("✅ Tabbed classes generated successfully");
     }
 
     // Check form validity
