@@ -1278,10 +1278,7 @@
           
           // Class entries
           entries: Array.from(selectedClasses).map(entryJson => JSON.parse(entryJson)),
-          
-          // Fee calculation
-          totalFee: parseFloat(document.getElementById('calculatedFee').textContent.replace(', '')),
-          totalEntries: selectedClasses.size
+                
         };
         
         console.log("📝 Submitting entry:", entryData);
