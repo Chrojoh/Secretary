@@ -2,7 +2,1272 @@
 <html>
 <head>
   <title>Trial Secretary Dashboard</title>
+  <link rel<!DOCTYPE html>
+<html>
+<head>
+  <title>Trial Secretary Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+    
+    .welcome-msg {
+      margin: 10px 0 0 0;
+      font-size: 18px;
+      opacity: 0.9;
+    }
+
+    /* Tab Navigation */
+    .tab-navigation {
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tab-button {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 15px 20px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab-button:hover {
+      background: #e9ecef;
+      color: #333;
+    }
+
+    .tab-button.active {
+      background: white;
+      color: #4CAF50;
+      border-bottom-color: #4CAF50;
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+      padding: 30px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+    
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .nav-card {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .nav-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-color: #4CAF50;
+    }
+    
+    .nav-card h3 {
+      margin: 0 0 15px 0;
+      color: #333;
+      font-size: 20px;
+    }
+    
+    .nav-card p {
+      color: #666;
+      margin: 0 0 20px 0;
+      line-height: 1.5;
+    }
+    
+    .nav-button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    
+    .nav-button:hover {
+      background: #45a049;
+    }
+    
+    .nav-button.secondary {
+      background: #2196F3;
+    }
+    
+    .nav-button.secondary:hover {
+      background: #1976D2;
+    }
+    
+    .nav-button.tertiary {
+      background: #ff9800;
+    }
+    
+    .nav-button.tertiary:hover {
+      background: #f57c00;
+    }
+
+    .nav-button.summary {
+      background: #9C27B0;
+    }
+
+    .nav-button.summary:hover {
+      background: #7B1FA2;
+    }
+
+    .nav-button.entries {
+      background: #e91e63;
+    }
+
+    .nav-button.entries:hover {
+      background: #c2185b;
+    }
+    
+    .user-info {
+      background: #e8f5e8;
+      padding: 20px;
+      margin: 20px 30px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .user-details {
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    
+    .logout-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .logout-btn:hover {
+      background: #d32f2f;
+    }
+    
+    .quick-stats {
+      background: #fff3e0;
+      padding: 20px;
+      margin: 20px 30px;
+      border-radius: 8px;
+      border-left: 5px solid #ff9800;
+    }
+    
+    .quick-stats h3 {
+      margin: 0 0 10px 0;
+      color: #f57c00;
+    }
+
+    /* Summary Specific Styles */
+    .summary-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .summary-item {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .summary-item:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .summary-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+
+    .summary-meta {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0;
+    }
+
+    .summary-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0056b3;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #1e7e34;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    .no-summaries {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 40px;
+    }
+
+    /* Entry Management Styles */
+    .trial-selector {
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .entries-table-container {
+      max-height: 600px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    #entriesTable {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    #entriesTable th {
+      position: sticky;
+      top: 0;
+      background: #f8f9fa;
+      z-index: 1;
+      padding: 1rem 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    #entriesTable td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+
+    #entriesTable tr:hover {
+      background: #f8f9fa;
+    }
+
+    .entry-classes {
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+
+    .entry-class-item {
+      background: #e7f3ff;
+      border: 1px solid #0066cc;
+      border-radius: 12px;
+      padding: 0.2rem 0.5rem;
+      margin: 0.1rem;
+      display: inline-block;
+      font-size: 0.8rem;
+    }
+
+    .entry-class-item.feo {
+      background: #fff3cd;
+      border-color: #ffc107;
+      color: #856404;
+    }
+
+    .entry-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .btn-edit, .btn-delete {
+      padding: 0.25rem 0.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .btn-edit {
+      background: #17a2b8;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #138496;
+    }
+
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: #c82333;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .entries-controls {
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .entries-controls input, .entries-controls select {
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .entries-controls input {
+      flex: 1;
+    }
+
+    .entries-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .entries-summary {
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="header">
+      <h1>🐕 Trial Secretary Dashboard</h1>
+      <div class="welcome-msg">Welcome back, <span id="username">User</span>!</div>
+    </div>
+
+    <!-- User Info Section (preserved from original) -->
+    <div class="user-info">
+      <div class="user-details">
+        <div>Logged in as: <span id="userEmail">user@example.com</span></div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Quick Stats Section (preserved from original) -->
+    <div class="quick-stats">
+      <h3>📊 Quick Stats</h3>
+      <div id="statsContent">Loading statistics...</div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button class="tab-button active" onclick="showTab('main')">Main Tools</button>
+      <button class="tab-button" onclick="showTab('entries')">Entry Management</button>
+      <button class="tab-button" onclick="showTab('summaries')">Class Summaries</button>
+      <button class="tab-button" onclick="showTab('reports')">Generated Reports</button>
+    </div>
+
+    <!-- Main Tools Tab (original content) -->
+    <div id="main-tab" class="tab-content active">
+      <div class="nav-grid">
+        <div class="nav-card" onclick="location.href='create-trial.html'">
+          <h3>🏁 Create Trial</h3>
+          <p>Set up a new trial with classes, dates, and judges</p>
+          <button class="nav-button">Create New Trial</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='view-trials.html'">
+          <h3>📋 My Trials</h3>
+          <p>View and manage your existing trials</p>
+          <button class="nav-button secondary">View Trials</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='trial-application.html'">
+          <h3>📄 Trial Application</h3>
+          <p>Generate trial application forms for submission</p>
+          <button class="nav-button">Create Application</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='entry-form.html'">
+          <h3>🐕 Entry Forms</h3>
+          <p>Manage dog entries and participant information</p>
+          <button class="nav-button tertiary">Manage Entries</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='premium.html'">
+          <h3>🏆 Premium Generator</h3>
+          <p>Generate professional premium lists for your trials</p>
+          <button class="nav-button secondary">Generate Premium</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='waiver-generator.html'">
+          <h3>📝 Waiver Generator</h3>
+          <p>Create liability waivers for your events</p>
+          <button class="nav-button tertiary">Generate Waivers</button>
+        </div>
+
+         <div class="nav-card" onclick="location.href='running-order.html'">
+          <h3>📝 Running Order</h3>
+          <p>Rearrange the running order of your event</p>
+          <button class="nav-button tertiary">Running Order</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='scoresheet-generator.html'">
+          <h3>📋 Score Sheets</h3>
+          <p>Generate and manage official C-WAGS score sheets for judges</p>
+          <button class="nav-button">Generate Score Sheets</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entry Management Tab -->
+    <div id="entries-tab" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>📝 Entry Management</h2>
+        <div style="color: #666; font-size: 14px;">View and edit entries for your trials</div>
+      </div>
+
+      <!-- Trial Selector for Entry Management -->
+      <div class="trial-selector">
+        <div class="form-group">
+          <label for="entryManagementTrialSelect">Select Trial to Manage Entries:</label>
+          <select id="entryManagementTrialSelect" style="padding: 0.75rem; font-size: 1rem; border-radius: 6px; border: 2px solid #e1e5e9; width: 100%; max-width: 500px;">
+            <option value="">Choose a trial...</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Entries List -->
+      <div id="entriesContainer" style="display: none;">
+        <div class="entries-header">
+          <h3 id="entriesTitle">Entries for Trial</h3>
+          <div class="entries-summary">
+            <span id="entriesCount">0 entries</span> • 
+            <span id="totalFees">$0.00 total</span>
+          </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="entries-controls">
+          <input type="text" id="entrySearch" placeholder="🔍 Search by handler name, dog name, or registration...">
+          <select id="classFilter">
+            <option value="">All Classes</option>
+          </select>
+          <button onclick="exportEntries()" class="btn-secondary" style="white-space: nowrap;">
+            📊 Export CSV
+          </button>
+        </div>
+
+        <!-- Entries Table -->
+        <div class="entries-table-container">
+          <table id="entriesTable">
+            <thead>
+              <tr>
+                <th>Handler</th>
+                <th>Dog</th>
+                <th>Registration</th>
+                <th>Classes</th>
+                <th>Fee</th>
+                <th>Submitted</th>
+                <th style="text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="entriesTableBody">
+              <!-- Entries will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- No entries message -->
+        <div id="noEntriesMessage" style="text-align: center; padding: 3rem; color: #666; display: none;">
+          <h4>No entries found for this trial</h4>
+          <p>Entries will appear here once participants submit them.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Class Summaries Tab -->
+    <div id="summaries-tab" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Class Summary Reports</h2>
+        <button class="nav-button summary" onclick="createNewSummary()">+ Create New Summary</button>
+      </div>
+      
+      <div id="summariesList" class="summary-list">
+        <div class="no-summaries">
+          <p>No class summaries yet. Create your first summary to get started!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated Reports Tab -->
+    <div id="reports-tab" class="tab-content">
+      <h2>Generated Reports</h2>
+      <div id="reportsList" class="summary-list">
+        <div class="no-summaries">
+          <p>No reports generated yet. Generate reports from your class summaries!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+    import { collection, query, where, getDocs, addDoc, deleteDoc, doc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    console.log("Enhanced Dashboard loading...");
+
+    let authCheckComplete = false;
+    let currentUser = null;
+    let availableTrials = [];
+    let currentTrialEntries = [];
+    let filteredEntries = [];
+
+    // Tab Management
+    window.showTab = function(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Remove active class from all buttons
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById(tabName + '-tab').classList.add('active');
+      
+      // Add active class to clicked button
+      event.target.classList.add('active');
+      
+      // Load content for specific tabs
+      if (tabName === 'summaries') {
+        loadSummaries();
+      } else if (tabName === 'reports') {
+        loadReports();
+      } else if (tabName === 'entries') {
+        loadEntryManagement();
+      }
+    };
+
+    // Entry Management Functions
+    async function loadEntryManagement() {
+      console.log("📝 Loading entry management...");
+      
+      if (!currentUser) {
+        console.log("No user found for entry management");
+        return;
+      }
+
+      // Load trials for entry management
+      await loadTrialsForEntryManagement();
+    }
+
+    async function loadTrialsForEntryManagement() {
+      try {
+        const trialsQuery = query(
+          collection(db, "trials"),
+          where("createdBy", "==", currentUser.uid)
+        );
+        
+        const trialsSnapshot = await getDocs(trialsQuery);
+        availableTrials = [];
+        
+        trialsSnapshot.forEach(doc => {
+          const trialData = doc.data();
+          availableTrials.push({ id: doc.id, ...trialData });
+        });
+        
+        availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
+        
+        // Populate trial selector
+        const entryTrialSelect = document.getElementById('entryManagementTrialSelect');
+        entryTrialSelect.innerHTML = '<option value="">Choose a trial...</option>';
+        
+        availableTrials.forEach(trial => {
+          const option = document.createElement('option');
+          option.value = trial.id;
+          
+          let trialLabel = trial.clubName || 'Unnamed Trial';
+          if (trial.days && trial.days.length > 0) {
+            const dates = trial.days
+              .filter(day => day.date)
+              .map(day => {
+                const localDate = new Date(day.date + 'T12:00:00');
+                return localDate.toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric' 
+                });
+              })
+              .join(', ');
+            if (dates) {
+              trialLabel += ` (${dates})`;
+            }
+          }
+          
+          option.textContent = trialLabel;
+          entryTrialSelect.appendChild(option);
+        });
+        
+        // Handle trial selection
+        entryTrialSelect.addEventListener('change', async function() {
+          const trialId = this.value;
+          if (trialId) {
+            await loadTrialEntries(trialId);
+          } else {
+            document.getElementById('entriesContainer').style.display = 'none';
+          }
+        });
+        
+        // Setup search and filter
+        document.getElementById('entrySearch').addEventListener('input', filterEntries);
+        document.getElementById('classFilter').addEventListener('change', filterEntries);
+        
+      } catch (error) {
+        console.error("Error loading trials for entry management:", error);
+      }
+    }
+
+    // Load entries for a specific trial
+    async function loadTrialEntries(trialId) {
+      console.log("📊 Loading entries for trial:", trialId);
+      
+      try {
+        const entriesQuery = query(
+          collection(db, "entries"),
+          where("trialId", "==", trialId)
+        );
+        
+        const entriesSnapshot = await getDocs(entriesQuery);
+        currentTrialEntries = [];
+        
+        entriesSnapshot.forEach(doc => {
+          const entryData = doc.data();
+          currentTrialEntries.push({
+            id: doc.id,
+            ...entryData
+          });
+        });
+        
+        // Sort by submission date (newest first)
+        currentTrialEntries.sort((a, b) => {
+          const dateA = a.submittedAt?.toDate() || new Date(0);
+          const dateB = b.submittedAt?.toDate() || new Date(0);
+          return dateB - dateA;
+        });
+        
+        console.log(`✅ Loaded ${currentTrialEntries.length} entries`);
+        
+        // Update UI
+        updateEntriesDisplay();
+        populateClassFilter();
+        
+        // Show entries container
+        document.getElementById('entriesContainer').style.display = 'block';
+        
+      } catch (error) {
+        console.error("❌ Error loading entries:", error);
+        alert("Error loading entries: " + error.message);
+      }
+    }
+
+    // Update the entries display
+    function updateEntriesDisplay() {
+      filteredEntries = [...currentTrialEntries];
+      
+      // Update summary
+      const totalFees = filteredEntries.reduce((sum, entry) => {
+        const fee = parseFloat(entry.entryFee?.replace('$', '') || 0);
+        return sum + fee;
+      }, 0);
+      
+      document.getElementById('entriesCount').textContent = `${filteredEntries.length} entries`;
+      document.getElementById('totalFees').textContent = `$${totalFees.toFixed(2)} total`;
+      
+      // Update table
+      renderEntriesTable();
+    }
+
+    // Render the entries table
+    function renderEntriesTable() {
+      const tbody = document.getElementById('entriesTableBody');
+      const noEntriesMsg = document.getElementById('noEntriesMessage');
+      
+      if (filteredEntries.length === 0) {
+        tbody.innerHTML = '';
+        noEntriesMsg.style.display = 'block';
+        return;
+      }
+      
+      noEntriesMsg.style.display = 'none';
+      
+      tbody.innerHTML = filteredEntries.map(entry => {
+        const submittedDate = entry.submittedAt?.toDate() || new Date();
+        const classesHtml = entry.selectedEntries ? 
+          entry.selectedEntries.map(selectedEntry => {
+            const feoClass = selectedEntry.entryType === 'feo' ? ' feo' : '';
+            const feoText = selectedEntry.entryType === 'feo' ? ' (FEO)' : '';
+            return `<span class="entry-class-item${feoClass}">${selectedEntry.className}${feoText}</span>`;
+          }).join(' ') : 
+          (entry.selectedClasses || []).map(className => 
+            `<span class="entry-class-item">${className}</span>`
+          ).join(' ');
+        
+        return `
+          <tr>
+            <td>
+              <strong>${entry.handlerName || 'N/A'}</strong><br>
+              <small style="color: #666;">${entry.handlerEmail || ''}</small>
+            </td>
+            <td>
+              <strong>${entry.dogCallName || 'N/A'}</strong><br>
+              <small style="color: #666;">${entry.dogBreed || ''}</small>
+            </td>
+            <td>${entry.cwagsNumber || 'Not provided'}</td>
+            <td class="entry-classes">${classesHtml}</td>
+            <td><strong>$${entry.entryFee || '0.00'}</strong></td>
+            <td>
+              <small>${submittedDate.toLocaleDateString()}<br>
+              ${submittedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+            </td>
+            <td>
+              <div class="entry-actions">
+                <a href="entry-form.html?entry=${entry.id}" class="btn-edit" target="_blank">
+                  ✏️ Edit
+                </a>
+                <button onclick="deleteEntry('${entry.id}')" class="btn-delete">
+                  🗑️ Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Populate class filter dropdown
+    function populateClassFilter() {
+      const classFilter = document.getElementById('classFilter');
+      const allClasses = new Set();
+      
+      currentTrialEntries.forEach(entry => {
+        if (entry.selectedEntries) {
+          entry.selectedEntries.forEach(selectedEntry => {
+            allClasses.add(selectedEntry.className);
+          });
+        } else if (entry.selectedClasses) {
+          entry.selectedClasses.forEach(className => {
+            allClasses.add(className);
+          });
+        }
+      });
+      
+      classFilter.innerHTML = '<option value="">All Classes</option>';
+      Array.from(allClasses).sort().forEach(className => {
+        const option = document.createElement('option');
+        option.value = className;
+        option.textContent = className;
+        classFilter.appendChild(option);
+      });
+    }
+
+    // Filter entries based on search and class filter
+    function filterEntries() {
+      const searchTerm = document.getElementById('entrySearch').value.toLowerCase();
+      const classFilter = document.getElementById('classFilter').value;
+      
+      filteredEntries = currentTrialEntries.filter(entry => {
+        // Search filter
+        const matchesSearch = !searchTerm || 
+          (entry.handlerName || '').toLowerCase().includes(searchTerm) ||
+          (entry.dogCallName || '').toLowerCase().includes(searchTerm) ||
+          (entry.cwagsNumber || '').toLowerCase().includes(searchTerm) ||
+          (entry.handlerEmail || '').toLowerCase().includes(searchTerm);
+        
+        // Class filter
+        const matchesClass = !classFilter ||
+          (entry.selectedEntries && entry.selectedEntries.some(se => se.className === classFilter)) ||
+          (entry.selectedClasses && entry.selectedClasses.includes(classFilter));
+        
+        return matchesSearch && matchesClass;
+      });
+      
+      renderEntriesTable();
+      
+      // Update filtered summary
+      const totalFees = filteredEntries.reduce((sum, entry) => {
+        const fee = parseFloat(entry.entryFee?.replace('$', '') || 0);
+        return sum + fee;
+      }, 0);
+      
+      document.getElementById('entriesCount').textContent = `${filteredEntries.length} entries`;
+      document.getElementById('totalFees').textContent = `$${totalFees.toFixed(2)} total`;
+    }
+
+    // Delete an entry
+    window.deleteEntry = async function(entryId) {
+      if (!confirm('Are you sure you want to delete this entry? This action cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        await deleteDoc(doc(db, "entries", entryId));
+        console.log("✅ Entry deleted successfully");
+        
+        // Remove from current entries array
+        currentTrialEntries = currentTrialEntries.filter(entry => entry.id !== entryId);
+        updateEntriesDisplay();
+        
+        alert('Entry deleted successfully');
+      } catch (error) {
+        console.error("❌ Error deleting entry:", error);
+        alert('Error deleting entry: ' + error.message);
+      }
+    };
+
+    // Export entries to CSV
+    window.exportEntries = function() {
+      if (filteredEntries.length === 0) {
+        alert('No entries to export');
+        return;
+      }
+      
+      // Create CSV content
+      const headers = [
+        'Handler Name', 'Handler Email', 'Handler Phone', 'Dog Call Name', 'Dog Breed',
+        'Registration Number', 'Classes', 'Entry Fee', 'Junior Handler', 'Submitted Date'
+      ];
+      
+      const csvContent = [
+        headers.join(','),
+        ...filteredEntries.map(entry => {
+          const submittedDate = entry.submittedAt?.toDate() || new Date();
+          const classes = entry.selectedEntries ? 
+            entry.selectedEntries.map(se => `${se.className}${se.entryType === 'feo' ? ' (FEO)' : ''}`).join('; ') :
+            (entry.selectedClasses || []).join('; ');
+          
+          return [
+            `"${entry.handlerName || ''}"`,
+            `"${entry.handlerEmail || ''}"`,
+            `"${entry.handlerPhone || ''}"`,
+            `"${entry.dogCallName || ''}"`,
+            `"${entry.dogBreed || ''}"`,
+            `"${entry.cwagsNumber || ''}"`,
+            `"${classes}"`,
+            `"${entry.entryFee || ''}"`,
+            `"${entry.juniorHandler ? 'Yes' : 'No'}"`,
+            `"${submittedDate.toLocaleDateString()} ${submittedDate.toLocaleTimeString()}"`
+          ].join(',');
+        })
+      ].join('\n');
+      
+      // Download CSV
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `trial-entries-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    };
+
+    // Summary Management Functions
+    window.createNewSummary = function() {
+      // Redirect to a new summary creation page or open modal
+      window.open('class-summary-generator.html', '_blank');
+    };
+
+    // Load summaries from Firebase
+    async function loadSummaries() {
+      if (!currentUser) return;
+      
+      try {
+        const summariesQuery = query(
+          collection(db, "classSummaries"),
+          where("createdBy", "==", currentUser.uid)
+        );
+        const summariesSnapshot = await getDocs(summariesQuery);
+        
+        const summariesList = document.getElementById('summariesList');
+        
+        if (summariesSnapshot.empty) {
+          summariesList.innerHTML = `
+            <div class="no-summaries">
+              <p>No class summaries yet. Create your first summary to get started!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const summariesHTML = summariesSnapshot.docs.map(doc => {
+          const data = doc.data();
+          const createdDate = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'Unknown';
+          
+          return `
+            <div class="summary-item">
+              <div class="summary-header">
+                <h3 class="summary-title">${data.hostName || 'Untitled Summary'}</h3>
+                <span class="summary-meta">Created: ${createdDate}</span>
+              </div>
+              <div class="summary-meta">
+                <strong>Date Range:</strong> ${data.dateRange || 'Not specified'}<br>
+                <strong>Classes:</strong> ${data.classes ? data.classes.length : 0}<br>
+                <strong>Total Entries:</strong> ${calculateTotalEntries(data.classes || [])}
+              </div>
+              <div class="summary-actions">
+                <button class="btn-sm btn-primary" onclick="editSummary('${doc.id}')">Edit</button>
+                <button class="btn-sm btn-success" onclick="generateReport('${doc.id}')">Generate Report</button>
+                <button class="btn-sm btn-danger" onclick="deleteSummary('${doc.id}')">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        summariesList.innerHTML = summariesHTML;
+        
+      } catch (error) {
+        console.error("Error loading summaries:", error);
+        document.getElementById('summariesList').innerHTML = `
+          <div class="no-summaries">
+            <p>Error loading summaries. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Load reports from Firebase
+    async function loadReports() {
+      if (!currentUser) return;
+      
+      try {
+        const reportsQuery = query(
+          collection(db, "generatedReports"),
+          where("createdBy", "==", currentUser.uid)
+        );
+        const reportsSnapshot = await getDocs(reportsQuery);
+        
+        const reportsList = document.getElementById('reportsList');
+        
+        if (reportsSnapshot.empty) {
+          reportsList.innerHTML = `
+            <div class="no-summaries">
+              <p>No reports generated yet. Generate reports from your class summaries!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const reportsHTML = reportsSnapshot.docs.map(doc => {
+          const data = doc.data();
+          const createdDate = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'Unknown';
+          
+          return `
+            <div class="summary-item">
+              <div class="summary-header">
+                <h3 class="summary-title">${data.reportName || 'Untitled Report'}</h3>
+                <span class="summary-meta">Generated: ${createdDate}</span>
+              </div>
+              <div class="summary-meta">
+                <strong>Type:</strong> ${data.reportType || 'Class Results'}<br>
+                <strong>Trial:</strong> ${data.trialName || 'Unknown'}<br>
+                <strong>Format:</strong> PDF
+              </div>
+              <div class="summary-actions">
+                <button class="btn-sm btn-primary" onclick="downloadReport('${doc.id}')">Download</button>
+                <button class="btn-sm btn-danger" onclick="deleteReport('${doc.id}')">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        reportsList.innerHTML = reportsHTML;
+        
+      } catch (error) {
+        console.error("Error loading reports:", error);
+        document.getElementById('reportsList').innerHTML = `
+          <div class="no-summaries">
+            <p>Error loading reports. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Helper function to calculate total entries
+    function calculateTotalEntries(classes) {
+      return classes.reduce((total, classItem) => {
+        return total + (classItem.entries ? classItem.entries.length : 0);
+      }, 0);
+    }
+
+    // Summary action functions
+    window.editSummary = function(summaryId) {
+      window.open(`class-summary-generator.html?edit=${summaryId}`, '_blank');
+    };
+
+    window.generateReport = function(summaryId) {
+      // This would open a report generator with the summary data
+      alert(`Generating report for summary ${summaryId}. This would open the PDF generator.`);
+    };
+
+    window.deleteSummary = async function(summaryId) {
+      if (confirm('Are you sure you want to delete this summary?')) {
+        try {
+          await deleteDoc(doc(db, "classSummaries", summaryId));
+          loadSummaries(); // Reload the list
+        } catch (error) {
+          console.error("Error deleting summary:", error);
+          alert("Error deleting summary: " + error.message);
+        }
+      }
+    };
+
+    // Report action functions
+    window.downloadReport = function(reportId) {
+      alert(`Downloading report ${reportId}. This would download the PDF file.`);
+    };
+
+    window.deleteReport = async function(reportId) {
+      if (confirm('Are you sure you want to delete this report?')) {
+        try {
+          await deleteDoc(doc(db, "generatedReports", reportId));
+          loadReports(); // Reload the list
+        } catch (error) {
+          console.error("Error deleting report:", error);
+          alert("Error deleting report: " + error.message);
+        }
+      }
+    };
+
+    // Auth state management (preserved from original)
+    auth.onAuthStateChanged(async (user) => {
+      if (authCheckComplete) return;
+      authCheckComplete = true;
+
+      console.log("Auth state changed:", user ? "logged in" : "not logged in");
+
+      if (user) {
+        console.log("User authenticated:", user.email);
+        currentUser = user;
+        
+        // Update UI with user info
+        const username = user.email.split('@')[0];
+        document.getElementById('username').textContent = username;
+        document.getElementById('userEmail').textContent = user.email;
+        
+        // Load user stats
+        await loadUserStats(user);
+        
+      } else {
+        console.log("No user found, redirecting to login");
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+      }
+    });
+
+    // Load user stats (enhanced to include entry counts)
+    async function loadUserStats(user) {
+      try {
+        // Count trials
+        const trialsQuery = query(
+          collection(db, "trials"),
+          where("createdBy", "==", user.uid)
+        );
+        const trialsSnapshot = await getDocs(trialsQuery);
+        
+        // Count applications  
+        const appsQuery = query(
+          collection(db, "applications"),
+          where("createdBy", "==", user.uid)
+        );
+        const appsSnapshot = await getDocs(appsQuery);
+
+        // Count summaries
+        const summariesQuery = query(
+          collection(db, "classSummaries"),
+          where("createdBy", "==", user.uid)
+        );
+        const summariesSnapshot = await getDocs(summariesQuery);
+
+        // Count total entries across all trials
+        let totalEntries = 0;
+        const entriesQuery = query(collection(db, "entries"));
+        const entriesSnapshot = await getDocs(entriesQuery);
+        
+        // Get trial IDs for this user
+        const userTrialIds = trialsSnapshot.docs.map(doc => doc.id);
+        
+        entriesSnapshot.forEach(doc => {
+          const entryData = doc.data();
+          if (userTrialIds.includes(entryData.trialId)) {
+            totalEntries++;
+          }
+        });
+
+        const statsHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #4CAF50;">${trialsSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Trials Created</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #e91e63;">${totalEntries}</div>
+              <div style="font-size: 14px; color: #666;">Total Entries</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #2196F3;">${appsSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Applications</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #9C27B0;">${summariesSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Class Summaries</div>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('statsContent').innerHTML = statsHTML;
+        
+      } catch (error) {
+        console.error("Error loading stats:", error);
+        document.getElementById('statsContent').innerHTML = 
+          '<p style="color: #666;">Unable to load statistics</p>';
+      }
+    }
+
+    // Logout function (preserved from original)
+    window.logout = async function() {
+      if (confirm("Are you sure you want to logout?")) {
+        try {
+          console.log("Logging out...");
+          await signOut(auth);
+          window.location.href = 'index.html';
+        } catch (error) {
+          console.error("Logout error:", error);
+          alert("Error logging out: " + error.message);
+        }
+      }
+    };
+
+    console.log("Enhanced Dashboard with Entry Management loaded successfully");
+  </script>
+</body>
+</html>="stylesheet" href="css/style.css">
   <style>
     body {
       font-family: Arial, sans-serif;
