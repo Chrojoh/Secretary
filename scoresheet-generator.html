@@ -644,6 +644,105 @@
         import { auth, db } from './js/firebase.js';
         import { collection, query, where, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
+        // ========================================
+        // GLOBAL DATE HANDLING FIX
+        // ========================================
+
+        /**
+         * CORE TIMEZONE-SAFE DATE UTILITIES
+         */
+
+        // Creates a date object that stays in local timezone
+        function createLocalDate(dateStr) {
+            if (!dateStr) return null;
+            
+            // Always add noon time to prevent timezone shifts
+            if (typeof dateStr === 'string') {
+                const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+                return new Date(dateWithTime);
+            }
+            
+            return new Date(dateStr);
+        }
+
+        // Formats a date to YYYY-MM-DD string in local timezone
+        function formatLocalDate(date) {
+            if (!date || !(date instanceof Date)) return '';
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}`;
+        }
+
+        // Gets today's date in local timezone as YYYY-MM-DD string
+        function getTodayLocal() {
+            const now = new Date();
+            return formatLocalDate(now);
+        }
+
+        // Formats date for display with timezone consideration
+        function formatDateDisplay(dateInput, options = {}) {
+            let date;
+            
+            if (typeof dateInput === 'string') {
+                date = createLocalDate(dateInput);
+            } else if (dateInput instanceof Date) {
+                date = new Date(dateInput);
+            } else {
+                return 'Invalid Date';
+            }
+            
+            if (!date || isNaN(date.getTime())) return 'Invalid Date';
+            
+            const defaultOptions = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            
+            const formatOptions = { ...defaultOptions, ...options };
+            return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+        }
+
+        /**
+         * Prepares date data for Firebase storage (prevents timezone conversion)
+         */
+        function prepareDateForFirebase(dateStr) {
+            if (!dateStr) return null;
+            
+            // Create a date that represents the exact local date at noon
+            const localDate = createLocalDate(dateStr);
+            
+            // Store as a Firestore Timestamp to maintain precision
+            return localDate;
+        }
+
+        /**
+         * Retrieves date data from Firebase (converts back to local date string)
+         */
+        function getDateFromFirebase(firebaseDate) {
+            if (!firebaseDate) return '';
+            
+            let date;
+            
+            // Handle Firestore Timestamps
+            if (firebaseDate.toDate) {
+                date = firebaseDate.toDate();
+            } else if (firebaseDate instanceof Date) {
+                date = firebaseDate;
+            } else if (typeof firebaseDate === 'string') {
+                date = createLocalDate(firebaseDate);
+            } else {
+                return '';
+            }
+            
+            return formatLocalDate(date);
+        }
+
         // Global variables
         let trials = [];
         let currentTrial = null;
@@ -680,7 +779,17 @@
                 trials = [];
                 
                 snapshot.forEach(doc => {
-                    trials.push({ id: doc.id, ...doc.data() });
+                    const trialData = doc.data();
+                    
+                    // Fix date handling for trial days
+                    if (trialData.days && Array.isArray(trialData.days)) {
+                        trialData.days = trialData.days.map(day => ({
+                            ...day,
+                            date: day.date ? getDateFromFirebase(day.date) : null
+                        }));
+                    }
+                    
+                    trials.push({ id: doc.id, ...trialData });
                 });
 
                 // Sort by creation date (most recent first)
@@ -711,10 +820,13 @@
                 if (trial.days && trial.days.length > 0) {
                     const dates = trial.days
                         .filter(day => day.date)
-                        .map(day => new Date(day.date).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric' 
-                        }))
+                        .map(day => {
+                            const date = createLocalDate(day.date);
+                            return date.toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                        })
                         .join(', ');
                     if (dates) {
                         trialLabel += ` (${dates})`;
@@ -750,12 +862,7 @@
                     if (day.date) {
                         const option = document.createElement('option');
                         option.value = day.date;
-                        option.textContent = new Date(day.date).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        });
+                        option.textContent = formatDateDisplay(day.date);
                         dateSelect.appendChild(option);
                     }
                 });
@@ -822,11 +929,18 @@
                 
                 snapshot.forEach(doc => {
                     const entryData = doc.data();
+                    
+                    // Fix selected entries dates
                     if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
                         entryData.selectedEntries.forEach(selectedEntry => {
+                            const processedEntry = {
+                                ...selectedEntry,
+                                date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
+                            };
+                            
                             entries.push({
                                 id: doc.id,
-                                ...selectedEntry,
+                                ...processedEntry,
                                 handlerName: entryData.handlerName,
                                 dogCallName: entryData.dogCallName,
                                 cwagsNumber: entryData.cwagsNumber,
@@ -836,8 +950,12 @@
                     }
                 });
 
-                // Filter entries for selected date
-                entries = entries.filter(entry => entry.date === selectedDate);
+                // Filter entries for selected date using timezone-safe comparison
+                entries = entries.filter(entry => {
+                    const entryDate = getDateFromFirebase(entry.date);
+                    const filterDate = formatLocalDate(createLocalDate(selectedDate));
+                    return entryDate === filterDate;
+                });
 
                 console.log('Loaded entries for date:', selectedDate, entries);
 
@@ -948,7 +1066,7 @@
                         id: `${currentTrial.id}_${selectedDate}_${judge}_${classRound}`.replace(/[^a-zA-Z0-9]/g, '_'),
                         trialId: currentTrial.id,
                         trialName: currentTrial.clubName || 'Unnamed Trial',
-                        date: selectedDate,
+                        date: prepareDateForFirebase(selectedDate), // Fix the date
                         judge: judge,
                         classRound: classRound,
                         className: classRound.split(' - Round')[0],
@@ -993,12 +1111,13 @@
             let html = '';
             
             generatedSheets.forEach(sheet => {
+                const displayDate = getDateFromFirebase(sheet.date);
                 html += `
                     <div class="score-sheet-item">
                         <div class="score-sheet-info">
                             <div class="score-sheet-title">${sheet.judge} - ${sheet.classRound}</div>
                             <div class="score-sheet-details">
-                                ${sheet.entrants.length} entrants • ${sheet.date}
+                                ${sheet.entrants.length} entrants • ${formatDateDisplay(displayDate)}
                                 <span class="status-badge status-${sheet.status}">${sheet.status.toUpperCase()}</span>
                             </div>
                         </div>
@@ -1056,6 +1175,8 @@
                 rowHeight = '35px';
             }
 
+            const displayDate = formatDateDisplay(getDateFromFirebase(sheetData.date));
+
             let html = `
                 <div class="score-sheet">
                     <div class="score-sheet-header">
@@ -1064,7 +1185,7 @@
                             <img src="./images/cwags-logo.png" alt="C-WAGS Logo" />
                         </div>
                         <div class="score-sheet-title-text">${sheetData.className} Score Sheet</div>
-                        <div class="score-sheet-date">Date: ${sheetData.date}</div>
+                        <div class="score-sheet-date">Date: ${displayDate}</div>
                         <div class="score-sheet-class">CLASS: ${sheetData.className}</div>
                         <div class="score-sheet-class">JUDGE: ${sheetData.judge}</div>
                         
@@ -1290,7 +1411,15 @@
                 const storedSheets = [];
                 
                 snapshot.forEach(doc => {
-                    storedSheets.push({ id: doc.id, ...doc.data() });
+                    const sheetData = doc.data();
+                    
+                    // Fix date handling when loading
+                    const processedSheet = {
+                        ...sheetData,
+                        date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                    };
+                    
+                    storedSheets.push({ id: doc.id, ...processedSheet });
                 });
 
                 // Sort by creation date (most recent first)
@@ -1323,6 +1452,7 @@
             } else {
                 sheets.forEach(sheet => {
                     const createdDate = sheet.createdAt ? sheet.createdAt.toDate().toLocaleDateString() : 'Unknown';
+                    const displayDate = formatDateDisplay(sheet.date);
                     const hasScores = sheet.scoreData && Object.keys(sheet.scoreData).length > 0;
                     const statusClass = hasScores ? 'status-completed' : sheet.status;
                     const statusText = hasScores ? 'SCORED' : sheet.status.toUpperCase();
@@ -1332,7 +1462,7 @@
                             <div class="score-sheet-info">
                                 <div class="score-sheet-title">${sheet.trialName} - ${sheet.judge} - ${sheet.classRound}</div>
                                 <div class="score-sheet-details">
-                                    ${sheet.entrants.length} entrants • ${sheet.date} • Created: ${createdDate}
+                                    ${sheet.entrants.length} entrants • ${displayDate} • Created: ${createdDate}
                                     <span class="status-badge ${statusClass}">${statusText}</span>
                                 </div>
                             </div>
@@ -1360,7 +1490,13 @@
                     return;
                 }
 
-                const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                const sheetData = sheetDoc.data();
+                const sheet = { 
+                    id: sheetDoc.id, 
+                    ...sheetData,
+                    date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                };
+                
                 const container = document.getElementById('scoreSheetsContainer');
                 container.innerHTML = generateScoreSheetHTML(sheet);
                 container.style.display = 'block';
@@ -1382,7 +1518,13 @@
                     return;
                 }
 
-                const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                const sheetData = sheetDoc.data();
+                const sheet = { 
+                    id: sheetDoc.id, 
+                    ...sheetData,
+                    date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                };
+                
                 const container = document.getElementById('scoreSheetsContainer');
                 container.innerHTML = generateScoreSheetHTML(sheet);
                 
@@ -1404,7 +1546,12 @@
                     return;
                 }
 
-                currentEditingSheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                const sheetData = sheetDoc.data();
+                currentEditingSheet = { 
+                    id: sheetDoc.id, 
+                    ...sheetData,
+                    date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                };
                 
                 // Load existing score data if available
                 currentScoreData = currentEditingSheet.scoreData || {};
@@ -1678,7 +1825,8 @@
                 yPos -= 25;
 
                 // Date
-                page.drawText(`Date: ${currentEditingSheet.date}`, {
+                const displayDate = formatDateDisplay(currentEditingSheet.date);
+                page.drawText(`Date: ${displayDate}`, {
                     x: width / 2 - 80,
                     y: yPos,
                     size: 12,
