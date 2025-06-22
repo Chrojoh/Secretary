@@ -647,6 +647,35 @@
       </div>
     </div>
 
+    <!-- Entry Fee Configuration (Secretary Only) -->
+    <div class="trial-info" id="entryFeeSection" style="display: none;">
+      <h3>💰 Entry Fee Configuration</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="regularFee">Regular Entry Fee ($)</label>
+          <input type="number" id="regularFee" min="0" step="0.01" value="35.00" 
+                 style="font-size: 1.1rem; padding: 0.75rem;">
+        </div>
+        <div class="form-group">
+          <label for="feoFee">FEO Entry Fee ($)</label>
+          <input type="number" id="feoFee" min="0" step="0.01" value="25.00" 
+                 style="font-size: 1.1rem; padding: 0.75rem;">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="juniorFee">Junior Handler Fee ($)</label>
+          <input type="number" id="juniorFee" min="0" step="0.01" value="20.00" 
+                 style="font-size: 1.1rem; padding: 0.75rem;">
+        </div>
+        <div class="form-group">
+          <label style="color: #666; font-weight: normal; font-size: 0.9rem; margin-top: 1rem;">
+            💡 These fees will be applied to all entries for this trial. Junior Handler fee replaces regular/FEO fees when selected.
+          </label>
+        </div>
+      </div>
+    </div>
+
     <!-- Shareable Link Section (Secretary Only) -->
     <div class="shareable-link-section" id="shareableLinkSection">
       <h3>🔗 Shareable Entry Link</h3>
@@ -997,10 +1026,10 @@
     let selectedEntries = [];
     let totalFee = 0;
 
-    // Fee structure
-    const fees = {
-      firstClass: 35.00,
-      additionalClass: 25.00,
+    // Fee structure - now configurable by secretary
+    let fees = {
+      regular: 35.00,
+      feo: 25.00,
       juniorHandler: 20.00
     };
 
@@ -1341,6 +1370,14 @@
         // Hide secretary-only sections
         document.getElementById('trialSelectionSection').style.display = 'none';
         document.getElementById('backToDashboardSection').style.display = 'none';
+        document.getElementById('entryFeeSection').style.display = 'none'; // Hide fee config for public
+        
+        // Load fees from trial data if available, otherwise use defaults
+        if (trialData.entryFees) {
+          fees.regular = trialData.entryFees.regular || fees.regular;
+          fees.feo = trialData.entryFees.feo || fees.feo;
+          fees.juniorHandler = trialData.entryFees.juniorHandler || fees.juniorHandler;
+        }
         
         // Show trial info and entry form
         populateTrialInfo();
@@ -1548,6 +1585,12 @@
         if (trialId) {
           currentTrialData = availableTrials.find(t => t.id === trialId);
           if (currentTrialData) {
+            // Show fee configuration section for secretary
+            document.getElementById('entryFeeSection').style.display = 'block';
+            
+            // Setup fee change listeners
+            setupFeeChangeListeners();
+            
             generateShareableLink();
             populateTrialInfo();
             showEntryForm();
@@ -1561,8 +1604,41 @@
           hideShareableLink();
           hideTrialInfo();
           hideEntryForm();
+          document.getElementById('entryFeeSection').style.display = 'none';
         }
       });
+    }
+
+    // Setup fee change listeners for secretary
+    function setupFeeChangeListeners() {
+      const regularFeeInput = document.getElementById('regularFee');
+      const feoFeeInput = document.getElementById('feoFee');
+      const juniorFeeInput = document.getElementById('juniorFee');
+      
+      function updateFees() {
+        fees.regular = parseFloat(regularFeeInput.value) || 35.00;
+        fees.feo = parseFloat(feoFeeInput.value) || 25.00;
+        fees.juniorHandler = parseFloat(juniorFeeInput.value) || 20.00;
+        
+        // Regenerate classes with new fees
+        if (currentTrialData) {
+          generateTabbedClasses();
+        }
+        
+        // Update summary if entries are selected
+        updateEntrySummary();
+      }
+      
+      // Remove existing listeners
+      regularFeeInput.removeEventListener('input', updateFees);
+      feoFeeInput.removeEventListener('input', updateFees);
+      juniorFeeInput.removeEventListener('input', updateFees);
+      
+      // Add new listeners
+      regularFeeInput.addEventListener('input', updateFees);
+      feoFeeInput.addEventListener('input', updateFees);
+      juniorFeeInput.addEventListener('input', updateFees);
+    }
     }
 
     // Show entry form - ENHANCED
