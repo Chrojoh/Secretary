@@ -1578,12 +1578,16 @@
         trialSelect.appendChild(option);
       });
 
-      // Handle trial selection change
-      trialSelect.addEventListener('change', function() {
-        const trialId = this.value;
+      // Handle trial selection change - FIXED EVENT LISTENER
+      trialSelect.addEventListener('change', function(event) {
+        const trialId = event.target.value;
+        console.log("🎯 Trial selected:", trialId);
+        
         if (trialId) {
           currentTrialData = availableTrials.find(t => t.id === trialId);
           if (currentTrialData) {
+            console.log("✅ Found trial data:", currentTrialData.clubName);
+            
             // Show fee configuration section for secretary
             document.getElementById('entryFeeSection').style.display = 'block';
             
@@ -1598,8 +1602,11 @@
             setTimeout(() => {
               setupFormEventListeners();
             }, 100);
+          } else {
+            console.error("❌ Could not find trial data for ID:", trialId);
           }
         } else {
+          console.log("🚫 No trial selected, hiding sections");
           hideShareableLink();
           hideTrialInfo();
           hideEntryForm();
@@ -1614,10 +1621,18 @@
       const feoFeeInput = document.getElementById('feoFee');
       const juniorFeeInput = document.getElementById('juniorFee');
       
+      if (!regularFeeInput || !feoFeeInput || !juniorFeeInput) {
+        console.warn("⚠️ Fee input fields not found, skipping fee listeners setup");
+        return;
+      }
+      
       function updateFees() {
+        console.log("💰 Updating fees from inputs");
         fees.regular = parseFloat(regularFeeInput.value) || 35.00;
         fees.feo = parseFloat(feoFeeInput.value) || 25.00;
         fees.juniorHandler = parseFloat(juniorFeeInput.value) || 20.00;
+        
+        console.log("💰 New fees:", fees);
         
         // Regenerate classes with new fees
         if (currentTrialData) {
@@ -1628,7 +1643,7 @@
         updateEntrySummary();
       }
       
-      // Remove existing listeners
+      // Remove existing listeners to prevent duplicates
       regularFeeInput.removeEventListener('input', updateFees);
       feoFeeInput.removeEventListener('input', updateFees);
       juniorFeeInput.removeEventListener('input', updateFees);
@@ -1637,6 +1652,8 @@
       regularFeeInput.addEventListener('input', updateFees);
       feoFeeInput.addEventListener('input', updateFees);
       juniorFeeInput.addEventListener('input', updateFees);
+      
+      console.log("✅ Fee change listeners setup complete");
     }
     }
 
