@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Trial Secretary Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+    
+    .welcome-msg {
+      margin: 10px 0 0 0;
+      font-size: 18px;
+      opacity: 0.9;
+    }
+
+    /* Tab Navigation */
+    .tab-navigation {
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 2px solid #dee2e6;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tab-button {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 15px 20px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab-button:hover {
+      background: #e9ecef;
+      color: #333;
+    }
+
+    .tab-button.active {
+      background: white;
+      color: #4CAF50;
+      border-bottom-color: #4CAF50;
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+      padding: 30px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+    
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .nav-card {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .nav-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-color: #4CAF50;
+    }
+    
+    .nav-card h3 {
+      margin: 0 0 15px 0;
+      color: #333;
+      font-size: 20px;
+    }
+    
+    .nav-card p {
+      color: #666;
+      margin: 0 0 20px 0;
+      line-height: 1.5;
+    }
+    
+    .nav-button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    
+    .nav-button:hover {
+      background: #45a049;
+    }
+    
+    .nav-button.secondary {
+      background: #2196F3;
+    }
+    
+    .nav-button.secondary:hover {
+      background: #1976D2;
+    }
+    
+    .nav-button.tertiary {
+      background: #ff9800;
+    }
+    
+    .nav-button.tertiary:hover {
+      background: #f57c00;
+    }
+
+    .nav-button.summary {
+      background: #9C27B0;
+    }
+
+    .nav-button.summary:hover {
+      background: #7B1FA2;
+    }
+    
+    .user-info {
+      background: #e8f5e8;
+      padding: 20px;
+      margin: 20px 30px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .user-details {
+      font-weight: bold;
+      color: #2e7d32;
+    }
+    
+    .logout-btn {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .logout-btn:hover {
+      background: #d32f2f;
+    }
+    
+    .quick-stats {
+      background: #fff3e0;
+      padding: 20px;
+      margin: 20px 30px;
+      border-radius: 8px;
+      border-left: 5px solid #ff9800;
+    }
+    
+    .quick-stats h3 {
+      margin: 0 0 10px 0;
+      color: #f57c00;
+    }
+
+    /* Summary Specific Styles */
+    .summary-list {
+      display: grid;
+      gap: 20px;
+    }
+
+    .summary-item {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .summary-item:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .summary-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+
+    .summary-meta {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0;
+    }
+
+    .summary-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #0056b3;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #1e7e34;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    .no-summaries {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <div class="header">
+      <h1>🐕 Trial Secretary Dashboard</h1>
+      <div class="welcome-msg">Welcome back, <span id="username">User</span>!</div>
+    </div>
+
+    <!-- User Info Section (preserved from original) -->
+    <div class="user-info">
+      <div class="user-details">
+        <div>Logged in as: <span id="userEmail">user@example.com</span></div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Quick Stats Section (preserved from original) -->
+    <div class="quick-stats">
+      <h3>📊 Quick Stats</h3>
+      <div id="statsContent">Loading statistics...</div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <button class="tab-button active" onclick="showTab('main')">Main Tools</button>
+      <button class="tab-button" onclick="showTab('summaries')">Class Summaries</button>
+      <button class="tab-button" onclick="showTab('reports')">Generated Reports</button>
+    </div>
+
+    <!-- Main Tools Tab (original content) -->
+    <div id="main-tab" class="tab-content active">
+      <div class="nav-grid">
+        <div class="nav-card" onclick="location.href='create-trial.html'">
+          <h3>🏁 Create Trial</h3>
+          <p>Set up a new trial with classes, dates, and judges</p>
+          <button class="nav-button">Create New Trial</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='view-trials.html'">
+          <h3>📋 My Trials</h3>
+          <p>View and manage your existing trials</p>
+          <button class="nav-button secondary">View Trials</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='trial-application.html'">
+          <h3>📄 Trial Application</h3>
+          <p>Generate trial application forms for submission</p>
+          <button class="nav-button">Create Application</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='entry-form.html'">
+          <h3>🐕 Entry Forms</h3>
+          <p>Manage dog entries and participant information</p>
+          <button class="nav-button tertiary">Manage Entries</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='premium.html'">
+          <h3>🏆 Premium Generator</h3>
+          <p>Generate professional premium lists for your trials</p>
+          <button class="nav-button secondary">Generate Premium</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='waiver-generator.html'">
+          <h3>📝 Waiver Generator</h3>
+          <p>Create liability waivers for your events</p>
+          <button class="nav-button tertiary">Generate Waivers</button>
+        </div>
+
+        <div class="nav-card" onclick="location.href='scoresheet-generator.html'">
+          <h3>📋 Score Sheets</h3>
+          <p>Generate and manage official C-WAGS score sheets for judges</p>
+          <button class="nav-button">Generate Score Sheets</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Class Summaries Tab -->
+    <div id="summaries-tab" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>Class Summary Reports</h2>
+        <button class="nav-button summary" onclick="createNewSummary()">+ Create New Summary</button>
+      </div>
+      
+      <div id="summariesList" class="summary-list">
+        <div class="no-summaries">
+          <p>No class summaries yet. Create your first summary to get started!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated Reports Tab -->
+    <div id="reports-tab" class="tab-content">
+      <h2>Generated Reports</h2>
+      <div id="reportsList" class="summary-list">
+        <div class="no-summaries">
+          <p>No reports generated yet. Generate reports from your class summaries!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+    import { collection, query, where, getDocs, addDoc, deleteDoc, doc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    console.log("Enhanced Dashboard loading...");
+
+    let authCheckComplete = false;
+    let currentUser = null;
+
+    // Tab Management
+    window.showTab = function(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Remove active class from all buttons
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById(tabName + '-tab').classList.add('active');
+      
+      // Add active class to clicked button
+      event.target.classList.add('active');
+      
+      // Load content for specific tabs
+      if (tabName === 'summaries') {
+        loadSummaries();
+      } else if (tabName === 'reports') {
+        loadReports();
+      }
+    };
+
+    // Summary Management Functions
+    window.createNewSummary = function() {
+      // Redirect to a new summary creation page or open modal
+      window.open('class-summary-generator.html', '_blank');
+    };
+
+    // Load summaries from Firebase
+    async function loadSummaries() {
+      if (!currentUser) return;
+      
+      try {
+        const summariesQuery = query(
+          collection(db, "classSummaries"),
+          where("createdBy", "==", currentUser.uid)
+        );
+        const summariesSnapshot = await getDocs(summariesQuery);
+        
+        const summariesList = document.getElementById('summariesList');
+        
+        if (summariesSnapshot.empty) {
+          summariesList.innerHTML = `
+            <div class="no-summaries">
+              <p>No class summaries yet. Create your first summary to get started!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const summariesHTML = summariesSnapshot.docs.map(doc => {
+          const data = doc.data();
+          const createdDate = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'Unknown';
+          
+          return `
+            <div class="summary-item">
+              <div class="summary-header">
+                <h3 class="summary-title">${data.hostName || 'Untitled Summary'}</h3>
+                <span class="summary-meta">Created: ${createdDate}</span>
+              </div>
+              <div class="summary-meta">
+                <strong>Date Range:</strong> ${data.dateRange || 'Not specified'}<br>
+                <strong>Classes:</strong> ${data.classes ? data.classes.length : 0}<br>
+                <strong>Total Entries:</strong> ${calculateTotalEntries(data.classes || [])}
+              </div>
+              <div class="summary-actions">
+                <button class="btn-sm btn-primary" onclick="editSummary('${doc.id}')">Edit</button>
+                <button class="btn-sm btn-success" onclick="generateReport('${doc.id}')">Generate Report</button>
+                <button class="btn-sm btn-danger" onclick="deleteSummary('${doc.id}')">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        summariesList.innerHTML = summariesHTML;
+        
+      } catch (error) {
+        console.error("Error loading summaries:", error);
+        document.getElementById('summariesList').innerHTML = `
+          <div class="no-summaries">
+            <p>Error loading summaries. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Load reports from Firebase
+    async function loadReports() {
+      if (!currentUser) return;
+      
+      try {
+        const reportsQuery = query(
+          collection(db, "generatedReports"),
+          where("createdBy", "==", currentUser.uid)
+        );
+        const reportsSnapshot = await getDocs(reportsQuery);
+        
+        const reportsList = document.getElementById('reportsList');
+        
+        if (reportsSnapshot.empty) {
+          reportsList.innerHTML = `
+            <div class="no-summaries">
+              <p>No reports generated yet. Generate reports from your class summaries!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const reportsHTML = reportsSnapshot.docs.map(doc => {
+          const data = doc.data();
+          const createdDate = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'Unknown';
+          
+          return `
+            <div class="summary-item">
+              <div class="summary-header">
+                <h3 class="summary-title">${data.reportName || 'Untitled Report'}</h3>
+                <span class="summary-meta">Generated: ${createdDate}</span>
+              </div>
+              <div class="summary-meta">
+                <strong>Type:</strong> ${data.reportType || 'Class Results'}<br>
+                <strong>Trial:</strong> ${data.trialName || 'Unknown'}<br>
+                <strong>Format:</strong> PDF
+              </div>
+              <div class="summary-actions">
+                <button class="btn-sm btn-primary" onclick="downloadReport('${doc.id}')">Download</button>
+                <button class="btn-sm btn-danger" onclick="deleteReport('${doc.id}')">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        reportsList.innerHTML = reportsHTML;
+        
+      } catch (error) {
+        console.error("Error loading reports:", error);
+        document.getElementById('reportsList').innerHTML = `
+          <div class="no-summaries">
+            <p>Error loading reports. Please try again.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Helper function to calculate total entries
+    function calculateTotalEntries(classes) {
+      return classes.reduce((total, classItem) => {
+        return total + (classItem.entries ? classItem.entries.length : 0);
+      }, 0);
+    }
+
+    // Summary action functions
+    window.editSummary = function(summaryId) {
+      window.open(`class-summary-generator.html?edit=${summaryId}`, '_blank');
+    };
+
+    window.generateReport = function(summaryId) {
+      // This would open a report generator with the summary data
+      alert(`Generating report for summary ${summaryId}. This would open the PDF generator.`);
+    };
+
+    window.deleteSummary = async function(summaryId) {
+      if (confirm('Are you sure you want to delete this summary?')) {
+        try {
+          await deleteDoc(doc(db, "classSummaries", summaryId));
+          loadSummaries(); // Reload the list
+        } catch (error) {
+          console.error("Error deleting summary:", error);
+          alert("Error deleting summary: " + error.message);
+        }
+      }
+    };
+
+    // Report action functions
+    window.downloadReport = function(reportId) {
+      alert(`Downloading report ${reportId}. This would download the PDF file.`);
+    };
+
+    window.deleteReport = async function(reportId) {
+      if (confirm('Are you sure you want to delete this report?')) {
+        try {
+          await deleteDoc(doc(db, "generatedReports", reportId));
+          loadReports(); // Reload the list
+        } catch (error) {
+          console.error("Error deleting report:", error);
+          alert("Error deleting report: " + error.message);
+        }
+      }
+    };
+
+    // Auth state management (preserved from original)
+    auth.onAuthStateChanged(async (user) => {
+      if (authCheckComplete) return;
+      authCheckComplete = true;
+
+      console.log("Auth state changed:", user ? "logged in" : "not logged in");
+
+      if (user) {
+        console.log("User authenticated:", user.email);
+        currentUser = user;
+        
+        // Update UI with user info
+        const username = user.email.split('@')[0];
+        document.getElementById('username').textContent = username;
+        document.getElementById('userEmail').textContent = user.email;
+        
+        // Load user stats
+        await loadUserStats(user);
+        
+      } else {
+        console.log("No user found, redirecting to login");
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 1000);
+      }
+    });
+
+    // Load user stats (preserved from original)
+    async function loadUserStats(user) {
+      try {
+        // Count trials
+        const trialsQuery = query(
+          collection(db, "trials"),
+          where("createdBy", "==", user.uid)
+        );
+        const trialsSnapshot = await getDocs(trialsQuery);
+        
+        // Count applications  
+        const appsQuery = query(
+          collection(db, "applications"),
+          where("createdBy", "==", user.uid)
+        );
+        const appsSnapshot = await getDocs(appsQuery);
+
+        // Count summaries
+        const summariesQuery = query(
+          collection(db, "classSummaries"),
+          where("createdBy", "==", user.uid)
+        );
+        const summariesSnapshot = await getDocs(summariesQuery);
+
+        const statsHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #4CAF50;">${trialsSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Trials Created</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #2196F3;">${appsSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Applications</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #9C27B0;">${summariesSnapshot.size}</div>
+              <div style="font-size: 14px; color: #666;">Class Summaries</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #ff9800;">Active</div>
+              <div style="font-size: 14px; color: #666;">System Status</div>
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('statsContent').innerHTML = statsHTML;
+        
+      } catch (error) {
+        console.error("Error loading stats:", error);
+        document.getElementById('statsContent').innerHTML = 
+          '<p style="color: #666;">Unable to load statistics</p>';
+      }
+    }
+
+    // Logout function (preserved from original)
+    window.logout = async function() {
+      if (confirm("Are you sure you want to logout?")) {
+        try {
+          console.log("Logging out...");
+          await signOut(auth);
+          window.location.href = 'index.html';
+        } catch (error) {
+          console.error("Logout error:", error);
+          alert("Error logging out: " + error.message);
+        }
+      }
+    };
+
+    console.log("Enhanced Dashboard script loaded successfully");
+  </script>
+</body>
+</html>
