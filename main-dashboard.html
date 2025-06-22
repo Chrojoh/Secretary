@@ -626,6 +626,123 @@
 
     console.log("Enhanced Dashboard loading...");
 
+    // ========================================
+    // GLOBAL DATE HANDLING FIX
+    // ========================================
+    
+    // Creates a date object that stays in local timezone
+    function createLocalDate(dateStr) {
+      if (!dateStr) return null;
+      
+      // Always add noon time to prevent timezone shifts
+      if (typeof dateStr === 'string') {
+        const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+        return new Date(dateWithTime);
+      }
+      
+      return new Date(dateStr);
+    }
+
+    // Formats a date to YYYY-MM-DD string in local timezone
+    function formatLocalDate(date) {
+      if (!date || !(date instanceof Date)) return '';
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
+    }
+
+    // Gets today's date in local timezone as YYYY-MM-DD string
+    function getTodayLocal() {
+      const now = new Date();
+      return formatLocalDate(now);
+    }
+
+    // Formats date for display with timezone consideration
+    function formatDateDisplay(dateInput, options = {}) {
+      let date;
+      
+      if (typeof dateInput === 'string') {
+        date = createLocalDate(dateInput);
+      } else if (dateInput instanceof Date) {
+        date = new Date(dateInput);
+      } else {
+        return 'Invalid Date';
+      }
+      
+      if (!date || isNaN(date.getTime())) return 'Invalid Date';
+      
+      const defaultOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+      
+      const formatOptions = { ...defaultOptions, ...options };
+      return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+    }
+
+    // Prepares date data for Firebase storage (prevents timezone conversion)
+    function prepareDateForFirebase(dateStr) {
+      if (!dateStr) return null;
+      
+      // Create a date that represents the exact local date at noon
+      const localDate = createLocalDate(dateStr);
+      
+      // Store as a Firestore Timestamp to maintain precision
+      return localDate;
+    }
+
+    // Retrieves date data from Firebase (converts back to local date string)
+    function getDateFromFirebase(firebaseDate) {
+      if (!firebaseDate) return '';
+      
+      let date;
+      
+      // Handle Firestore Timestamps
+      if (firebaseDate.toDate) {
+        date = firebaseDate.toDate();
+      } else if (firebaseDate instanceof Date) {
+        date = firebaseDate;
+      } else if (typeof firebaseDate === 'string') {
+        date = createLocalDate(firebaseDate);
+      } else {
+        return '';
+      }
+      
+      return formatLocalDate(date);
+    }
+
+    // Test date handling function
+    function testDateHandling() {
+      console.log('=== Date Handling Test ===');
+      
+      const testDate = '2024-03-15';
+      console.log('1. Original date string:', testDate);
+      
+      const forFirebase = prepareDateForFirebase(testDate);
+      console.log('2. Prepared for Firebase:', forFirebase);
+      
+      const fromFirebase = getDateFromFirebase(forFirebase);
+      console.log('3. Retrieved from Firebase:', fromFirebase);
+      
+      const display = formatDateDisplay(fromFirebase);
+      console.log('4. Formatted for display:', display);
+      
+      const matches = fromFirebase === testDate;
+      console.log('5. Round-trip successful:', matches);
+      
+      if (!matches) {
+        console.error('❌ Date handling is still broken!');
+      } else {
+        console.log('✅ Date handling is working correctly!');
+      }
+    }
+
     let authCheckComplete = false;
     let currentUser = null;
     let availableTrials = [];
@@ -685,6 +802,15 @@
         
         trialsSnapshot.forEach(doc => {
           const trialData = doc.data();
+          
+          // Fix date handling for trial days using global date fix
+          if (trialData.days && Array.isArray(trialData.days)) {
+            trialData.days = trialData.days.map(day => ({
+              ...day,
+              date: day.date ? getDateFromFirebase(day.date) : null
+            }));
+          }
+          
           availableTrials.push({ id: doc.id, ...trialData });
         });
         
@@ -703,7 +829,8 @@
             const dates = trial.days
               .filter(day => day.date)
               .map(day => {
-                const localDate = new Date(day.date + 'T12:00:00');
+                // Use timezone-safe date formatting
+                const localDate = createLocalDate(day.date);
                 return localDate.toLocaleDateString('en-US', { 
                   month: 'short', 
                   day: 'numeric' 
@@ -753,6 +880,15 @@
         
         entriesSnapshot.forEach(doc => {
           const entryData = doc.data();
+          
+          // Fix selected entries dates using global date fix
+          if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+              ...entry,
+              date: entry.date ? getDateFromFirebase(entry.date) : null
+            }));
+          }
+          
           currentTrialEntries.push({
             id: doc.id,
             ...entryData
@@ -1260,7 +1396,10 @@
       }
     };
 
-    console.log("Enhanced Dashboard with Entry Management loaded successfully");
+            console.log("Enhanced Dashboard with Entry Management loaded successfully");
+        
+        // Test date handling (remove in production)
+        testDateHandling();
   </script>
 </body>
 </html>
