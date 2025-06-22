@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trial Entry Form</title>
-  <link rel="stylesheet" href="css/style.css">
   <style>
     * {
       margin: 0;
@@ -11,31 +12,49 @@
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f7fa;
-      line-height: 1.6;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 10px;
     }
     
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
-      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      overflow: hidden;
     }
     
     .header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       padding: 2rem;
-      border-radius: 12px 12px 0 0;
       text-align: center;
     }
     
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+    
     .trial-info {
-      background: white;
+      background: #f8f9fa;
       padding: 1.5rem;
-      border-left: 4px solid #667eea;
-      margin-bottom: 2rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .trial-info h3 {
+      color: #495057;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
     }
     
     .trial-details {
@@ -44,80 +63,107 @@
       gap: 1rem;
     }
     
-    .entry-form {
-      background: white;
-      border-radius: 0 0 12px 12px;
-      padding: 2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    .trial-details > div {
+      font-size: 0.95rem;
     }
     
-    .waiver-section {
-      background: #fff9e6;
-      border: 2px solid #ffc107;
+    .trial-details strong {
+      color: #495057;
+    }
+    
+    /* Shareable Link Section */
+    .shareable-link-section {
+      background: #e7f3ff;
+      border: 2px solid #0066cc;
       border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
+      padding: 20px;
+      margin: 20px;
+      display: none;
     }
     
-    .waiver-section h3 {
-      color: #e65100;
-      margin-bottom: 1rem;
+    .shareable-link-section h3 {
+      color: #0066cc;
+      margin-bottom: 15px;
     }
     
-    .waiver-content {
+    .link-display {
       background: white;
-      padding: 1rem;
+      border: 1px solid #dee2e6;
       border-radius: 6px;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-      line-height: 1.5;
+      padding: 15px;
+      margin-bottom: 15px;
     }
     
-    .waiver-agreement {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.8rem;
-      margin-top: 1rem;
-      padding: 1rem;
+    .link-url {
+      font-family: monospace;
       background: #f8f9fa;
-      border-radius: 6px;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      word-break: break-all;
+      color: #0066cc;
+      margin-bottom: 10px;
     }
     
-    .waiver-agreement input[type="checkbox"] {
-      margin-top: 0.2rem;
-      transform: scale(1.2);
+    .link-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-copy, .btn-test {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .btn-copy {
+      background: #17a2b8;
+      color: white;
+    }
+    
+    .btn-test {
+      background: #28a745;
+      color: white;
+    }
+    
+    .entry-form {
+      padding: 2rem;
     }
     
     .form-section {
       margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #28a745;
-    }
-    
-    .form-section.primary {
-      border-left-color: #007bff;
-      background: #f0f8ff;
     }
     
     .form-section h3 {
-      color: #28a745;
+      color: #495057;
       margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      font-size: 1.3rem;
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 0.5rem;
+    }
+    
+    .form-section.primary {
+      background: #f0f8ff;
+      border: 2px solid #0066cc;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
     }
     
     .form-section.primary h3 {
-      color: #007bff;
+      color: #0066cc;
+      border-bottom-color: #0066cc;
     }
     
     .form-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
     }
     
     .form-group {
@@ -129,91 +175,116 @@
       grid-column: 1 / -1;
     }
     
-    .form-group label {
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      color: #333;
-    }
-    
     .form-group.required label::after {
       content: " *";
-      color: #e74c3c;
+      color: #dc3545;
+      font-weight: bold;
     }
     
-    .form-group input, .form-group select, .form-group textarea {
-      padding: 0.8rem;
+    label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #495057;
+    }
+    
+    input, select, textarea {
+      padding: 0.75rem;
       border: 2px solid #e1e5e9;
       border-radius: 6px;
       font-size: 1rem;
-      transition: border-color 0.3s ease;
+      transition: all 0.3s ease;
     }
     
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
-    .lookup-status {
-      margin-top: 0.5rem;
-      padding: 0.8rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      display: none;
+    .auto-filled {
+      background: #e7f3ff !important;
+      border-color: #0066cc !important;
+      animation: autoFillGlow 2s ease-in-out;
     }
     
-    .lookup-status.loading {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
+    @keyframes autoFillGlow {
+      0% { box-shadow: 0 0 5px rgba(0, 102, 204, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(0, 102, 204, 0.8); }
+      100% { box-shadow: none; }
+    }
+    
+    .lookup-status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
     }
     
     .lookup-status.success {
       background: #d4edda;
-      color: #155724;
       border: 1px solid #c3e6cb;
-    }
-    
-    .lookup-status.info {
-      background: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
+      color: #155724;
+      display: block;
     }
     
     .lookup-status.warning {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+      display: block;
     }
     
-    .auto-filled {
-      background-color: #e8f5e8 !important;
-      transition: background-color 2s ease;
+    .lookup-status.loading {
+      background: #e7f3ff;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+      display: block;
     }
     
-    .day-section {
-      border: 2px solid #007bff;
+    .waiver-section {
+      background: #fff8e1;
+      border: 2px solid #ffc107;
       border-radius: 8px;
-      margin-bottom: 1.5rem;
-      overflow: hidden;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .waiver-content {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    
+    .waiver-agreement {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .waiver-agreement input[type="checkbox"] {
+      margin-top: 0.2rem;
+      width: auto;
+    }
+    
+    /* Class Selection - Match the screenshot style */
+    .day-section {
+      margin-bottom: 2rem;
     }
     
     .day-header {
       background: #007bff;
       color: white;
-      padding: 1rem 1.5rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
       font-weight: 600;
+      margin-bottom: 1rem;
       font-size: 1.1rem;
     }
     
-    .day-content {
-      background: white;
-      padding: 1rem;
-    }
-    
     .class-section {
-      border: 1px solid #28a745;
-      border-radius: 6px;
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
       margin-bottom: 1rem;
       overflow: hidden;
     }
@@ -221,138 +292,89 @@
     .class-header {
       background: #28a745;
       color: white;
-      padding: 0.8rem 1rem;
-      font-weight: 500;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     
     .class-content {
-      background: #f8f9fa;
-      padding: 0.8rem;
+      padding: 1rem;
     }
     
     .round-item {
       display: flex;
       align-items: center;
-      gap: 0.8rem;
-      padding: 0.6rem;
-      background: white;
-      border: 1px solid #dee2e6;
-      border-radius: 4px;
+      justify-content: space-between;
+      padding: 0.75rem;
+      border: 1px solid #e9ecef;
+      border-radius: 6px;
       margin-bottom: 0.5rem;
-      transition: all 0.3s ease;
-    }
-    
-    .round-item:hover {
-      border-color: #667eea;
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+      background: #f8f9fa;
     }
     
     .round-info {
       display: flex;
-      gap: 1rem;
       align-items: center;
-      flex: 1;
+      gap: 1rem;
     }
     
     .round-number {
-      background: #667eea;
+      background: #007bff;
       color: white;
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
       font-weight: 600;
+      font-size: 0.9rem;
     }
     
     .judge-name {
       font-weight: 500;
-      color: #333;
+      color: #495057;
     }
     
-    /* FEO and Regular Button Styles */
-    .entry-buttons {
+    .entry-options {
       display: flex;
       gap: 0.5rem;
-      align-items: center;
     }
     
-    .entry-button {
-      position: relative;
-      cursor: pointer;
-    }
-    
-    .entry-button input[type="checkbox"] {
-      display: none;
-    }
-    
-    .entry-tag {
-      display: inline-block;
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      border-radius: 4px;
-      border: 2px solid;
-      transition: all 0.3s ease;
-      min-width: 70px;
-      text-align: center;
-    }
-    
-    .entry-tag.regular {
+    .entry-btn {
+      padding: 0.5rem 1rem;
+      border: 2px solid #28a745;
       background: white;
       color: #28a745;
-      border-color: #28a745;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
     }
     
-    .entry-button.regular:hover .entry-tag.regular {
-      background: #f8f9fa;
-      transform: translateY(-1px);
-    }
-    
-    .entry-button input[type="checkbox"]:checked + .entry-tag.regular {
+    .entry-btn:hover {
       background: #28a745;
       color: white;
-      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
     }
     
-    .entry-tag.feo {
-      background: white;
-      color: #ffc107;
+    .entry-btn.selected {
+      background: #28a745;
+      color: white;
+    }
+    
+    .entry-btn.feo {
       border-color: #ffc107;
+      color: #ffc107;
     }
     
-    .entry-button.feo:hover .entry-tag.feo {
-      background: #fffbf0;
-      transform: translateY(-1px);
-    }
-    
-    .entry-button input[type="checkbox"]:checked + .entry-tag.feo {
+    .entry-btn.feo:hover,
+    .entry-btn.feo.selected {
       background: #ffc107;
-      color: #333;
-      box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
-    }
-    
-    .entry-tag.unavailable {
-      background: #f8f9fa;
-      color: #6c757d;
-      border: 2px solid #dee2e6;
-      min-width: 70px;
-      text-align: center;
-    }
-    
-    .no-classes-message {
-      text-align: center;
-      padding: 2rem;
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      border-radius: 6px;
-      color: #856404;
+      color: #212529;
     }
     
     .entry-summary {
-      background: #e8f5e8;
-      border: 2px solid #28a745;
+      background: #e7f3ff;
+      border: 2px solid #0066cc;
       border-radius: 8px;
       padding: 1.5rem;
       margin-bottom: 2rem;
@@ -362,20 +384,15 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 1rem;
-      margin-top: 1rem;
     }
     
     .summary-item {
-      background: white;
-      padding: 1rem;
-      border-radius: 6px;
       text-align: center;
     }
     
     .summary-item strong {
       display: block;
-      color: #28a745;
-      font-size: 0.9rem;
+      color: #495057;
       margin-bottom: 0.5rem;
     }
     
@@ -434,6 +451,20 @@
       margin-bottom: 2rem;
     }
     
+    .edit-link-section {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    
+    .edit-link-section h3 {
+      color: #856404;
+      margin-bottom: 10px;
+    }
+    
     .hidden {
       display: none;
     }
@@ -443,12 +474,23 @@
         padding: 10px;
       }
       
-      .form-row, .checkbox-group, .summary-grid {
+      .form-row, .summary-grid {
         grid-template-columns: 1fr;
       }
       
       .button-group {
         flex-direction: column;
+      }
+      
+      .entry-options {
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      
+      .round-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
       }
     }
   </style>
@@ -461,23 +503,69 @@
       <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
     </div>
 
-    <!-- Trial Information -->
-    <div class="trial-info">
-      <h3>📋 Trial Information</h3>
-      <div class="trial-details">
-        <div><strong>Club:</strong> <span id="clubName">Loading...</span></div>
-        <div><strong>Dates:</strong> <span id="trialDates">Loading...</span></div>
-        <div><strong>Location:</strong> <span id="trialLocation">Loading...</span></div>
-        <div><strong>Secretary:</strong> <span id="trialSecretary">Loading...</span></div>
+    <!-- Trial Selection (Secretary Only) -->
+    <div class="trial-info" id="trialSelectionSection">
+      <h3>🎯 Select Trial</h3>
+      <div class="form-row">
+        <div class="form-group required full-width">
+          <label for="trialSelection">Choose which trial to enter:</label>
+          <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
+            <option value="">Loading available trials...</option>
+          </select>
+        </div>
       </div>
     </div>
 
-    <div class="entry-form">
+    <!-- Shareable Link Section (Secretary Only) -->
+    <div class="shareable-link-section" id="shareableLinkSection">
+      <h3>🔗 Shareable Entry Link</h3>
+      <p>Share this link with participants so they can enter from home:</p>
+      <div class="link-display">
+        <div class="link-url" id="shareableUrl">
+          <!-- Generated URL will appear here -->
+        </div>
+        <div class="link-actions">
+          <button class="btn-copy" onclick="copyShareableLink()">📋 Copy Link</button>
+          <button class="btn-test" onclick="testShareableLink()">🔗 Test Link</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trial Information -->
+    <div class="trial-info" id="trialInfoSection" style="display: none;">
+      <h3>📋 Trial Information</h3>
+      <div class="trial-details">
+        <div><strong>Club:</strong> <span id="clubName">-</span></div>
+        <div><strong>Dates:</strong> <span id="trialDates">-</span></div>
+        <div><strong>Location:</strong> <span id="trialLocation">-</span></div>
+        <div><strong>Secretary:</strong> <span id="trialSecretary">-</span></div>
+      </div>
+    </div>
+
+    <div class="entry-form" id="entryFormContainer" style="display: none;">
       <!-- Success Message -->
       <div id="successMessage" class="success-message hidden">
         <h3>✅ Entry Submitted Successfully!</h3>
         <p>The entry has been recorded for this trial.</p>
         <button class="btn btn-primary" onclick="resetForm()">Enter Another Participant</button>
+      </div>
+
+      <!-- Edit Link Section -->
+      <div class="edit-link-section hidden" id="editLinkSection">
+        <h3>✅ Entry Submitted Successfully!</h3>
+        <p>Your entry has been recorded. Use this link to edit your entry in the future:</p>
+        <div class="link-display">
+          <div class="link-url" id="editUrl">
+            <!-- Edit URL will appear here -->
+          </div>
+          <div class="link-actions">
+            <button class="btn-copy" onclick="copyEditLink()">📋 Copy Edit Link</button>
+            <button class="btn-test" onclick="testEditLink()">🔗 Test Edit Link</button>
+          </div>
+        </div>
+        <div style="margin-top: 15px;">
+          <button class="btn btn-primary" onclick="resetForNewEntry()">Submit Another Entry</button>
+        </div>
       </div>
 
       <!-- Waiver Section -->
@@ -498,32 +586,16 @@
 
       <!-- Entry Form -->
       <form id="entryForm">
-        <!-- Trial Selection - FIRST -->
-        <div class="form-section primary">
-          <h3>🏆 Trial Selection</h3>
-          <div class="form-row">
-            <div class="form-group required full-width">
-              <label>Select Trial</label>
-              <select id="trialSelector" required style="font-size: 1.1rem; font-weight: bold; background: #f0f8ff;">
-                <option value="">Loading available trials...</option>
-              </select>
-              <small style="color: #666; margin-top: 0.5rem; display: block;">
-                💡 Select which trial you want to enter first
-              </small>
-            </div>
-          </div>
-        </div>
-
-        <!-- Registration Number - SECOND -->
+        <!-- Registration Number Lookup -->
         <div class="form-section primary">
           <h3>🔍 Registration Lookup</h3>
           <div class="form-row">
-            <div class="form-group required full-width">
-              <label>C-WAGS Registration Number</label>
-              <input type="text" id="cwagsNumber" required placeholder="XX-XXXX-XX" 
+            <div class="form-group full-width">
+              <label>C-WAGS Registration Number (optional)</label>
+              <input type="text" id="cwagsNumber" placeholder="XX-XXXX-XX" 
                      style="font-size: 1.2rem; font-weight: bold; background: #f0f8ff;">
               <small style="color: #666; margin-top: 0.5rem; display: block;">
-                💡 Enter registration number first - handler and dog info will auto-fill
+                💡 Enter registration number first - handler and dog info will auto-fill if found
               </small>
             </div>
           </div>
@@ -584,22 +656,6 @@
               </select>
             </div>
           </div>
-        </div>
-
-        <!-- Class Selection with FEO/Regular buttons -->
-        <div class="form-section">
-          <h3>🎯 Class Selection</h3>
-          <p style="color: #666; margin-bottom: 1rem;">Select Regular or FEO entries for each class/judge combination:</p>
-          <div id="classSelection" style="max-height: 400px; overflow-y: auto;">
-            <div style="text-align: center; padding: 2rem; color: #666;">
-              Loading available classes...
-            </div>
-          </div>
-        </div>
-
-        <!-- Additional Information -->
-        <div class="form-section">
-          <h3>📝 Additional Information</h3>
           <div class="form-row">
             <div class="form-group">
               <label>Junior Handler (Under 18)</label>
@@ -608,9 +664,16 @@
                 <option value="Yes">Yes</option>
               </select>
             </div>
-            <div class="form-group">
-              <label>Special Needs/Requests</label>
-              <textarea id="specialRequests" rows="2" placeholder="Any special accommodations needed"></textarea>
+          </div>
+        </div>
+
+        <!-- Class Selection -->
+        <div class="form-section">
+          <h3>🎯 Class Entries</h3>
+          <p style="margin-bottom: 1rem; color: #666;">Select the specific class/judge combinations you wish to enter:</p>
+          <div id="classSelection">
+            <div style="text-align: center; padding: 2rem; color: #666;">
+              Loading available classes by day and judge...
             </div>
           </div>
         </div>
@@ -642,9 +705,6 @@
           <button type="button" class="btn btn-secondary" onclick="resetForm()">
             Clear Form
           </button>
-          <button type="button" class="btn btn-secondary" onclick="location.href='main-dashboard.html'">
-            ← Back to Dashboard
-          </button>
         </div>
       </form>
     </div>
@@ -652,24 +712,46 @@
 
   <script type="module">
     import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs, addDoc, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { collection, query, where, getDocs, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     console.log("🎯 Entry form loaded");
 
     // Global variables
     let currentTrialData = null;
-    let allTrials = [];
     let selectedClasses = new Set();
     let registrationData = [];
     let isAutoFilling = false;
+    let availableTrials = [];
+    let isSecretary = false;
 
     // Fee structure
     const fees = {
       firstClass: 35.00,
       additionalClass: 25.00,
-      juniorHandler: 20.00,
-      exhibition: 15.00
+      juniorHandler: 20.00
     };
+
+    // Initialize the application
+    async function init() {
+      await loadRegistrationData();
+
+      // Check URL parameters for entry link
+      const urlParams = new URLSearchParams(window.location.search);
+      const entryId = urlParams.get('entry');
+      const trialId = urlParams.get('trial');
+
+      if (entryId) {
+        // Load existing entry for editing
+        await loadExistingEntry(entryId);
+      } else if (trialId) {
+        // Load specific trial for public entry
+        await loadSpecificTrial(trialId);
+      } else {
+        // Normal secretary view
+        isSecretary = true;
+        setupSecretaryView();
+      }
+    }
 
     // Load registration data from data.json
     async function loadRegistrationData() {
@@ -685,707 +767,719 @@
       }
     }
 
-    // Show lookup status
-    function showLookupStatus(message, type = 'loading') {
-      const statusDiv = document.getElementById('lookupStatus');
-      if (!statusDiv) return;
-      
-      statusDiv.className = `lookup-status ${type}`;
-      statusDiv.innerHTML = message;
-      statusDiv.style.display = 'block';
-      
-      if (type === 'success' || type === 'warning') {
-        setTimeout(() => {
-          statusDiv.style.display = 'none';
-        }, 3000);
-      }
-    }
-
-    // Auto-fill from registration data
-    function lookupRegistration(cwagsNumber) {
-      if (!cwagsNumber || cwagsNumber.length < 3) {
-        showLookupStatus("Enter at least 3 characters to search", 'warning');
-        return;
-      }
-      
-      showLookupStatus("🔍 Searching registration database...", 'loading');
-      
-      const matches = registrationData.filter(record => 
-        record.cwagsNumber && record.cwagsNumber.toLowerCase().includes(cwagsNumber.toLowerCase())
-      );
-      
-      if (matches.length === 0) {
-        showLookupStatus("❌ No registration found. Please enter details manually.", 'warning');
-        return;
-      }
-      
-      if (matches.length > 1) {
-        showLookupStatus(`⚠️ Multiple matches found (${matches.length}). Using first match.`, 'info');
-      }
-      
-      const record = matches[0];
-      fillFormFromRecord(record);
-      showLookupStatus(`✅ Registration found and auto-filled: ${record.dogName}`, 'success');
-    }
-
-    // Fill form from registration record
-    function fillFormFromRecord(record) {
-      isAutoFilling = true;
-      
+    // Setup secretary view
+    async function setupSecretaryView() {
       try {
-        const fields = [
-          { id: 'handlerName', value: record.handlerName },
-          { id: 'handlerPhone', value: record.handlerPhone },
-          { id: 'handlerEmail', value: record.handlerEmail },
-          { id: 'dogCallName', value: record.dogName },
-          { id: 'dogBreed', value: record.breed },
-          { id: 'dogBirthdate', value: record.birthdate },
-          { id: 'dogSex', value: record.sex }
-        ];
-        
-        fields.forEach(field => {
-          const element = document.getElementById(field.id);
-          if (element && field.value) {
-            element.value = field.value;
-            element.classList.add('auto-filled');
-            setTimeout(() => element.classList.remove('auto-filled'), 2000);
+        // Wait for auth
+        await new Promise((resolve) => {
+          if (auth.currentUser) {
+            resolve();
+          } else {
+            const unsubscribe = auth.onAuthStateChanged((user) => {
+              unsubscribe();
+              resolve();
+            });
           }
         });
+
+        if (!auth.currentUser) {
+          alert("Please log in to access the entry form");
+          window.location.href = 'index.html';
+          return;
+        }
+
+        // Load trials for secretary
+        const trialsQuery = query(
+          collection(db, "trials"),
+          where("createdBy", "==", auth.currentUser.uid)
+        );
         
-        console.log("✅ Form auto-filled from registration data");
+        const trialsSnapshot = await getDocs(trialsQuery);
+        
+        if (!trialsSnapshot.empty) {
+          availableTrials = [];
+          trialsSnapshot.forEach(doc => {
+            availableTrials.push({ id: doc.id, ...doc.data() });
+          });
+          
+          availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
+          
+          populateTrialSelector();
+        } else {
+          alert("No trials found. Please create a trial first.");
+          window.location.href = 'main-dashboard.html';
+        }
       } catch (error) {
-        console.error("❌ Error auto-filling form:", error);
-      } finally {
-        isAutoFilling = false;
-        checkFormValidity();
+        console.error("❌ Error loading trial data:", error);
+        alert("Error loading trial data: " + error.message);
       }
     }
 
-    // Load all trials for selection
-    async function loadAllTrials() {
+    // Load specific trial for public entry
+    async function loadSpecificTrial(trialId) {
       try {
-        console.log("🔄 Loading all trials...");
-        
-        if (!auth.currentUser) {
-          console.log("⏳ Waiting for authentication...");
+        const trialDoc = await getDoc(doc(db, 'trials', trialId));
+        if (!trialDoc.exists()) {
+          alert('Trial not found');
           return;
         }
 
-        const q = query(
-          collection(db, "trials"), 
-          where("userId", "==", auth.currentUser.uid)
-        );
-        const querySnapshot = await getDocs(q);
-        
-        allTrials = [];
-        querySnapshot.forEach((doc) => {
-          allTrials.push({ id: doc.id, ...doc.data() });
-        });
-
-        console.log(`✅ Loaded ${allTrials.length} trials`);
-        populateTrialSelector();
-        
-        if (allTrials.length === 0) {
-          alert("No trials found. Please create a trial first.");
-          window.location.href = 'main-dashboard.html';
-          return;
-        }
-        
+        currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
+        document.getElementById('trialSelectionSection').style.display = 'none';
+        populateTrialInfo();
+        showEntryForm();
       } catch (error) {
-        console.error("❌ Error loading trials:", error);
-        alert("Error loading trials: " + error.message);
+        console.error('Error loading specific trial:', error);
+        alert('Error loading trial: ' + error.message);
+      }
+    }
+
+    // Load existing entry for editing
+    async function loadExistingEntry(entryId) {
+      try {
+        const entryDoc = await getDoc(doc(db, 'entries', entryId));
+        if (!entryDoc.exists()) {
+          alert('Entry not found');
+          return;
+        }
+
+        const entryData = entryDoc.data();
+        
+        // Load the trial
+        const trialDoc = await getDoc(doc(db, 'trials', entryData.trialId));
+        if (!trialDoc.exists()) {
+          alert('Associated trial not found');
+          return;
+        }
+
+        currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
+        document.getElementById('trialSelectionSection').style.display = 'none';
+        
+        // Populate trial info and form
+        populateTrialInfo();
+        showEntryForm();
+        
+        // Fill form with existing data
+        setTimeout(() => {
+          populateFormWithEntryData(entryData);
+        }, 500);
+
+      } catch (error) {
+        console.error('Error loading existing entry:', error);
+        alert('Error loading entry: ' + error.message);
       }
     }
 
     // Populate trial selector dropdown
     function populateTrialSelector() {
-      const selector = document.getElementById('trialSelector');
-      if (!selector) {
-        console.error("❌ Trial selector element not found");
-        return;
-      }
+      const trialSelect = document.getElementById('trialSelection');
+      trialSelect.innerHTML = '<option value="">Select a trial...</option>';
 
-      console.log("🔄 Populating trial selector with", allTrials.length, "trials");
-
-      // Clear existing options
-      selector.innerHTML = '<option value="">Select a trial...</option>';
-
-      // Add trials to selector
-      allTrials.forEach(trial => {
+      availableTrials.forEach(trial => {
         const option = document.createElement('option');
         option.value = trial.id;
         
-        // Format trial display name
-        let displayName = trial.clubName || 'Unnamed Trial';
+        let trialLabel = trial.clubName || 'Unnamed Trial';
+        
         if (trial.days && trial.days.length > 0) {
-          const firstDate = trial.days.find(day => day.date)?.date;
-          if (firstDate) {
-            const formattedDate = new Date(firstDate).toLocaleDateString();
-            displayName += ` - ${formattedDate}`;
+          const dates = trial.days
+            .filter(day => day.date)
+            .map(day => new Date(day.date).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric' 
+            }))
+            .join(', ');
+          if (dates) {
+            trialLabel += ` (${dates})`;
           }
         }
         
-        option.textContent = displayName;
-        selector.appendChild(option);
-        console.log("✅ Added trial option:", displayName);
+        option.textContent = trialLabel;
+        trialSelect.appendChild(option);
       });
 
-      // Auto-select if only one trial
-      if (allTrials.length === 1) {
-        selector.value = allTrials[0].id;
-        console.log("🎯 Auto-selecting single trial:", allTrials[0].clubName);
-        onTrialSelected();
-      }
+      // Handle trial selection change
+      trialSelect.addEventListener('change', function() {
+        const trialId = this.value;
+        if (trialId) {
+          currentTrialData = availableTrials.find(t => t.id === trialId);
+          if (currentTrialData) {
+            generateShareableLink();
+            populateTrialInfo();
+            showEntryForm();
+          }
+        } else {
+          hideShareableLink();
+          hideTrialInfo();
+          hideEntryForm();
+        }
+      });
     }
 
-    // Handle trial selection
-    function onTrialSelected() {
-      const selector = document.getElementById('trialSelector');
-      const selectedTrialId = selector.value;
-      
-      console.log("🎯 Trial selection changed:", selectedTrialId);
-      
-      if (!selectedTrialId) {
-        currentTrialData = null;
-        clearTrialDependentData();
-        return;
-      }
+    // Generate shareable link
+    function generateShareableLink() {
+      if (!isSecretary || !currentTrialData) return;
 
-      // Find selected trial
-      currentTrialData = allTrials.find(trial => trial.id === selectedTrialId);
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shareableUrl = `${baseUrl}?trial=${currentTrialData.id}`;
       
-      if (currentTrialData) {
-        console.log("✅ Trial selected:", currentTrialData.clubName);
-        console.log("📊 Trial data:", currentTrialData);
-        populateTrialInfo();
-        populateClasses();
-        checkFormValidity();
-        
-        // Focus on registration number input
-        setTimeout(() => {
-          const cwagsInput = document.getElementById('cwagsNumber');
-          if (cwagsInput) cwagsInput.focus();
-        }, 100);
-      } else {
-        console.error("❌ Could not find selected trial:", selectedTrialId);
-      }
-    }
-
-    // Clear data that depends on trial selection
-    function clearTrialDependentData() {
-      selectedClasses.clear();
-      updateEntrySummary();
-      
-      // Clear trial info
-      document.getElementById('clubName').textContent = 'Please select a trial';
-      document.getElementById('trialDates').textContent = 'Please select a trial';
-      document.getElementById('trialLocation').textContent = 'Please select a trial';
-      document.getElementById('trialSecretary').textContent = 'Please select a trial';
-      
-      // Clear class selection
-      const classSelection = document.getElementById('classSelection');
-      if (classSelection) {
-        classSelection.innerHTML = `
-          <div style="text-align: center; padding: 2rem; color: #666;">
-            Please select a trial to view available classes
-          </div>
-        `;
-      }
-    }
-
-    // Load trial data (updated to use selected trial)
-    async function loadTrialData() {
-      // This function is now replaced by loadAllTrials and onTrialSelected
-      console.log("🔄 Loading trial system...");
-      await loadAllTrials();
+      document.getElementById('shareableUrl').textContent = shareableUrl;
+      document.getElementById('shareableLinkSection').style.display = 'block';
     }
 
     // Populate trial information
     function populateTrialInfo() {
-      if (!currentTrialData) {
-        console.log("❌ No trial data to populate");
-        return;
-      }
+      if (!currentTrialData) return;
 
-      console.log("🔄 Populating trial info for:", currentTrialData.clubName);
-
-      document.getElementById('trialTitle').textContent = 
-        `🏆 ${currentTrialData.clubName || 'Trial'} Entry Form`;
+      document.getElementById('trialTitle').textContent = `${currentTrialData.clubName || 'Trial'} Entry Form`;
       
+      const dates = currentTrialData.days && currentTrialData.days.length > 0 
+        ? currentTrialData.days.filter(day => day.date).map(day => new Date(day.date).toLocaleDateString()).join(', ')
+        : 'No dates specified';
+
       document.getElementById('clubName').textContent = currentTrialData.clubName || 'TBD';
+      document.getElementById('trialDates').textContent = dates;
+      document.getElementById('trialLocation').textContent = 'TBD';
       document.getElementById('trialSecretary').textContent = currentTrialData.secretary || 'TBD';
-      
-      // Format dates
-      if (currentTrialData.days && currentTrialData.days.length > 0) {
-        const dates = currentTrialData.days
-          .filter(day => day.date)
-          .map(day => new Date(day.date).toLocaleDateString())
-          .join(', ');
-        document.getElementById('trialDates').textContent = dates || 'TBD';
-      } else {
-        document.getElementById('trialDates').textContent = 'TBD';
-      }
 
-      document.getElementById('trialLocation').textContent = currentTrialData.location || 'TBD';
-      
-      console.log("✅ Trial info populated");
+      document.getElementById('trialInfoSection').style.display = 'block';
+      populateClasses();
     }
 
-    // Populate classes organized by day, class, and judge with FEO/Regular buttons
+    // Populate classes with the exact style from screenshot
     function populateClasses() {
       const classSelection = document.getElementById('classSelection');
-      if (!classSelection) {
-        console.error("❌ classSelection element not found");
+      let html = '';
+
+      if (!currentTrialData.days || currentTrialData.days.length === 0) {
+        html = '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
+        classSelection.innerHTML = html;
         return;
       }
 
-      if (!currentTrialData || !currentTrialData.days) {
-        classSelection.innerHTML = `
-          <div class="no-classes-message">
-            ⚠️ No trial data available. Please check your trial setup.
-          </div>
-        `;
-        return;
-      }
-
-      console.log("📅 Processing trial days and classes...", currentTrialData.days);
-      
-      let hasAnyClasses = false;
-      let classSelectionHTML = '';
-
-      // Process each day
       currentTrialData.days.forEach((day, dayIndex) => {
-        if (!day || !day.classes || !Array.isArray(day.classes) || day.classes.length === 0) {
-          return; // Skip days with no classes
-        }
+        if (!day.classes || day.classes.length === 0) return;
 
-        hasAnyClasses = true;
-        
-        // Format the date
-        const dayDate = day.date ? 
-          new Date(day.date).toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          }) : 
-          `Day ${dayIndex + 1}`;
+        const dayDate = day.date ? new Date(day.date).toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        }) : `Day ${dayIndex + 1}`;
 
-        classSelectionHTML += `
+        html += `
           <div class="day-section">
-            <div class="day-header">
-              📅 ${dayDate}
-            </div>
-            <div class="day-content">
+            <div class="day-header">📅 ${dayDate}</div>
         `;
 
-        // Group classes by name for better organization
-        const classMap = new Map();
-        day.classes.forEach((cls, index) => {
-          if (!cls || !cls.name) return;
-          
-          const className = cls.name;
-          if (!classMap.has(className)) {
-            classMap.set(className, []);
+        // Group classes by name
+        const classGroups = new Map();
+        day.classes.forEach((cls, classIndex) => {
+          if (cls && cls.className && cls.className.trim()) {
+            const className = cls.className.trim();
+            if (!classGroups.has(className)) {
+              classGroups.set(className, []);
+            }
+            classGroups.get(className).push({...cls, dayIndex, classIndex});
           }
-          classMap.get(className).push({ ...cls, classIndex: index });
         });
 
-                  // Process each unique class
-        classMap.forEach((classInstances, className) => {
-          classSelectionHTML += `
+        classGroups.forEach((classInstances, className) => {
+          html += `
             <div class="class-section">
               <div class="class-header">
-                🏆 ${className}
-                <span style="font-weight: normal; color: #e8f5e8;">
-                  (${classInstances.length} instance${classInstances.length > 1 ? 's' : ''})
-                </span>
+                <span>🎯 ${className}</span>
+                <span>${classInstances.length} round${classInstances.length > 1 ? 's' : ''}</span>
               </div>
               <div class="class-content">
           `;
 
-          // Process each round for this class
           classInstances.forEach((classInstance, instanceIndex) => {
             if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
               classInstance.rounds.forEach((round, roundIndex) => {
                 const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
                 const roundNumber = round.roundNumber || (roundIndex + 1);
-                const feoAvailable = round.feo !== false; // FEO available unless explicitly disabled
-                const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}`;
+                const regularId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_regular`;
+                const feoId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_feo`;
                 
-                const regularEntryValue = JSON.stringify({
+                const baseEntryValue = {
                   dayIndex,
                   classIndex: classInstance.classIndex,
                   roundIndex,
                   className,
                   judge: judgeName,
                   roundNumber,
-                  date: day.date || `Day ${dayIndex + 1}`,
-                  entryType: 'Regular'
-                });
+                  date: day.date || `Day ${dayIndex + 1}`
+                };
                 
-                const feoEntryValue = JSON.stringify({
-                  dayIndex,
-                  classIndex: classInstance.classIndex,
-                  roundIndex,
-                  className,
-                  judge: judgeName,
-                  roundNumber,
-                  date: day.date || `Day ${dayIndex + 1}`,
-                  entryType: 'FEO'
-                });
+                const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
+                const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
+                
+                const showFeo = round.feo === true || round.FEO === true;
 
-                classSelectionHTML += `
+                html += `
                   <div class="round-item">
+                    <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
+                    ${showFeo ? `<input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">` : ''}
+                    
                     <div class="round-info">
-                      <span class="round-number">Round ${roundNumber}</span>
-                      <span class="judge-name">${judgeName}</span>
+                      <div class="round-number">Round ${roundNumber}</div>
+                      <div class="judge-name">${judgeName}</div>
                     </div>
-                    <div class="entry-buttons">
-                      <label class="entry-button regular" for="${uniqueId}_regular">
-                        <input type="checkbox" id="${uniqueId}_regular" value='${regularEntryValue}'>
-                        <span class="entry-tag regular">Regular</span>
-                      </label>
-                      ${feoAvailable ? 
-                        `<label class="entry-button feo" for="${uniqueId}_feo">
-                          <input type="checkbox" id="${uniqueId}_feo" value='${feoEntryValue}'>
-                          <span class="entry-tag feo">FEO</span>
-                        </label>` : 
-                        `<span class="entry-tag unavailable">FEO N/A</span>`
-                      }
+                    <div class="entry-options">
+                      <button type="button" class="entry-btn regular" data-entry-id="${regularId}">Entry</button>
+                      ${showFeo ? `<button type="button" class="entry-btn feo" data-entry-id="${feoId}">FEO</button>` : ''}
                     </div>
                   </div>
                 `;
               });
-            } else {
-              // Class with no rounds defined - create a default entry
-              const uniqueId = `entry_${dayIndex}_${classInstance.classIndex}_0`;
-              const regularEntryValue = JSON.stringify({
-                dayIndex,
-                classIndex: classInstance.classIndex,
-                roundIndex: 0,
-                className,
-                judge: 'Judge TBD',
-                roundNumber: 1,
-                date: day.date || `Day ${dayIndex + 1}`,
-                entryType: 'Regular'
-              });
-              const feoEntryValue = JSON.stringify({
-                dayIndex,
-                classIndex: classInstance.classIndex,
-                roundIndex: 0,
-                className,
-                judge: 'Judge TBD',
-                roundNumber: 1,
-                date: day.date || `Day ${dayIndex + 1}`,
-                entryType: 'FEO'
-              });
-
-              classSelectionHTML += `
-                <div class="round-item">
-                  <div class="round-info">
-                    <span class="round-number">Round 1</span>
-                    <span class="judge-name">Judge TBD</span>
-                  </div>
-                  <div class="entry-buttons">
-                    <label class="entry-button regular" for="${uniqueId}_regular">
-                      <input type="checkbox" id="${uniqueId}_regular" value='${regularEntryValue}'>
-                      <span class="entry-tag regular">Regular</span>
-                    </label>
-                    <label class="entry-button feo" for="${uniqueId}_feo">
-                      <input type="checkbox" id="${uniqueId}_feo" value='${feoEntryValue}'>
-                      <span class="entry-tag feo">FEO</span>
-                    </label>
-                  </div>
-                </div>
-              `;
             }
           });
 
-          classSelectionHTML += `
+          html += `
               </div>
             </div>
           `;
         });
 
-        classSelectionHTML += `
-            </div>
-          </div>
-        `;
+        html += `</div>`;
       });
 
-      if (!hasAnyClasses) {
-        classSelection.innerHTML = `
-          <div class="no-classes-message">
-            ⚠️ No classes found in trial data. Please create classes in your trial setup.
-          </div>
-        `;
-        return;
-      }
-
-      classSelection.innerHTML = classSelectionHTML;
-
-      // Add event listeners to all checkboxes
-      classSelection.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', updateClassSelection);
-      });
-
-      console.log(`✅ Populated classes with FEO/Regular buttons organized by day, class, and judge`);
+      classSelection.innerHTML = html;
+      setupEventListeners();
     }
 
-    // Update class selection with detailed entry tracking
-    function updateClassSelection(event) {
-      const entryData = JSON.parse(event.target.value);
+    // Setup event listeners
+    function setupEventListeners() {
+      // Entry button clicks
+      document.querySelectorAll('.entry-btn').forEach(button => {
+        button.addEventListener('click', handleEntryButtonClick);
+      });
+
+      // Registration number lookup with debouncing
+      let registrationTimeout;
+      const cwagsInput = document.getElementById('cwagsNumber');
+      if (cwagsInput) {
+        cwagsInput.addEventListener('input', function(e) {
+          const registrationNumber = e.target.value.trim();
+          
+          clearTimeout(registrationTimeout);
+          
+          if (registrationNumber.length >= 3) {
+            registrationTimeout = setTimeout(() => {
+              autoFillFromRegistration(registrationNumber);
+            }, 500);
+          } else {
+            hideLookupStatus();
+          }
+          
+          checkFormValidity();
+        });
+      }
+
+      // Form validation listeners
+      document.getElementById('entryForm').addEventListener('input', checkFormValidity);
+      document.getElementById('waiverAccepted').addEventListener('change', checkFormValidity);
+      document.getElementById('juniorHandler').addEventListener('change', updateEntrySummary);
+
+      // Form submission
+      document.getElementById('entryForm').addEventListener('submit', handleFormSubmit);
+    }
+
+    // Auto-fill from registration data (search both data.json and Firebase)
+    async function autoFillFromRegistration(registrationNumber) {
+      if (isAutoFilling) return;
       
-      if (event.target.checked) {
-        selectedClasses.add(event.target.value);
-        console.log(`✅ Added entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType}`);
+      showLookupStatus('🔍 Looking up registration...', 'loading');
+      
+      try {
+        isAutoFilling = true;
+        
+        const normalizedInput = registrationNumber.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        console.log("🔍 Looking up registration:", normalizedInput);
+        
+        let matchingRegistration = null;
+
+        // First search data.json
+        matchingRegistration = registrationData.find(record => {
+          const normalizedRecord = (record.cwagsNumber || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+          return normalizedRecord === normalizedInput;
+        });
+
+        // If not found in data.json, search Firebase entries
+        if (!matchingRegistration) {
+          try {
+            const entriesQuery = query(
+              collection(db, "entries"),
+              where("cwagsNumber", "==", registrationNumber)
+            );
+            const entriesSnapshot = await getDocs(entriesQuery);
+            
+            if (!entriesSnapshot.empty) {
+              // Use the most recent entry
+              const entries = [];
+              entriesSnapshot.forEach(doc => {
+                entries.push(doc.data());
+              });
+              entries.sort((a, b) => b.submittedAt?.toDate() - a.submittedAt?.toDate());
+              matchingRegistration = entries[0];
+            }
+          } catch (firebaseError) {
+            console.warn("Could not search Firebase entries:", firebaseError);
+          }
+        }
+        
+        if (matchingRegistration) {
+          console.log("✅ Found matching registration:", matchingRegistration);
+          showLookupStatus('✅ Registration found! Auto-filling information...', 'success');
+          populateForm(matchingRegistration);
+        } else {
+          console.log("❌ No matching registration found for:", normalizedInput);
+          showLookupStatus('ℹ️ Registration number not found in our records. You can still continue with manual entry.', 'warning');
+        }
+        
+      } catch (error) {
+        console.error("❌ Error during registration lookup:", error);
+        showLookupStatus('❌ Error looking up registration', 'warning');
+      } finally {
+        isAutoFilling = false;
+      }
+    }
+
+    // Handle entry button clicks
+    function handleEntryButtonClick(event) {
+      event.preventDefault();
+      
+      const button = event.target;
+      const entryId = button.dataset.entryId;
+      const checkbox = document.getElementById(entryId);
+      
+      if (!checkbox) return;
+      
+      checkbox.checked = !checkbox.checked;
+      
+      if (checkbox.checked) {
+        button.classList.add('selected');
+        selectedClasses.add(checkbox.value);
       } else {
-        selectedClasses.delete(event.target.value);
-        console.log(`❌ Removed entry: ${entryData.className} - Round ${entryData.roundNumber} (${entryData.judge}) - ${entryData.entryType}`);
+        button.classList.remove('selected');
+        selectedClasses.delete(checkbox.value);
       }
       
       updateEntrySummary();
       checkFormValidity();
     }
 
-    // Update entry summary with detailed breakdown
+    // Update entry summary
     function updateEntrySummary() {
       const entryCount = selectedClasses.size;
       const isJunior = document.getElementById('juniorHandler').value === 'Yes';
       
       let totalFee = 0;
+      let regularEntries = 0;
+      let feoEntries = 0;
+      
+      selectedClasses.forEach(entryJson => {
+        try {
+          const entry = JSON.parse(entryJson);
+          if (entry.entryType === 'feo') {
+            feoEntries++;
+          } else {
+            regularEntries++;
+          }
+        } catch (e) {
+          regularEntries++;
+        }
+      });
       
       if (isJunior) {
-        totalFee = fees.juniorHandler * entryCount;
-      } else if (entryCount > 0) {
-        totalFee = fees.firstClass + (fees.additionalClass * (entryCount - 1));
+        totalFee = fees.juniorHandler * regularEntries;
+      } else if (regularEntries > 0) {
+        totalFee = fees.firstClass + (fees.additionalClass * Math.max(0, regularEntries - 1));
       }
       
-      // Count unique classes (for display purposes)
       const uniqueClasses = new Set();
       selectedClasses.forEach(entryJson => {
         try {
           const entry = JSON.parse(entryJson);
           uniqueClasses.add(entry.className);
-        } catch (e) {
-          console.warn("Error parsing entry data:", e);
-        }
+        } catch (e) {}
       });
       
-      document.getElementById('selectedClassCount').textContent = 
-        `${entryCount} entries (${uniqueClasses.size} classes)`;
+      let entryBreakdown = `${entryCount} entries (${uniqueClasses.size} classes)`;
+      if (feoEntries > 0) {
+        entryBreakdown += ` - ${regularEntries} Regular, ${feoEntries} FEO`;
+      }
+      
+      document.getElementById('selectedClassCount').textContent = entryBreakdown;
       document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
       document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
     }
 
     // Check form validity
     function checkFormValidity() {
-      if (isAutoFilling) return;
-      
-      const trialSelected = document.getElementById('trialSelector').value;
       const waiverAccepted = document.getElementById('waiverAccepted').checked;
-      const cwagsNumber = document.getElementById('cwagsNumber').value.trim();
       const handlerName = document.getElementById('handlerName').value.trim();
       const handlerEmail = document.getElementById('handlerEmail').value.trim();
       const handlerPhone = document.getElementById('handlerPhone').value.trim();
       const dogCallName = document.getElementById('dogCallName').value.trim();
-      const hasEntries = selectedClasses.size > 0;
+      const hasClasses = selectedClasses.size > 0;
       
-      const isValid = trialSelected && waiverAccepted && cwagsNumber && handlerName && 
-                     handlerEmail && handlerPhone && dogCallName && hasEntries;
+      const isValid = waiverAccepted && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
       
       document.getElementById('submitBtn').disabled = !isValid;
     }
 
-    // Setup event listeners
-    function setupEventListeners() {
-      // Trial selector
-      const trialSelector = document.getElementById('trialSelector');
-      if (trialSelector) {
-        trialSelector.addEventListener('change', onTrialSelected);
-      }
-
-      // C-WAGS number lookup
-      const cwagsInput = document.getElementById('cwagsNumber');
-      let debounceTimer;
-      
-      cwagsInput.addEventListener('input', (e) => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-          const value = e.target.value.trim();
-          if (value.length >= 3) {
-            lookupRegistration(value);
-          }
-        }, 500);
-      });
-
-      // Form validation on input changes
-      document.querySelectorAll('input, select').forEach(element => {
-        element.addEventListener('input', checkFormValidity);
-        element.addEventListener('change', checkFormValidity);
-      });
-
-      // Junior handler changes
-      document.getElementById('juniorHandler').addEventListener('change', updateEntrySummary);
-
-      // Form submission
-      document.getElementById('entryForm').addEventListener('submit', handleFormSubmission);
-    }
-
     // Handle form submission
-    async function handleFormSubmission(event) {
+    async function handleFormSubmit(event) {
       event.preventDefault();
-      
-      if (!auth.currentUser) {
-        alert("Please log in to submit entries.");
-        return;
-      }
-      
-      if (!checkFormValidity()) {
-        alert("Please complete all required fields and accept the waiver.");
-        return;
-      }
       
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Submitting...';
       
       try {
-        // Prepare entry data
+        const selectedEntries = Array.from(selectedClasses).map(entryJson => {
+          try {
+            return JSON.parse(entryJson);
+          } catch (e) {
+            return null;
+          }
+        }).filter(entry => entry !== null);
+
         const entryData = {
-          userId: auth.currentUser.uid,
           trialId: currentTrialData.id,
-          submissionDate: new Date().toISOString(),
-          
-          // Handler information
           cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
           handlerName: document.getElementById('handlerName').value.trim(),
           handlerPhone: document.getElementById('handlerPhone').value.trim(),
           handlerEmail: document.getElementById('handlerEmail').value.trim(),
           emergencyContact: document.getElementById('emergencyContact').value.trim(),
-          
-          // Dog information
           dogCallName: document.getElementById('dogCallName').value.trim(),
           dogBreed: document.getElementById('dogBreed').value.trim(),
           dogBirthdate: document.getElementById('dogBirthdate').value,
           dogSex: document.getElementById('dogSex').value,
-          
-          // Entry details
+          selectedEntries: selectedEntries,
+          selectedClasses: selectedEntries.map(e => e.className),
+          entryCount: selectedEntries.length,
+          uniqueClassCount: new Set(selectedEntries.map(e => e.className)).size,
+          regularEntries: selectedEntries.filter(e => e.entryType === 'regular').length,
+          feoEntries: selectedEntries.filter(e => e.entryType === 'feo').length,
           juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
-          specialRequests: document.getElementById('specialRequests').value.trim(),
-          waiverAccepted: document.getElementById('waiverAccepted').checked,
-          
-          // Class entries
-          entries: Array.from(selectedClasses).map(entryJson => JSON.parse(entryJson)),
-                
+          waiverAccepted: true,
+          entryFee: document.getElementById('calculatedFee').textContent,
+          submittedAt: new Date(),
+          submittedBy: auth.currentUser ? auth.currentUser.uid : 'public_entry'
         };
-        
-        console.log("📝 Submitting entry:", entryData);
-        
-        // Submit to Firestore
+
+        console.log("💾 Submitting entry data:", entryData);
+
+        // Save entry
         const docRef = await addDoc(collection(db, "entries"), entryData);
+        console.log("✅ Entry submitted with ID:", docRef.id);
+
+        // Generate edit link
+        generateEditLink(docRef.id);
         
-        console.log("✅ Entry submitted successfully:", docRef.id);
-        
-        // Save registration data for future use
-        await saveRegistrationData(entryData.cwagsNumber, entryData);
-        
-        // Show success message
-        document.getElementById('entryForm').style.display = 'none';
-        document.getElementById('successMessage').classList.remove('hidden');
-        
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
+        // Show success
+        showSuccessSection();
+
       } catch (error) {
-        console.error("❌ Error submitting entry:", error);
-        alert("Error submitting entry: " + error.message);
-        
+        console.error('Error submitting entry:', error);
+        alert('Error submitting entry: ' + error.message);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Submit Entry';
       }
     }
 
-    // Save registration data for future use
-    async function saveRegistrationData(registrationNumber, formData) {
-      try {
-        if (!registrationNumber || !auth.currentUser) return;
-        
-        const registrationDoc = {
-          cwagsNumber: registrationNumber,
-          handlerName: formData.handlerName,
-          handlerPhone: formData.handlerPhone,
-          handlerEmail: formData.handlerEmail,
-          emergencyContact: formData.emergencyContact,
-          dogCallName: formData.dogCallName,
-          dogBreed: formData.dogBreed,
-          dogBirthdate: formData.dogBirthdate,
-          dogSex: formData.dogSex,
-          lastUpdated: new Date(),
-          lastTrialId: currentTrialData?.id
-        };
-        
-        await setDoc(doc(db, "registrations", registrationNumber), registrationDoc);
-        console.log("✅ Saved registration data for:", registrationNumber);
-      } catch (error) {
-        console.error("Error saving registration data:", error);
+    // Generate edit link
+    function generateEditLink(entryId) {
+      const baseUrl = window.location.origin + window.location.pathname;
+      const editUrl = `${baseUrl}?entry=${entryId}`;
+      
+      document.getElementById('editUrl').textContent = editUrl;
+    }
+
+    // Show success section
+    function showSuccessSection() {
+      document.getElementById('entryForm').style.display = 'none';
+      document.getElementById('editLinkSection').classList.remove('hidden');
+    }
+
+    // Populate form with existing entry data
+    function populateFormWithEntryData(entryData) {
+      document.getElementById('cwagsNumber').value = entryData.cwagsNumber || '';
+      document.getElementById('handlerName').value = entryData.handlerName || '';
+      document.getElementById('handlerPhone').value = entryData.handlerPhone || '';
+      document.getElementById('handlerEmail').value = entryData.handlerEmail || '';
+      document.getElementById('emergencyContact').value = entryData.emergencyContact || '';
+      document.getElementById('dogCallName').value = entryData.dogCallName || '';
+      document.getElementById('dogBreed').value = entryData.dogBreed || '';
+      document.getElementById('dogBirthdate').value = entryData.dogBirthdate || '';
+      document.getElementById('dogSex').value = entryData.dogSex || '';
+      document.getElementById('juniorHandler').value = entryData.juniorHandler ? 'Yes' : 'No';
+      document.getElementById('waiverAccepted').checked = true;
+
+      // Restore selected classes
+      if (entryData.selectedEntries) {
+        entryData.selectedEntries.forEach(entry => {
+          const entryJson = JSON.stringify(entry);
+          selectedClasses.add(entryJson);
+          
+          const entryId = `entry_${entry.dayIndex}_${entry.classIndex}_${entry.roundIndex}_${entry.entryType}`;
+          const button = document.querySelector(`[data-entry-id="${entryId}"]`);
+          const checkbox = document.getElementById(entryId);
+          
+          if (button && checkbox) {
+            button.classList.add('selected');
+            checkbox.checked = true;
+          }
+        });
+      }
+
+      updateEntrySummary();
+      checkFormValidity();
+    }
+
+    // Utility functions
+    function showLookupStatus(message, type = 'loading') {
+      const statusDiv = document.getElementById('lookupStatus');
+      if (statusDiv) {
+        statusDiv.textContent = message;
+        statusDiv.className = `lookup-status ${type}`;
       }
     }
 
-    // Reset form
-    window.resetForm = function() {
-      isAutoFilling = true;
+    function hideLookupStatus() {
+      const statusDiv = document.getElementById('lookupStatus');
+      if (statusDiv) {
+        statusDiv.style.display = 'none';
+      }
+    }
+
+    function fillField(fieldId, value) {
+      const field = document.getElementById(fieldId);
+      if (field && value && (!field.value || field.value.trim() === '')) {
+        field.value = value;
+        field.classList.add('auto-filled');
+        setTimeout(() => {
+          field.classList.remove('auto-filled');
+        }, 2000);
+      }
+    }
+
+    function populateForm(data) {
+      if (!data || isAutoFilling === false) return;
       
+      fillField('handlerName', data.handlerName);
+      fillField('handlerPhone', data.handlerPhone);
+      fillField('handlerEmail', data.handlerEmail);
+      fillField('emergencyContact', data.emergencyContact);
+      fillField('dogCallName', data.dogCallName);
+      fillField('dogBreed', data.dogBreed);
+      fillField('dogBirthdate', data.dogBirthdate);
+      
+      if (data.dogSex) {
+        const sexField = document.getElementById('dogSex');
+        if (sexField && (!sexField.value || sexField.value === '')) {
+          sexField.value = data.dogSex;
+          sexField.classList.add('auto-filled');
+          setTimeout(() => {
+            sexField.classList.remove('auto-filled');
+          }, 2000);
+        }
+      }
+      
+      checkFormValidity();
+    }
+
+    function showEntryForm() {
+      document.getElementById('entryFormContainer').style.display = 'block';
+    }
+
+    function hideEntryForm() {
+      document.getElementById('entryFormContainer').style.display = 'none';
+    }
+
+    function hideTrialInfo() {
+      document.getElementById('trialInfoSection').style.display = 'none';
+    }
+
+    function hideShareableLink() {
+      document.getElementById('shareableLinkSection').style.display = 'none';
+    }
+
+    // Global functions for buttons
+    window.copyShareableLink = function() {
+      const url = document.getElementById('shareableUrl').textContent;
+      copyToClipboard(url, 'Shareable link copied to clipboard!');
+    };
+
+    window.testShareableLink = function() {
+      const url = document.getElementById('shareableUrl').textContent;
+      window.open(url, '_blank');
+    };
+
+    window.copyEditLink = function() {
+      const url = document.getElementById('editUrl').textContent;
+      copyToClipboard(url, 'Edit link copied to clipboard!');
+    };
+
+    window.testEditLink = function() {
+      const url = document.getElementById('editUrl').textContent;
+      window.open(url, '_blank');
+    };
+
+    function copyToClipboard(text, successMessage) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert(successMessage);
+      }).catch(err => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert(successMessage);
+      });
+    }
+
+    window.resetForNewEntry = function() {
+      document.getElementById('editLinkSection').classList.add('hidden');
+      document.getElementById('entryForm').style.display = 'block';
+      resetForm();
+    };
+
+    window.resetForm = function() {
       document.getElementById('entryForm').reset();
       selectedClasses.clear();
       
-      // Clear checkboxes
+      document.querySelectorAll('.entry-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      
       document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         if (cb.id !== 'waiverAccepted') cb.checked = false;
       });
       
-      // Clear lookup status
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) statusDiv.style.display = 'none';
-      
+      hideLookupStatus();
       updateEntrySummary();
-      
-      // Hide success message and show form
-      document.getElementById('successMessage').classList.add('hidden');
-      document.getElementById('entryForm').style.display = 'block';
-      
-      // Scroll to top and focus on registration
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      setTimeout(() => {
-        isAutoFilling = false;
-        const cwagsInput = document.getElementById('cwagsNumber');
-        if (cwagsInput) cwagsInput.focus();
-        checkFormValidity();
-      }, 500);
+      checkFormValidity();
     };
 
-    // Initialize when page loads
-    window.addEventListener('load', () => {
-      console.log("🚀 Page loaded, initializing entry form...");
-      loadRegistrationData();
-      // Set up basic event listeners first
-      setupEventListeners();
-    });
-
-    // Initialize auth state listener
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        console.log("✅ User authenticated, loading trial data...");
-        loadTrialData();
-      } else {
-        console.log("❌ User not authenticated");
+    // Initialize when auth is ready (if secretary) or immediately (if public)
+    auth.onAuthStateChanged(async (user) => {
+      if (user || !isSecretary) {
+        await init();
+      } else if (isSecretary) {
+        alert("Please log in to access the entry form");
         window.location.href = 'index.html';
       }
     });
 
-    console.log("Entry form with FEO/Regular buttons ready");
+    // For public access, initialize immediately
+    if (window.location.search.includes('trial=') || window.location.search.includes('entry=')) {
+      init();
+    }
   </script>
 </body>
 </html>
