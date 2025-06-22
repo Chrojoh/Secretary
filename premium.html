@@ -362,7 +362,141 @@
   <script type="module">
     import { auth, db } from './js/firebase.js';
     import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+// Add these new variables at the top
+let availableTrials = [];
+let selectedTrial = null;
 
+// NEW: Load all trials for selection
+async function loadTrials() {
+  try {
+    console.log("🔄 Loading trials for selection...");
+    showLoadingIndicator();
+
+    await new Promise((resolve) => {
+      if (auth.currentUser) {
+        resolve();
+      } else {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+          unsubscribe();
+          resolve();
+        });
+      }
+    });
+
+    if (!auth.currentUser) {
+      console.log("❌ No authenticated user");
+      hideLoadingIndicator();
+      return;
+    }
+
+    const trialsQuery = query(
+      collection(db, "trials"),
+      where("createdBy", "==", auth.currentUser.uid)
+    );
+    
+    const trialsSnapshot = await getDocs(trialsQuery);
+    
+    if (!trialsSnapshot.empty) {
+      availableTrials = [];
+      trialsSnapshot.forEach(doc => {
+        const trialData = doc.data();
+        
+        if (trialData.days && Array.isArray(trialData.days)) {
+          trialData.days = trialData.days.map(day => ({
+            ...day,
+            date: day.date ? getDateFromFirebase(day.date) : null
+          }));
+        }
+        
+        availableTrials.push({ id: doc.id, ...trialData });
+      });
+      
+      availableTrials.sort((a, b) => {
+        const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+        const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+        return dateB - dateA;
+      });
+      
+      populateTrialSelector();
+      console.log(`✅ Loaded ${availableTrials.length} trials`);
+    } else {
+      alert("No trials found. Please create a trial first.");
+    }
+    
+    hideLoadingIndicator();
+    
+  } catch (error) {
+    console.error("💥 Error loading trials:", error);
+    hideLoadingIndicator();
+    alert("Error loading trials: " + error.message);
+  }
+}
+
+// NEW: Populate trial selector
+function populateTrialSelector() {
+  const trialSelect = document.getElementById('trialSelect');
+  trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+
+  availableTrials.forEach(trial => {
+    const option = document.createElement('option');
+    option.value = trial.id;
+    
+    let trialLabel = trial.clubName || 'Unnamed Trial';
+    
+    if (trial.days && trial.days.length > 0) {
+      const dates = trial.days
+        .filter(day => day.date)
+        .map(day => {
+          const localDate = createLocalDate(day.date);
+          return localDate.toLocaleDateString('en-US', { 
+            month: 'short', 
+            day: 'numeric' 
+          });
+        })
+        .join(', ');
+      if (dates) {
+        trialLabel += ` (${dates})`;
+      }
+    }
+    
+    option.textContent = trialLabel;
+    trialSelect.appendChild(option);
+  });
+
+  trialSelect.addEventListener('change', function() {
+    const trialId = this.value;
+    if (trialId) {
+      selectedTrial = availableTrials.find(t => t.id === trialId);
+      if (selectedTrial) {
+        console.log("✅ Selected trial:", selectedTrial.clubName);
+        loadTrialData(selectedTrial);
+        document.getElementById('generateBtn').disabled = false;
+      }
+    } else {
+      selectedTrial = null;
+      currentTrialData = null;
+      document.getElementById('generateBtn').disabled = true;
+      clearPremiumForm();
+    }
+  });
+}
+
+function clearPremiumForm() {
+  const fields = ['clubName', 'secretary', 'trialDates', 'location', 'startTime', 'endTime'];
+  fields.forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (field) field.value = '';
+  });
+  
+  const premiumDoc = document.getElementById('premiumDocument');
+  if (premiumDoc) {
+    premiumDoc.innerHTML = '';
+    premiumDoc.style.display = 'none';
+  }
+  
+  judges = [];
+  classes = [];
+}
     console.log("IMPROVED PREMIUM GENERATOR LOADED");
 
     let currentTrialData = null;
