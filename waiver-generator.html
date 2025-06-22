@@ -217,6 +217,77 @@
     import { auth, db } from './js/firebase.js';
     import { collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
+    // ========================================
+    // TIMEZONE-SAFE DATE UTILITIES - CRITICAL FIX
+    // ========================================
+
+    /**
+     * Creates a date object that stays in local timezone
+     */
+    function createLocalDate(dateStr) {
+      if (!dateStr) return null;
+      const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+      return new Date(dateWithTime);
+    }
+
+    /**
+     * Formats a date to YYYY-MM-DD string in local timezone
+     */
+    function formatLocalDate(date) {
+      if (!date || !(date instanceof Date)) return '';
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    /**
+     * Retrieves date data from Firebase (converts back to local date string)
+     */
+    function getDateFromFirebase(firebaseDate) {
+      if (!firebaseDate) return '';
+      
+      let date;
+      if (firebaseDate.toDate) {
+        date = firebaseDate.toDate();
+      } else if (firebaseDate instanceof Date) {
+        date = firebaseDate;
+      } else if (typeof firebaseDate === 'string') {
+        date = createLocalDate(firebaseDate);
+      } else {
+        return '';
+      }
+      
+      return formatLocalDate(date);
+    }
+
+    /**
+     * Formats date for display with timezone consideration
+     */
+    function formatDateDisplay(dateInput, options = {}) {
+      let date;
+      
+      if (typeof dateInput === 'string') {
+        date = createLocalDate(dateInput);
+      } else if (dateInput instanceof Date) {
+        date = new Date(dateInput);
+      } else {
+        return 'Invalid Date';
+      }
+      
+      if (!date || isNaN(date.getTime())) return 'Invalid Date';
+      
+      const defaultOptions = {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+      
+      const formatOptions = { ...defaultOptions, ...options };
+      return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+    }
+
     let currentTrialData = null;
     let currentApplicationData = null;
 
@@ -287,11 +358,11 @@
         document.getElementById('clubName').value = currentTrialData.clubName || '';
         document.getElementById('eventName').value = `${template.title.split(' ')[0]} Trial` || '';
         
-        // Get trial dates
+        // Get trial dates with timezone-safe handling
         if (currentTrialData.days && currentTrialData.days.length > 0) {
           const dates = currentTrialData.days
             .filter(day => day.date)
-            .map(day => new Date(day.date).toLocaleDateString());
+            .map(day => formatDateDisplay(day.date));
           if (dates.length > 0) {
             document.getElementById('eventDates').value = dates.join(', ');
           }
@@ -418,7 +489,7 @@
       }
     };
 
-    // Load trial and application data on page load
+    // Load trial and application data on page load with TIMEZONE-SAFE date handling
     async function loadTrialData() {
       try {
         if (!auth.currentUser) return;
@@ -434,7 +505,17 @@
         if (!trialsSnapshot.empty) {
           const trials = [];
           trialsSnapshot.forEach(doc => {
-            trials.push({ id: doc.id, ...doc.data() });
+            const trialData = doc.data();
+            
+            // FIX: Process dates when loading trials from Firebase
+            if (trialData.days && Array.isArray(trialData.days)) {
+              trialData.days = trialData.days.map(day => ({
+                ...day,
+                date: day.date ? getDateFromFirebase(day.date) : null
+              }));
+            }
+            
+            trials.push({ id: doc.id, ...trialData });
           });
           
           trials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
