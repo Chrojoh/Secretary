@@ -716,6 +716,118 @@
 
     console.log("🎯 Entry form loaded");
 
+    // ========================================
+    // TIMEZONE-SAFE DATE UTILITIES - CRITICAL FIX
+    // ========================================
+
+    /**
+     * Creates a date object that stays in local timezone
+     */
+    function createLocalDate(dateStr) {
+      if (!dateStr) return null;
+      const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+      return new Date(dateWithTime);
+    }
+
+    /**
+     * Formats a date to YYYY-MM-DD string in local timezone
+     */
+    function formatLocalDate(date) {
+      if (!date || !(date instanceof Date)) return '';
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    /**
+     * Prepares date data for Firebase storage (prevents timezone conversion)
+     */
+    function prepareDateForFirebase(dateStr) {
+      if (!dateStr) return null;
+      const localDate = createLocalDate(dateStr);
+      return localDate;
+    }
+
+    /**
+     * Retrieves date data from Firebase (converts back to local date string)
+     */
+    function getDateFromFirebase(firebaseDate) {
+      if (!firebaseDate) return '';
+      
+      let date;
+      if (firebaseDate.toDate) {
+        date = firebaseDate.toDate();
+      } else if (firebaseDate instanceof Date) {
+        date = firebaseDate;
+      } else if (typeof firebaseDate === 'string') {
+        date = createLocalDate(firebaseDate);
+      } else {
+        return '';
+      }
+      
+      return formatLocalDate(date);
+    }
+
+    /**
+     * Formats date for display with timezone consideration
+     */
+    function formatDateDisplay(dateInput, options = {}) {
+      let date;
+      
+      if (typeof dateInput === 'string') {
+        date = createLocalDate(dateInput);
+      } else if (dateInput instanceof Date) {
+        date = new Date(dateInput);
+      } else {
+        return 'Invalid Date';
+      }
+      
+      if (!date || isNaN(date.getTime())) return 'Invalid Date';
+      
+      const defaultOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+      
+      const formatOptions = { ...defaultOptions, ...options };
+      return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+    }
+
+    /**
+     * Test function to verify dates work correctly
+     */
+    function testDateHandling() {
+      console.log('=== Entry Form Date Handling Test ===');
+      
+      const testDate = '2024-03-15';
+      console.log('1. Original date string:', testDate);
+      
+      const forFirebase = prepareDateForFirebase(testDate);
+      console.log('2. Prepared for Firebase:', forFirebase);
+      
+      const fromFirebase = getDateFromFirebase(forFirebase);
+      console.log('3. Retrieved from Firebase:', fromFirebase);
+      
+      const display = formatDateDisplay(fromFirebase);
+      console.log('4. Formatted for display:', display);
+      
+      const matches = fromFirebase === testDate;
+      console.log('5. Round-trip successful:', matches);
+      
+      if (!matches) {
+        console.error('❌ Date handling is still broken!');
+      } else {
+        console.log('✅ Date handling is working correctly!');
+      }
+    }
+
+    // Test the date handling on page load
+    testDateHandling();
+
     // Global variables
     let currentTrialData = null;
     let selectedClasses = new Set();
@@ -767,7 +879,7 @@
       }
     }
 
-    // Setup secretary view
+    // Setup secretary view with TIMEZONE-SAFE date handling
     async function setupSecretaryView() {
       try {
         // Wait for auth
@@ -799,687 +911,17 @@
         if (!trialsSnapshot.empty) {
           availableTrials = [];
           trialsSnapshot.forEach(doc => {
-            availableTrials.push({ id: doc.id, ...doc.data() });
-          });
-          
-          availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
-          
-          populateTrialSelector();
-        } else {
-          alert("No trials found. Please create a trial first.");
-          window.location.href = 'main-dashboard.html';
-        }
-      } catch (error) {
-        console.error("❌ Error loading trial data:", error);
-        alert("Error loading trial data: " + error.message);
-      }
-    }
-
-    // Load specific trial for public entry
-    async function loadSpecificTrial(trialId) {
-      try {
-        const trialDoc = await getDoc(doc(db, 'trials', trialId));
-        if (!trialDoc.exists()) {
-          alert('Trial not found');
-          return;
-        }
-
-        currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
-        document.getElementById('trialSelectionSection').style.display = 'none';
-        populateTrialInfo();
-        showEntryForm();
-      } catch (error) {
-        console.error('Error loading specific trial:', error);
-        alert('Error loading trial: ' + error.message);
-      }
-    }
-
-    // Load existing entry for editing
-    async function loadExistingEntry(entryId) {
-      try {
-        const entryDoc = await getDoc(doc(db, 'entries', entryId));
-        if (!entryDoc.exists()) {
-          alert('Entry not found');
-          return;
-        }
-
-        const entryData = entryDoc.data();
-        
-        // Load the trial
-        const trialDoc = await getDoc(doc(db, 'trials', entryData.trialId));
-        if (!trialDoc.exists()) {
-          alert('Associated trial not found');
-          return;
-        }
-
-        currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
-        document.getElementById('trialSelectionSection').style.display = 'none';
-        
-        // Populate trial info and form
-        populateTrialInfo();
-        showEntryForm();
-        
-        // Fill form with existing data
-        setTimeout(() => {
-          populateFormWithEntryData(entryData);
-        }, 500);
-
-      } catch (error) {
-        console.error('Error loading existing entry:', error);
-        alert('Error loading entry: ' + error.message);
-      }
-    }
-
-    // Populate trial selector dropdown
-    function populateTrialSelector() {
-      const trialSelect = document.getElementById('trialSelection');
-      trialSelect.innerHTML = '<option value="">Select a trial...</option>';
-
-      availableTrials.forEach(trial => {
-        const option = document.createElement('option');
-        option.value = trial.id;
-        
-        let trialLabel = trial.clubName || 'Unnamed Trial';
-        
-        if (trial.days && trial.days.length > 0) {
-          const dates = trial.days
-            .filter(day => day.date)
-            .map(day => new Date(day.date).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric' 
-            }))
-            .join(', ');
-          if (dates) {
-            trialLabel += ` (${dates})`;
-          }
-        }
-        
-        option.textContent = trialLabel;
-        trialSelect.appendChild(option);
-      });
-
-      // Handle trial selection change
-      trialSelect.addEventListener('change', function() {
-        const trialId = this.value;
-        if (trialId) {
-          currentTrialData = availableTrials.find(t => t.id === trialId);
-          if (currentTrialData) {
-            generateShareableLink();
-            populateTrialInfo();
-            showEntryForm();
-          }
-        } else {
-          hideShareableLink();
-          hideTrialInfo();
-          hideEntryForm();
-        }
-      });
-    }
-
-    // Generate shareable link
-    function generateShareableLink() {
-      if (!isSecretary || !currentTrialData) return;
-
-      const baseUrl = window.location.origin + window.location.pathname;
-      const shareableUrl = `${baseUrl}?trial=${currentTrialData.id}`;
-      
-      document.getElementById('shareableUrl').textContent = shareableUrl;
-      document.getElementById('shareableLinkSection').style.display = 'block';
-    }
-
-    // Populate trial information
-    function populateTrialInfo() {
-      if (!currentTrialData) return;
-
-      document.getElementById('trialTitle').textContent = `${currentTrialData.clubName || 'Trial'} Entry Form`;
-      
-      const dates = currentTrialData.days && currentTrialData.days.length > 0 
-        ? currentTrialData.days.filter(day => day.date).map(day => new Date(day.date).toLocaleDateString()).join(', ')
-        : 'No dates specified';
-
-      document.getElementById('clubName').textContent = currentTrialData.clubName || 'TBD';
-      document.getElementById('trialDates').textContent = dates;
-      document.getElementById('trialLocation').textContent = 'TBD';
-      document.getElementById('trialSecretary').textContent = currentTrialData.secretary || 'TBD';
-
-      document.getElementById('trialInfoSection').style.display = 'block';
-      populateClasses();
-    }
-
-    // Populate classes with the exact style from screenshot
-    function populateClasses() {
-      const classSelection = document.getElementById('classSelection');
-      let html = '';
-
-      if (!currentTrialData.days || currentTrialData.days.length === 0) {
-        html = '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
-        classSelection.innerHTML = html;
-        return;
-      }
-
-      currentTrialData.days.forEach((day, dayIndex) => {
-        if (!day.classes || day.classes.length === 0) return;
-
-        const dayDate = day.date ? new Date(day.date).toLocaleDateString('en-US', {
-          weekday: 'long',
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric'
-        }) : `Day ${dayIndex + 1}`;
-
-        html += `
-          <div class="day-section">
-            <div class="day-header">📅 ${dayDate}</div>
-        `;
-
-        // Group classes by name
-        const classGroups = new Map();
-        day.classes.forEach((cls, classIndex) => {
-          if (cls && cls.className && cls.className.trim()) {
-            const className = cls.className.trim();
-            if (!classGroups.has(className)) {
-              classGroups.set(className, []);
-            }
-            classGroups.get(className).push({...cls, dayIndex, classIndex});
-          }
-        });
-
-        classGroups.forEach((classInstances, className) => {
-          html += `
-            <div class="class-section">
-              <div class="class-header">
-                <span>🎯 ${className}</span>
-                <span>${classInstances.length} round${classInstances.length > 1 ? 's' : ''}</span>
-              </div>
-              <div class="class-content">
-          `;
-
-          classInstances.forEach((classInstance, instanceIndex) => {
-            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
-              classInstance.rounds.forEach((round, roundIndex) => {
-                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
-                const roundNumber = round.roundNumber || (roundIndex + 1);
-                const regularId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_regular`;
-                const feoId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_feo`;
-                
-                const baseEntryValue = {
-                  dayIndex,
-                  classIndex: classInstance.classIndex,
-                  roundIndex,
-                  className,
-                  judge: judgeName,
-                  roundNumber,
-                  date: day.date || `Day ${dayIndex + 1}`
-                };
-                
-                const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
-                const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
-                
-                const showFeo = round.feo === true || round.FEO === true;
-
-                html += `
-                  <div class="round-item">
-                    <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
-                    ${showFeo ? `<input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">` : ''}
-                    
-                    <div class="round-info">
-                      <div class="round-number">Round ${roundNumber}</div>
-                      <div class="judge-name">${judgeName}</div>
-                    </div>
-                    <div class="entry-options">
-                      <button type="button" class="entry-btn regular" data-entry-id="${regularId}">Entry</button>
-                      ${showFeo ? `<button type="button" class="entry-btn feo" data-entry-id="${feoId}">FEO</button>` : ''}
-                    </div>
-                  </div>
-                `;
-              });
-            }
-          });
-
-          html += `
-              </div>
-            </div>
-          `;
-        });
-
-        html += `</div>`;
-      });
-
-      classSelection.innerHTML = html;
-      setupEventListeners();
-    }
-
-    // Setup event listeners
-    function setupEventListeners() {
-      // Entry button clicks
-      document.querySelectorAll('.entry-btn').forEach(button => {
-        button.addEventListener('click', handleEntryButtonClick);
-      });
-
-      // Registration number lookup with debouncing
-      let registrationTimeout;
-      const cwagsInput = document.getElementById('cwagsNumber');
-      if (cwagsInput) {
-        cwagsInput.addEventListener('input', function(e) {
-          const registrationNumber = e.target.value.trim();
-          
-          clearTimeout(registrationTimeout);
-          
-          if (registrationNumber.length >= 3) {
-            registrationTimeout = setTimeout(() => {
-              autoFillFromRegistration(registrationNumber);
-            }, 500);
-          } else {
-            hideLookupStatus();
-          }
-          
-          checkFormValidity();
-        });
-      }
-
-      // Form validation listeners
-      document.getElementById('entryForm').addEventListener('input', checkFormValidity);
-      document.getElementById('waiverAccepted').addEventListener('change', checkFormValidity);
-      document.getElementById('juniorHandler').addEventListener('change', updateEntrySummary);
-
-      // Form submission
-      document.getElementById('entryForm').addEventListener('submit', handleFormSubmit);
-    }
-
-    // Auto-fill from registration data (search both data.json and Firebase)
-    async function autoFillFromRegistration(registrationNumber) {
-      if (isAutoFilling) return;
-      
-      showLookupStatus('🔍 Looking up registration...', 'loading');
-      
-      try {
-        isAutoFilling = true;
-        
-        const normalizedInput = registrationNumber.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        console.log("🔍 Looking up registration:", normalizedInput);
-        
-        let matchingRegistration = null;
-
-        // First search data.json
-        matchingRegistration = registrationData.find(record => {
-          const normalizedRecord = (record.cwagsNumber || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-          return normalizedRecord === normalizedInput;
-        });
-
-        // If not found in data.json, search Firebase entries
-        if (!matchingRegistration) {
-          try {
-            const entriesQuery = query(
-              collection(db, "entries"),
-              where("cwagsNumber", "==", registrationNumber)
-            );
-            const entriesSnapshot = await getDocs(entriesQuery);
+            const trialData = doc.data();
             
-            if (!entriesSnapshot.empty) {
-              // Use the most recent entry
-              const entries = [];
-              entriesSnapshot.forEach(doc => {
-                entries.push(doc.data());
-              });
-              entries.sort((a, b) => b.submittedAt?.toDate() - a.submittedAt?.toDate());
-              matchingRegistration = entries[0];
+            // FIX: Process dates when loading trials from Firebase
+            if (trialData.days && Array.isArray(trialData.days)) {
+              trialData.days = trialData.days.map(day => ({
+                ...day,
+                date: day.date ? getDateFromFirebase(day.date) : null
+              }));
             }
-          } catch (firebaseError) {
-            console.warn("Could not search Firebase entries:", firebaseError);
-          }
-        }
-        
-        if (matchingRegistration) {
-          console.log("✅ Found matching registration:", matchingRegistration);
-          showLookupStatus('✅ Registration found! Auto-filling information...', 'success');
-          populateForm(matchingRegistration);
-        } else {
-          console.log("❌ No matching registration found for:", normalizedInput);
-          showLookupStatus('ℹ️ Registration number not found in our records. You can still continue with manual entry.', 'warning');
-        }
-        
-      } catch (error) {
-        console.error("❌ Error during registration lookup:", error);
-        showLookupStatus('❌ Error looking up registration', 'warning');
-      } finally {
-        isAutoFilling = false;
-      }
-    }
-
-    // Handle entry button clicks
-    function handleEntryButtonClick(event) {
-      event.preventDefault();
-      
-      const button = event.target;
-      const entryId = button.dataset.entryId;
-      const checkbox = document.getElementById(entryId);
-      
-      if (!checkbox) return;
-      
-      checkbox.checked = !checkbox.checked;
-      
-      if (checkbox.checked) {
-        button.classList.add('selected');
-        selectedClasses.add(checkbox.value);
-      } else {
-        button.classList.remove('selected');
-        selectedClasses.delete(checkbox.value);
-      }
-      
-      updateEntrySummary();
-      checkFormValidity();
-    }
-
-    // Update entry summary
-    function updateEntrySummary() {
-      const entryCount = selectedClasses.size;
-      const isJunior = document.getElementById('juniorHandler').value === 'Yes';
-      
-      let totalFee = 0;
-      let regularEntries = 0;
-      let feoEntries = 0;
-      
-      selectedClasses.forEach(entryJson => {
-        try {
-          const entry = JSON.parse(entryJson);
-          if (entry.entryType === 'feo') {
-            feoEntries++;
-          } else {
-            regularEntries++;
-          }
-        } catch (e) {
-          regularEntries++;
-        }
-      });
-      
-      if (isJunior) {
-        totalFee = fees.juniorHandler * regularEntries;
-      } else if (regularEntries > 0) {
-        totalFee = fees.firstClass + (fees.additionalClass * Math.max(0, regularEntries - 1));
-      }
-      
-      const uniqueClasses = new Set();
-      selectedClasses.forEach(entryJson => {
-        try {
-          const entry = JSON.parse(entryJson);
-          uniqueClasses.add(entry.className);
-        } catch (e) {}
-      });
-      
-      let entryBreakdown = `${entryCount} entries (${uniqueClasses.size} classes)`;
-      if (feoEntries > 0) {
-        entryBreakdown += ` - ${regularEntries} Regular, ${feoEntries} FEO`;
-      }
-      
-      document.getElementById('selectedClassCount').textContent = entryBreakdown;
-      document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
-      document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
-    }
-
-    // Check form validity
-    function checkFormValidity() {
-      const waiverAccepted = document.getElementById('waiverAccepted').checked;
-      const handlerName = document.getElementById('handlerName').value.trim();
-      const handlerEmail = document.getElementById('handlerEmail').value.trim();
-      const handlerPhone = document.getElementById('handlerPhone').value.trim();
-      const dogCallName = document.getElementById('dogCallName').value.trim();
-      const hasClasses = selectedClasses.size > 0;
-      
-      const isValid = waiverAccepted && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
-      
-      document.getElementById('submitBtn').disabled = !isValid;
-    }
-
-    // Handle form submission
-    async function handleFormSubmit(event) {
-      event.preventDefault();
-      
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting...';
-      
-      try {
-        const selectedEntries = Array.from(selectedClasses).map(entryJson => {
-          try {
-            return JSON.parse(entryJson);
-          } catch (e) {
-            return null;
-          }
-        }).filter(entry => entry !== null);
-
-        const entryData = {
-          trialId: currentTrialData.id,
-          cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
-          handlerName: document.getElementById('handlerName').value.trim(),
-          handlerPhone: document.getElementById('handlerPhone').value.trim(),
-          handlerEmail: document.getElementById('handlerEmail').value.trim(),
-          emergencyContact: document.getElementById('emergencyContact').value.trim(),
-          dogCallName: document.getElementById('dogCallName').value.trim(),
-          dogBreed: document.getElementById('dogBreed').value.trim(),
-          dogBirthdate: document.getElementById('dogBirthdate').value,
-          dogSex: document.getElementById('dogSex').value,
-          selectedEntries: selectedEntries,
-          selectedClasses: selectedEntries.map(e => e.className),
-          entryCount: selectedEntries.length,
-          uniqueClassCount: new Set(selectedEntries.map(e => e.className)).size,
-          regularEntries: selectedEntries.filter(e => e.entryType === 'regular').length,
-          feoEntries: selectedEntries.filter(e => e.entryType === 'feo').length,
-          juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
-          waiverAccepted: true,
-          entryFee: document.getElementById('calculatedFee').textContent,
-          submittedAt: new Date(),
-          submittedBy: auth.currentUser ? auth.currentUser.uid : 'public_entry'
-        };
-
-        console.log("💾 Submitting entry data:", entryData);
-
-        // Save entry
-        const docRef = await addDoc(collection(db, "entries"), entryData);
-        console.log("✅ Entry submitted with ID:", docRef.id);
-
-        // Generate edit link
-        generateEditLink(docRef.id);
-        
-        // Show success
-        showSuccessSection();
-
-      } catch (error) {
-        console.error('Error submitting entry:', error);
-        alert('Error submitting entry: ' + error.message);
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Entry';
-      }
-    }
-
-    // Generate edit link
-    function generateEditLink(entryId) {
-      const baseUrl = window.location.origin + window.location.pathname;
-      const editUrl = `${baseUrl}?entry=${entryId}`;
-      
-      document.getElementById('editUrl').textContent = editUrl;
-    }
-
-    // Show success section
-    function showSuccessSection() {
-      document.getElementById('entryForm').style.display = 'none';
-      document.getElementById('editLinkSection').classList.remove('hidden');
-    }
-
-    // Populate form with existing entry data
-    function populateFormWithEntryData(entryData) {
-      document.getElementById('cwagsNumber').value = entryData.cwagsNumber || '';
-      document.getElementById('handlerName').value = entryData.handlerName || '';
-      document.getElementById('handlerPhone').value = entryData.handlerPhone || '';
-      document.getElementById('handlerEmail').value = entryData.handlerEmail || '';
-      document.getElementById('emergencyContact').value = entryData.emergencyContact || '';
-      document.getElementById('dogCallName').value = entryData.dogCallName || '';
-      document.getElementById('dogBreed').value = entryData.dogBreed || '';
-      document.getElementById('dogBirthdate').value = entryData.dogBirthdate || '';
-      document.getElementById('dogSex').value = entryData.dogSex || '';
-      document.getElementById('juniorHandler').value = entryData.juniorHandler ? 'Yes' : 'No';
-      document.getElementById('waiverAccepted').checked = true;
-
-      // Restore selected classes
-      if (entryData.selectedEntries) {
-        entryData.selectedEntries.forEach(entry => {
-          const entryJson = JSON.stringify(entry);
-          selectedClasses.add(entryJson);
+            
+            availableTrials.push({ id: doc.id, ...trialData });
+          });
           
-          const entryId = `entry_${entry.dayIndex}_${entry.classIndex}_${entry.roundIndex}_${entry.entryType}`;
-          const button = document.querySelector(`[data-entry-id="${entryId}"]`);
-          const checkbox = document.getElementById(entryId);
-          
-          if (button && checkbox) {
-            button.classList.add('selected');
-            checkbox.checked = true;
-          }
-        });
-      }
-
-      updateEntrySummary();
-      checkFormValidity();
-    }
-
-    // Utility functions
-    function showLookupStatus(message, type = 'loading') {
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) {
-        statusDiv.textContent = message;
-        statusDiv.className = `lookup-status ${type}`;
-      }
-    }
-
-    function hideLookupStatus() {
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) {
-        statusDiv.style.display = 'none';
-      }
-    }
-
-    function fillField(fieldId, value) {
-      const field = document.getElementById(fieldId);
-      if (field && value && (!field.value || field.value.trim() === '')) {
-        field.value = value;
-        field.classList.add('auto-filled');
-        setTimeout(() => {
-          field.classList.remove('auto-filled');
-        }, 2000);
-      }
-    }
-
-    function populateForm(data) {
-      if (!data || isAutoFilling === false) return;
-      
-      fillField('handlerName', data.handlerName);
-      fillField('handlerPhone', data.handlerPhone);
-      fillField('handlerEmail', data.handlerEmail);
-      fillField('emergencyContact', data.emergencyContact);
-      fillField('dogCallName', data.dogCallName);
-      fillField('dogBreed', data.dogBreed);
-      fillField('dogBirthdate', data.dogBirthdate);
-      
-      if (data.dogSex) {
-        const sexField = document.getElementById('dogSex');
-        if (sexField && (!sexField.value || sexField.value === '')) {
-          sexField.value = data.dogSex;
-          sexField.classList.add('auto-filled');
-          setTimeout(() => {
-            sexField.classList.remove('auto-filled');
-          }, 2000);
-        }
-      }
-      
-      checkFormValidity();
-    }
-
-    function showEntryForm() {
-      document.getElementById('entryFormContainer').style.display = 'block';
-    }
-
-    function hideEntryForm() {
-      document.getElementById('entryFormContainer').style.display = 'none';
-    }
-
-    function hideTrialInfo() {
-      document.getElementById('trialInfoSection').style.display = 'none';
-    }
-
-    function hideShareableLink() {
-      document.getElementById('shareableLinkSection').style.display = 'none';
-    }
-
-    // Global functions for buttons
-    window.copyShareableLink = function() {
-      const url = document.getElementById('shareableUrl').textContent;
-      copyToClipboard(url, 'Shareable link copied to clipboard!');
-    };
-
-    window.testShareableLink = function() {
-      const url = document.getElementById('shareableUrl').textContent;
-      window.open(url, '_blank');
-    };
-
-    window.copyEditLink = function() {
-      const url = document.getElementById('editUrl').textContent;
-      copyToClipboard(url, 'Edit link copied to clipboard!');
-    };
-
-    window.testEditLink = function() {
-      const url = document.getElementById('editUrl').textContent;
-      window.open(url, '_blank');
-    };
-
-    function copyToClipboard(text, successMessage) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert(successMessage);
-      }).catch(err => {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert(successMessage);
-      });
-    }
-
-    window.resetForNewEntry = function() {
-      document.getElementById('editLinkSection').classList.add('hidden');
-      document.getElementById('entryForm').style.display = 'block';
-      resetForm();
-    };
-
-    window.resetForm = function() {
-      document.getElementById('entryForm').reset();
-      selectedClasses.clear();
-      
-      document.querySelectorAll('.entry-btn').forEach(btn => {
-        btn.classList.remove('selected');
-      });
-      
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        if (cb.id !== 'waiverAccepted') cb.checked = false;
-      });
-      
-      hideLookupStatus();
-      updateEntrySummary();
-      checkFormValidity();
-    };
-
-    // Initialize when auth is ready (if secretary) or immediately (if public)
-    auth.onAuthStateChanged(async (user) => {
-      if (user || !isSecretary) {
-        await init();
-      } else if (isSecretary) {
-        alert("Please log in to access the entry form");
-        window.location.href = 'index.html';
-      }
-    });
-
-    // For public access, initialize immediately
-    if (window.location.search.includes('trial=') || window.location.search.includes('entry=')) {
-      init();
-    }
-  </script>
-</body>
-</html>
+          availableTrials.sort((a, b) => b
