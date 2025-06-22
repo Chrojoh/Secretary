@@ -7,6 +7,115 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="form-styles.css">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn,
+        .config-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+
+        .submit-btn:hover,
+        .config-btn:hover {
+            transform: translateY(-2px);
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -27,6 +136,8 @@
             max-width: 500px;
             border-radius: 10px;
             position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         .close {
@@ -50,6 +161,7 @@
             display: flex;
             margin-bottom: 20px;
             border-bottom: 2px solid #ddd;
+            flex-wrap: wrap;
         }
 
         .day-tab {
@@ -60,8 +172,10 @@
             cursor: pointer;
             border-radius: 8px 8px 0 0;
             margin-right: 4px;
+            margin-bottom: -2px;
             transition: all 0.3s ease;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .day-tab:hover {
@@ -69,9 +183,9 @@
         }
 
         .day-tab.active {
-            background: #007bff;
+            background: #667eea;
             color: white;
-            border-color: #007bff;
+            border-color: #667eea;
         }
 
         .day-content {
@@ -215,6 +329,159 @@
             margin: 5px 0;
             color: #424242;
         }
+
+        .lookup-btn {
+            background: #17a2b8;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .lookup-btn:hover {
+            background: #138496;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            margin: 0 0 0.5rem 0;
+            color: #667eea;
+            font-size: 2rem;
+        }
+
+        .stat-card p {
+            margin: 0;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .entry-list {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .entry-list h3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        .entry-item {
+            border-bottom: 1px solid #eee;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .entry-item:last-child {
+            border-bottom: none;
+        }
+
+        .entry-details {
+            flex: 1;
+        }
+
+        .entry-details h4 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+        }
+
+        .entry-details p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .entry-fee {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem auto;
+                padding: 0 0.5rem;
+            }
+
+            .form-section {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .day-tabs {
+                flex-direction: column;
+            }
+
+            .day-tab {
+                margin-right: 0;
+                margin-bottom: 4px;
+                border-radius: 4px;
+            }
+
+            .round-entry {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .round-buttons {
+                justify-content: center;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -227,6 +494,27 @@
     </div>
 
     <div class="container">
+        <!-- Statistics Dashboard -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3 id="totalEntries">0</h3>
+                <p>Total Entries</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="todayEntries">0</h3>
+                <p>Today's Entries</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalRevenue">$0</h3>
+                <p>Total Revenue</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="activeTrials">0</h3>
+                <p>Active Trials</p>
+            </div>
+        </div>
+
+        <!-- Trial Entry Form -->
         <div class="form-section">
             <h2>Trial Entry Form</h2>
             
@@ -244,6 +532,14 @@
             <!-- Classes Container -->
             <div id="classesContainer" style="display: none;">
                 <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Recent Entries -->
+        <div class="entry-list">
+            <h3>Recent Entries</h3>
+            <div id="entriesList">
+                <div class="loading">Loading recent entries...</div>
             </div>
         </div>
     </div>
@@ -275,16 +571,22 @@
             <span class="close" onclick="closeEntryModal()">&times;</span>
             <h3 id="entryModalTitle">Enter Dog for Class</h3>
             <form id="entryForm">
-                <!-- Entry form fields will be populated here -->
-                <div class="form-group">
-                    <label for="registrationNumber">Registration Number:</label>
-                    <input type="text" id="registrationNumber" required>
-                    <button type="button" onclick="lookupRegistration()">Lookup</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="registrationNumber">Registration Number:</label>
+                        <input type="text" id="registrationNumber" required>
+                    </div>
+                    <button type="button" onclick="lookupRegistration()" class="lookup-btn">Lookup</button>
                 </div>
                 
                 <div class="form-group">
                     <label for="dogName">Dog Name:</label>
                     <input type="text" id="dogName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="breed">Breed:</label>
+                    <input type="text" id="breed">
                 </div>
                 
                 <div class="form-group">
@@ -296,16 +598,33 @@
                     <label for="ownerName">Owner Name:</label>
                     <input type="text" id="ownerName" required>
                 </div>
-                
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="juniorHandler"> Junior Handler
-                    </label>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ownerPhone">Owner Phone:</label>
+                        <input type="tel" id="ownerPhone">
+                    </div>
+                    <div class="form-group">
+                        <label for="ownerEmail">Owner Email:</label>
+                        <input type="email" id="ownerEmail">
+                    </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="entryFee">Entry Fee:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="juniorHandler">
+                        <label for="juniorHandler">Junior Handler</label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="entryFee">Entry Fee ($):</label>
                     <input type="number" id="entryFee" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes:</label>
+                    <textarea id="notes" rows="3" placeholder="Any special notes or requirements..."></textarea>
                 </div>
                 
                 <button type="submit" class="submit-btn">Submit Entry</button>
@@ -325,6 +644,7 @@
             feo: 20,
             juniorHandler: 20
         };
+        let allEntries = [];
 
         // Date handling functions
         function prepareDateForFirebase(dateString) {
@@ -394,6 +714,8 @@
             try {
                 await loadRegistrationData();
                 await setupSecretaryView();
+                await loadDashboardStats();
+                await loadRecentEntries();
                 console.log("✅ Application initialized successfully");
             } catch (error) {
                 console.error("❌ Error initializing application:", error);
@@ -437,6 +759,80 @@
             }
         }
 
+        async function loadDashboardStats() {
+            try {
+                // Load all entries
+                const entriesSnapshot = await window.firebase.firestore().collection('entries').get();
+                const entries = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Load all trials
+                const trialsSnapshot = await window.firebase.firestore().collection('trials').get();
+                const trials = trialsSnapshot.docs.length;
+                
+                // Calculate stats
+                const totalEntries = entries.length;
+                const today = new Date().toDateString();
+                const todayEntries = entries.filter(entry => {
+                    const entryDate = entry.submittedAt?.toDate?.()?.toDateString() || 
+                                    new Date(entry.submittedAt).toDateString();
+                    return entryDate === today;
+                }).length;
+                
+                const totalRevenue = entries.reduce((sum, entry) => sum + (entry.entryFee || 0), 0);
+                
+                // Update dashboard
+                document.getElementById('totalEntries').textContent = totalEntries;
+                document.getElementById('todayEntries').textContent = todayEntries;
+                document.getElementById('totalRevenue').textContent = `$${totalRevenue.toFixed(2)}`;
+                document.getElementById('activeTrials').textContent = trials;
+                
+            } catch (error) {
+                console.error("❌ Error loading dashboard stats:", error);
+            }
+        }
+
+        async function loadRecentEntries() {
+            try {
+                const snapshot = await window.firebase.firestore()
+                    .collection('entries')
+                    .orderBy('submittedAt', 'desc')
+                    .limit(10)
+                    .get();
+                
+                const entriesList = document.getElementById('entriesList');
+                entriesList.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    entriesList.innerHTML = '<div class="no-classes">No entries yet</div>';
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const entry = doc.data();
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'entry-item';
+                    
+                    const submittedDate = entry.submittedAt?.toDate?.() || new Date(entry.submittedAt);
+                    
+                    entryDiv.innerHTML = `
+                        <div class="entry-details">
+                            <h4>${entry.dogName} - ${entry.className}</h4>
+                            <p>Handler: ${entry.handlerName} | Owner: ${entry.ownerName}</p>
+                            <p>Trial: ${entry.trialName} | Type: ${entry.entryType?.toUpperCase() || 'Regular'}</p>
+                            <p>Submitted: ${submittedDate.toLocaleDateString()} ${submittedDate.toLocaleTimeString()}</p>
+                        </div>
+                        <div class="entry-fee">$${entry.entryFee?.toFixed(2) || '0.00'}</div>
+                    `;
+                    
+                    entriesList.appendChild(entryDiv);
+                });
+                
+            } catch (error) {
+                console.error("❌ Error loading recent entries:", error);
+                document.getElementById('entriesList').innerHTML = '<div class="error">Error loading entries</div>';
+            }
+        }
+
         async function selectTrial() {
             const trialId = document.getElementById('trialSelect').value;
             if (!trialId) {
@@ -474,13 +870,18 @@
         function displayTrialInfo() {
             const trialInfo = document.getElementById('trialInfo');
             const startDate = formatDateForDisplay(retrieveDateFromFirebase(currentTrialData.startDate));
+            const endDate = currentTrialData.endDate ? 
+                formatDateForDisplay(retrieveDateFromFirebase(currentTrialData.endDate)) : null;
             
             trialInfo.innerHTML = `
                 <div class="trial-info">
                     <h3>${currentTrialData.name}</h3>
                     <p><strong>Start Date:</strong> ${startDate}</p>
+                    ${endDate ? `<p><strong>End Date:</strong> ${endDate}</p>` : ''}
                     <p><strong>Location:</strong> ${currentTrialData.location || 'Not specified'}</p>
                     <p><strong>Secretary:</strong> ${currentTrialData.secretary || 'Not specified'}</p>
+                    <p><strong>Judge(s):</strong> ${currentTrialData.judges?.join(', ') || 'Not specified'}</p>
+                    <p><strong>Number of Days:</strong> ${currentTrialData.numDays || currentTrialData.days?.length || 1}</p>
                     <button onclick="openFeeModal()" class="config-btn">Configure Fees</button>
                 </div>
             `;
@@ -717,8 +1118,11 @@
             
             if (dog) {
                 document.getElementById('dogName').value = dog.dogName || '';
+                document.getElementById('breed').value = dog.breed || '';
                 document.getElementById('handlerName').value = dog.handlerName || dog.ownerName || '';
                 document.getElementById('ownerName').value = dog.ownerName || '';
+                document.getElementById('ownerPhone').value = dog.ownerPhone || '';
+                document.getElementById('ownerEmail').value = dog.ownerEmail || '';
                 console.log("✅ Registration found and populated");
             } else {
                 console.log("❌ Registration not found");
@@ -771,14 +1175,18 @@
                 trialName: currentTrialData.name,
                 registrationNumber: document.getElementById('registrationNumber').value,
                 dogName: document.getElementById('dogName').value,
+                breed: document.getElementById('breed').value,
                 handlerName: document.getElementById('handlerName').value,
                 ownerName: document.getElementById('ownerName').value,
+                ownerPhone: document.getElementById('ownerPhone').value,
+                ownerEmail: document.getElementById('ownerEmail').value,
                 juniorHandler: document.getElementById('juniorHandler').checked,
                 entryFee: parseFloat(document.getElementById('entryFee').value),
                 entryType: currentEntryDetails.entryType,
                 dayIndex: currentEntryDetails.dayIndex,
                 classIndex: currentEntryDetails.classIndex,
                 className: currentEntryDetails.className,
+                notes: document.getElementById('notes').value,
                 submittedAt: new Date(),
                 submittedBy: window.currentUser.email
             };
@@ -794,6 +1202,10 @@
                 console.log("✅ Entry submitted successfully");
                 alert("Entry submitted successfully!");
                 closeEntryModal();
+                
+                // Refresh dashboard and recent entries
+                await loadDashboardStats();
+                await loadRecentEntries();
             } catch (error) {
                 console.error("❌ Error submitting entry:", error);
                 alert("Error submitting entry. Please try again.");
@@ -821,6 +1233,7 @@
             window.firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
                     console.log("✅ User authenticated, initializing secretary mode");
+                    window.currentUser = user;
                     document.getElementById('userEmail').textContent = user.email;
                     init().then(() => {
                         showEntryForm();
