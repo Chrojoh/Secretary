@@ -1,126 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Premium Generator</title>
-  <link rel="stylesheet" href="css/style.css">
   <style>
-    .container {
+    body {
+      font-family: Arial, sans-serif;
       max-width: 1200px;
       margin: 0 auto;
       padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     
     .controls {
-      background-color: #f5f5f5;
+      background-color: #f9f9f9;
       padding: 20px;
-      border-radius: 8px;
+      border-radius: 10px;
       margin-bottom: 20px;
+      border: 1px solid #ddd;
     }
     
     .controls h2 {
-      margin-top: 0;
+      margin: 0 0 20px 0;
       color: #333;
     }
     
-    .edit-form {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-top: 20px;
+    .form-group {
+      margin: 15px 0;
     }
-    
-    .edit-form .full-width {
-      grid-column: 1 / -1;
-    }
-    
-    .edit-form label {
+
+    .form-group label {
       display: block;
       margin-bottom: 5px;
       font-weight: bold;
       color: #333;
     }
-    
-    .edit-form input, .edit-form textarea {
+
+    .form-control {
       width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      max-width: 400px;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
       font-size: 14px;
+      background-color: white;
+    }
+
+    .form-control:focus {
+      border-color: #4CAF50;
+      outline: none;
     }
     
-    .edit-form textarea {
-      height: 80px;
-      resize: vertical;
-    }
-    
-    .generate-btn {
+    .reload-btn, .generate-btn, .print-btn {
       background-color: #4CAF50;
       color: white;
-      border: none;
       padding: 12px 24px;
-      font-size: 16px;
+      border: none;
       border-radius: 5px;
       cursor: pointer;
-      margin: 10px 5px;
+      margin: 5px;
+      font-size: 14px;
+      font-weight: bold;
     }
     
-    .generate-btn:hover {
-      background-color: #45a049;
+    .reload-btn {
+      background-color: #ff9800;
     }
     
     .print-btn {
       background-color: #2196F3;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 10px 5px;
     }
     
-    .print-btn:hover {
-      background-color: #0b7dda;
+    .reload-btn:hover, .generate-btn:hover, .print-btn:hover {
+      opacity: 0.8;
     }
-    
-    .reload-btn {
-      background-color: #FF9800;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 10px 5px;
+
+    .generate-btn:disabled {
+      background-color: #ccc !important;
+      cursor: not-allowed;
+      opacity: 0.6;
     }
-    
-    .reload-btn:hover {
-      background-color: #e68900;
-    }
-    
+
     .loading-indicator {
-      display: none;
-      color: #4CAF50;
-      font-weight: bold;
+      color: #666;
+      font-style: italic;
       margin: 10px 0;
       padding: 10px;
-      background-color: #e8f5e8;
-      border-radius: 4px;
-      border-left: 4px solid #4CAF50;
-    }
-    
-    .auto-filled {
-      background-color: #e8f5e8 !important;
-      transition: background-color 2s ease;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      display: none;
     }
     
     .premium-document {
+      background-color: white;
       border: 1px solid #ccc;
-      padding: 20px;
-      margin-top: 20px;
-      background: white;
-      font-family: Arial, sans-serif;
-      line-height: 1.4;
+      padding: 30px;
+      margin: 20px 0;
+      display: none;
     }
     
     .premium-header {
@@ -197,6 +181,12 @@
       background-color: #3367d6;
     }
     
+    .auto-filled {
+      background-color: #e8f5e8 !important;
+      border-color: #4CAF50 !important;
+      transition: all 0.3s ease;
+    }
+    
     @media print {
       .controls, .loading-indicator {
         display: none;
@@ -212,341 +202,197 @@
       .maps-link {
         display: none;
       }
-      .form-group {
-  margin: 15px 0;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #333;
-}
-
-.form-control {
-  width: 100%;
-  max-width: 400px;
-  padding: 10px;
-  border: 2px solid #ddd;
-  border-radius: 5px;
-  font-size: 14px;
-  background-color: white;
-}
-
-.form-control:focus {
-  border-color: #4CAF50;
-  outline: none;
-}
-
-.generate-btn:disabled {
-  background-color: #ccc !important;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.loading-indicator {
-  color: #666;
-  font-style: italic;
-  margin: 10px 0;
-  padding: 10px;
-  background-color: #f9f9f9;
-  border-radius: 5px;
-}
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="controls">
-  <h2>🏆 Premium Generator</h2>
-  
-  <!-- NEW: Trial Selection Dropdown -->
-  <div class="form-group">
-    <label for="trialSelect">Select Trial:</label>
-    <select id="trialSelect" class="form-control">
-      <option value="">Select a trial...</option>
-    </select>
-  </div>
-  
-  <div class="loading-indicator" id="loadingIndicator" style="display: none;">
-    🔄 Loading trials...
-  </div>
-  
-  <button class="reload-btn" onclick="loadTrials()">🔄 Load Trials</button>
-  <button class="generate-btn" onclick="generatePremium()" id="generateBtn" disabled>Generate Premium</button>
-  <button class="print-btn" onclick="window.print()">Print Premium</button>
-  <button onclick="location.href='main-dashboard.html'" style="background-color: #666; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">← Back to Dashboard</button>
-</div>
-      <div class="edit-form">
-        <div>
-          <label>Club Name:</label>
-          <input type="text" id="clubName" placeholder="Will be auto-filled from trial data">
-        </div>
-        <div>
-          <label>Trial Secretary:</label>
-          <input type="text" id="secretary" placeholder="Will be auto-filled from trial data">
-        </div>
-        <div class="full-width">
-          <label>Trial Dates:</label>
-          <input type="text" id="trialDates" placeholder="Will be auto-filled from trial data">
-        </div>
-        <div>
-          <label>Start Time:</label>
-          <input type="text" id="startTime" value="8:00 AM">
-        </div>
-        <div>
-          <label>End Time:</label>
-          <input type="text" id="endTime" value="4:00 PM">
-        </div>
-        <div class="full-width">
-          <label>Trial Location:</label>
-          <input type="text" id="location" placeholder="Enter venue name and address">
-        </div>
-        <div class="full-width">
-          <label>Address (for directions):</label>
-          <input type="text" id="address" placeholder="Enter full address for Google Maps">
-        </div>
-        <div>
-          <label>Secretary Email:</label>
-          <input type="email" id="email" placeholder="Enter email address">
-        </div>
-        <div>
-          <label>Secretary Phone:</label>
-          <input type="tel" id="phone" placeholder="Enter phone number">
-        </div>
-        <div>
-          <label>Entry Limit:</label>
-          <input type="text" id="entryLimit" value="60 dogs maximum">
-        </div>
-        <div>
-          <label>Entry Deadline:</label>
-          <input type="text" id="deadline" placeholder="e.g., May 20, 2025 at 11:59 PM">
-        </div>
-        <div class="full-width">
-          <label>Judges (one per line):</label>
-          <textarea id="judges" placeholder="Will be auto-filled from trial data"></textarea>
-        </div>
-        <div class="full-width">
-          <label>Classes Offered (one per line):</label>
-          <textarea id="classes" placeholder="Will be auto-filled from trial data"></textarea>
-        </div>
+      <h2>🏆 Premium Generator</h2>
+      
+      <!-- Trial Selection Dropdown -->
+      <div class="form-group">
+        <label for="trialSelect">Select Trial:</label>
+        <select id="trialSelect" class="form-control">
+          <option value="">Select a trial...</option>
+        </select>
+      </div>
+      
+      <div class="loading-indicator" id="loadingIndicator">
+        🔄 Loading trials...
+      </div>
+      
+      <button class="reload-btn" onclick="loadTrials()">🔄 Load Trials</button>
+      <button class="generate-btn" onclick="generatePremium()" id="generateBtn" disabled>Generate Premium</button>
+      <button class="print-btn" onclick="window.print()">Print Premium</button>
+      <button onclick="location.href='main-dashboard.html'" style="background-color: #666; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">← Back to Dashboard</button>
+    </div>
+
+    <!-- Form fields for premium generation -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+      <div>
+        <label>Club Name:</label>
+        <input type="text" id="clubName" style="width: 100%; padding: 8px; margin: 5px 0;">
         
-        <!-- Entry Fees Section -->
-        <div class="full-width">
-          <h3 style="margin-top: 20px; margin-bottom: 10px; color: #333;">Entry Fees</h3>
-          <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;">
-            <label>First dog, first class:</label>
-            <input type="text" id="fee1" value="$35.00" style="width: 80px;">
-            
-            <label>Same dog, additional class:</label>
-            <input type="text" id="fee2" value="$25.00" style="width: 80px;">
-            
-            <label>Additional dog, same handler:</label>
-            <input type="text" id="fee3" value="$30.00" style="width: 80px;">
-            
-            <label>Junior Handler (under 18):</label>
-            <input type="text" id="fee4" value="$20.00" style="width: 80px;">
-            
-            <label>Exhibition Only:</label>
-            <input type="text" id="fee5" value="$15.00" style="width: 80px;">
-          </div>
+        <label>Trial Secretary:</label>
+        <input type="text" id="secretary" style="width: 100%; padding: 8px; margin: 5px 0;">
+        
+        <label>Trial Dates:</label>
+        <input type="text" id="trialDates" style="width: 100%; padding: 8px; margin: 5px 0;">
+        
+        <label>Start Time:</label>
+        <input type="text" id="startTime" style="width: 100%; padding: 8px; margin: 5px 0;">
+        
+        <label>End Time:</label>
+        <input type="text" id="endTime" style="width: 100%; padding: 8px; margin: 5px 0;">
+      </div>
+      
+      <div>
+        <label>Trial Location:</label>
+        <input type="text" id="location" style="width: 100%; padding: 8px; margin: 5px 0;">
+        
+        <label>Entry Limit:</label>
+        <input type="text" id="entryLimit" style="width: 100%; padding: 8px; margin: 5px 0;">
+        
+        <label>Entry Deadline:</label>
+        <input type="text" id="deadline" style="width: 100%; padding: 8px; margin: 5px 0;">
+        
+        <label>Email:</label>
+        <input type="email" id="email" style="width: 100%; padding: 8px; margin: 5px 0;">
+        
+        <label>Phone:</label>
+        <input type="text" id="phone" style="width: 100%; padding: 8px; margin: 5px 0;">
+      </div>
+    </div>
+
+    <!-- Fees section -->
+    <div style="margin: 20px 0;">
+      <h3>Entry Fees</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <label>First dog, first class:</label>
+          <input type="text" id="fee1" style="width: 100%; padding: 8px; margin: 5px 0;" placeholder="$35.00">
+          
+          <label>Same dog, additional class:</label>
+          <input type="text" id="fee2" style="width: 100%; padding: 8px; margin: 5px 0;" placeholder="$25.00">
+        </div>
+        <div>
+          <label>Additional dog, same handler:</label>
+          <input type="text" id="fee3" style="width: 100%; padding: 8px; margin: 5px 0;" placeholder="$30.00">
+          
+          <label>Junior Handler (under 18):</label>
+          <input type="text" id="fee4" style="width: 100%; padding: 8px; margin: 5px 0;" placeholder="$20.00">
+          
+          <label>Exhibition Only:</label>
+          <input type="text" id="fee5" style="width: 100%; padding: 8px; margin: 5px 0;" placeholder="$15.00">
         </div>
       </div>
     </div>
-    
-    <div id="premiumDocument" class="premium-document" style="display: none;">
-      <!-- Premium content will be generated here -->
+
+    <div style="margin: 20px 0;">
+      <label>Address (for directions):</label>
+      <input type="text" id="address" style="width: 100%; padding: 8px; margin: 5px 0;">
     </div>
+
+    <!-- Generated Premium Document -->
+    <div id="premiumDocument" class="premium-document"></div>
   </div>
 
+  <!-- Firebase Configuration -->
   <script type="module">
     import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-// Add these new variables at the top
-let availableTrials = [];
-let selectedTrial = null;
+    import { collection, query, where, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-// NEW: Load all trials for selection
-async function loadTrials() {
-  try {
-    console.log("🔄 Loading trials for selection...");
-    showLoadingIndicator();
-
-    await new Promise((resolve) => {
-      if (auth.currentUser) {
-        resolve();
-      } else {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
-          unsubscribe();
-          resolve();
-        });
-      }
-    });
-
-    if (!auth.currentUser) {
-      console.log("❌ No authenticated user");
-      hideLoadingIndicator();
-      return;
-    }
-
-    const trialsQuery = query(
-      collection(db, "trials"),
-      where("createdBy", "==", auth.currentUser.uid)
-    );
-    
-    const trialsSnapshot = await getDocs(trialsQuery);
-    
-    if (!trialsSnapshot.empty) {
-      availableTrials = [];
-      trialsSnapshot.forEach(doc => {
-        const trialData = doc.data();
-        
-        if (trialData.days && Array.isArray(trialData.days)) {
-          trialData.days = trialData.days.map(day => ({
-            ...day,
-            date: day.date ? getDateFromFirebase(day.date) : null
-          }));
-        }
-        
-        availableTrials.push({ id: doc.id, ...trialData });
-      });
-      
-      availableTrials.sort((a, b) => {
-        const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
-        const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
-        return dateB - dateA;
-      });
-      
-      populateTrialSelector();
-      console.log(`✅ Loaded ${availableTrials.length} trials`);
-    } else {
-      alert("No trials found. Please create a trial first.");
-    }
-    
-    hideLoadingIndicator();
-    
-  } catch (error) {
-    console.error("💥 Error loading trials:", error);
-    hideLoadingIndicator();
-    alert("Error loading trials: " + error.message);
-  }
-}
-
-// NEW: Populate trial selector
-function populateTrialSelector() {
-  const trialSelect = document.getElementById('trialSelect');
-  trialSelect.innerHTML = '<option value="">Select a trial...</option>';
-
-  availableTrials.forEach(trial => {
-    const option = document.createElement('option');
-    option.value = trial.id;
-    
-    let trialLabel = trial.clubName || 'Unnamed Trial';
-    
-    if (trial.days && trial.days.length > 0) {
-      const dates = trial.days
-        .filter(day => day.date)
-        .map(day => {
-          const localDate = createLocalDate(day.date);
-          return localDate.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric' 
-          });
-        })
-        .join(', ');
-      if (dates) {
-        trialLabel += ` (${dates})`;
-      }
-    }
-    
-    option.textContent = trialLabel;
-    trialSelect.appendChild(option);
-  });
-
-  trialSelect.addEventListener('change', function() {
-    const trialId = this.value;
-    if (trialId) {
-      selectedTrial = availableTrials.find(t => t.id === trialId);
-      if (selectedTrial) {
-        console.log("✅ Selected trial:", selectedTrial.clubName);
-        loadTrialData(selectedTrial);
-        document.getElementById('generateBtn').disabled = false;
-      }
-    } else {
-      selectedTrial = null;
-      currentTrialData = null;
-      document.getElementById('generateBtn').disabled = true;
-      clearPremiumForm();
-    }
-  });
-}
-
-function clearPremiumForm() {
-  const fields = ['clubName', 'secretary', 'trialDates', 'location', 'startTime', 'endTime'];
-  fields.forEach(fieldId => {
-    const field = document.getElementById(fieldId);
-    if (field) field.value = '';
-  });
-  
-  const premiumDoc = document.getElementById('premiumDocument');
-  if (premiumDoc) {
-    premiumDoc.innerHTML = '';
-    premiumDoc.style.display = 'none';
-  }
-  
-  judges = [];
-  classes = [];
-}
-    console.log("IMPROVED PREMIUM GENERATOR LOADED");
-
+    // Global variables
+    let availableTrials = [];
+    let selectedTrial = null;
     let currentTrialData = null;
     let currentApplicationData = null;
+    let judges = [];
+    let classes = [];
 
-    // ROBUST DATE CONVERSION FUNCTION
-    function convertDateSafely(dateInput) {
-  if (!dateInput) return "Date TBD";
-  
-  try {
-    let processedDate;
-    
-    // Handle different date input types
-    if (dateInput instanceof Date) {
-      processedDate = dateInput;
-    } else if (dateInput && typeof dateInput.toDate === 'function') {
-      processedDate = dateInput.toDate();
-    } else if (typeof dateInput === 'string') {
-      const trimmedDate = dateInput.trim();
-      if (trimmedDate.includes('/')) {
-        const [month, day, year] = trimmedDate.split('/');
-        processedDate = new Date(year, month - 1, day);
-      } else if (trimmedDate.includes('-')) {
-        processedDate = new Date(trimmedDate + 'T12:00:00');
-      } else {
-        processedDate = new Date(trimmedDate);
+    // DATE HANDLING FUNCTIONS
+    function createLocalDate(dateStr) {
+      if (!dateStr) return new Date();
+      
+      if (typeof dateStr === 'string') {
+        const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+        return new Date(dateWithTime);
       }
-    } else {
-      processedDate = new Date(dateInput);
+      
+      return new Date(dateStr);
     }
-    
-    if (!processedDate || isNaN(processedDate.getTime())) {
-      return dateInput.toString ? dateInput.toString() : "Date TBD";
-    }
-    
-    const options = { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    };
-    
-    return processedDate.toLocaleDateString('en-US', options);
-    
-  } catch (error) {
-    console.error("Date conversion error:", error);
-    return dateInput.toString ? dateInput.toString() : "Date TBD";
-  }
-}
 
+    function formatLocalDate(date) {
+      if (!date || !(date instanceof Date)) return '';
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function getDateFromFirebase(firebaseDate) {
+      if (!firebaseDate) return '';
+      
+      let date;
+      
+      if (firebaseDate.toDate) {
+        date = firebaseDate.toDate();
+      } else if (firebaseDate instanceof Date) {
+        date = firebaseDate;
+      } else if (typeof firebaseDate === 'string') {
+        date = createLocalDate(firebaseDate);
+      } else {
+        return '';
+      }
+      
+      return formatLocalDate(date);
+    }
+
+    function convertDateSafely(dateInput) {
+      if (!dateInput) return "Date TBD";
+      
+      try {
+        let processedDate;
+        
+        if (dateInput instanceof Date) {
+          processedDate = dateInput;
+        } else if (dateInput && typeof dateInput.toDate === 'function') {
+          processedDate = dateInput.toDate();
+        } else if (typeof dateInput === 'string') {
+          const trimmedDate = dateInput.trim();
+          if (trimmedDate.includes('/')) {
+            const [month, day, year] = trimmedDate.split('/');
+            processedDate = new Date(year, month - 1, day);
+          } else if (trimmedDate.includes('-')) {
+            processedDate = new Date(trimmedDate + 'T12:00:00');
+          } else {
+            processedDate = new Date(trimmedDate);
+          }
+        } else {
+          processedDate = new Date(dateInput);
+        }
+        
+        if (!processedDate || isNaN(processedDate.getTime())) {
+          return dateInput.toString ? dateInput.toString() : "Date TBD";
+        }
+        
+        const options = { 
+          weekday: 'long', 
+          year: 'numeric', 
+          month: 'long', 
+          day: 'numeric' 
+        };
+        
+        return processedDate.toLocaleDateString('en-US', options);
+        
+      } catch (error) {
+        console.error("Date conversion error:", error);
+        return dateInput.toString ? dateInput.toString() : "Date TBD";
+      }
+    }
+
+    // UTILITY FUNCTIONS
     function showLoadingIndicator() {
       const indicator = document.getElementById('loadingIndicator');
       if (indicator) {
@@ -571,12 +417,12 @@ function clearPremiumForm() {
       }
     }
 
-    window.loadTrialData = async function() {
+    // MAIN FUNCTIONS
+    async function loadTrials() {
       try {
-        console.log("🔄 Loading trial data...");
+        console.log("🔄 Loading trials for selection...");
         showLoadingIndicator();
 
-        // Wait for auth state to be ready
         await new Promise((resolve) => {
           if (auth.currentUser) {
             resolve();
@@ -596,7 +442,6 @@ function clearPremiumForm() {
 
         console.log("👤 Authenticated user:", auth.currentUser.email);
 
-        // Load trial data
         const trialsQuery = query(
           collection(db, "trials"),
           where("createdBy", "==", auth.currentUser.uid)
@@ -605,18 +450,109 @@ function clearPremiumForm() {
         const trialsSnapshot = await getDocs(trialsQuery);
         
         if (!trialsSnapshot.empty) {
-          const trials = [];
+          availableTrials = [];
           trialsSnapshot.forEach(doc => {
-            trials.push({ id: doc.id, ...doc.data() });
+            const trialData = doc.data();
+            
+            if (trialData.days && Array.isArray(trialData.days)) {
+              trialData.days = trialData.days.map(day => ({
+                ...day,
+                date: day.date ? getDateFromFirebase(day.date) : null
+              }));
+            }
+            
+            availableTrials.push({ id: doc.id, ...trialData });
           });
           
-          trials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
-          currentTrialData = trials[0];
-          console.log("📊 Loaded trial:", currentTrialData);
+          availableTrials.sort((a, b) => {
+            const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+            const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+            return dateB - dateA;
+          });
+          
+          populateTrialSelector();
+          console.log(`✅ Loaded ${availableTrials.length} trials`);
+        } else {
+          console.log("❌ No trials found");
+          alert("No trials found. Please create a trial first.");
+        }
+        
+        hideLoadingIndicator();
+        
+      } catch (error) {
+        console.error("💥 Error loading trials:", error);
+        hideLoadingIndicator();
+        alert("Error loading trials: " + error.message);
+      }
+    }
+
+    function populateTrialSelector() {
+      const trialSelect = document.getElementById('trialSelect');
+      trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+
+      availableTrials.forEach(trial => {
+        const option = document.createElement('option');
+        option.value = trial.id;
+        
+        let trialLabel = trial.clubName || 'Unnamed Trial';
+        
+        if (trial.days && trial.days.length > 0) {
+          const dates = trial.days
+            .filter(day => day.date)
+            .map(day => {
+              const localDate = createLocalDate(day.date);
+              return localDate.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+              });
+            })
+            .join(', ');
+          if (dates) {
+            trialLabel += ` (${dates})`;
+          }
+        }
+        
+        option.textContent = trialLabel;
+        trialSelect.appendChild(option);
+      });
+
+      trialSelect.addEventListener('change', function() {
+        const trialId = this.value;
+        if (trialId) {
+          selectedTrial = availableTrials.find(t => t.id === trialId);
+          if (selectedTrial) {
+            console.log("✅ Selected trial:", selectedTrial.clubName);
+            loadTrialData(selectedTrial);
+            
+            const generateBtn = document.getElementById('generateBtn');
+            if (generateBtn) generateBtn.disabled = false;
+          }
+        } else {
+          selectedTrial = null;
+          currentTrialData = null;
+          
+          const generateBtn = document.getElementById('generateBtn');
+          if (generateBtn) generateBtn.disabled = true;
+          
+          clearPremiumForm();
+        }
+      });
+    }
+
+    async function loadTrialData(trial = null) {
+      try {
+        if (trial) {
+          currentTrialData = trial;
+        } else if (selectedTrial) {
+          currentTrialData = selectedTrial;
+        } else {
+          console.log("❌ No trial selected");
+          return;
         }
 
-        // Load application data
-        if (currentTrialData) {
+        console.log("🎯 Loading data for trial:", currentTrialData.clubName);
+
+        if (currentTrialData && auth.currentUser) {
           const appQuery = query(
             collection(db, "applications"),
             where("trialId", "==", currentTrialData.id),
@@ -633,15 +569,12 @@ function clearPremiumForm() {
           }
         }
 
-        // Fill form and hide loading
         fillFormFromTrialData();
-        hideLoadingIndicator();
         
       } catch (error) {
         console.error("💥 Error loading trial data:", error);
-        hideLoadingIndicator();
       }
-    };
+    }
 
     function fillFormFromTrialData() {
       if (!currentTrialData) {
@@ -651,27 +584,29 @@ function clearPremiumForm() {
 
       console.log("🎯 Filling form from trial data...");
       
-      // Fill basic info with highlighting
       if (currentTrialData.clubName) {
-        document.getElementById('clubName').value = currentTrialData.clubName;
-        highlightAutoFilledField('clubName');
-        console.log("✅ Auto-filled Club Name:", currentTrialData.clubName);
+        const clubNameField = document.getElementById('clubName');
+        if (clubNameField) {
+          clubNameField.value = currentTrialData.clubName;
+          highlightAutoFilledField('clubName');
+        }
       }
       
       if (currentTrialData.secretary) {
-        document.getElementById('secretary').value = currentTrialData.secretary;
-        highlightAutoFilledField('secretary');
-        console.log("✅ Auto-filled Secretary:", currentTrialData.secretary);
+        const secretaryField = document.getElementById('secretary');
+        if (secretaryField) {
+          secretaryField.value = currentTrialData.secretary;
+          highlightAutoFilledField('secretary');
+        }
       }
 
-      // Process and fill dates
       let processedDates = [];
       
       if (currentTrialData.days && currentTrialData.days.length > 0) {
         console.log("📅 Processing trial dates...");
         
         currentTrialData.days.forEach((day, index) => {
-          if (day.date && day.date.trim()) {
+          if (day.date) {
             const converted = convertDateSafely(day.date);
             processedDates.push(converted);
             console.log(`Day ${index + 1}: ${day.date} → ${converted}`);
@@ -680,82 +615,52 @@ function clearPremiumForm() {
         
         if (processedDates.length > 0) {
           const finalDateString = processedDates.join(' & ');
-          document.getElementById('trialDates').value = finalDateString;
-          highlightAutoFilledField('trialDates');
-          console.log("✅ Auto-filled Trial Dates:", finalDateString);
+          const trialDatesField = document.getElementById('trialDates');
+          if (trialDatesField) {
+            trialDatesField.value = finalDateString;
+            highlightAutoFilledField('trialDates');
+          }
         }
       }
 
-      // Fill application data if available
-      if (currentApplicationData) {
-        console.log("📋 Auto-filling from trial application data...");
-        
-        // Location information
-        if (currentApplicationData.trialLocation) {
-          document.getElementById('location').value = currentApplicationData.trialLocation;
+      if (currentTrialData.location) {
+        const locationField = document.getElementById('location');
+        if (locationField) {
+          locationField.value = currentTrialData.location;
           highlightAutoFilledField('location');
-          console.log("✅ Auto-filled Location:", currentApplicationData.trialLocation);
-        }
-        
-        // Address for directions
-        if (currentApplicationData.trialAddress) {
-          document.getElementById('address').value = currentApplicationData.trialAddress;
-          highlightAutoFilledField('address');
-          console.log("✅ Auto-filled Address:", currentApplicationData.trialAddress);
-        }
-        
-        // Contact information from trial application
-        if (currentApplicationData.contactEmail) {
-          document.getElementById('email').value = currentApplicationData.contactEmail;
-          highlightAutoFilledField('email');
-          console.log("✅ Auto-filled Email:", currentApplicationData.contactEmail);
-        }
-        
-        if (currentApplicationData.contactPhone) {
-          document.getElementById('phone').value = currentApplicationData.contactPhone;
-          highlightAutoFilledField('phone');
-          console.log("✅ Auto-filled Phone:", currentApplicationData.contactPhone);
-        }
-        
-        // Use contact name from trial application instead of secretary if available
-        if (currentApplicationData.contactName && !document.getElementById('secretary').value) {
-          document.getElementById('secretary').value = currentApplicationData.contactName;
-          highlightAutoFilledField('secretary');
-          console.log("✅ Auto-filled Secretary from Application Contact:", currentApplicationData.contactName);
-        }
-        
-        // Use host name from trial application if club name not already filled
-        if (currentApplicationData.hostName && !document.getElementById('clubName').value) {
-          document.getElementById('clubName').value = currentApplicationData.hostName;
-          highlightAutoFilledField('clubName');
-          console.log("✅ Auto-filled Club Name from Host Name:", currentApplicationData.hostName);
-        }
-        
-        // City/State information if available - now using venueAddress
-        if (currentApplicationData.venueAddress && !document.getElementById('location').value) {
-          document.getElementById('location').value = currentApplicationData.venueAddress;
-          highlightAutoFilledField('location');
-          console.log("✅ Auto-filled Location from Venue Address:", currentApplicationData.venueAddress);
-        }
-        
-        // Also use venueAddress for the address field if trialAddress is not available
-        if (currentApplicationData.venueAddress && !document.getElementById('address').value) {
-          document.getElementById('address').value = currentApplicationData.venueAddress;
-          highlightAutoFilledField('address');
-          console.log("✅ Auto-filled Address from Venue Address:", currentApplicationData.venueAddress);
         }
       }
 
-      // Extract and fill judges
-      const judges = new Set();
+      if (currentTrialData.startTime) {
+        const startTimeField = document.getElementById('startTime');
+        if (startTimeField) {
+          startTimeField.value = currentTrialData.startTime;
+          highlightAutoFilledField('startTime');
+        }
+      }
+
+      if (currentTrialData.endTime) {
+        const endTimeField = document.getElementById('endTime');
+        if (endTimeField) {
+          endTimeField.value = currentTrialData.endTime;
+          highlightAutoFilledField('endTime');
+        }
+      }
+
+      let allJudges = new Set();
+      let allClasses = new Set();
+
       if (currentTrialData.days) {
         currentTrialData.days.forEach(day => {
           if (day.classes) {
             day.classes.forEach(cls => {
+              if (cls.className) {
+                allClasses.add(cls.className);
+              }
               if (cls.rounds) {
                 cls.rounds.forEach(round => {
-                  if (round.judge && round.judge.trim()) {
-                    judges.add(round.judge.trim());
+                  if (round.judge) {
+                    allJudges.add(round.judge);
                   }
                 });
               }
@@ -763,57 +668,77 @@ function clearPremiumForm() {
           }
         });
       }
-      
-      if (judges.size > 0) {
-        document.getElementById('judges').value = Array.from(judges).join('\n');
-        highlightAutoFilledField('judges');
-        console.log("✅ Auto-filled Judges:", Array.from(judges).join(', '));
-      }
 
-      // Extract and fill classes
-      const classes = new Set();
-      if (currentTrialData.days) {
-        currentTrialData.days.forEach(day => {
-          if (day.classes) {
-            day.classes.forEach(cls => {
-              if (cls.className && cls.className.trim()) {
-                classes.add(cls.className.trim());
-              }
-            });
-          }
-        });
-      }
-      
-      if (classes.size > 0) {
-        document.getElementById('classes').value = Array.from(classes).join('\n');
-        highlightAutoFilledField('classes');
-        console.log("✅ Auto-filled Classes:", Array.from(classes).join(', '));
-      }
+      judges = Array.from(allJudges);
+      classes = Array.from(allClasses);
 
-      console.log("🎉 Form auto-fill completed successfully!");
+      console.log("✅ Extracted judges:", judges);
+      console.log("✅ Extracted classes:", classes);
+
+      if (currentApplicationData) {
+        fillFormFromApplicationData();
+      }
     }
 
+    function fillFormFromApplicationData() {
+      if (!currentApplicationData) return;
+
+      const fields = [
+        'entryLimit', 'deadline', 'email', 'phone', 'address',
+        'fee1', 'fee2', 'fee3', 'fee4', 'fee5'
+      ];
+
+      fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        const value = currentApplicationData[fieldId];
+        if (field && value) {
+          field.value = value;
+          highlightAutoFilledField(fieldId);
+        }
+      });
+    }
+
+    function clearPremiumForm() {
+      const fields = ['clubName', 'secretary', 'trialDates', 'location', 'startTime', 'endTime'];
+      fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.value = '';
+        }
+      });
+      
+      const premiumDoc = document.getElementById('premiumDocument');
+      if (premiumDoc) {
+        premiumDoc.innerHTML = '';
+        premiumDoc.style.display = 'none';
+      }
+      
+      judges = [];
+      classes = [];
+    }
+
+    // PREMIUM GENERATION
     window.generatePremium = function() {
       const data = {
-        clubName: document.getElementById('clubName').value || '[CLUB NAME]',
-        secretary: document.getElementById('secretary').value || '[TRIAL SECRETARY]',
-        trialDates: document.getElementById('trialDates').value || '[TRIAL DATES]',
-        startTime: document.getElementById('startTime').value || '8:00 AM',
-        endTime: document.getElementById('endTime').value || '4:00 PM',
-        location: document.getElementById('location').value || '[LOCATION TBD]',
-        address: document.getElementById('address').value || '',
-        email: document.getElementById('email').value || '[EMAIL TBD]',
-        phone: document.getElementById('phone').value || '[PHONE TBD]',
-        entryLimit: document.getElementById('entryLimit').value || '60 dogs maximum',
-        deadline: document.getElementById('deadline').value || '[DEADLINE TBD]',
-        judges: document.getElementById('judges').value.split('\n').filter(j => j.trim()),
-        classes: document.getElementById('classes').value.split('\n').filter(c => c.trim()),
+        clubName: document.getElementById('clubName').value,
+        secretary: document.getElementById('secretary').value,
+        trialDates: document.getElementById('trialDates').value,
+        startTime: document.getElementById('startTime').value,
+        endTime: document.getElementById('endTime').value,
+        location: document.getElementById('location').value,
+        entryLimit: document.getElementById('entryLimit').value,
+        deadline: document.getElementById('deadline').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        judges: judges,
+        classes: classes,
         fees: {
-          fee1: document.getElementById('fee1').value || '$35.00',
-          fee2: document.getElementById('fee2').value || '$25.00',
-          fee3: document.getElementById('fee3').value || '$30.00',
-          fee4: document.getElementById('fee4').value || '$20.00',
-          fee5: document.getElementById('fee5').value || '$15.00'
+          fee1: document.getElementById('fee1').value,
+          fee2: document.getElementById('fee2').value,
+          fee3: document.getElementById('fee3').value,
+          fee4: document.getElementById('fee4').value,
+          fee5: document.getElementById('fee5').value
         }
       };
 
@@ -922,13 +847,17 @@ function clearPremiumForm() {
       document.getElementById('premiumDocument').scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Auto-load trial data when page loads with longer delay to ensure auth is ready
- // Replace the existing window.addEventListener('load', ...) with:
-window.addEventListener('load', () => {
-  console.log("🚀 Page loaded, loading trials...");
-  setTimeout(loadTrials, 1000);
-});
-    console.log("Premium generator ready with improved auto-fill");
+    // Make functions globally accessible
+    window.loadTrials = loadTrials;
+    window.loadTrialData = loadTrialData;
+
+    // Auto-load trials when page loads
+    window.addEventListener('load', () => {
+      console.log("🚀 Page loaded, loading trials...");
+      setTimeout(loadTrials, 1000);
+    });
+
+    console.log("Premium generator ready with complete date handling and trial selection");
   </script>
 </body>
 </html>
