@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Class Summary Generator</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #eee;
+    }
+    
+    .header h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .back-button {
+      background-color: #007cba;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .back-button:hover {
+      background-color: #005a8b;
+    }
+    
+    .form-section {
+      background: #f8f9fa;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #4CAF50;
+    }
+    
+    .form-section h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .class-container {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .class-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #0056b3;
+    }
+    
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #1e7e34;
+    }
+    
+    .btn-purple {
+      background: #6f42c1;
+      color: white;
+    }
+    
+    .btn-purple:hover {
+      background: #5a2d91;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .dates-section {
+      margin-bottom: 20px;
+    }
+    
+    .date-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    
+    .entries-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    
+    .entries-table th,
+    .entries-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    
+    .entries-table th {
+      background: #f8f9fa;
+      font-weight: bold;
+    }
+    
+    .entries-table tbody tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+    
+    .result-select {
+      width: 100%;
+      padding: 4px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin: 30px 0;
+      padding-top: 20px;
+      border-top: 2px solid #eee;
+    }
+    
+    .preview-section {
+      background: #f8f9fa;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+    
+    .preview-section h2 {
+      margin-top: 0;
+      color: #333;
+      text-align: center;
+    }
+    
+    .preview-class {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    
+    .preview-class h3 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    .loading {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
+    
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    
+    .success {
+      background: #d4edda;
+      color: #155724;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="main-dashboard.html" class="back-button">← Back to Dashboard</a>
+    
+    <div class="header">
+      <h1>🐕 C-WAGS Class Summary Generator</h1>
+      <p>Create and manage class summary reports for trials</p>
+    </div>
+
+    <div id="loadingMessage" class="loading" style="display: none;">
+      Loading summary data...
+    </div>
+
+    <div id="errorMessage" class="error" style="display: none;"></div>
+    <div id="successMessage" class="success" style="display: none;"></div>
+
+    <!-- Trial Information Section -->
+    <div class="form-section">
+      <h2>Trial Information</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="hostName">Host Name:</label>
+          <input type="text" id="hostName" placeholder="e.g., DOG GROUP">
+        </div>
+        <div class="form-group">
+          <label for="dateRange">Date Range:</label>
+          <input type="text" id="dateRange" placeholder="e.g., July 1 – August 5, 2025">
+        </div>
+      </div>
+    </div>
+
+    <!-- Classes Section -->
+    <div id="classesContainer"></div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn btn-purple" onclick="addClass()">+ Add Another Class</button>
+      <div>
+        <button class="btn btn-success" onclick="saveSummary()">💾 Save Summary</button>
+        <button class="btn btn-primary" onclick="generateReport()">📄 Generate Report</button>
+      </div>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="preview-section">
+      <h2>📋 Report Preview</h2>
+      <div id="previewContainer">
+        <p class="loading">Add trial information and classes to see preview...</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { 
+      saveSummary as saveToFirebase, 
+      updateSummary, 
+      loadSummary, 
+      validateSummaryData,
+      calculateSummaryStatistics 
+    } from './js/summary-firebase.js';
+
+    // Global state
+    let currentSummaryId = null;
+    let summaryData = {
+      hostName: '',
+      dateRange: '',
+      classes: []
+    };
+
+    // Initialize the form
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if we're editing an existing summary
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
+      
+      if (editId) {
+        loadExistingSummary(editId);
+      } else {
+        // Start with one empty class
+        addClass();
+      }
+
+      // Bind form change events
+      document.getElementById('hostName').addEventListener('input', updateTrialInfo);
+      document.getElementById('dateRange').addEventListener('input', updateTrialInfo);
+    });
+
+    // ========================================
+    // SUMMARY MANAGEMENT
+    // ========================================
+
+    async function loadExistingSummary(summaryId) {
+      try {
+        showLoading('Loading summary data...');
+        const summary = await loadSummary(summaryId);
+        
+        currentSummaryId = summaryId;
+        summaryData = summary;
+        
+        // Populate form
+        document.getElementById('hostName').value = summary.hostName || '';
+        document.getElementById('dateRange').value = summary.dateRange || '';
+        
+        // Render classes
+        renderClasses();
+        updatePreview();
+        
+        hideLoading();
+        showSuccess('Summary loaded successfully!');
+        
+      } catch (error) {
+        console.error('Error loading summary:', error);
+        showError('Failed to load summary: ' + error.message);
+        hideLoading();
+      }
+    }
+
+    window.saveSummary = async function() {
+      try {
+        // Validate data
+        const validation = validateSummaryData(summaryData);
+        if (!validation.isValid) {
+          showError('Please fix the following errors: ' + validation.errors.join(', '));
+          return;
+        }
+
+        showLoading('Saving summary...');
+
+        let savedId;
+        if (currentSummaryId) {
+          // Update existing summary
+          await updateSummary(currentSummaryId, summaryData);
+          savedId = currentSummaryId;
+          showSuccess('Summary updated successfully!');
+        } else {
+          // Save new summary
+          savedId = await saveToFirebase(summaryData);
+          currentSummaryId = savedId;
+          showSuccess('Summary saved successfully!');
+        }
+
+        hideLoading();
+        
+      } catch (error) {
+        console.error('Error saving summary:', error);
+        showError('Failed to save summary: ' + error.message);
+        hideLoading();
+      }
+    };
+
+    // ========================================
+    // CLASS MANAGEMENT
+    // ========================================
+
+    window.addClass = function() {
+      const newClass = {
+        id: summaryData.classes.length + 1,
+        name: '',
+        dates: [],
+        entries: []
+      };
+      
+      summaryData.classes.push(newClass);
+      renderClasses();
+      updatePreview();
+    };
+
+    function removeClass(classIndex) {
+      summaryData.classes.splice(classIndex, 1);
+      // Re-number classes
+      summaryData.classes.forEach((cls, index) => {
+        cls.id = index + 1;
+      });
+      renderClasses();
+      updatePreview();
+    }
+
+    function updateClassName(classIndex, name) {
+      summaryData.classes[classIndex].name = name;
+      updatePreview();
+    }
+
+    // ========================================
+    // DATE MANAGEMENT
+    // ========================================
+
+    function addDate(classIndex) {
+      if (!summaryData.classes[classIndex].dates) {
+        summaryData.classes[classIndex].dates = [];
+      }
+      
+      summaryData.classes[classIndex].dates.push({
+        date: '',
+        judge: ''
+      });
+      
+      // Update all existing entries to have results for the new date
+      summaryData.classes[classIndex].entries.forEach(entry => {
+        if (!entry.results) entry.results = [];
+        entry.results.push('');
+      });
+      
+      renderClasses();
+      updatePreview();
+    }
+
+    function removeDate(classIndex, dateIndex) {
+      summaryData.classes[classIndex].dates.splice(dateIndex, 1);
+      
+      // Remove results for this date from all entries
+      summaryData.classes[classIndex].entries.forEach(entry => {
+        if (entry.results) {
+          entry.results.splice(dateIndex, 1);
+        }
+      });
+      
+      renderClasses();
+      updatePreview();
+    }
+
+    function updateDate(classIndex, dateIndex, field, value) {
+      summaryData.classes[classIndex].dates[dateIndex][field] = value;
+      updatePreview();
+    }
+
+    // ========================================
+    // ENTRY MANAGEMENT
+    // ========================================
+
+    function addEntry(classIndex) {
+      if (!summaryData.classes[classIndex].entries) {
+        summaryData.classes[classIndex].entries = [];
+      }
+      
+      const numDates = summaryData.classes[classIndex].dates ? summaryData.classes[classIndex].dates.length : 0;
+      
+      summaryData.classes[classIndex].entries.push({
+        registrationNumber: '',
+        dogName: '',
+        handlerName: '',
+        results: new Array(numDates).fill('')
+      });
+      
+      renderClasses();
+      updatePreview();
+    }
+
+    function removeEntry(classIndex, entryIndex) {
+      summaryData.classes[classIndex].entries.splice(entryIndex, 1);
+      renderClasses();
+      updatePreview();
+    }
+
+    function updateEntry(classIndex, entryIndex, field, value) {
+      summaryData.classes[classIndex].entries[entryIndex][field] = value;
+      updatePreview();
+    }
+
+    function updateResult(classIndex, entryIndex, dateIndex, value) {
+      if (!summaryData.classes[classIndex].entries[entryIndex].results) {
+        summaryData.classes[classIndex].entries[entryIndex].results = [];
+      }
+      summaryData.classes[classIndex].entries[entryIndex].results[dateIndex] = value;
+      updatePreview();
+    }
+
+    // ========================================
+    // RENDERING FUNCTIONS
+    // ========================================
+
+    function renderClasses() {
+      const container = document.getElementById('classesContainer');
+      
+      container.innerHTML = summaryData.classes.map((classItem, classIndex) => `
+        <div class="class-container">
+          <div class="class-header">
+            <h2>Class ${classItem.id}</h2>
+            <button class="btn btn-danger" onclick="removeClass(${classIndex})">Remove Class</button>
+          </div>
+          
+          <div class="form-group">
+            <label>Class Name:</label>
+            <input type="text" value="${classItem.name}" 
+                   onchange="updateClassName(${classIndex}, this.value)"
+                   placeholder="e.g., Patrol Level 1">
+          </div>
+          
+          <div class="dates-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3>Dates & Judges</h3>
+              <button class="btn btn-primary" onclick="addDate(${classIndex})">+ Add Date</button>
+            </div>
+            
+            ${classItem.dates ? classItem.dates.map((date, dateIndex) => `
+              <div class="date-item">
+                <div class="form-group" style="margin: 0;">
+                  <label>Date:</label>
+                  <input type="date" value="${date.date || ''}" 
+                         onchange="updateDate(${classIndex}, ${dateIndex}, 'date', this.value)">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                  <label>Judge:</label>
+                  <input type="text" value="${date.judge || ''}" 
+                         onchange="updateDate(${classIndex}, ${dateIndex}, 'judge', this.value)"
+                         placeholder="Judge Name">
+                </div>
+                <button class="btn btn-danger" onclick="removeDate(${classIndex}, ${dateIndex})">Remove</button>
+              </div>
+            `).join('') : ''}
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>Entries</h3>
+            <button class="btn btn-success" onclick="addEntry(${classIndex})">+ Add Dog</button>
+          </div>
+          
+          ${renderEntriesTable(classItem, classIndex)}
+          
+          <div style="text-align: right; margin-top: 10px; color: #666; font-weight: bold;">
+            Total Entries: ${classItem.entries ? classItem.entries.length : 0}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderEntriesTable(classItem, classIndex) {
+      if (!classItem.entries || classItem.entries.length === 0 || !classItem.dates || classItem.dates.length === 0) {
+        return '<p style="color: #666; font-style: italic;">Add dates and dogs to start building your class report.</p>';
+      }
+      
+      return `
+        <table class="entries-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Registration Number</th>
+              <th>Dog's Call Name</th>
+              <th>Handler</th>
+              ${classItem.dates.map((date, dateIndex) => `
+                <th>${date.date}<br>${date.judge}</th>
+              `).join('')}
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${classItem.entries.map((entry, entryIndex) => `
+              <tr>
+                <td>${entryIndex + 1}</td>
+                <td>
+                  <input type="text" value="${entry.registrationNumber || ''}" 
+                         onchange="updateEntry(${classIndex}, ${entryIndex}, 'registrationNumber', this.value)"
+                         placeholder="Reg #">
+                </td>
+                <td>
+                  <input type="text" value="${entry.dogName || ''}" 
+                         onchange="updateEntry(${classIndex}, ${entryIndex}, 'dogName', this.value)"
+                         placeholder="Dog Name">
+                </td>
+                <td>
+                  <input type="text" value="${entry.handlerName || ''}" 
+                         onchange="updateEntry(${classIndex}, ${entryIndex}, 'handlerName', this.value)"
+                         placeholder="Handler Name">
+                </td>
+                ${classItem.dates.map((date, dateIndex) => `
+                  <td>
+                    <select class="result-select" 
+                            onchange="updateResult(${classIndex}, ${entryIndex}, ${dateIndex}, this.value)"
+                            value="${entry.results && entry.results[dateIndex] ? entry.results[dateIndex] : ''}">
+                      <option value="">-</option>
+                      <option value="Pass" ${entry.results && entry.results[dateIndex] === 'Pass' ? 'selected' : ''}>Pass</option>
+                      <option value="Fail" ${entry.results && entry.results[dateIndex] === 'Fail' ? 'selected' : ''}>Fail</option>
+                      <option value="XX" ${entry.results && entry.results[dateIndex] === 'XX' ? 'selected' : ''}>XX</option>
+                    </select>
+                  </td>
+                `).join('')}
+                <td>
+                  <button class="btn btn-danger" onclick="removeEntry(${classIndex}, ${entryIndex})">Remove</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function updateTrialInfo() {
+      summaryData.hostName = document.getElementById('hostName').value;
+      summaryData.dateRange = document.getElementById('dateRange').value;
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const container = document.getElementById('previewContainer');
+      
+      if (!summaryData.hostName && !summaryData.dateRange && summaryData.classes.length === 0) {
+        container.innerHTML = '<p class="loading">Add trial information and classes to see preview...</p>';
+        return;
+      }
+      
+      const previewHTML = summaryData.classes.map((classItem, classIndex) => {
+        if (!classItem.name) return '';
+        
+        return `
+          <div class="preview-class">
+            <h3>C-WAGS CLASS RESULTS REPORT</h3>
+            <div style="border: 1px solid #ddd; padding: 15px; background: white;">
+              <p><strong>Host:</strong> ${summaryData.hostName}</p>
+              <p><strong>Dates - From - To:</strong> ${summaryData.dateRange}</p>
+              <p><strong>Class:</strong> ${classItem.name}</p>
+              <p><strong>Total # of Entries:</strong> ${classItem.entries ? classItem.entries.length : 0}</p>
+              
+              ${classItem.entries && classItem.entries.length > 0 && classItem.dates && classItem.dates.length > 0 ? `
+                <table class="entries-table" style="margin-top: 15px;">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Registration Number</th>
+                      <th>Dog's Call Name</th>
+                      <th>Handler</th>
+                      ${classItem.dates.map(date => `
+                        <th style="text-align: center;">
+                          ${date.date}<br/>${date.judge}
+                        </th>
+                      `).join('')}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${classItem.entries.map((entry, entryIndex) => `
+                      <tr>
+                        <td style="text-align: center;">${entryIndex + 1}</td>
+                        <td>${entry.registrationNumber || ''}</td>
+                        <td>${entry.dogName || ''}</td>
+                        <td>${entry.handlerName || ''}</td>
+                        ${classItem.dates.map((date, dateIndex) => `
+                          <td style="text-align: center;">
+                            ${entry.results && entry.results[dateIndex] ? entry.results[dateIndex] : ''}
+                          </td>
+                        `).join('')}
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              ` : `
+                <p style="color: #666; font-style: italic; margin-top: 15px;">
+                  Add dates and entries to see the complete report preview.
+                </p>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      container.innerHTML = previewHTML || '<p class="loading">Add classes to see preview...</p>';
+    }
+
+    // ========================================
+    // REPORT GENERATION
+    // ========================================
+
+    window.generateReport = function() {
+      // Validate data first
+      const validation = validateSummaryData(summaryData);
+      if (!validation.isValid) {
+        showError('Please fix the following errors before generating report: ' + validation.errors.join(', '));
+        return;
+      }
+
+      // For now, we'll show an alert. In a real implementation, this would generate a PDF
+      const stats = calculateSummaryStatistics(summaryData);
+      
+      alert(`Report would be generated with the following data:
+      
+Host: ${summaryData.hostName}
+Date Range: ${summaryData.dateRange}
+Total Classes: ${stats.totalClasses}
+Total Entries: ${stats.totalEntries}
+Total Runs: ${stats.totalRuns}
+Qualifying Runs: ${stats.qualifyingRuns}
+
+This would integrate with your existing PDF generation system.`);
+      
+      // Here you would call your existing PDF generation functions
+      // generateClassResultsPDF(summaryData);
+    };
+
+    // ========================================
+    // UTILITY FUNCTIONS
+    // ========================================
+
+    function showLoading(message) {
+      const loadingEl = document.getElementById('loadingMessage');
+      loadingEl.textContent = message;
+      loadingEl.style.display = 'block';
+    }
+
+    function hideLoading() {
+      document.getElementById('loadingMessage').style.display = 'none';
+    }
+
+    function showError(message) {
+      const errorEl = document.getElementById('errorMessage');
+      errorEl.textContent = message;
+      errorEl.style.display = 'block';
+      setTimeout(() => {
+        errorEl.style.display = 'none';
+      }, 5000);
+    }
+
+    function showSuccess(message) {
+      const successEl = document.getElementById('successMessage');
+      successEl.textContent = message;
+      successEl.style.display = 'block';
+      setTimeout(() => {
+        successEl.style.display = 'none';
+      }, 3000);
+    }
+
+    // Make functions globally available
+    window.removeClass = removeClass;
+    window.updateClassName = updateClassName;
+    window.addDate = addDate;
+    window.removeDate = removeDate;
+    window.updateDate = updateDate;
+    window.addEntry = addEntry;
+    window.removeEntry = removeEntry;
+    window.updateEntry = updateEntry;
+    window.updateResult = updateResult;
+
+    console.log("Class Summary Generator loaded successfully");
+  </script>
+</body>
+</html>
