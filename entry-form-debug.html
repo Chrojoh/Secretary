@@ -455,24 +455,29 @@
                     console.log(`🔍 DEBUGGING: Processing day ${dayIndex + 1} with ${day.classes.length} classes`);
                     
                     day.classes.forEach((cls, classIndex) => {
-                        console.log(`🔍 DEBUGGING: Processing class ${classIndex + 1}: ${cls.name}`);
+                        const className = cls.className || cls.name || 'Unnamed Class';
+                        console.log(`🔍 DEBUGGING: Processing class ${classIndex + 1}: ${className}`);
                         console.log(`🔍 DEBUGGING: Class has rounds?`, !!(cls.rounds));
                         
                         html += `<div class="class-group">
-                            <div class="class-header">${cls.name}</div>
+                            <div class="class-header">${className}</div>
                             <div class="rounds-container">`;
                         
                         if (cls.rounds && cls.rounds.length > 0) {
-                            console.log(`🔍 DEBUGGING: Class ${cls.name} has ${cls.rounds.length} rounds`);
+                            console.log(`🔍 DEBUGGING: Class ${className} has ${cls.rounds.length} rounds`);
                             
                             cls.rounds.forEach((round, roundIndex) => {
-                                console.log(`🔍 DEBUGGING: Processing round ${roundIndex + 1}: ${round.name || 'Unnamed'}`);
+                                const roundName = round.name || round.roundName || `Round ${roundIndex + 1}`;
+                                console.log(`🔍 DEBUGGING: Processing round ${roundIndex + 1}: ${roundName}`);
+                                console.log(`🔍 DEBUGGING: Round data:`, round);
                                 
                                 html += `<div class="round-entry">
                                     <div class="round-label">
-                                        ${round.name || `Round ${roundIndex + 1}`}
+                                        ${roundName}
                                         <div class="round-info">
-                                            ${round.time ? `Time: ${round.time}` : ''}
+                                            ${round.judge ? `Judge: ${round.judge}` : ''}
+                                            ${round.feo ? ' | FEO Available' : ''}
+                                            ${round.time ? ` | Time: ${round.time}` : ''}
                                             ${round.maxDogs ? ` | Max Dogs: ${round.maxDogs}` : ''}
                                         </div>
                                     </div>
@@ -482,10 +487,10 @@
                                 </div>`;
                             });
                         } else {
-                            console.log(`❌ DEBUGGING: Class ${cls.name} has NO rounds - creating fallback`);
+                            console.log(`❌ DEBUGGING: Class ${className} has NO rounds - creating fallback`);
                             html += `<div class="round-entry">
                                 <div class="round-label">
-                                    ${cls.name}
+                                    ${className}
                                     <div class="round-info">No specific rounds defined</div>
                                 </div>
                                 <button class="entry-button" onclick="enterClass('${dayIndex}', '${classIndex}')">
@@ -536,17 +541,20 @@
             const day = currentTrialData.days[dayIndex];
             const cls = day.classes[classIndex];
             const round = cls.rounds[roundIndex];
+            const className = cls.className || cls.name || 'Unnamed Class';
+            const roundName = round.name || round.roundName || `Round ${parseInt(roundIndex) + 1}`;
             
-            console.log(`🎯 Entering round: Day ${parseInt(dayIndex) + 1}, Class ${cls.name}, Round ${round.name || roundIndex + 1}`);
-            alert(`Entry for:\nClass: ${cls.name}\nRound: ${round.name || `Round ${parseInt(roundIndex) + 1}`}\n\nThis would open the entry form for this specific round.`);
+            console.log(`🎯 Entering round: Day ${parseInt(dayIndex) + 1}, Class ${className}, Round ${roundName}`);
+            alert(`Entry for:\nClass: ${className}\nRound: ${roundName}\nJudge: ${round.judge || 'Not specified'}\n\nThis would open the entry form for this specific round.`);
         };
 
         window.enterClass = function(dayIndex, classIndex) {
             const day = currentTrialData.days[dayIndex];
             const cls = day.classes[classIndex];
+            const className = cls.className || cls.name || 'Unnamed Class';
             
-            console.log(`🎯 Entering class: Day ${parseInt(dayIndex) + 1}, Class ${cls.name}`);
-            alert(`Entry for:\nClass: ${cls.name}\n\nThis would open the entry form for this class.`);
+            console.log(`🎯 Entering class: Day ${parseInt(dayIndex) + 1}, Class ${className}`);
+            alert(`Entry for:\nClass: ${className}\n\nThis would open the entry form for this class.`);
         };
 
         // Initialize the application
