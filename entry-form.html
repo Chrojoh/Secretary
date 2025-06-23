@@ -2673,23 +2673,7 @@ function updateEntrySummary() {
       });
     }
 
-    // Check form validity function
-function checkFormValidity() {
-  const waiverAccepted = document.getElementById('waiverAccepted').checked;
-  const handlerName = document.getElementById('handlerName').value.trim();
-  const handlerEmail = document.getElementById('handlerEmail').value.trim();
-  const dogCallName = document.getElementById('dogCallName').value.trim();
-  const hasClasses = selectedEntries.length > 0;
-  
-  const isValid = waiverAccepted && handlerName && handlerEmail && dogCallName && hasClasses;
-  
-  const submitBtn = document.getElementById('submitEntry');
-  if (submitBtn) {
-    submitBtn.disabled = !isValid;
-  }
-  
-  return isValid;
-}
+   
 
 // Submit entry function
 async function submitEntry() {
