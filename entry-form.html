@@ -1812,7 +1812,74 @@
       // Generate the tabbed class interface from trial data
       generateTabbedClasses();
     }
+// Debug function to inspect trial data structure
+function debugTrialData() {
+  console.log("🔍 DEBUGGING TRIAL DATA STRUCTURE");
+  console.log("=" .repeat(50));
+  
+  if (!currentTrialData) {
+    console.error("❌ currentTrialData is null or undefined");
+    return;
+  }
+  
+  console.log("📋 Trial Overview:");
+  console.log("- Club Name:", currentTrialData.clubName);
+  console.log("- Secretary:", currentTrialData.secretary);
+  console.log("- Number of days:", currentTrialData.days?.length || 0);
+  
+  if (!currentTrialData.days || currentTrialData.days.length === 0) {
+    console.error("❌ No days found in trial data");
+    return;
+  }
+  
+  currentTrialData.days.forEach((day, dayIndex) => {
+    console.log(`\n📅 DAY ${dayIndex + 1}:`);
+    console.log("- Date:", day.date);
+    console.log("- Classes count:", day.classes?.length || 0);
+    
+    if (!day.classes || day.classes.length === 0) {
+      console.warn(`⚠️ No classes found for day ${dayIndex + 1}`);
+      return;
+    }
+    
+    day.classes.forEach((cls, classIndex) => {
+      console.log(`\n  🎓 CLASS ${classIndex + 1}:`);
+      console.log("  - Raw class object:", cls);
+      console.log("  - className property:", cls.className);
+      console.log("  - name property:", cls.name);
+      console.log("  - level property:", cls.level);
+      console.log("  - rounds count:", cls.rounds?.length || 0);
+      
+      if (cls.rounds && cls.rounds.length > 0) {
+        cls.rounds.forEach((round, roundIndex) => {
+          console.log(`    🔄 ROUND ${roundIndex + 1}:`);
+          console.log("    - Raw round object:", round);
+          console.log("    - judge property:", round.judge);
+          console.log("    - name property:", round.name);
+          console.log("    - roundName property:", round.roundName);
+          console.log("    - feo property:", round.feo);
+          console.log("    - allowFEO property:", round.allowFEO);
+          console.log("    - time property:", round.time);
+          console.log("    - maxDogs property:", round.maxDogs);
+        });
+      } else {
+        console.warn(`    ⚠️ No rounds found for class ${classIndex + 1}`);
+      }
+    });
+  });
+  
+  console.log("\n" + "=".repeat(50));
+  console.log("🔧 DEBUGGING TIPS:");
+  console.log("1. Check if classes have 'className' or 'name' property");
+  console.log("2. Verify rounds exist and have proper structure");
+  console.log("3. Check if judge names are in 'judge' property");
+  console.log("4. Look for FEO settings in rounds");
+  console.log("=".repeat(50));
+}
 
+// Call this function right before generateTabbedClasses()
+// Add this line in your populateTrialInfo() function:
+// debugTrialData();
     // Generate tabbed classes from trial data - FIXED FOR ROUND NAMING
     // Generate tabbed classes from trial data - FULLY FIXED
 function generateTabbedClasses() {
