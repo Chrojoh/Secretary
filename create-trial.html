@@ -676,18 +676,22 @@
           const roundDiv = document.createElement("div");
           roundDiv.className = "round-container";
           roundDiv.innerHTML = `
-            <div style="margin-bottom: 5px;">
-              <strong>Round ${r + 1}:</strong>
-              <label style="margin-left: 10px;">Judge:</label>
-              <select style="margin-left: 5px; width: 150px;">
-                <option value="">Select judge...</option>
-                ${globalJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
-              </select>
-              <label style="margin-left: 10px;">
-                <input type="checkbox"> FEO
-              </label>
-            </div>
-          `;
+  <div style="margin-bottom: 5px;">
+    <strong>Round ${r + 1}:</strong>
+    <label style="margin-left: 10px;">Judge:</label>
+    <input type="text" 
+           style="margin-left: 5px; width: 150px; padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px;" 
+           placeholder="Type judge name..." 
+           list="judges-datalist-${dayIndex}-${classIndex}-${r}"
+           class="judge-autocomplete">
+    <datalist id="judges-datalist-${dayIndex}-${classIndex}-${r}">
+      ${globalJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
+    </datalist>
+    <label style="margin-left: 10px;">
+      <input type="checkbox"> FEO
+    </label>
+  </div>
+`;
           roundsContainer.appendChild(roundDiv);
         }
         
