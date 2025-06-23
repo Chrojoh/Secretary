@@ -842,25 +842,25 @@
       <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
     </div>
 
-    <!-- Back to Dashboard Button -->
-    <div class="back-to-dashboard" id="backToDashboardSection">
-      <a href="main-dashboard.html" class="back-button">
-        ← Back to Dashboard
-      </a>
+ <!-- Trial Selection (Secretary Only) -->
+<div class="trial-info" id="trialSelectionSection">
+  <!-- Back to Dashboard Button -->
+  <div class="back-to-dashboard">
+    <a href="main-dashboard.html" class="back-button">
+      ← Back to Dashboard
+    </a>
+  </div>
+  
+  <h3>🎯 Select Trial</h3>
+  <div class="form-row">
+    <div class="form-group required full-width">
+      <label for="trialSelection">Choose which trial to enter:</label>
+      <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
+        <option value="">Loading available trials...</option>
+      </select>
     </div>
-
-    <!-- Trial Selection (Secretary Only) -->
-    <div class="trial-info" id="trialSelectionSection">
-      <h3>🎯 Select Trial</h3>
-      <div class="form-row">
-        <div class="form-group required full-width">
-          <label for="trialSelection">Choose which trial to enter:</label>
-          <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
-            <option value="">Loading available trials...</option>
-          </select>
-        </div>
-      </div>
-    </div>
+  </div>
+</div>
 
     <!-- Entry Fee Configuration (Secretary Only) -->
     <div class="trial-info" id="entryFeeSection" style="display: none;">
