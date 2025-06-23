@@ -923,9 +923,10 @@
                         day.classes.forEach(cls => {
                             if (cls.rounds) {
                                 cls.rounds.forEach(round => {
-                                    if (round.judge && round.judge.trim()) {
-                                        judges.add(round.judge.trim());
-                                    }
+                                   const judgeName = getStandardizedJudgeName(round);
+if (judgeName && judgeName !== 'Judge TBD') {
+    judges.add(judgeName);
+}
                                 });
                             }
                         });
