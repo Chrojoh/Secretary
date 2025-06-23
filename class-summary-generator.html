@@ -101,75 +101,37 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #eee;
     }
     
-    .btn {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
+    .class-title {
+      font-size: 18px;
       font-weight: bold;
-      transition: background-color 0.3s;
-    }
-    
-    .btn-primary {
-      background: #007bff;
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background: #0056b3;
-    }
-    
-    .btn-success {
-      background: #28a745;
-      color: white;
-    }
-    
-    .btn-success:hover {
-      background: #1e7e34;
-    }
-    
-    .btn-purple {
-      background: #6f42c1;
-      color: white;
-    }
-    
-    .btn-purple:hover {
-      background: #5a2d91;
-    }
-    
-    .btn-danger {
-      background: #dc3545;
-      color: white;
-    }
-    
-    .btn-danger:hover {
-      background: #c82333;
+      color: #333;
     }
     
     .dates-section {
-      margin-bottom: 20px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
     }
     
-    .date-item {
+    .date-row {
       display: grid;
       grid-template-columns: 1fr 1fr auto;
       gap: 10px;
-      align-items: end;
+      align-items: center;
       margin-bottom: 10px;
-      padding: 10px;
-      background: #f8f9fa;
-      border-radius: 4px;
+    }
+    
+    .entries-section {
+      margin-top: 20px;
     }
     
     .entries-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
+      margin-top: 10px;
     }
     
     .entries-table th,
@@ -184,10 +146,6 @@
       font-weight: bold;
     }
     
-    .entries-table tbody tr:nth-child(even) {
-      background: #f8f9fa;
-    }
-    
     .result-select {
       width: 100%;
       padding: 4px;
@@ -195,24 +153,68 @@
       border-radius: 3px;
     }
     
+    .btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 5px;
+    }
+    
+    .btn:hover {
+      background: #45a049;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    
+    .btn-success {
+      background: #28a745;
+    }
+    
+    .btn-primary {
+      background: #007bff;
+    }
+    
+    .btn-purple {
+      background: #6f42c1;
+    }
+    
     .action-buttons {
-      display: flex;
-      justify-content: space-between;
+      text-align: center;
       margin: 30px 0;
-      padding-top: 20px;
-      border-top: 2px solid #eee;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .action-buttons .btn {
+      margin: 0 10px;
+      padding: 12px 24px;
+      font-size: 16px;
     }
     
     .preview-section {
-      background: #f8f9fa;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      padding: 20px;
       margin-top: 30px;
+      padding: 20px;
+      background: #f1f3f4;
+      border-radius: 8px;
     }
     
     .preview-section h2 {
-      margin-top: 0;
       color: #333;
       text-align: center;
     }
@@ -300,109 +302,96 @@
     <div class="preview-section">
       <h2>📋 Report Preview</h2>
       <div id="previewContainer">
-        <p class="loading">Add trial information and classes to see preview...</p>
+        <p class="loading">Add classes to see preview...</p>
       </div>
     </div>
   </div>
 
   <script type="module">
+    // Firebase imports
     import { auth, db } from './js/firebase.js';
-    import { 
-      saveSummary as saveToFirebase, 
-      updateSummary, 
-      loadSummary, 
-      validateSummaryData,
-      calculateSummaryStatistics 
-    } from './js/summary-firebase.js';
+    import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-    // Global state
-    let currentSummaryId = null;
+    // ========================================
+    // STANDARDIZED FIELD NAMES (CRITICAL FIX)
+    // ========================================
+
+    // Use these EXACT field names everywhere:
+    const STANDARD_FIELDS = {
+      HANDLER_NAME: 'handlerName',      // NOT 'Handler' or 'handler'
+      DOG_CALL_NAME: 'dogCallName',     // NOT 'dogName' or 'callName'
+      JUDGE_NAME: 'judgeName',          // NOT 'judge' or 'judgeAssigned'
+      CLASS_NAME: 'className',          // NOT 'Class'
+      CWAGS_NUMBER: 'cwagsNumber'
+    };
+
+    // Function to normalize entry data to standard field names
+    function normalizeEntryData(entryData) {
+      const normalized = { ...entryData };
+      
+      // Normalize dog call name (CRITICAL FIX)
+      if (entryData.dogName && !entryData.dogCallName) {
+        normalized.dogCallName = entryData.dogName;
+        delete normalized.dogName; // Remove old field
+      }
+      
+      // Normalize handler name
+      if (entryData.Handler && !entryData.handlerName) {
+        normalized.handlerName = entryData.Handler;
+      }
+      if (entryData.handler && !entryData.handlerName) {
+        normalized.handlerName = entryData.handler;
+      }
+      
+      // Normalize judge name
+      if (entryData.judge && !entryData.judgeName) {
+        normalized.judgeName = entryData.judge;
+      }
+      
+      return normalized;
+    }
+
+    // Global variables
     let summaryData = {
       hostName: '',
       dateRange: '',
       classes: []
     };
+    
+    let currentSummaryId = null;
 
-    // Initialize the form
+    // Initialize the page
     document.addEventListener('DOMContentLoaded', function() {
-      // Check if we're editing an existing summary
+      console.log("Class Summary Generator initializing...");
+      
+      // Check for edit mode
       const urlParams = new URLSearchParams(window.location.search);
       const editId = urlParams.get('edit');
+      const viewId = urlParams.get('view');
       
       if (editId) {
         loadExistingSummary(editId);
+      } else if (viewId) {
+        loadExistingSummary(viewId, true); // View mode
       } else {
         // Start with one empty class
         addClass();
       }
-
-      // Bind form change events
-      document.getElementById('hostName').addEventListener('input', updateTrialInfo);
-      document.getElementById('dateRange').addEventListener('input', updateTrialInfo);
+      
+      // Setup event listeners
+      document.getElementById('hostName').addEventListener('input', updateBasicInfo);
+      document.getElementById('dateRange').addEventListener('input', updateBasicInfo);
     });
 
     // ========================================
-    // SUMMARY MANAGEMENT
+    // BASIC INFO MANAGEMENT
     // ========================================
 
-    async function loadExistingSummary(summaryId) {
-      try {
-        showLoading('Loading summary data...');
-        const summary = await loadSummary(summaryId);
-        
-        currentSummaryId = summaryId;
-        summaryData = summary;
-        
-        // Populate form
-        document.getElementById('hostName').value = summary.hostName || '';
-        document.getElementById('dateRange').value = summary.dateRange || '';
-        
-        // Render classes
-        renderClasses();
-        updatePreview();
-        
-        hideLoading();
-        showSuccess('Summary loaded successfully!');
-        
-      } catch (error) {
-        console.error('Error loading summary:', error);
-        showError('Failed to load summary: ' + error.message);
-        hideLoading();
-      }
+    function updateBasicInfo() {
+      summaryData.hostName = document.getElementById('hostName').value;
+      summaryData.dateRange = document.getElementById('dateRange').value;
+      updatePreview();
     }
-
-    window.saveSummary = async function() {
-      try {
-        // Validate data
-        const validation = validateSummaryData(summaryData);
-        if (!validation.isValid) {
-          showError('Please fix the following errors: ' + validation.errors.join(', '));
-          return;
-        }
-
-        showLoading('Saving summary...');
-
-        let savedId;
-        if (currentSummaryId) {
-          // Update existing summary
-          await updateSummary(currentSummaryId, summaryData);
-          savedId = currentSummaryId;
-          showSuccess('Summary updated successfully!');
-        } else {
-          // Save new summary
-          savedId = await saveToFirebase(summaryData);
-          currentSummaryId = savedId;
-          showSuccess('Summary saved successfully!');
-        }
-
-        hideLoading();
-        
-      } catch (error) {
-        console.error('Error saving summary:', error);
-        showError('Failed to save summary: ' + error.message);
-        hideLoading();
-      }
-    };
 
     // ========================================
     // CLASS MANAGEMENT
@@ -480,7 +469,7 @@
     }
 
     // ========================================
-    // ENTRY MANAGEMENT
+    // ENTRY MANAGEMENT WITH STANDARDIZED FIELDS
     // ========================================
 
     function addEntry(classIndex) {
@@ -492,8 +481,8 @@
       
       summaryData.classes[classIndex].entries.push({
         registrationNumber: '',
-        dogName: '',
-        handlerName: '',
+        dogCallName: '',        // STANDARDIZED: Use dogCallName, not dogName
+        handlerName: '',        // STANDARDIZED: Use handlerName
         results: new Array(numDates).fill('')
       });
       
@@ -507,8 +496,17 @@
       updatePreview();
     }
 
+    // CRITICAL FIX: Update entry function with field name mapping
     function updateEntry(classIndex, entryIndex, field, value) {
-      summaryData.classes[classIndex].entries[entryIndex][field] = value;
+      // Map old field names to standardized ones
+      const fieldMapping = {
+        'dogName': 'dogCallName',     // CRITICAL: Map dogName to dogCallName
+        'handler': 'handlerName',
+        'judge': 'judgeName'
+      };
+      
+      const standardField = fieldMapping[field] || field;
+      summaryData.classes[classIndex].entries[entryIndex][standardField] = value;
       updatePreview();
     }
 
@@ -521,65 +519,63 @@
     }
 
     // ========================================
-    // RENDERING FUNCTIONS
+    // RENDERING FUNCTIONS WITH STANDARDIZED FIELDS
     // ========================================
 
     function renderClasses() {
       const container = document.getElementById('classesContainer');
       
-      container.innerHTML = summaryData.classes.map((classItem, classIndex) => `
+      const html = summaryData.classes.map((classItem, classIndex) => `
         <div class="class-container">
           <div class="class-header">
-            <h2>Class ${classItem.id}</h2>
-            <button class="btn btn-danger" onclick="removeClass(${classIndex})">Remove Class</button>
+            <div class="class-title">Class ${classItem.id}</div>
+            <button class="btn btn-danger btn-sm" onclick="removeClass(${classIndex})">Remove Class</button>
           </div>
           
           <div class="form-group">
             <label>Class Name:</label>
             <input type="text" value="${classItem.name}" 
                    onchange="updateClassName(${classIndex}, this.value)"
-                   placeholder="e.g., Patrol Level 1">
+                   placeholder="e.g., Novice Birch">
           </div>
           
           <div class="dates-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-              <h3>Dates & Judges</h3>
-              <button class="btn btn-primary" onclick="addDate(${classIndex})">+ Add Date</button>
-            </div>
-            
-            ${classItem.dates ? classItem.dates.map((date, dateIndex) => `
-              <div class="date-item">
-                <div class="form-group" style="margin: 0;">
-                  <label>Date:</label>
-                  <input type="date" value="${date.date || ''}" 
-                         onchange="updateDate(${classIndex}, ${dateIndex}, 'date', this.value)">
-                </div>
-                <div class="form-group" style="margin: 0;">
-                  <label>Judge:</label>
-                  <input type="text" value="${date.judge || ''}" 
-                         onchange="updateDate(${classIndex}, ${dateIndex}, 'judge', this.value)"
-                         placeholder="Judge Name">
-                </div>
-                <button class="btn btn-danger" onclick="removeDate(${classIndex}, ${dateIndex})">Remove</button>
-              </div>
-            `).join('') : ''}
+            <h4>Dates & Judges</h4>
+            ${renderDates(classItem, classIndex)}
+            <button class="btn btn-sm" onclick="addDate(${classIndex})">+ Add Date</button>
           </div>
           
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3>Entries</h3>
-            <button class="btn btn-success" onclick="addEntry(${classIndex})">+ Add Dog</button>
+          <div class="entries-section">
+            <h4>Entries (${classItem.entries ? classItem.entries.length : 0} dogs)</h4>
+            ${renderEntriesTableWithStandardizedFields(classItem, classIndex)}
+            <button class="btn btn-sm" onclick="addEntry(${classIndex})">+ Add Entry</button>
           </div>
-          
-          ${renderEntriesTable(classItem, classIndex)}
-          
-          <div style="text-align: right; margin-top: 10px; color: #666; font-weight: bold;">
-            Total Entries: ${classItem.entries ? classItem.entries.length : 0}
-          </div>
+        </div>
+      `).join('');
+      
+      container.innerHTML = html;
+    }
+
+    function renderDates(classItem, classIndex) {
+      if (!classItem.dates || classItem.dates.length === 0) {
+        return '<p style="color: #666; font-style: italic;">No dates added yet.</p>';
+      }
+      
+      return classItem.dates.map((date, dateIndex) => `
+        <div class="date-row">
+          <input type="date" value="${date.date}" 
+                 onchange="updateDate(${classIndex}, ${dateIndex}, 'date', this.value)"
+                 placeholder="Select date">
+          <input type="text" value="${date.judge}" 
+                 onchange="updateDate(${classIndex}, ${dateIndex}, 'judge', this.value)"
+                 placeholder="Judge name">
+          <button class="btn btn-danger btn-sm" onclick="removeDate(${classIndex}, ${dateIndex})">Remove</button>
         </div>
       `).join('');
     }
 
-    function renderEntriesTable(classItem, classIndex) {
+    // CRITICAL FIX: Updated entries table using standardized field names
+    function renderEntriesTableWithStandardizedFields(classItem, classIndex) {
       if (!classItem.entries || classItem.entries.length === 0 || !classItem.dates || classItem.dates.length === 0) {
         return '<p style="color: #666; font-style: italic;">Add dates and dogs to start building your class report.</p>';
       }
@@ -599,51 +595,54 @@
             </tr>
           </thead>
           <tbody>
-            ${classItem.entries.map((entry, entryIndex) => `
-              <tr>
-                <td>${entryIndex + 1}</td>
-                <td>
-                  <input type="text" value="${entry.registrationNumber || ''}" 
-                         onchange="updateEntry(${classIndex}, ${entryIndex}, 'registrationNumber', this.value)"
-                         placeholder="Reg #">
-                </td>
-                <td>
-                  <input type="text" value="${entry.dogName || ''}" 
-                         onchange="updateEntry(${classIndex}, ${entryIndex}, 'dogName', this.value)"
-                         placeholder="Dog Name">
-                </td>
-                <td>
-                  <input type="text" value="${entry.handlerName || ''}" 
-                         onchange="updateEntry(${classIndex}, ${entryIndex}, 'handlerName', this.value)"
-                         placeholder="Handler Name">
-                </td>
-                ${classItem.dates.map((date, dateIndex) => `
+            ${classItem.entries.map((entry, entryIndex) => {
+              // Normalize entry data to ensure we use standard field names
+              const normalizedEntry = normalizeEntryData(entry);
+              
+              return `
+                <tr>
+                  <td>${entryIndex + 1}</td>
                   <td>
-                    <select class="result-select" 
-                            onchange="updateResult(${classIndex}, ${entryIndex}, ${dateIndex}, this.value)"
-                            value="${entry.results && entry.results[dateIndex] ? entry.results[dateIndex] : ''}">
-                      <option value="">-</option>
-                      <option value="Pass" ${entry.results && entry.results[dateIndex] === 'Pass' ? 'selected' : ''}>Pass</option>
-                      <option value="Fail" ${entry.results && entry.results[dateIndex] === 'Fail' ? 'selected' : ''}>Fail</option>
-                      <option value="XX" ${entry.results && entry.results[dateIndex] === 'XX' ? 'selected' : ''}>XX</option>
-                    </select>
+                    <input type="text" value="${normalizedEntry.registrationNumber || ''}" 
+                           onchange="updateEntry(${classIndex}, ${entryIndex}, 'registrationNumber', this.value)"
+                           placeholder="Reg #">
                   </td>
-                `).join('')}
-                <td>
-                  <button class="btn btn-danger" onclick="removeEntry(${classIndex}, ${entryIndex})">Remove</button>
-                </td>
-              </tr>
-            `).join('')}
+                  <td>
+                    <input type="text" value="${normalizedEntry.dogCallName || ''}" 
+                           onchange="updateEntry(${classIndex}, ${entryIndex}, 'dogCallName', this.value)"
+                           placeholder="Dog Call Name">
+                  </td>
+                  <td>
+                    <input type="text" value="${normalizedEntry.handlerName || ''}" 
+                           onchange="updateEntry(${classIndex}, ${entryIndex}, 'handlerName', this.value)"
+                           placeholder="Handler Name">
+                  </td>
+                  ${classItem.dates.map((date, dateIndex) => `
+                    <td>
+                      <select class="result-select" 
+                              onchange="updateResult(${classIndex}, ${entryIndex}, ${dateIndex}, this.value)"
+                              value="${normalizedEntry.results && normalizedEntry.results[dateIndex] ? normalizedEntry.results[dateIndex] : ''}">
+                        <option value="">-</option>
+                        <option value="Pass" ${normalizedEntry.results && normalizedEntry.results[dateIndex] === 'Pass' ? 'selected' : ''}>Pass</option>
+                        <option value="Fail" ${normalizedEntry.results && normalizedEntry.results[dateIndex] === 'Fail' ? 'selected' : ''}>Fail</option>
+                        <option value="XX" ${normalizedEntry.results && normalizedEntry.results[dateIndex] === 'XX' ? 'selected' : ''}>XX</option>
+                      </select>
+                    </td>
+                  `).join('')}
+                  <td>
+                    <button onclick="removeEntry(${classIndex}, ${entryIndex})" class="btn btn-danger btn-sm">Remove</button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
           </tbody>
         </table>
       `;
     }
 
-    function updateTrialInfo() {
-      summaryData.hostName = document.getElementById('hostName').value;
-      summaryData.dateRange = document.getElementById('dateRange').value;
-      updatePreview();
-    }
+    // ========================================
+    // PREVIEW GENERATION WITH STANDARDIZED FIELDS
+    // ========================================
 
     function updatePreview() {
       const container = document.getElementById('previewContainer');
@@ -653,75 +652,223 @@
         return;
       }
       
-      const previewHTML = summaryData.classes.map((classItem, classIndex) => {
-        if (!classItem.name) return '';
+      const previewHTML = `
+        <div class="preview-header" style="text-align: center; margin-bottom: 30px;">
+          <h2>C-WAGS Class Results</h2>
+          <h3>${summaryData.hostName || '[Host Name]'}</h3>
+          <p><strong>Trial Dates:</strong> ${summaryData.dateRange || '[Date Range]'}</p>
+        </div>
         
-        return `
+        ${summaryData.classes.map(classItem => `
           <div class="preview-class">
-            <h3>C-WAGS CLASS RESULTS REPORT</h3>
-            <div style="border: 1px solid #ddd; padding: 15px; background: white;">
-              <p><strong>Host:</strong> ${summaryData.hostName}</p>
-              <p><strong>Dates - From - To:</strong> ${summaryData.dateRange}</p>
-              <p><strong>Class:</strong> ${classItem.name}</p>
-              <p><strong>Total # of Entries:</strong> ${classItem.entries ? classItem.entries.length : 0}</p>
-              
-              ${classItem.entries && classItem.entries.length > 0 && classItem.dates && classItem.dates.length > 0 ? `
-                <table class="entries-table" style="margin-top: 15px;">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Registration Number</th>
-                      <th>Dog's Call Name</th>
-                      <th>Handler</th>
-                      ${classItem.dates.map(date => `
-                        <th style="text-align: center;">
-                          ${date.date}<br/>${date.judge}
-                        </th>
-                      `).join('')}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${classItem.entries.map((entry, entryIndex) => `
+            <h3>${classItem.name || '[Class Name]'}</h3>
+            <p><strong>Total Entries:</strong> ${classItem.entries ? classItem.entries.length : 0}</p>
+            
+            ${classItem.entries && classItem.entries.length > 0 && classItem.dates && classItem.dates.length > 0 ? `
+              <table class="entries-table" style="margin-top: 15px;">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Registration Number</th>
+                    <th>Dog's Call Name</th>
+                    <th>Handler</th>
+                    ${classItem.dates.map(date => `
+                      <th style="text-align: center;">
+                        ${date.date}<br/>${date.judge}
+                      </th>
+                    `).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${classItem.entries.map((entry, entryIndex) => {
+                    // Normalize entry for display
+                    const normalizedEntry = normalizeEntryData(entry);
+                    
+                    return `
                       <tr>
                         <td style="text-align: center;">${entryIndex + 1}</td>
-                        <td>${entry.registrationNumber || ''}</td>
-                        <td>${entry.dogCallName || ''}</td>
-                        <td>${entry.handlerName || ''}</td>
+                        <td>${normalizedEntry.registrationNumber || ''}</td>
+                        <td>${normalizedEntry.dogCallName || ''}</td>
+                        <td>${normalizedEntry.handlerName || ''}</td>
                         ${classItem.dates.map((date, dateIndex) => `
                           <td style="text-align: center;">
-                            ${entry.results && entry.results[dateIndex] ? entry.results[dateIndex] : ''}
+                            ${normalizedEntry.results && normalizedEntry.results[dateIndex] ? normalizedEntry.results[dateIndex] : ''}
                           </td>
                         `).join('')}
                       </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              ` : `
-                <p style="color: #666; font-style: italic; margin-top: 15px;">
-                  Add dates and entries to see the complete report preview.
-                </p>
-              `}
-            </div>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            ` : `
+              <p style="color: #666; font-style: italic; margin-top: 15px;">
+                Add dates and entries to see the complete report preview.
+              </p>
+            `}
           </div>
-        `;
-      }).join('');
+        `).join('')}
+      `;
       
       container.innerHTML = previewHTML || '<p class="loading">Add classes to see preview...</p>';
     }
 
     // ========================================
-    // REPORT GENERATION
+    // SAVE/LOAD FUNCTIONALITY WITH STANDARDIZED FIELDS
     // ========================================
+
+    async function saveToFirebase(data) {
+      try {
+        // Normalize all entry data before saving
+        const normalizedData = {
+          ...data,
+          classes: data.classes.map(classItem => ({
+            ...classItem,
+            entries: classItem.entries ? classItem.entries.map(entry => normalizeEntryData(entry)) : []
+          }))
+        };
+        
+        const docRef = await addDoc(collection(db, 'classSummaries'), {
+          ...normalizedData,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          createdBy: auth.currentUser.uid
+        });
+        
+        return docRef.id;
+      } catch (error) {
+        console.error('Error saving to Firebase:', error);
+        throw error;
+      }
+    }
+
+    async function updateInFirebase(id, data) {
+      try {
+        // Normalize all entry data before updating
+        const normalizedData = {
+          ...data,
+          classes: data.classes.map(classItem => ({
+            ...classItem,
+            entries: classItem.entries ? classItem.entries.map(entry => normalizeEntryData(entry)) : []
+          }))
+        };
+        
+        await updateDoc(doc(db, 'classSummaries', id), {
+          ...normalizedData,
+          updatedAt: serverTimestamp()
+        });
+      } catch (error) {
+        console.error('Error updating Firebase:', error);
+        throw error;
+      }
+    }
+
+    async function loadExistingSummary(summaryId, viewMode = false) {
+      try {
+        showLoading('Loading summary...');
+        
+        const summaryDoc = await getDoc(doc(db, 'classSummaries', summaryId));
+        
+        if (summaryDoc.exists()) {
+          const data = summaryDoc.data();
+          
+          // Normalize loaded data to ensure standard field names
+          summaryData = {
+            ...data,
+            classes: data.classes ? data.classes.map(classItem => ({
+              ...classItem,
+              entries: classItem.entries ? classItem.entries.map(entry => normalizeEntryData(entry)) : []
+            })) : []
+          };
+          
+          currentSummaryId = summaryId;
+          
+          // Populate form
+          document.getElementById('hostName').value = summaryData.hostName || '';
+          document.getElementById('dateRange').value = summaryData.dateRange || '';
+          
+          if (summaryData.classes.length === 0) {
+            addClass();
+          } else {
+            renderClasses();
+          }
+          
+          updatePreview();
+          
+          if (viewMode) {
+            // Disable editing in view mode
+            document.querySelectorAll('input, select, button').forEach(el => {
+              if (!el.textContent.includes('Back')) {
+                el.disabled = true;
+              }
+            });
+          }
+          
+        } else {
+          showError('Summary not found');
+        }
+        
+      } catch (error) {
+        console.error('Error loading summary:', error);
+        showError('Error loading summary: ' + error.message);
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // ========================================
+    // MAIN ACTION FUNCTIONS
+    // ========================================
+
+    window.saveSummary = async function() {
+      try {
+        showLoading('Saving summary...');
+        
+        if (!summaryData.hostName || !summaryData.dateRange) {
+          showError('Please fill in host name and date range');
+          hideLoading();
+          return;
+        }
+        
+        if (summaryData.classes.length === 0) {
+          showError('Please add at least one class');
+          hideLoading();
+          return;
+        }
+        
+        let savedId;
+        if (currentSummaryId) {
+          // Update existing
+          await updateInFirebase(currentSummaryId, summaryData);
+          showSuccess('Summary updated successfully!');
+        } else {
+          // Save new summary
+          savedId = await saveToFirebase(summaryData);
+          currentSummaryId = savedId;
+          showSuccess('Summary saved successfully!');
+        }
+
+        hideLoading();
+        
+      } catch (error) {
+        console.error('Error saving summary:', error);
+        showError('Failed to save summary: ' + error.message);
+        hideLoading();
+      }
+    };
 
     window.generateReport = function() {
       // Validate data first
-      const validation = validateSummaryData(summaryData);
-      if (!validation.isValid) {
-        showError('Please fix the following errors before generating report: ' + validation.errors.join(', '));
+      if (!summaryData.hostName || !summaryData.dateRange) {
+        showError('Please fill in host name and date range before generating report');
         return;
       }
 
-      // For now, we'll show an alert. In a real implementation, this would generate a PDF
+      if (summaryData.classes.length === 0) {
+        showError('Please add at least one class before generating report');
+        return;
+      }
+
+      // For now, show alert with normalized data
       const stats = calculateSummaryStatistics(summaryData);
       
       alert(`Report would be generated with the following data:
@@ -734,14 +881,43 @@ Total Runs: ${stats.totalRuns}
 Qualifying Runs: ${stats.qualifyingRuns}
 
 This would integrate with your existing PDF generation system.`);
-      
-      // Here you would call your existing PDF generation functions
-      // generateClassResultsPDF(summaryData);
     };
 
     // ========================================
     // UTILITY FUNCTIONS
     // ========================================
+
+    function calculateSummaryStatistics(data) {
+      let totalEntries = 0;
+      let totalRuns = 0;
+      let qualifyingRuns = 0;
+      
+      data.classes.forEach(classItem => {
+        totalEntries += classItem.entries ? classItem.entries.length : 0;
+        
+        if (classItem.entries && classItem.dates) {
+          classItem.entries.forEach(entry => {
+            if (entry.results) {
+              entry.results.forEach(result => {
+                if (result) {
+                  totalRuns++;
+                  if (result === 'Pass') {
+                    qualifyingRuns++;
+                  }
+                }
+              });
+            }
+          });
+        }
+      });
+      
+      return {
+        totalClasses: data.classes.length,
+        totalEntries: totalEntries,
+        totalRuns: totalRuns,
+        qualifyingRuns: qualifyingRuns
+      };
+    }
 
     function showLoading(message) {
       const loadingEl = document.getElementById('loadingMessage');
@@ -782,7 +958,7 @@ This would integrate with your existing PDF generation system.`);
     window.updateEntry = updateEntry;
     window.updateResult = updateResult;
 
-    console.log("Class Summary Generator loaded successfully");
+    console.log("Class Summary Generator loaded successfully with standardized field names");
   </script>
 </body>
 </html>
