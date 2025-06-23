@@ -1122,7 +1122,7 @@
             
             dateEntries.forEach((entry, index) => {
                 // FIX: Try multiple judge field names in correct priority order
-                const judge = entry.judgeName || entry.judge || entry.judgeAssigned || 'Judge TBD';
+               const judge = getStandardizedJudgeName(entry);
                 
                 // FIX: Better round number extraction and class round naming
                 let roundNumber = entry.roundNumber || 1;
