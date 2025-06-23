@@ -121,8 +121,13 @@ function populateFormFromTrial() {
   console.log("Form populated with trial data");
 }
 
-function populateScheduleTable() {
+async function populateScheduleTableWithRealJudges() {
   if (!currentTrialData || !currentTrialData.days) return;
+  
+  console.log("📋 Populating schedule table with real judge data...");
+  
+  // First, load the actual judge assignments from entries
+  const judgeData = await loadJudgesFromEntries(currentTrialData.id);
   
   const scheduleBody = document.getElementById('scheduleBody');
   scheduleBody.innerHTML = '';
@@ -153,13 +158,23 @@ function populateScheduleTable() {
       const judgeCell = document.createElement('td');
       
       let judgeValue = '';
+      
+      // CRITICAL FIX: Look for judge in the entry data, not trial structure
       if (dayIndex < currentTrialData.days.length) {
         const day = currentTrialData.days[dayIndex];
-        if (day.classes) {
-          const classMatch = day.classes.find(cls => cls.className === className);
-          if (classMatch && classMatch.rounds && classMatch.rounds.length > 0) {
-            // Get first judge for this class on this day
-            judgeValue = classMatch.rounds[0].judge || '';
+        const dayDate = day.date;
+        
+        // Look for this judge in the entry data
+        const judgeKey = `${dayDate}_${className}_1`; // Assuming round 1 for now
+        if (judgeData[judgeKey]) {
+          judgeValue = judgeData[judgeKey].judgeName;
+        } else {
+          // Fallback: check trial structure as backup
+          if (day.classes) {
+            const classMatch = day.classes.find(cls => cls.className === className);
+            if (classMatch && classMatch.rounds && classMatch.rounds.length > 0) {
+              judgeValue = classMatch.rounds[0].judge || '';
+            }
           }
         }
       }
@@ -171,25 +186,9 @@ function populateScheduleTable() {
     scheduleBody.appendChild(row);
   });
   
-  // Add a few empty rows for additional classes
-  for (let i = 0; i < 5; i++) {
-    const row = document.createElement('tr');
-    
-    // Class name cell
-    const classCell = document.createElement('td');
-    classCell.innerHTML = '<input type="text" placeholder="Class name">';
-    row.appendChild(classCell);
-    
-    // Judge cells
-    for (let dayIndex = 0; dayIndex < 6; dayIndex++) {
-      const judgeCell = document.createElement('td');
-      judgeCell.innerHTML = '<input type="text" placeholder="Judge">';
-      row.appendChild(judgeCell);
-    }
-    
-    scheduleBody.appendChild(row);
-  }
+  console.log("✅ Schedule table populated with real judge data");
 }
+
 
 async function loadExistingApplication() {
   try {
