@@ -1814,168 +1814,199 @@
     }
 
     // Generate tabbed classes from trial data - FIXED FOR ROUND NAMING
-    function generateTabbedClasses() {
-      console.log("🎯 Generating tabbed classes from trial data");
+    // Generate tabbed classes from trial data - FULLY FIXED
+function generateTabbedClasses() {
+  console.log("🎯 Generating tabbed classes from trial data");
+  console.log("📊 Current trial data:", currentTrialData);
+  
+  if (!currentTrialData.days || currentTrialData.days.length === 0) {
+    console.warn("❌ No days data found");
+    document.getElementById('classEntriesContainer').innerHTML = 
+      '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
+    return;
+  }
+
+  console.log("📅 Processing", currentTrialData.days.length, "days");
+
+  // Generate day tabs
+  const dayTabsContainer = document.getElementById('dayTabs');
+  dayTabsContainer.innerHTML = '';
+
+  currentTrialData.days.forEach((day, dayIndex) => {
+    console.log(`📅 Day ${dayIndex + 1}:`, day);
+    
+    const dayDate = day.date ? formatDateDisplay(day.date, { 
+      weekday: undefined, 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    }) : `Day ${dayIndex + 1}`;
+
+    const tabButton = document.createElement('button');
+    tabButton.type = 'button';
+    tabButton.className = `day-tab ${dayIndex === 0 ? 'active' : ''}`;
+    tabButton.onclick = () => showDay(dayIndex);
+    tabButton.textContent = `Day ${dayIndex + 1} - ${dayDate}`;
+    
+    dayTabsContainer.appendChild(tabButton);
+  });
+
+  // Generate class content for each day
+  const classEntriesContainer = document.getElementById('classEntriesContainer');
+  let html = '';
+
+  currentTrialData.days.forEach((day, dayIndex) => {
+    console.log(`🎓 Processing classes for day ${dayIndex + 1}:`, day.classes);
+    
+    if (!day.classes || day.classes.length === 0) {
+      console.warn(`⚠️ No classes found for day ${dayIndex + 1}`);
+      return;
+    }
+
+    html += `<div class="class-day-content ${dayIndex === 0 ? 'active' : ''}" id="day-${dayIndex}">`;
+
+    // Group classes by name - FIXED LOGIC
+    const classGroups = new Map();
+    day.classes.forEach((cls, classIndex) => {
+      console.log(`🔍 Processing class ${classIndex}:`, cls);
       
-      if (!currentTrialData.days || currentTrialData.days.length === 0) {
-        document.getElementById('classEntriesContainer').innerHTML = 
-          '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
-        return;
-      }
-
-      // Generate day tabs
-      const dayTabsContainer = document.getElementById('dayTabs');
-      dayTabsContainer.innerHTML = '';
-
-      currentTrialData.days.forEach((day, dayIndex) => {
-        const dayDate = day.date ? formatDateDisplay(day.date, { 
-          weekday: undefined, 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric' 
-        }) : `Day ${dayIndex + 1}`;
-
-        const tabButton = document.createElement('button');
-        tabButton.type = 'button';
-        tabButton.className = `day-tab ${dayIndex === 0 ? 'active' : ''}`;
-        tabButton.onclick = () => showDay(dayIndex);
-        tabButton.textContent = `Day ${dayIndex + 1} - ${dayDate}`;
+      // Try both possible property names
+      const className = cls.className || cls.name;
+      
+      if (className && className.trim()) {
+        const trimmedName = className.trim();
+        console.log(`✅ Found class: "${trimmedName}"`);
         
-        dayTabsContainer.appendChild(tabButton);
-      });
-
-      // Generate class content for each day
-      const classEntriesContainer = document.getElementById('classEntriesContainer');
-      let html = '';
-
-      currentTrialData.days.forEach((day, dayIndex) => {
-        if (!day.classes || day.classes.length === 0) return;
-
-        html += `<div class="class-day-content ${dayIndex === 0 ? 'active' : ''}" id="day-${dayIndex}">`;
-
-        // Group classes by name - FIXED TO USE CORRECT PROPERTY
-        const classGroups = new Map();
-        day.classes.forEach((cls, classIndex) => {
-          // FIXED: Use 'name' property instead of 'className' as shown in debug output
-          if (cls && cls.name && cls.name.trim()) {
-           const className = cls.name || cls.className;
-           if (cls && className && className.trim()) {
-            if (!classGroups.has(className)) 
-              classGroups.set(className, []);
-            }
-            classGroups.get(className).push({...cls, dayIndex, classIndex});
-          }
-         });
-
-        classGroups.forEach((classInstances, className) => {
-          // Calculate base fee (use first instance's fee or default)
-          const baseFee = fees.regular;
-          const feoFee = fees.feo;
-
-          html += `
-            <div class="class-item">
-              <div class="class-header">
-                <div class="class-name">${className}</div>
-                <div class="class-fee">${baseFee.toFixed(2)}</div>
-              </div>
-              <div class="class-details">
-                <div><strong>Level:</strong> ${classInstances[0].level || 'All levels'}</div>
-                <div><strong>Rounds:</strong> ${classInstances.reduce((total, inst) => total + (inst.rounds ? inst.rounds.length : 0), 0)}</div>
-                <div><strong>Prerequisites:</strong> ${getPrerequisitesText(className)}</div>
-              </div>
-              <div class="rounds-container">
-          `;
-
-          classInstances.forEach((classInstance, instanceIndex) => {
-            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
-              classInstance.rounds.forEach((round, roundIndex) => {
-                // FIXED: Use 'judge' property directly as shown in debug output
-                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
-                // FIXED: Use 'name' property for round name as shown in debug output
-                const roundName = round.name || `Round ${roundIndex + 1}`;
-                
-                html += `
-                  <div class="round-item">
-                    <div class="round-details">
-                      <span class="judge-name">Judge: ${judgeName}</span>
-                      <span>${roundName}</span>
-                      ${round.time ? `<span>Time: ${round.time}</span>` : ''}
-                      ${round.maxDogs ? `<span>Max Dogs: ${round.maxDogs}</span>` : ''}
-                    </div>
-                  </div>
-                `;
-              });
-            }
-          });
-
-          html += `
-              </div>
-              <div class="entry-options">
-                <div class="entry-option">
-                  <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg">
-                    <input type="checkbox" 
-                           id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg" 
-                           data-class="${className}" 
-                           data-fee="${baseFee.toFixed(2)}" 
-                           data-type="regular"
-                           data-day="${dayIndex}">
-                    <span>Regular Entry (${baseFee.toFixed(2)})</span>
-                  </label>
-                </div>
-          `;
-
-          // FIXED: Check if FEO is available using correct property
-          const hasFEO = classInstances.some(inst => 
-            inst.rounds && inst.rounds.some(round => round.feo === true)
-          );
-
-          if (hasFEO) {
-            html += `
-                <div class="entry-option">
-                  <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo">
-                    <input type="checkbox" 
-                           id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo" 
-                           data-class="${className}" 
-                           data-fee="${feoFee.toFixed(2)}" 
-                           data-type="feo"
-                           data-day="${dayIndex}">
-                    <span>FEO Entry (${feoFee.toFixed(2)})</span>
-                  </label>
-                </div>
-            `;
-          }
-
-          html += `
-              </div>
-            </div>
-          `;
-        });
-
-        html += `</div>`;
-      });
-
-      classEntriesContainer.innerHTML = html;
-      
-      // Initialize the tabbed interface
-      updateEntrySummary();
-      
-      console.log("✅ Tabbed classes generated successfully");
-    }
-
-    // Check form validity
-    function checkFormValidity() {
-      const waiverAccepted = document.getElementById('waiverAccepted').checked;
-      const handlerName = document.getElementById('handlerName').value.trim();
-      const dogCallName = document.getElementById('dogCallName').value.trim();
-      const hasClasses = selectedEntries.length > 0;
-      
-      const isValid = waiverAccepted && handlerName && dogCallName && hasClasses;
-      
-      const submitBtn = document.getElementById('submitEntry');
-      if (submitBtn) {
-        submitBtn.disabled = !isValid;
+        if (!classGroups.has(trimmedName)) {
+          classGroups.set(trimmedName, []);
+        }
+        classGroups.get(trimmedName).push({...cls, dayIndex, classIndex});
+      } else {
+        console.warn(`⚠️ Class ${classIndex} has no valid name:`, cls);
       }
-    }
+    });
+
+    console.log(`📊 Grouped classes for day ${dayIndex + 1}:`, Array.from(classGroups.keys()));
+
+    classGroups.forEach((classInstances, className) => {
+      console.log(`🎯 Generating HTML for class: ${className}`, classInstances);
+      
+      // Calculate base fee (use first instance's fee or default)
+      const baseFee = fees.regular;
+      const feoFee = fees.feo;
+      
+      // Check if any instance has junior handler pricing
+      const isJuniorHandler = document.getElementById('juniorHandler')?.value === 'Yes';
+      const displayFee = isJuniorHandler ? fees.juniorHandler : baseFee;
+
+      html += `
+        <div class="class-item">
+          <div class="class-header">
+            <div class="class-name">${className}</div>
+            <div class="class-fee">$${displayFee.toFixed(2)}</div>
+          </div>
+          <div class="class-details">
+            <div><strong>Level:</strong> ${classInstances[0].level || 'All levels'}</div>
+            <div><strong>Rounds:</strong> ${classInstances.reduce((total, inst) => total + (inst.rounds ? inst.rounds.length : 0), 0)}</div>
+            <div><strong>Prerequisites:</strong> ${getPrerequisitesText(className)}</div>
+          </div>
+          <div class="rounds-container">
+      `;
+
+      classInstances.forEach((classInstance, instanceIndex) => {
+        console.log(`🔄 Processing rounds for ${className}, instance ${instanceIndex}:`, classInstance.rounds);
+        
+        if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
+          classInstance.rounds.forEach((round, roundIndex) => {
+            // Use appropriate property for judge name
+            const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
+            // Use appropriate property for round name
+            const roundName = round.name || round.roundName || `Round ${roundIndex + 1}`;
+            
+            html += `
+              <div class="round-item">
+                <div class="round-details">
+                  <span class="judge-name">Judge: ${judgeName}</span>
+                  <span>${roundName}</span>
+                  ${round.time ? `<span>Time: ${round.time}</span>` : ''}
+                  ${round.maxDogs ? `<span>Max Dogs: ${round.maxDogs}</span>` : ''}
+                </div>
+              </div>
+            `;
+          });
+        } else {
+          console.warn(`⚠️ No rounds found for ${className}, instance ${instanceIndex}`);
+        }
+      });
+
+      html += `
+          </div>
+          <div class="entry-options">
+            <div class="entry-option">
+              <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg">
+                <input type="checkbox" 
+                       id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg" 
+                       data-class="${className}" 
+                       data-fee="${isJuniorHandler ? fees.juniorHandler.toFixed(2) : baseFee.toFixed(2)}" 
+                       data-type="regular"
+                       data-day="${dayIndex}">
+                <span>Regular Entry ($${isJuniorHandler ? fees.juniorHandler.toFixed(2) : baseFee.toFixed(2)})</span>
+              </label>
+            </div>
+      `;
+
+      // Check if FEO is available
+      const hasFEO = classInstances.some(inst => 
+        inst.rounds && inst.rounds.some(round => round.feo === true || round.allowFEO === true)
+      );
+
+      if (hasFEO && !isJuniorHandler) {
+        html += `
+            <div class="entry-option">
+              <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo">
+                <input type="checkbox" 
+                       id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo" 
+                       data-class="${className}" 
+                       data-fee="${feoFee.toFixed(2)}" 
+                       data-type="feo"
+                       data-day="${dayIndex}">
+                <span>FEO Entry ($${feoFee.toFixed(2)})</span>
+              </label>
+            </div>
+        `;
+      }
+
+      html += `
+          </div>
+        </div>
+      `;
+    });
+
+    html += `</div>`;
+  });
+
+  console.log("📝 Generated HTML length:", html.length);
+  classEntriesContainer.innerHTML = html;
+  
+  // Initialize the tabbed interface
+  updateEntrySummary();
+  
+  console.log("✅ Tabbed classes generated successfully");
+  
+  // Add debug information to the page if no classes were found
+  if (html.trim() === '') {
+    console.error("❌ No HTML was generated - classes may not be loading properly");
+    classEntriesContainer.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: #666;">
+        <h3>Debug Information</h3>
+        <p>Trial has ${currentTrialData.days.length} days</p>
+        <pre style="text-align: left; background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow: auto;">
+${JSON.stringify(currentTrialData.days, null, 2)}
+        </pre>
+      </div>
+    `;
+  }
+}
 
     // Populate form with existing entry data using timezone-safe dates
     function populateFormWithEntryData(entryData) {
