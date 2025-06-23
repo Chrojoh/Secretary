@@ -195,6 +195,52 @@
       }
     });
 
+    async function loadJudgesFromEntries(trialId) {
+  console.log("🔍 Loading judge names from entries for trial:", trialId);
+  
+  try {
+    // Query all entries for this trial (same as running order)
+    const q = query(
+      collection(db, "entries"),
+      where("trialId", "==", trialId)
+    );
+    const snapshot = await getDocs(q);
+    
+    const judgesByClassAndDate = {};
+    
+    snapshot.forEach(doc => {
+      const entry = doc.data();
+      
+      // Extract judge info from entries (exactly like running order does)
+      const judgeName = entry.judgeName || entry.judge || 'TBD';
+      const className = entry.className || 'Unknown Class';
+      const date = entry.date || 'Unknown Date';
+      const roundNumber = entry.roundNumber || 1;
+      
+      // Create a unique key for this class/date/round combination
+      const key = `${date}_${className}_${roundNumber}`;
+      
+      if (!judgesByClassAndDate[key]) {
+        judgesByClassAndDate[key] = {
+          date: date,
+          className: className,
+          roundNumber: roundNumber,
+          judgeName: judgeName
+        };
+      }
+    });
+    
+    console.log("✅ Loaded judges from entries:", judgesByClassAndDate);
+    return judgesByClassAndDate;
+    
+  } catch (error) {
+    console.error("❌ Error loading judges from entries:", error);
+    return {};
+  }
+}
+
+    
+    
     // Load existing trial data if in edit mode
     async function loadExistingTrialData() {
       if (!editTrialId) return;
