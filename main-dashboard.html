@@ -778,17 +778,52 @@
     };
 
     // Entry Management Functions
-    async function loadEntryManagement() {
-      console.log("📝 Loading entry management...");
-      
-      if (!currentUser) {
-        console.log("No user found for entry management");
-        return;
-      }
-
-      // Load trials for entry management
-      await loadTrialsForEntryManagement();
+   async function loadTrialEntriesWithJudges(trialId) {
+  console.log("📝 Loading entries with real judge names for trial:", trialId);
+  
+  try {
+    // Load trial data
+    const trialDoc = await getDoc(doc(db, 'trials', trialId));
+    if (!trialDoc.exists()) {
+      alert('Trial not found');
+      return;
     }
+    
+    const trialData = trialDoc.data();
+    
+    // Load all entries for this trial
+    const q = query(
+      collection(db, "entries"),
+      where("trialId", "==", trialId)
+    );
+    const snapshot = await getDocs(q);
+    
+    const entries = [];
+    snapshot.forEach(doc => {
+      const entry = { id: doc.id, ...doc.data() };
+      
+      // CRITICAL: Ensure judge name is visible (same as running order)
+      if (!entry.judgeName && entry.judge) {
+        entry.judgeName = entry.judge;
+      }
+      // Default to 'TBD' if no judge found
+      if (!entry.judgeName) {
+        entry.judgeName = 'TBD';
+      }
+      
+      entries.push(entry);
+    });
+    
+    console.log("✅ Loaded entries with judge data:", entries);
+    
+    // Update the entry management display
+    displayEntriesWithCorrectJudges(entries, trialData);
+    
+  } catch (error) {
+    console.error("❌ Error loading entry management:", error);
+    alert('Error loading entries: ' + error.message);
+  }
+}
 
     async function loadTrialsForEntryManagement() {
       try {
