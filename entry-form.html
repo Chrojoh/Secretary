@@ -2508,6 +2508,15 @@
     window.goToDashboard = goToDashboard;
     window.resetForm = resetForm;
 
+    // Connect submit button to function
+document.addEventListener('DOMContentLoaded', function() {
+  const submitBtn = document.getElementById('submitEntry');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', submitEntry);
+    console.log("✅ Submit button event listener attached");
+  }
+});
+  
     // Enhanced form validation that runs on form changes
     document.addEventListener('DOMContentLoaded', function() {
       // Add validation listeners to key fields
