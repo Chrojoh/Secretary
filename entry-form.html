@@ -1983,101 +1983,70 @@ function populateFormForEditing(entryData) {
   console.log("✅ Form populated for editing");
 }
   
-    // Auto-fill from registration data
-    async function autoFillFromRegistration(registrationNumber) {
-      if (isAutoFilling) {
-        console.log("⏳ Auto-fill already in progress, skipping");
-        return;
-      }
-      
-      // Wait for registration data to be loaded
-      if (!isRegistrationDataLoaded) {
-        console.log("⏳ Waiting for registration data to load...");
-        showLookupStatus('⏳ Loading registration database...', 'loading');
-        
-        // Wait up to 5 seconds for data to load
-        let attempts = 0;
-        while (!isRegistrationDataLoaded && attempts < 50) {
-          await new Promise(resolve => setTimeout(resolve, 100));
-          attempts++;
-        }
-        
-        if (!isRegistrationDataLoaded) {
-          showLookupStatus('❌ Registration database not available', 'warning');
-          return;
-        }
-      }
-      
-      showLookupStatus('🔍 Looking up registration...', 'loading');
-      
-      try {
-        isAutoFilling = true;
-        
-        const normalizedInput = registrationNumber.toUpperCase().replace(/[^A-Z0-9]/g, '');
-        console.log("🔍 Looking up registration:", normalizedInput);
-        
-        let matchingRegistration = null;
-
-        // First search data.json
-        if (registrationData && registrationData.length > 0) {
-          console.log("🔍 Searching in local data.json...");
-          matchingRegistration = registrationData.find(record => {
-            const normalizedRecord = (record.Registration || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-            return normalizedRecord === normalizedInput;
-          });
-        }
-
-        // If not found in data.json, search Firebase entries
-        if (!matchingRegistration) {
-          console.log("🔍 Searching in Firebase entries...");
-          try {
-            const entriesQuery = query(
-              collection(db, "entries"),
-              where("cwagsNumber", "==", registrationNumber)
-            );
-            const entriesSnapshot = await getDocs(entriesQuery);
-            
-            if (!entriesSnapshot.empty) {
-              // Use the most recent entry
-              const entries = [];
-              entriesSnapshot.forEach(doc => {
-                const entryData = doc.data();
-                
-                // Fix date handling for entry data
-                if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-                  entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
-                    ...entry,
-                    date: entry.date ? getDateFromFirebase(entry.date) : null
-                  }));
-                }
-                
-                entries.push(entryData);
-              });
-              entries.sort((a, b) => b.submittedAt?.toDate() - a.submittedAt?.toDate());
-              matchingRegistration = entries[0];
-              console.log("✅ Found in Firebase entries");
-            }
-          } catch (firebaseError) {
-            console.warn("Could not search Firebase entries:", firebaseError);
-          }
-        }
-        
-        if (matchingRegistration) {
-          console.log("✅ Found matching registration:", matchingRegistration);
-          showLookupStatus('✅ Registration found! Auto-filling information...', 'success');
-          populateForm(matchingRegistration);
-        } else {
-          console.log("❌ No matching registration found for:", normalizedInput);
-          showLookupStatus('ℹ️ Registration number not found in our records. You can still continue with manual entry.', 'warning');
-        }
-        
-      } catch (error) {
-        console.error("❌ Error during registration lookup:", error);
-        showLookupStatus('❌ Error looking up registration', 'warning');
-      } finally {
-        isAutoFilling = false;
-      }
+    // Replace the auto-fill function in entry-form.html with this enhanced version:
+function enhancedAutoFillFromRegistration(cwagsNumber) {
+  console.log("🔍 Enhanced auto-fill for registration:", cwagsNumber);
+  
+  if (!cwagsNumber || !isRegistrationDataLoaded || !registrationData) {
+    return;
+  }
+  
+  // Find registration data
+  const data = registrationData.find(entry => 
+    entry.Registration === cwagsNumber || 
+    entry.cwagsNumber === cwagsNumber
+  );
+  
+  if (!data) {
+    console.log("❌ No registration data found for:", cwagsNumber);
+    return;
+  }
+  
+  console.log("✅ Found registration data:", data);
+  
+  // Normalize the data to standard field names
+  const normalizedData = normalizeRegistrationData(data);
+  
+  // Enhanced fill function that handles both old and new field names
+  function fillFieldEnhanced(fieldId, value) {
+    if (!value) return;
+    
+    const field = document.getElementById(fieldId);
+    if (field && (!field.value || field.value === '')) {
+      field.value = value;
+      field.classList.add('auto-filled');
+      console.log(`✅ Auto-filled ${fieldId}: ${value}`);
+      setTimeout(() => {
+        field.classList.remove('auto-filled');
+      }, 2000);
     }
+  }
+  
+  // Use standardized field mapping
+  fillFieldEnhanced('handlerName', normalizedData.handlerName);
+  fillFieldEnhanced('handlerPhone', normalizedData.handlerPhone);
+  fillFieldEnhanced('handlerEmail', normalizedData.handlerEmail);
+  fillFieldEnhanced('emergencyContact', normalizedData.emergencyContact);
+  fillFieldEnhanced('dogCallName', normalizedData.dogCallName);
+  fillFieldEnhanced('dogBreed', normalizedData.dogBreed);
+  fillFieldEnhanced('dogBirthdate', normalizedData.dogBirthdate);
+  
+  // Handle sex dropdown
+  if (normalizedData.dogSex) {
+    const sexField = document.getElementById('dogSex');
+    if (sexField && (!sexField.value || sexField.value === '')) {
+      sexField.value = normalizedData.dogSex;
+      sexField.classList.add('auto-filled');
+      console.log(`✅ Auto-filled dogSex: ${normalizedData.dogSex}`);
+      setTimeout(() => {
+        sexField.classList.remove('auto-filled');
+      }, 2000);
+    }
+  }
+  
+  checkFormValidity();
+}
+
 
     // Populate trial selector dropdown
     function populateTrialSelector() {
