@@ -2681,12 +2681,16 @@ async function submitEntry() {
   
   // Basic form validation
   const handlerName = document.getElementById('handlerName').value.trim();
-  const handlerEmail = document.getElementById('handlerEmail').value.trim();
-  const dogName = document.getElementById('dogCallName').value.trim();
+  const dogCallName = document.getElementById('dogCallName').value.trim();
   const waiverAccepted = document.getElementById('waiverAccepted').checked;
   
-  if (!handlerName || !handlerEmail || !dogName) {
-    alert('Please fill in all required fields (Handler Name, Email, and Dog Name).');
+  if (!handlerName) {
+    alert('Please enter the Handler Name.');
+    return;
+  }
+  
+  if (!dogCallName) {
+    alert('Please enter the Dog\'s Call Name.');
     return;
   }
   
@@ -2695,7 +2699,7 @@ async function submitEntry() {
     return;
   }
   
-  if (selectedEntries.length === 0) {
+  if (!selectedEntries || selectedEntries.length === 0) {
     alert('Please select at least one class entry.');
     return;
   }
@@ -2710,11 +2714,12 @@ async function submitEntry() {
     // Collect form data
     const entryData = {
       trialId: currentTrialData.id,
+      trialName: currentTrialData.clubName,
       handlerName: handlerName,
-      handlerEmail: handlerEmail,
+      handlerEmail: document.getElementById('handlerEmail').value.trim(),
       handlerPhone: document.getElementById('handlerPhone').value.trim(),
       emergencyContact: document.getElementById('emergencyContact').value.trim(),
-      dogCallName: dogName,
+      dogCallName: dogCallName,
       dogBreed: document.getElementById('dogBreed').value.trim(),
       dogBirthdate: document.getElementById('dogBirthdate').value,
       dogSex: document.getElementById('dogSex').value,
@@ -2726,23 +2731,19 @@ async function submitEntry() {
       })),
       totalFee: totalFee,
       submittedAt: new Date(),
-      waiverAccepted: true
+      waiverAccepted: true,
+      regularEntries: selectedEntries.filter(e => e.type === 'regular').length,
+      feoEntries: selectedEntries.filter(e => e.type === 'feo').length
     };
     
     console.log("📝 Entry data prepared:", entryData);
     
     // Save to Firebase
-    if (typeof addDoc !== 'undefined' && typeof collection !== 'undefined') {
-      const docRef = await addDoc(collection(db, "entries"), entryData);
-      console.log("✅ Entry saved with ID:", docRef.id);
-      
-      // Show success message
-      showSuccessMessage(docRef.id);
-    } else {
-      // Fallback for testing without Firebase
-      console.log("⚠️ Firebase not available, simulating success");
-      alert(`Entry submitted successfully!\n\nHandler: ${handlerName}\nDog: ${dogName}\nEntries: ${selectedEntries.length}\nTotal Fee: $${totalFee.toFixed(2)}\n\nYou will receive a confirmation email shortly.`);
-    }
+    const docRef = await addDoc(collection(db, "entries"), entryData);
+    console.log("✅ Entry saved with ID:", docRef.id);
+    
+    // Show success and scroll to top
+    showSuccessMessage();
     
   } catch (error) {
     console.error("❌ Error submitting entry:", error);
