@@ -1280,33 +1280,38 @@ document.addEventListener('change', function(e) {
         checkFormValidity();
     }
 
-    function updateEntrySummary() {
-        const summaryDiv = document.getElementById('entrySummary');
-        const entriesList = document.getElementById('selectedEntriesList');
-        const totalFeeSpan = document.getElementById('totalFee');
-        
-        if (selectedEntries.length === 0) {
-            summaryDiv.style.display = 'none';
-            return;
-        }
-        
-        summaryDiv.style.display = 'block';
-        
-        // Update entries list
-        entriesList.innerHTML = selectedEntries.map(entry => 
-            `<li class="selected-entry">${entry.className} ${entry.type === 'feo' ? '(FEO)' : ''} - ${entry.fee.toFixed(2)}</li>`
-        ).join('');
-        
-        // Update total fee
-        totalFee = selectedEntries.reduce((sum, entry) => sum + entry.fee, 0);
-        totalFeeSpan.textContent = totalFee.toFixed(2);
-        
-        // Enable/disable submit button
-        const submitBtn = document.getElementById('submitEntry');
-        if (submitBtn) {
-            submitBtn.disabled = selectedEntries.length === 0;
-        }
-    }
+ function updateEntrySummary() {
+  const summaryDiv = document.getElementById('entrySummary');
+  const entriesList = document.getElementById('selectedEntriesList');
+  const totalFeeSpan = document.getElementById('totalFee');
+  
+  if (selectedEntries.length === 0) {
+    summaryDiv.style.display = 'none';
+    return;
+  }
+  
+  summaryDiv.style.display = 'block';
+  
+  // Update entries list with round information
+  entriesList.innerHTML = selectedEntries.map(entry => 
+    `<li class="selected-entry">
+      ${entry.className} - ${entry.roundName} 
+      ${entry.type === 'feo' ? '(FEO)' : '(Regular)'} 
+      - Judge: ${entry.judgeName} 
+      - $${entry.fee.toFixed(2)}
+    </li>`
+  ).join('');
+  
+  // Update total fee
+  totalFee = selectedEntries.reduce((sum, entry) => sum + entry.fee, 0);
+  totalFeeSpan.textContent = totalFee.toFixed(2);
+  
+  // Enable/disable submit button
+  const submitBtn = document.getElementById('submitEntry');
+  if (submitBtn) {
+    submitBtn.disabled = selectedEntries.length === 0;
+  }
+}
 
     window.submitEntry = function() {
         // Basic form validation
