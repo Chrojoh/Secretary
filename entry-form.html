@@ -1260,7 +1260,7 @@
     async function loadRegistrationData() {
       try {
         console.log("📊 Loading registration data...");
-        const response = await fetch('./js/data.json');
+        const response = await fetch('/js/data.json');
         const data = await response.json();
         registrationData = data || [];
         isRegistrationDataLoaded = true;
