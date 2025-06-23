@@ -1162,17 +1162,17 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
           
           let trialLabel = trial.clubName || 'Unnamed Trial';
           if (trial.days && trial.days.length > 0) {
-            const dates = trial.days
-              .filter(day => day.date)
-              .map(day => {
-                // Use timezone-safe date formatting
-                const localDate = createLocalDate(day.date);
-                return localDate.toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric' 
-                });
-              })
-              .join(', ');
+           const dates = trial.days
+  .filter(day => day.date)
+  .map(day => {
+    // Simple date formatting without createLocalDate
+    const localDate = new Date(day.date + 'T12:00:00');
+    return localDate.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  })
+  .join(', ');
             if (dates) {
               trialLabel += ` (${dates})`;
             }
