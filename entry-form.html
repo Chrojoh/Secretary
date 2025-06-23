@@ -1241,45 +1241,6 @@ document.addEventListener('change', function(e) {
     }
 });
 
-    function handleEntrySelection(checkbox) {
-        const className = checkbox.dataset.class;
-        const fee = parseFloat(checkbox.dataset.fee);
-        const entryType = checkbox.dataset.type;
-        
-        if (checkbox.checked) {
-            // Prevent selecting both regular and FEO for same class
-            const otherType = entryType === 'regular' ? 'feo' : 'regular';
-            const otherCheckbox = document.querySelector(`input[data-class="${className}"][data-type="${otherType}"]`);
-            if (otherCheckbox) {
-                otherCheckbox.checked = false;
-                otherCheckbox.parentElement.classList.remove('selected');
-                // Remove from selected entries if it was there
-                selectedEntries = selectedEntries.filter(entry => 
-                    !(entry.className === className && entry.type === otherType)
-                );
-            }
-            
-            // Add to selected entries
-            selectedEntries.push({
-                className: className,
-                fee: fee,
-                type: entryType
-            });
-            
-            checkbox.parentElement.classList.add('selected');
-        } else {
-            // Remove from selected entries
-            selectedEntries = selectedEntries.filter(entry => 
-                !(entry.className === className && entry.type === entryType)
-            );
-            
-            checkbox.parentElement.classList.remove('selected');
-        }
-        
-        updateEntrySummary();
-        checkFormValidity();
-    }
-
  function updateEntrySummary() {
   const summaryDiv = document.getElementById('entrySummary');
   const entriesList = document.getElementById('selectedEntriesList');
