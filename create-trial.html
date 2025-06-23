@@ -262,32 +262,38 @@
       }
     }
 
-    // Populate form with existing trial data
-    function populateFormWithTrialData() {
-      if (!currentTrialData) return;
+   async function populateFormWithTrialData() {
+  if (!currentTrialData) return;
 
-      console.log("🎯 Populating form with existing trial data...");
+  console.log("🎯 Populating form with existing trial data...");
 
-      // Fill basic info
-      if (currentTrialData.clubName) {
-        document.querySelector('input[name="clubName"]').value = currentTrialData.clubName;
-      }
-      if (currentTrialData.secretary) {
-        document.querySelector('input[name="secretary"]').value = currentTrialData.secretary;
-      }
-      if (currentTrialData.numDays) {
-        document.getElementById('numDays').value = currentTrialData.numDays;
-        
-        // Auto-generate days
-        generateDays();
-        
-        // Wait a moment for DOM to update, then populate days
-        setTimeout(() => {
-          populateDaysData();
-        }, 500);
-      }
-    }
-
+  // Fill basic info
+  if (currentTrialData.clubName) {
+    document.querySelector('input[name="clubName"]').value = currentTrialData.clubName;
+  }
+  if (currentTrialData.secretary) {
+    document.querySelector('input[name="secretary"]').value = currentTrialData.secretary;
+  }
+  if (currentTrialData.numDays) {
+    document.getElementById('numDays').value = currentTrialData.numDays;
+    
+    // Auto-generate days
+    generateDays();
+    
+    // Wait a moment for DOM to update, then populate
+    setTimeout(async () => {
+      await populateExistingTrialData();
+      
+      // CRITICAL: Load judges from entries and populate them
+      console.log("🔍 Loading real judge assignments from entries...");
+      const realJudges = await loadJudgesFromEntries(currentTrialData.id);
+      
+      // Apply the real judge data to the form
+      populateJudgeData(realJudges);
+      
+    }, 500);
+  }
+}
     // Populate days, classes, and rounds with existing data
     function populateDaysData() {
       if (!currentTrialData || !currentTrialData.days) return;
