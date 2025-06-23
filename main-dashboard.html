@@ -1,264 +1,270 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trial Secretary Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      margin: 0;
-      padding: 20px;
+      color: #333;
     }
-    
+
     .dashboard-container {
       max-width: 1200px;
       margin: 0 auto;
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-    
-    .header {
-      background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-      color: white;
-      padding: 30px;
-      text-align: center;
-    }
-    
-    .header h1 {
-      margin: 0;
-      font-size: 32px;
-    }
-    
-    .welcome-msg {
-      margin: 10px 0 0 0;
-      font-size: 18px;
-      opacity: 0.9;
+      padding: 20px;
     }
 
-    /* Tab Navigation */
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .welcome-msg {
+      font-size: 1.2rem;
+      color: #666;
+    }
+
+    .user-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 15px 25px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-details {
+      font-weight: 500;
+      color: #444;
+    }
+
+    .logout-btn {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(238, 90, 36, 0.4);
+    }
+
+    .quick-stats {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .quick-stats h3 {
+      margin-bottom: 15px;
+      color: #444;
+      font-size: 1.4rem;
+    }
+
     .tab-navigation {
       display: flex;
-      background: #f8f9fa;
-      border-bottom: 2px solid #dee2e6;
-      margin: 0;
-      padding: 0;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .tab-button {
       flex: 1;
-      background: none;
-      border: none;
       padding: 15px 20px;
-      font-size: 16px;
-      font-weight: 500;
-      color: #666;
+      border: none;
+      background: transparent;
       cursor: pointer;
+      font-weight: 600;
       transition: all 0.3s ease;
-      border-bottom: 3px solid transparent;
-    }
-
-    .tab-button:hover {
-      background: #e9ecef;
-      color: #333;
+      color: #666;
     }
 
     .tab-button.active {
-      background: white;
-      color: #4CAF50;
-      border-bottom-color: #4CAF50;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
     }
 
-    /* Tab Content */
+    .tab-button:hover:not(.active) {
+      background: rgba(102, 126, 234, 0.1);
+    }
+
     .tab-content {
       display: none;
+      background: rgba(255, 255, 255, 0.95);
       padding: 30px;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      min-height: 500px;
     }
 
     .tab-content.active {
       display: block;
     }
-    
+
     .nav-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
+      gap: 25px;
+      margin-top: 20px;
     }
-    
+
     .nav-card {
-      background: #f8f9fa;
-      border: 2px solid #e9ecef;
-      border-radius: 12px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
       padding: 25px;
+      border-radius: 12px;
       text-align: center;
-      transition: all 0.3s ease;
       cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
-    
+
     .nav-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-      border-color: #4CAF50;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      border-color: #667eea;
     }
-    
+
     .nav-card h3 {
-      margin: 0 0 15px 0;
+      margin-bottom: 15px;
       color: #333;
-      font-size: 20px;
+      font-size: 1.3rem;
     }
-    
+
     .nav-card p {
       color: #666;
-      margin: 0 0 20px 0;
+      margin-bottom: 20px;
       line-height: 1.5;
     }
-    
+
     .nav-button {
-      background: #4CAF50;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
       padding: 12px 24px;
       border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
       cursor: pointer;
-      width: 100%;
-      transition: background-color 0.3s;
+      font-weight: 600;
+      transition: all 0.3s ease;
     }
-    
+
     .nav-button:hover {
-      background: #45a049;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     }
-    
+
     .nav-button.secondary {
-      background: #2196F3;
+      background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
     }
-    
-    .nav-button.secondary:hover {
-      background: #1976D2;
-    }
-    
+
     .nav-button.tertiary {
-      background: #ff9800;
-    }
-    
-    .nav-button.tertiary:hover {
-      background: #f57c00;
+      background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+      color: #212529;
     }
 
-    .nav-button.summary {
-      background: #9C27B0;
-    }
-
-    .nav-button.summary:hover {
-      background: #7B1FA2;
-    }
-
-    .nav-button.entries {
-      background: #e91e63;
-    }
-
-    .nav-button.entries:hover {
-      background: #c2185b;
-    }
-    
-    .user-info {
-      background: #e8f5e8;
-      padding: 20px;
-      margin: 20px 30px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .user-details {
-      font-weight: bold;
-      color: #2e7d32;
-    }
-    
-    .logout-btn {
-      background: #f44336;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    
-    .logout-btn:hover {
-      background: #d32f2f;
-    }
-    
-    .quick-stats {
-      background: #fff3e0;
-      padding: 20px;
-      margin: 20px 30px;
-      border-radius: 8px;
-      border-left: 5px solid #ff9800;
-    }
-    
-    .quick-stats h3 {
-      margin: 0 0 10px 0;
-      color: #f57c00;
-    }
-
-    /* Summary Specific Styles */
     .summary-list {
       display: grid;
-      gap: 20px;
+      gap: 15px;
+      margin-top: 20px;
     }
 
     .summary-item {
       background: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
       padding: 20px;
-      transition: all 0.3s ease;
-    }
-
-    .summary-item:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
-    }
-
-    .summary-header {
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
     }
 
-    .summary-title {
-      font-size: 18px;
-      font-weight: bold;
+    .summary-info h4 {
+      margin-bottom: 5px;
       color: #333;
-      margin: 0;
     }
 
     .summary-meta {
-      font-size: 14px;
       color: #666;
-      margin: 5px 0;
+      font-size: 0.9rem;
     }
 
     .summary-actions {
       display: flex;
       gap: 10px;
-      margin-top: 15px;
     }
 
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 14px;
+    .btn {
+      padding: 8px 16px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+      color: #212529;
     }
 
     .btn-primary {
@@ -268,15 +274,6 @@
 
     .btn-primary:hover {
       background: #0056b3;
-    }
-
-    .btn-success {
-      background: #28a745;
-      color: white;
-    }
-
-    .btn-success:hover {
-      background: #1e7e34;
     }
 
     .btn-danger {
@@ -403,20 +400,6 @@
       background: #c82333;
     }
 
-    .btn-secondary {
-      background: #6c757d;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-    }
-
-    .btn-secondary:hover {
-      background: #5a6268;
-    }
-
     .entries-controls {
       margin-bottom: 1rem;
       display: flex;
@@ -444,6 +427,21 @@
     .entries-summary {
       color: #666;
     }
+
+    select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: white;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    }
   </style>
 </head>
 <body>
@@ -453,7 +451,7 @@
       <div class="welcome-msg">Welcome back, <span id="username">User</span>!</div>
     </div>
 
-    <!-- User Info Section (preserved from original) -->
+    <!-- User Info Section -->
     <div class="user-info">
       <div class="user-details">
         <div>Logged in as: <span id="userEmail">user@example.com</span></div>
@@ -461,7 +459,7 @@
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
-    <!-- Quick Stats Section (preserved from original) -->
+    <!-- Quick Stats Section -->
     <div class="quick-stats">
       <h3>📊 Quick Stats</h3>
       <div id="statsContent">Loading statistics...</div>
@@ -475,7 +473,7 @@
       <button class="tab-button" onclick="showTab('reports')">Generated Reports</button>
     </div>
 
-    <!-- Main Tools Tab (original content) -->
+    <!-- Main Tools Tab -->
     <div id="main-tab" class="tab-content active">
       <div class="nav-grid">
         <div class="nav-card" onclick="location.href='create-trial.html'">
@@ -539,10 +537,11 @@
       <div class="trial-selector">
         <div class="form-group">
           <label for="entryManagementTrialSelect">Select Trial to Manage Entries:</label>
-          <select id="entryManagementTrialSelect" style="padding: 0.75rem; font-size: 1rem; border-radius: 6px; border: 2px solid #e1e5e9; width: 100%; max-width: 500px;">
-            <option value="">Choose a trial...</option>
+          <select id="entryManagementTrialSelect">
+            <option value="">Loading trials...</option>
           </select>
         </div>
+        <button class="btn btn-primary" onclick="loadEntryManagement()">Load Entries</button>
       </div>
 
       <!-- Entries List -->
@@ -575,6 +574,7 @@
                 <th>Dog</th>
                 <th>Registration</th>
                 <th>Classes</th>
+                <th>Judge</th>
                 <th>Fee</th>
                 <th>Submitted</th>
                 <th style="text-align: center;">Actions</th>
@@ -597,131 +597,80 @@
     <!-- Class Summaries Tab -->
     <div id="summaries-tab" class="tab-content">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2>Class Summary Reports</h2>
-        <button class="nav-button summary" onclick="createNewSummary()">+ Create New Summary</button>
+        <h2>📊 Class Summaries</h2>
+        <button class="btn btn-success" onclick="location.href='class-summary-generator.html'">+ Create New Summary</button>
       </div>
-      
-      <div id="summariesList" class="summary-list">
-        <div class="no-summaries">
-          <p>No class summaries yet. Create your first summary to get started!</p>
-        </div>
-      </div>
+      <div id="summariesList">Loading summaries...</div>
     </div>
 
     <!-- Generated Reports Tab -->
     <div id="reports-tab" class="tab-content">
-      <h2>Generated Reports</h2>
-      <div id="reportsList" class="summary-list">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2>📄 Generated Reports</h2>
+        <div style="color: #666; font-size: 14px;">Access your generated premium lists, applications, and other documents</div>
+      </div>
+      <div id="reportsList">
         <div class="no-summaries">
-          <p>No reports generated yet. Generate reports from your class summaries!</p>
+          <h4>📋 Available Reports</h4>
+          <p>Your generated reports will appear here. Use the tools above to create:</p>
+          <ul style="text-align: left; display: inline-block; margin-top: 15px;">
+            <li>Trial Applications</li>
+            <li>Premium Lists</li>
+            <li>Waiver Forms</li>
+            <li>Running Orders</li>
+            <li>Score Sheets</li>
+            <li>Class Summaries</li>
+          </ul>
         </div>
       </div>
     </div>
   </div>
 
   <script type="module">
+    // Firebase imports
     import { auth, db } from './js/firebase.js';
-    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
-    import { collection, query, where, getDocs, addDoc, deleteDoc, doc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-    console.log("Enhanced Dashboard loading...");
+    import { collection, query, where, getDocs, doc, getDoc, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     // ========================================
-    // GLOBAL DATE HANDLING FIX
+    // TIMEZONE-SAFE DATE UTILITIES
     // ========================================
     
-    // Creates a date object that stays in local timezone
-    function createLocalDate(dateStr) {
-      if (!dateStr) return null;
-      
-      // Always add noon time to prevent timezone shifts
-      if (typeof dateStr === 'string') {
-        const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
-        return new Date(dateWithTime);
-      }
-      
-      return new Date(dateStr);
-    }
-
-    // Formats a date to YYYY-MM-DD string in local timezone
-    function formatLocalDate(date) {
-      if (!date || !(date instanceof Date)) return '';
-      
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      
-      return `${year}-${month}-${day}`;
-    }
-
-    // Gets today's date in local timezone as YYYY-MM-DD string
-    function getTodayLocal() {
-      const now = new Date();
-      return formatLocalDate(now);
-    }
-
-    // Formats date for display with timezone consideration
-    function formatDateDisplay(dateInput, options = {}) {
-      let date;
-      
-      if (typeof dateInput === 'string') {
-        date = createLocalDate(dateInput);
-      } else if (dateInput instanceof Date) {
-        date = new Date(dateInput);
-      } else {
-        return 'Invalid Date';
-      }
-      
-      if (!date || isNaN(date.getTime())) return 'Invalid Date';
-      
-      const defaultOptions = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      };
-      
-      const formatOptions = { ...defaultOptions, ...options };
-      return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
-    }
-
-    // Prepares date data for Firebase storage (prevents timezone conversion)
     function prepareDateForFirebase(dateStr) {
       if (!dateStr) return null;
-      
-      // Create a date that represents the exact local date at noon
-      const localDate = createLocalDate(dateStr);
-      
-      // Store as a Firestore Timestamp to maintain precision
-      return localDate;
+      const localDate = new Date(dateStr + 'T12:00:00');
+      return localDate.toISOString().split('T')[0];
     }
 
-    // Retrieves date data from Firebase (converts back to local date string)
     function getDateFromFirebase(firebaseDate) {
-      if (!firebaseDate) return '';
-      
-      let date;
-      
-      // Handle Firestore Timestamps
-      if (firebaseDate.toDate) {
-        date = firebaseDate.toDate();
-      } else if (firebaseDate instanceof Date) {
-        date = firebaseDate;
-      } else if (typeof firebaseDate === 'string') {
-        date = createLocalDate(firebaseDate);
-      } else {
-        return '';
+      if (!firebaseDate) return null;
+      if (typeof firebaseDate === 'string') {
+        return firebaseDate;
       }
-      
-      return formatLocalDate(date);
+      if (firebaseDate.toDate) {
+        return firebaseDate.toDate().toISOString().split('T')[0];
+      }
+      return firebaseDate.toString().split('T')[0];
     }
 
-    // Test date handling function
+    function formatDateDisplay(dateStr, options = {}) {
+      if (!dateStr) return 'No date';
+      try {
+        const date = new Date(dateStr + 'T12:00:00');
+        const defaultOptions = {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        };
+        return date.toLocaleDateString('en-US', {...defaultOptions, ...options});
+      } catch (error) {
+        console.error('Date formatting error:', error);
+        return dateStr;
+      }
+    }
+
     function testDateHandling() {
-      console.log('=== Date Handling Test ===');
-      
-      const testDate = '2024-03-15';
+      const testDate = '2025-07-15';
       console.log('1. Original date string:', testDate);
       
       const forFirebase = prepareDateForFirebase(testDate);
@@ -778,52 +727,361 @@
     };
 
     // Entry Management Functions
-   async function loadTrialEntriesWithJudges(trialId) {
-  console.log("📝 Loading entries with real judge names for trial:", trialId);
-  
-  try {
-    // Load trial data
-    const trialDoc = await getDoc(doc(db, 'trials', trialId));
-    if (!trialDoc.exists()) {
-      alert('Trial not found');
-      return;
+    async function loadEntryManagement() {
+      console.log("📝 Loading entry management...");
+      
+      if (!currentUser) {
+        console.log("No user found for entry management");
+        return;
+      }
+
+      // Load trials for entry management
+      await loadTrialsForEntryManagement();
     }
-    
-    const trialData = trialDoc.data();
-    
-    // Load all entries for this trial
-    const q = query(
-      collection(db, "entries"),
-      where("trialId", "==", trialId)
-    );
-    const snapshot = await getDocs(q);
-    
-    const entries = [];
-    snapshot.forEach(doc => {
-      const entry = { id: doc.id, ...doc.data() };
+
+    // JUDGE FIX FUNCTIONS - Added here for Entry Management
+    async function loadTrialEntriesWithJudges(trialId) {
+      console.log("📝 Loading entries with real judge names for trial:", trialId);
       
-      // CRITICAL: Ensure judge name is visible (same as running order)
-      if (!entry.judgeName && entry.judge) {
-        entry.judgeName = entry.judge;
+      try {
+        // Load trial data
+        const trialDoc = await getDoc(doc(db, 'trials', trialId));
+        if (!trialDoc.exists()) {
+          alert('Trial not found');
+          return;
+        }
+        
+        const trialData = trialDoc.data();
+        
+        // Load all entries for this trial
+        const q = query(
+          collection(db, "entries"),
+          where("trialId", "==", trialId)
+        );
+        const snapshot = await getDocs(q);
+        
+        const entries = [];
+        snapshot.forEach(doc => {
+          const entry = { id: doc.id, ...doc.data() };
+          
+          // CRITICAL: Ensure judge name is visible (same as running order)
+          if (!entry.judgeName && entry.judge) {
+            entry.judgeName = entry.judge;
+          }
+          // Default to 'TBD' if no judge found
+          if (!entry.judgeName) {
+            entry.judgeName = 'TBD';
+          }
+          
+          entries.push(entry);
+        });
+        
+        console.log("✅ Loaded entries with judge data:", entries);
+        
+        // Update the entry management display
+        displayEntriesWithCorrectJudges(entries, trialData);
+        
+      } catch (error) {
+        console.error("❌ Error loading entry management:", error);
+        alert('Error loading entries: ' + error.message);
       }
-      // Default to 'TBD' if no judge found
-      if (!entry.judgeName) {
-        entry.judgeName = 'TBD';
+    }
+
+    function displayEntriesWithCorrectJudges(entries, trialData) {
+      const container = document.getElementById('entryManagementResults');
+      if (!container) {
+        console.error("❌ Could not find entry management results container");
+        return;
       }
       
-      entries.push(entry);
-    });
-    
-    console.log("✅ Loaded entries with judge data:", entries);
-    
-    // Update the entry management display
-    displayEntriesWithCorrectJudges(entries, trialData);
-    
-  } catch (error) {
-    console.error("❌ Error loading entry management:", error);
-    alert('Error loading entries: ' + error.message);
-  }
-}
+      let html = `<h3>📋 Entries for ${trialData.clubName || 'Trial'}</h3>`;
+      
+      if (entries.length === 0) {
+        html += '<p>No entries found for this trial.</p>';
+      } else {
+        html += `
+          <div class="entries-table-container">
+            <table id="entriesTable">
+              <thead>
+                <tr>
+                  <th>Handler</th>
+                  <th>Dog</th>
+                  <th>Class</th>
+                  <th>Round</th>
+                  <th>Judge</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+        
+        entries.forEach(entry => {
+          // Use the same judge resolution as running order
+          const judgeName = entry.judgeName || 'TBD';
+          const judgeStyle = judgeName === 'TBD' ? 'background-color: #ffebee; color: #c62828;' : 'background-color: #e8f5e8; color: #2e7d32;';
+          
+          html += `
+            <tr>
+              <td>${entry.handlerName || 'Unknown'}</td>
+              <td>${entry.dogCallName || 'Unknown'}</td>
+              <td>${entry.className || 'Unknown'}</td>
+              <td>${entry.roundNumber || '1'}</td>
+              <td style="${judgeStyle}"><strong>${judgeName}</strong></td>
+              <td>${entry.date || 'Unknown'}</td>
+              <td>${entry.status || 'Pending'}</td>
+              <td class="entry-actions">
+                <button class="btn-edit" onclick="editEntry('${entry.id}')">✏️ Edit</button>
+                <button class="btn-delete" onclick="deleteEntry('${entry.id}')">🗑️ Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+        
+        html += `
+              </tbody>
+            </table>
+          </div>
+          <div class="entries-summary" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+            <strong>Summary:</strong> 
+            Total entries: ${entries.length} | 
+            Entries with judges assigned: <span style="color: #2e7d32; font-weight: bold;">${entries.filter(e => e.judgeName && e.judgeName !== 'TBD').length}</span> | 
+            Entries with TBD judges: <span style="color: #c62828; font-weight: bold;">${entries.filter(e => !e.judgeName || e.judgeName === 'TBD').length}</span>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = html;
+    }
+
+    // Enhanced entry management loading function with full functionality
+    window.loadEntryManagement = async function() {
+      const trialId = document.getElementById('entryManagementTrialSelect').value;
+      
+      if (!trialId) {
+        alert('Please select a trial first');
+        return;
+      }
+      
+      console.log("📝 Loading entry management for trial:", trialId);
+      await loadTrialEntries(trialId);
+    };
+
+    // Load entries for a specific trial (RESTORED ORIGINAL FUNCTIONALITY)
+    async function loadTrialEntries(trialId) {
+      console.log("📊 Loading entries for trial:", trialId);
+      
+      try {
+        const entriesQuery = query(
+          collection(db, "entries"),
+          where("trialId", "==", trialId)
+        );
+        
+        const entriesSnapshot = await getDocs(entriesQuery);
+        currentTrialEntries = [];
+        
+        entriesSnapshot.forEach(doc => {
+          const entryData = doc.data();
+          
+          // Fix selected entries dates using global date fix
+          if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+              ...entry,
+              date: entry.date ? getDateFromFirebase(entry.date) : null,
+              // CRITICAL: Ensure judge name is visible (same as running order)
+              judgeName: entry.judgeName || entry.judge || 'TBD'
+            }));
+          }
+          
+          currentTrialEntries.push({ id: doc.id, ...entryData });
+        });
+        
+        console.log(`✅ Loaded ${currentTrialEntries.length} entries`);
+        
+        // Update UI
+        displayEntries();
+        populateClassFilter();
+        document.getElementById('entriesContainer').style.display = 'block';
+        
+      } catch (error) {
+        console.error("❌ Error loading entries:", error);
+        alert('Error loading entries: ' + error.message);
+      }
+    }
+
+    // Display entries in table (RESTORED ORIGINAL FUNCTIONALITY)
+    function displayEntries(entriesToShow = null) {
+      const entries = entriesToShow || currentTrialEntries;
+      const tableBody = document.getElementById('entriesTableBody');
+      const noEntriesMsg = document.getElementById('noEntriesMessage');
+      
+      if (entries.length === 0) {
+        tableBody.innerHTML = '';
+        noEntriesMsg.style.display = 'block';
+        updateEntriesSummary(0, 0);
+        return;
+      }
+      
+      noEntriesMsg.style.display = 'none';
+      
+      // Calculate total fees
+      let totalFees = 0;
+      entries.forEach(entry => {
+        totalFees += entry.totalFee || 0;
+      });
+      
+      // Update summary
+      updateEntriesSummary(entries.length, totalFees);
+      
+      // Generate table rows
+      tableBody.innerHTML = entries.map(entry => {
+        const submittedDate = entry.submittedAt ? entry.submittedAt.toDate() : new Date();
+        
+        // Handle both new selectedEntries format and legacy selectedClasses
+        const classesHtml = entry.selectedEntries ? 
+          entry.selectedEntries.map(selectedEntry => {
+            const feoClass = selectedEntry.entryType === 'feo' ? ' feo' : '';
+            const feoText = selectedEntry.entryType === 'feo' ? ' (FEO)' : '';
+            const judgeName = selectedEntry.judgeName || selectedEntry.judge || 'TBD';
+            return `<span class="entry-class-item${feoClass}">${selectedEntry.className}${feoText} - ${judgeName}</span>`;
+          }).join(' ') : 
+          (entry.selectedClasses || []).map(className => 
+            `<span class="entry-class-item">${className}</span>`
+          ).join(' ');
+
+        // Get primary judge for this entry
+        const primaryJudge = entry.selectedEntries && entry.selectedEntries.length > 0 ? 
+          (entry.selectedEntries[0].judgeName || entry.selectedEntries[0].judge || 'TBD') : 'TBD';
+        const judgeStyle = primaryJudge === 'TBD' ? 'color: #c62828; font-weight: bold;' : 'color: #2e7d32; font-weight: bold;';
+        
+        return `
+          <tr>
+            <td>
+              <strong>${entry.handlerName || 'N/A'}</strong><br>
+              <small style="color: #666;">${entry.handlerEmail || ''}</small>
+            </td>
+            <td>
+              <strong>${entry.dogCallName || 'N/A'}</strong><br>
+              <small style="color: #666;">${entry.dogBreed || ''}</small>
+            </td>
+            <td>${entry.cwagsNumber || 'Not provided'}</td>
+            <td class="entry-classes">${classesHtml}</td>
+            <td style="${judgeStyle}">${primaryJudge}</td>
+            <td><strong>${(entry.totalFee || 0).toFixed(2)}</strong></td> 
+            <td>
+              <small>${submittedDate.toLocaleDateString()}<br>
+              ${submittedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
+            </td>
+            <td>
+              <div class="entry-actions">
+                <a href="entry-form.html?entry=${entry.id}" class="btn-edit" target="_blank">
+                  ✏️ Edit
+                </a>
+                <button onclick="deleteEntry('${entry.id}')" class="btn-delete">
+                  🗑️ Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Update entries summary
+    function updateEntriesSummary(count, totalFees) {
+      document.getElementById('entriesCount').textContent = `${count} entries`;
+      document.getElementById('totalFees').textContent = `${totalFees.toFixed(2)} total`;
+    }
+
+    // Populate class filter dropdown (RESTORED)
+    function populateClassFilter() {
+      const classFilter = document.getElementById('classFilter');
+      const allClasses = new Set();
+      
+      currentTrialEntries.forEach(entry => {
+        if (entry.selectedEntries) {
+          entry.selectedEntries.forEach(selectedEntry => {
+            allClasses.add(selectedEntry.className);
+          });
+        } else if (entry.selectedClasses) {
+          entry.selectedClasses.forEach(className => {
+            allClasses.add(className);
+          });
+        }
+      });
+      
+      classFilter.innerHTML = '<option value="">All Classes</option>';
+      Array.from(allClasses).sort().forEach(className => {
+        const option = document.createElement('option');
+        option.value = className;
+        option.textContent = className;
+        classFilter.appendChild(option);
+      });
+    }
+
+    // Filter entries based on search and class filter (RESTORED)
+    function filterEntries() {
+      const searchTerm = document.getElementById('entrySearch').value.toLowerCase();
+      const classFilter = document.getElementById('classFilter').value;
+      
+      const filtered = currentTrialEntries.filter(entry => {
+        // Search filter
+        const matchesSearch = !searchTerm || 
+          (entry.handlerName && entry.handlerName.toLowerCase().includes(searchTerm)) ||
+          (entry.dogCallName && entry.dogCallName.toLowerCase().includes(searchTerm)) ||
+          (entry.cwagsNumber && entry.cwagsNumber.toLowerCase().includes(searchTerm)) ||
+          (entry.handlerEmail && entry.handlerEmail.toLowerCase().includes(searchTerm));
+        
+        // Class filter
+        const matchesClass = !classFilter || 
+          (entry.selectedEntries && entry.selectedEntries.some(se => se.className === classFilter)) ||
+          (entry.selectedClasses && entry.selectedClasses.includes(classFilter));
+        
+        return matchesSearch && matchesClass;
+      });
+      
+      displayEntries(filtered);
+    }
+
+    // Export entries to CSV (RESTORED)
+    window.exportEntries = function() {
+      if (currentTrialEntries.length === 0) {
+        alert('No entries to export');
+        return;
+      }
+      
+      const headers = ['Handler Name', 'Handler Email', 'Dog Call Name', 'Dog Breed', 'CWAGS Number', 'Classes', 'Total Fee', 'Submitted Date'];
+      const csvData = [headers];
+      
+      currentTrialEntries.forEach(entry => {
+        const classes = entry.selectedEntries ? 
+          entry.selectedEntries.map(se => `${se.className}${se.entryType === 'feo' ? ' (FEO)' : ''}`).join('; ') :
+          (entry.selectedClasses || []).join('; ');
+        
+        const submittedDate = entry.submittedAt ? entry.submittedAt.toDate().toLocaleDateString() : '';
+        
+        csvData.push([
+          entry.handlerName || '',
+          entry.handlerEmail || '',
+          entry.dogCallName || '',
+          entry.dogBreed || '',
+          entry.cwagsNumber || '',
+          classes,
+          (entry.totalFee || 0).toFixed(2),
+          submittedDate
+        ]);
+      });
+      
+      const csvContent = csvData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `trial-entries-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    };
 
     async function loadTrialsForEntryManagement() {
       try {
@@ -881,475 +1139,169 @@
           entryTrialSelect.appendChild(option);
         });
         
-        // Handle trial selection
-        entryTrialSelect.addEventListener('change', async function() {
-          const trialId = this.value;
-          if (trialId) {
-            await loadTrialEntries(trialId);
-          } else {
-            document.getElementById('entriesContainer').style.display = 'none';
-          }
-        });
-        
         // Setup search and filter
         document.getElementById('entrySearch').addEventListener('input', filterEntries);
         document.getElementById('classFilter').addEventListener('change', filterEntries);
         
-      } catch (error) {
-        console.error("Error loading trials for entry management:", error);
-      }
-    }
-
-    // Load entries for a specific trial
-    async function loadTrialEntries(trialId) {
-      console.log("📊 Loading entries for trial:", trialId);
-      
-      try {
-        const entriesQuery = query(
-          collection(db, "entries"),
-          where("trialId", "==", trialId)
-        );
-        
-        const entriesSnapshot = await getDocs(entriesQuery);
-        currentTrialEntries = [];
-        
-        entriesSnapshot.forEach(doc => {
-          const entryData = doc.data();
-          
-          // Fix selected entries dates using global date fix
-          if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
-              ...entry,
-              date: entry.date ? getDateFromFirebase(entry.date) : null
-            }));
-          }
-          
-          currentTrialEntries.push({
-            id: doc.id,
-            ...entryData
-          });
-        });
-        
-        // Sort by submission date (newest first)
-        currentTrialEntries.sort((a, b) => {
-          const dateA = a.submittedAt?.toDate() || new Date(0);
-          const dateB = b.submittedAt?.toDate() || new Date(0);
-          return dateB - dateA;
-        });
-        
-        console.log(`✅ Loaded ${currentTrialEntries.length} entries`);
-        
-        // Update UI
-        updateEntriesDisplay();
-        populateClassFilter();
-        
-        // Show entries container
-        document.getElementById('entriesContainer').style.display = 'block';
+        console.log(`✅ Loaded ${availableTrials.length} trials for entry management`);
         
       } catch (error) {
-        console.error("❌ Error loading entries:", error);
-        alert("Error loading entries: " + error.message);
+        console.error("❌ Error loading trials for entry management:", error);
       }
     }
 
-    // Update the entries display
-    function updateEntriesDisplay() {
-      filteredEntries = [...currentTrialEntries];
-      
-      // Update summary
-      const totalFees = filteredEntries.reduce((sum, entry) => {
-        const fee = parseFloat(entry.totalFee || 0);
-        return sum + fee;
-      }, 0);
-      
-      document.getElementById('entriesCount').textContent = `${filteredEntries.length} entries`;
-      document.getElementById('totalFees').textContent = `$${totalFees.toFixed(2)} total`;
-      
-      // Update table
-      renderEntriesTable();
-    }
-
-    // Render the entries table
-    function renderEntriesTable() {
-      const tbody = document.getElementById('entriesTableBody');
-      const noEntriesMsg = document.getElementById('noEntriesMessage');
-      
-      if (filteredEntries.length === 0) {
-        tbody.innerHTML = '';
-        noEntriesMsg.style.display = 'block';
-        return;
-      }
-      
-      noEntriesMsg.style.display = 'none';
-      
-      tbody.innerHTML = filteredEntries.map(entry => {
-        const submittedDate = entry.submittedAt?.toDate() || new Date();
-        const classesHtml = entry.selectedEntries ? 
-          entry.selectedEntries.map(selectedEntry => {
-            const feoClass = selectedEntry.entryType === 'feo' ? ' feo' : '';
-            const feoText = selectedEntry.entryType === 'feo' ? ' (FEO)' : '';
-            return `<span class="entry-class-item${feoClass}">${selectedEntry.className}${feoText}</span>`;
-          }).join(' ') : 
-          (entry.selectedClasses || []).map(className => 
-            `<span class="entry-class-item">${className}</span>`
-          ).join(' ');
-        
-        return `
-          <tr>
-            <td>
-              <strong>${entry.handlerName || 'N/A'}</strong><br>
-              <small style="color: #666;">${entry.handlerEmail || ''}</small>
-            </td>
-            <td>
-              <strong>${entry.dogCallName || 'N/A'}</strong><br>
-              <small style="color: #666;">${entry.dogBreed || ''}</small>
-            </td>
-            <td>${entry.cwagsNumber || 'Not provided'}</td>
-            <td class="entry-classes">${classesHtml}</td>
-            <td><strong>$${(entry.totalFee || 0).toFixed(2)}</strong></td> 
-            <td>
-              <small>${submittedDate.toLocaleDateString()}<br>
-              ${submittedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
-            </td>
-            <td>
-              <div class="entry-actions">
-                <a href="entry-form.html?entry=${entry.id}" class="btn-edit" target="_blank">
-                  ✏️ Edit
-                </a>
-                <button onclick="deleteEntry('${entry.id}')" class="btn-delete">
-                  🗑️ Delete
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // Populate class filter dropdown
-    function populateClassFilter() {
-      const classFilter = document.getElementById('classFilter');
-      const allClasses = new Set();
-      
-      currentTrialEntries.forEach(entry => {
-        if (entry.selectedEntries) {
-          entry.selectedEntries.forEach(selectedEntry => {
-            allClasses.add(selectedEntry.className);
-          });
-        } else if (entry.selectedClasses) {
-          entry.selectedClasses.forEach(className => {
-            allClasses.add(className);
-          });
-        }
-      });
-      
-      classFilter.innerHTML = '<option value="">All Classes</option>';
-      Array.from(allClasses).sort().forEach(className => {
-        const option = document.createElement('option');
-        option.value = className;
-        option.textContent = className;
-        classFilter.appendChild(option);
-      });
-    }
-
-    // Filter entries based on search and class filter
-    function filterEntries() {
-      const searchTerm = document.getElementById('entrySearch').value.toLowerCase();
-      const classFilter = document.getElementById('classFilter').value;
-      
-      filteredEntries = currentTrialEntries.filter(entry => {
-        // Search filter
-        const matchesSearch = !searchTerm || 
-          (entry.handlerName || '').toLowerCase().includes(searchTerm) ||
-          (entry.dogCallName || '').toLowerCase().includes(searchTerm) ||
-          (entry.cwagsNumber || '').toLowerCase().includes(searchTerm) ||
-          (entry.handlerEmail || '').toLowerCase().includes(searchTerm);
-        
-        // Class filter
-        const matchesClass = !classFilter ||
-          (entry.selectedEntries && entry.selectedEntries.some(se => se.className === classFilter)) ||
-          (entry.selectedClasses && entry.selectedClasses.includes(classFilter));
-        
-        return matchesSearch && matchesClass;
-      });
-      
-      renderEntriesTable();
-      
-      // Update filtered summary
-      const totalFees = filteredEntries.reduce((sum, entry) => {
-       const fee = parseFloat(entry.totalFee || 0); 
-        return sum + fee;
-      }, 0);
-      
-      document.getElementById('entriesCount').textContent = `${filteredEntries.length} entries`;
-      document.getElementById('totalFees').textContent = `$${totalFees.toFixed(2)} total`;
-    }
-
-    // Delete an entry
-    window.deleteEntry = async function(entryId) {
-      if (!confirm('Are you sure you want to delete this entry? This action cannot be undone.')) {
-        return;
-      }
-      
-      try {
-        await deleteDoc(doc(db, "entries", entryId));
-        console.log("✅ Entry deleted successfully");
-        
-        // Remove from current entries array
-        currentTrialEntries = currentTrialEntries.filter(entry => entry.id !== entryId);
-        updateEntriesDisplay();
-        
-        alert('Entry deleted successfully');
-      } catch (error) {
-        console.error("❌ Error deleting entry:", error);
-        alert('Error deleting entry: ' + error.message);
-      }
+    // Global functions for entry actions
+    window.editEntry = function(entryId) {
+      // Redirect to entry form with entry ID for editing
+      window.location.href = `entry-form.html?entry=${entryId}`;
     };
 
-    // Export entries to CSV
-    window.exportEntries = function() {
-      if (filteredEntries.length === 0) {
-        alert('No entries to export');
-        return;
+    window.deleteEntry = async function(entryId) {
+      if (confirm('Are you sure you want to delete this entry? This cannot be undone.')) {
+        try {
+          await deleteDoc(doc(db, 'entries', entryId));
+          alert('Entry deleted successfully');
+          // Reload the current trial's entries
+          const trialId = document.getElementById('entryManagementTrialSelect').value;
+          if (trialId) {
+            await loadTrialEntriesWithJudges(trialId);
+          }
+        } catch (error) {
+          console.error('Error deleting entry:', error);
+          alert('Error deleting entry: ' + error.message);
+        }
       }
-      
-      // Create CSV content
-      const headers = [
-        'Handler Name', 'Handler Email', 'Handler Phone', 'Dog Call Name', 'Dog Breed',
-        'Registration Number', 'Classes', 'Entry Fee', 'Junior Handler', 'Submitted Date'
-      ];
-      
-      const csvContent = [
-        headers.join(','),
-        ...filteredEntries.map(entry => {
-          const submittedDate = entry.submittedAt?.toDate() || new Date();
-          const classes = entry.selectedEntries ? 
-            entry.selectedEntries.map(se => `${se.className}${se.entryType === 'feo' ? ' (FEO)' : ''}`).join('; ') :
-            (entry.selectedClasses || []).join('; ');
-          
-          return [
-            `"${entry.handlerName || ''}"`,
-            `"${entry.handlerEmail || ''}"`,
-            `"${entry.handlerPhone || ''}"`,
-            `"${entry.dogCallName || ''}"`,
-            `"${entry.dogBreed || ''}"`,
-            `"${entry.cwagsNumber || ''}"`,
-            `"${classes}"`,
-            `"$${(entry.totalFee || 0).toFixed(2)}"`,  
-            `"${entry.juniorHandler ? 'Yes' : 'No'}"`,
-            `"${submittedDate.toLocaleDateString()} ${submittedDate.toLocaleTimeString()}"`
-          ].join(',');
-        })
-      ].join('\n');
-      
-      // Download CSV
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `trial-entries-${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
     };
 
     // Summary Management Functions
-    window.createNewSummary = function() {
-      // Redirect to a new summary creation page or open modal
-      window.open('class-summary-generator.html', '_blank');
-    };
-
-    // Load summaries from Firebase
     async function loadSummaries() {
-      if (!currentUser) return;
+      console.log("📊 Loading summaries...");
       
+      if (!currentUser) {
+        console.log("No user found for summaries");
+        return;
+      }
+
       try {
         const summariesQuery = query(
           collection(db, "classSummaries"),
           where("createdBy", "==", currentUser.uid)
         );
-        const summariesSnapshot = await getDocs(summariesQuery);
         
+        const summariesSnapshot = await getDocs(summariesQuery);
         const summariesList = document.getElementById('summariesList');
         
         if (summariesSnapshot.empty) {
           summariesList.innerHTML = `
             <div class="no-summaries">
-              <p>No class summaries yet. Create your first summary to get started!</p>
+              <h4>📋 No Class Summaries Yet</h4>
+              <p>You haven't created any class summaries yet.</p>
+              <button class="btn btn-success" onclick="location.href='class-summary-generator.html'">Create Your First Summary</button>
             </div>
           `;
           return;
         }
+
+        let summariesHTML = '<div class="summary-list">';
         
-        const summariesHTML = summariesSnapshot.docs.map(doc => {
-          const data = doc.data();
-          const createdDate = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'Unknown';
+        summariesSnapshot.forEach(doc => {
+          const summary = doc.data();
+          const createdDate = summary.createdAt ? summary.createdAt.toDate().toLocaleDateString() : 'Unknown date';
           
-          return `
+          summariesHTML += `
             <div class="summary-item">
-              <div class="summary-header">
-                <h3 class="summary-title">${data.hostName || 'Untitled Summary'}</h3>
-                <span class="summary-meta">Created: ${createdDate}</span>
-              </div>
-              <div class="summary-meta">
-                <strong>Date Range:</strong> ${data.dateRange || 'Not specified'}<br>
-                <strong>Classes:</strong> ${data.classes ? data.classes.length : 0}<br>
-                <strong>Total Entries:</strong> ${calculateTotalEntries(data.classes || [])}
+              <div class="summary-info">
+                <h4>${summary.trialName || 'Unnamed Summary'}</h4>
+                <div class="summary-meta">
+                  Created: ${createdDate} | 
+                  Classes: ${summary.classes ? summary.classes.length : 0}
+                </div>
               </div>
               <div class="summary-actions">
-                <button class="btn-sm btn-primary" onclick="editSummary('${doc.id}')">Edit</button>
-                <button class="btn-sm btn-success" onclick="generateReport('${doc.id}')">Generate Report</button>
-                <button class="btn-sm btn-danger" onclick="deleteSummary('${doc.id}')">Delete</button>
+                <button class="btn btn-secondary" onclick="viewSummary('${doc.id}')">View</button>
+                <button class="btn btn-warning" onclick="editSummary('${doc.id}')">Edit</button>
+                <button class="btn btn-danger" onclick="deleteSummary('${doc.id}', '${summary.trialName || 'this summary'}')">Delete</button>
               </div>
             </div>
           `;
-        }).join('');
+        });
         
+        summariesHTML += '</div>';
         summariesList.innerHTML = summariesHTML;
         
       } catch (error) {
         console.error("Error loading summaries:", error);
-        document.getElementById('summariesList').innerHTML = `
-          <div class="no-summaries">
-            <p>Error loading summaries. Please try again.</p>
-          </div>
-        `;
+        document.getElementById('summariesList').innerHTML = 
+          '<div class="no-summaries">Error loading summaries: ' + error.message + '</div>';
       }
-    }
-
-    // Load reports from Firebase
-    async function loadReports() {
-      if (!currentUser) return;
-      
-      try {
-        const reportsQuery = query(
-          collection(db, "generatedReports"),
-          where("createdBy", "==", currentUser.uid)
-        );
-        const reportsSnapshot = await getDocs(reportsQuery);
-        
-        const reportsList = document.getElementById('reportsList');
-        
-        if (reportsSnapshot.empty) {
-          reportsList.innerHTML = `
-            <div class="no-summaries">
-              <p>No reports generated yet. Generate reports from your class summaries!</p>
-            </div>
-          `;
-          return;
-        }
-        
-        const reportsHTML = reportsSnapshot.docs.map(doc => {
-          const data = doc.data();
-          const createdDate = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'Unknown';
-          
-          return `
-            <div class="summary-item">
-              <div class="summary-header">
-                <h3 class="summary-title">${data.reportName || 'Untitled Report'}</h3>
-                <span class="summary-meta">Generated: ${createdDate}</span>
-              </div>
-              <div class="summary-meta">
-                <strong>Type:</strong> ${data.reportType || 'Class Results'}<br>
-                <strong>Trial:</strong> ${data.trialName || 'Unknown'}<br>
-                <strong>Format:</strong> PDF
-              </div>
-              <div class="summary-actions">
-                <button class="btn-sm btn-primary" onclick="downloadReport('${doc.id}')">Download</button>
-                <button class="btn-sm btn-danger" onclick="deleteReport('${doc.id}')">Delete</button>
-              </div>
-            </div>
-          `;
-        }).join('');
-        
-        reportsList.innerHTML = reportsHTML;
-        
-      } catch (error) {
-        console.error("Error loading reports:", error);
-        document.getElementById('reportsList').innerHTML = `
-          <div class="no-summaries">
-            <p>Error loading reports. Please try again.</p>
-          </div>
-        `;
-      }
-    }
-
-    // Helper function to calculate total entries
-    function calculateTotalEntries(classes) {
-      return classes.reduce((total, classItem) => {
-        return total + (classItem.entries ? classItem.entries.length : 0);
-      }, 0);
     }
 
     // Summary action functions
+    window.viewSummary = function(summaryId) {
+      window.location.href = `class-summary-generator.html?view=${summaryId}`;
+    };
+
     window.editSummary = function(summaryId) {
-      window.open(`class-summary-generator.html?edit=${summaryId}`, '_blank');
+      window.location.href = `class-summary-generator.html?edit=${summaryId}`;
     };
 
-    window.generateReport = function(summaryId) {
-      // This would open a report generator with the summary data
-      alert(`Generating report for summary ${summaryId}. This would open the PDF generator.`);
-    };
-
-    window.deleteSummary = async function(summaryId) {
-      if (confirm('Are you sure you want to delete this summary?')) {
+    window.deleteSummary = async function(summaryId, summaryName) {
+      if (confirm(`Are you sure you want to delete "${summaryName}"? This cannot be undone.`)) {
         try {
-          await deleteDoc(doc(db, "classSummaries", summaryId));
+          await deleteDoc(doc(db, 'classSummaries', summaryId));
+          alert('Summary deleted successfully');
           loadSummaries(); // Reload the list
         } catch (error) {
-          console.error("Error deleting summary:", error);
-          alert("Error deleting summary: " + error.message);
+          console.error('Error deleting summary:', error);
+          alert('Error deleting summary: ' + error.message);
         }
       }
     };
 
-    // Report action functions
-    window.downloadReport = function(reportId) {
-      alert(`Downloading report ${reportId}. This would download the PDF file.`);
-    };
+    // Reports loading function
+    function loadReports() {
+      console.log("📄 Loading reports...");
+      // This is a placeholder - you can expand this based on your needs
+      const reportsList = document.getElementById('reportsList');
+      reportsList.innerHTML = `
+        <div class="no-summaries">
+          <h4>📋 Available Reports</h4>
+          <p>Your generated reports will appear here. Use the tools above to create:</p>
+          <ul style="text-align: left; display: inline-block; margin-top: 15px;">
+            <li>Trial Applications</li>
+            <li>Premium Lists</li>
+            <li>Waiver Forms</li>
+            <li>Running Orders</li>
+            <li>Score Sheets</li>
+            <li>Class Summaries</li>
+          </ul>
+        </div>
+      `;
+    }
 
-    window.deleteReport = async function(reportId) {
-      if (confirm('Are you sure you want to delete this report?')) {
-        try {
-          await deleteDoc(doc(db, "generatedReports", reportId));
-          loadReports(); // Reload the list
-        } catch (error) {
-          console.error("Error deleting report:", error);
-          alert("Error deleting report: " + error.message);
-        }
+    // Authentication and initialization
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
       }
-    };
 
-    // Auth state management (preserved from original)
-    auth.onAuthStateChanged(async (user) => {
-      if (authCheckComplete) return;
+      currentUser = user;
       authCheckComplete = true;
 
-      console.log("Auth state changed:", user ? "logged in" : "not logged in");
+      // Update UI with user info
+      const username = user.email.split('@')[0];
+      document.getElementById('username').textContent = username;
+      document.getElementById('userEmail').textContent = user.email;
 
-      if (user) {
-        console.log("User authenticated:", user.email);
-        currentUser = user;
-        
-        // Update UI with user info
-        const username = user.email.split('@')[0];
-        document.getElementById('username').textContent = username;
-        document.getElementById('userEmail').textContent = user.email;
-        
-        // Load user stats
-        await loadUserStats(user);
-        
-      } else {
-        console.log("No user found, redirecting to login");
-        setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 1000);
-      }
+      // Load initial stats
+      await loadStats(user);
+
+      console.log("Dashboard initialized for user:", user.email);
     });
 
-    // Load user stats (enhanced to include entry counts)
-    async function loadUserStats(user) {
+    // Load user statistics
+    async function loadStats(user) {
       try {
         // Count trials
         const trialsQuery = query(
@@ -1357,8 +1309,8 @@
           where("createdBy", "==", user.uid)
         );
         const trialsSnapshot = await getDocs(trialsQuery);
-        
-        // Count applications  
+
+        // Count applications
         const appsQuery = query(
           collection(db, "applications"),
           where("createdBy", "==", user.uid)
@@ -1417,7 +1369,7 @@
       }
     }
 
-    // Logout function (preserved from original)
+    // Logout function
     window.logout = async function() {
       if (confirm("Are you sure you want to logout?")) {
         try {
@@ -1431,10 +1383,6 @@
       }
     };
 
-            console.log("Enhanced Dashboard with Entry Management loaded successfully");
-        
-        // Test date handling (remove in production)
-        testDateHandling();
   </script>
 </body>
 </html>
