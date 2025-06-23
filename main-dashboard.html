@@ -626,11 +626,11 @@
     </div>
   </div>
 
-  <script type="module">
+ <script type="module">
     // Firebase imports
     import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs, doc, getDoc, signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
+    import { collection, query, where, getDocs, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
     // ========================================
     // TIMEZONE-SAFE DATE UTILITIES
     // ========================================
