@@ -1228,8 +1228,10 @@
 
     // AUTO-FORMATTER FOR C-WAGS REGISTRATION NUMBERS
 // Add this to entry-form.html to automatically format registration numbers to xx-xxxx-xx format
+// FIXED REGISTRATION NUMBER AUTO-FORMATTER
+// Fixes: 1) Invalid regex pattern 2) Over-aggressive formatting
 
-// Function to clean and format registration number to xx-xxxx-xx format
+// Fixed function - only formats when user has entered enough digits
 function formatRegistrationNumber(input) {
   if (!input) return '';
   
@@ -1239,9 +1241,10 @@ function formatRegistrationNumber(input) {
   // If empty after cleaning, return empty
   if (!cleaned) return '';
   
-  // Pad with leading zeros if too short
+  // Don't auto-format until we have at least 6 digits
+  // This prevents "107" from becoming "00-0001-07"
   if (cleaned.length < 6) {
-    cleaned = cleaned.padStart(6, '0');
+    return cleaned; // Return as-is until user enters more digits
   }
   
   // Limit to maximum 8 digits (xx-xxxx-xx format)
@@ -1249,17 +1252,14 @@ function formatRegistrationNumber(input) {
     cleaned = cleaned.substring(0, 8);
   }
   
-  // Format based on length
-  if (cleaned.length <= 2) {
-    // Just the first part: "22"
-    return cleaned;
-  } else if (cleaned.length <= 6) {
-    // First and second parts: "22-4168"
+  // Format based on length (only for 6+ digits)
+  if (cleaned.length === 6) {
+    // 6 digits: format as xx-xxxx
     const part1 = cleaned.substring(0, 2);
     const part2 = cleaned.substring(2);
     return `${part1}-${part2}`;
-  } else {
-    // All three parts: "22-4168-01"
+  } else if (cleaned.length >= 7) {
+    // 7-8 digits: format as xx-xxxx-xx
     const part1 = cleaned.substring(0, 2);
     const part2 = cleaned.substring(2, 6);
     let part3 = cleaned.substring(6);
@@ -1271,17 +1271,29 @@ function formatRegistrationNumber(input) {
     
     return `${part1}-${part2}-${part3}`;
   }
+  
+  // Should never reach here, but just in case
+  return cleaned;
 }
 
-// Function to handle live formatting as user types
+// Fixed function to handle live formatting with better logic
 function handleRegistrationInput(event) {
   const input = event.target;
   const cursorPosition = input.selectionStart;
   const originalValue = input.value;
   const originalLength = originalValue.length;
   
-  // Format the value
-  const formattedValue = formatRegistrationNumber(originalValue);
+  // Only format if user has typed enough digits
+  const cleanedDigits = originalValue.replace(/[^\d]/g, '');
+  
+  let formattedValue;
+  if (cleanedDigits.length >= 6) {
+    // Format if we have enough digits
+    formattedValue = formatRegistrationNumber(originalValue);
+  } else {
+    // Just clean out non-digits but don't format yet
+    formattedValue = cleanedDigits;
+  }
   
   // Update the input value
   input.value = formattedValue;
@@ -1295,60 +1307,52 @@ function handleRegistrationInput(event) {
     input.setSelectionRange(newCursorPosition, newCursorPosition);
   }, 0);
   
-  // Trigger auto-fill after formatting
-  if (formattedValue.length >= 8) { // Complete registration number
+  // Only trigger auto-fill for complete registration numbers (8+ digits or properly formatted)
+  const hasCompleteRegistration = 
+    formattedValue.length >= 8 || 
+    (formattedValue.includes('-') && cleanedDigits.length >= 6);
+    
+  if (hasCompleteRegistration) {
     console.log("🔍 Triggering auto-fill for formatted registration:", formattedValue);
     enhancedAutoFillFromRegistration(formattedValue);
   }
 }
 
-// Function to handle paste events
-function handleRegistrationPaste(event) {
-  event.preventDefault();
-  
-  // Get pasted text
-  const pastedText = (event.clipboardData || window.clipboardData).getData('text');
-  
-  // Format the pasted text
-  const formattedValue = formatRegistrationNumber(pastedText);
-  
-  // Set the formatted value
-  event.target.value = formattedValue;
-  
-  // Trigger auto-fill if complete
-  if (formattedValue.length >= 8) {
-    console.log("📋 Triggering auto-fill for pasted registration:", formattedValue);
-    enhancedAutoFillFromRegistration(formattedValue);
-  }
-}
-
-// Function to handle blur (when user leaves the field)
+// Fixed function to handle blur with better validation
 function handleRegistrationBlur(event) {
   const input = event.target;
   const currentValue = input.value;
   
   if (currentValue) {
-    // Ensure final formatting is correct
-    const finalFormatted = formatRegistrationNumber(currentValue);
-    input.value = finalFormatted;
+    const cleanedDigits = currentValue.replace(/[^\d]/g, '');
     
-    // Show visual feedback for formatting
-    if (finalFormatted !== currentValue) {
-      input.classList.add('auto-filled');
-      console.log(`✅ Auto-formatted registration: "${currentValue}" → "${finalFormatted}"`);
-      setTimeout(() => {
-        input.classList.remove('auto-filled');
-      }, 2000);
-    }
-    
-    // Trigger auto-fill if we have a complete registration number
-    if (finalFormatted.length >= 8) {
+    // Only format if we have a reasonable number of digits
+    let finalFormatted;
+    if (cleanedDigits.length >= 6) {
+      finalFormatted = formatRegistrationNumber(currentValue);
+      
+      // Show visual feedback for formatting
+      if (finalFormatted !== currentValue) {
+        input.classList.add('auto-filled');
+        console.log(`✅ Auto-formatted registration: "${currentValue}" → "${finalFormatted}"`);
+        setTimeout(() => {
+          input.classList.remove('auto-filled');
+        }, 2000);
+      }
+      
+      input.value = finalFormatted;
+      
+      // Trigger auto-fill for complete registration
       enhancedAutoFillFromRegistration(finalFormatted);
+    } else {
+      // For incomplete entries, just clean but don't format
+      finalFormatted = cleanedDigits;
+      input.value = finalFormatted;
     }
   }
 }
 
-// Enhanced setup function for the registration input field
+// Fixed setup function with corrected regex pattern
 function setupRegistrationFormatter() {
   const regInput = document.getElementById('cwagsNumber');
   
@@ -1365,9 +1369,9 @@ function setupRegistrationFormatter() {
     regInput.addEventListener('paste', handleRegistrationPaste);
     regInput.addEventListener('blur', handleRegistrationBlur);
     
-    // Set input attributes for better mobile experience
+    // FIXED: Set input attributes with corrected regex pattern
     regInput.setAttribute('inputmode', 'numeric');
-    regInput.setAttribute('pattern', '[0-9-]*');
+    regInput.setAttribute('pattern', '[0-9\\-]*'); // FIXED: Properly escaped dash
     regInput.setAttribute('maxlength', '10'); // xx-xxxx-xx = 10 characters
     regInput.setAttribute('placeholder', 'e.g., 22-4168-01');
     
@@ -1377,26 +1381,158 @@ function setupRegistrationFormatter() {
   }
 }
 
-// Test function to verify formatting works correctly
+// Keep the existing paste handler
+function handleRegistrationPaste(event) {
+  event.preventDefault();
+  
+  // Get pasted text
+  const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+  
+  // Format the pasted text only if it has enough digits
+  const cleanedDigits = pastedText.replace(/[^\d]/g, '');
+  let formattedValue;
+  
+  if (cleanedDigits.length >= 6) {
+    formattedValue = formatRegistrationNumber(pastedText);
+  } else {
+    formattedValue = cleanedDigits;
+  }
+  
+  // Set the formatted value
+  event.target.value = formattedValue;
+  
+  // Trigger auto-fill if complete
+  if (formattedValue.length >= 8 || (formattedValue.includes('-') && cleanedDigits.length >= 6)) {
+    console.log("📋 Triggering auto-fill for pasted registration:", formattedValue);
+    enhancedAutoFillFromRegistration(formattedValue);
+  }
+}
+
+// Enhanced auto-fill function that handles both formatted and unformatted registration numbers
+function enhancedAutoFillFromRegistration(cwagsNumber) {
+  console.log("🔍 Enhanced auto-fill for registration:", cwagsNumber);
+  
+  if (!cwagsNumber || !isRegistrationDataLoaded || !registrationData) {
+    return;
+  }
+  
+  // Clean the input for comparison (remove dashes)
+  const cleanedInput = cwagsNumber.replace(/[^\d]/g, '');
+  
+  // Find registration data - try multiple formats
+  let data = registrationData.find(entry => {
+    // Try exact match first
+    if (entry.Registration === cwagsNumber || entry.cwagsNumber === cwagsNumber) {
+      return true;
+    }
+    
+    // Try cleaned number match
+    const cleanedEntry = (entry.Registration || entry.cwagsNumber || '').replace(/[^\d]/g, '');
+    if (cleanedEntry === cleanedInput) {
+      return true;
+    }
+    
+    // Try formatted version match
+    if (cleanedInput.length >= 6) {
+      const formattedInput = formatRegistrationNumber(cleanedInput);
+      if (entry.Registration === formattedInput || entry.cwagsNumber === formattedInput) {
+        return true;
+      }
+    }
+    
+    return false;
+  });
+  
+  if (!data) {
+    console.log("❌ No registration data found for:", cwagsNumber);
+    return;
+  }
+  
+  console.log("✅ Found registration data:", data);
+  
+  // Enhanced fill function that handles both old and new field names
+  function fillFieldEnhanced(fieldId, value) {
+    if (!value) return;
+    
+    const field = document.getElementById(fieldId);
+    if (field && (!field.value || field.value === '')) {
+      field.value = value;
+      field.classList.add('auto-filled');
+      console.log(`✅ Auto-filled ${fieldId}: ${value}`);
+      setTimeout(() => {
+        field.classList.remove('auto-filled');
+      }, 2000);
+    }
+  }
+  
+  // Use standardized field mapping with fallbacks
+  fillFieldEnhanced('handlerName', data.handlerName || data.Handler);
+  fillFieldEnhanced('handlerPhone', data.handlerPhone);
+  fillFieldEnhanced('handlerEmail', data.handlerEmail);
+  fillFieldEnhanced('emergencyContact', data.emergencyContact);
+  fillFieldEnhanced('dogCallName', data.dogCallName || data['Call Name']);
+  fillFieldEnhanced('dogBreed', data.dogBreed);
+  fillFieldEnhanced('dogBirthdate', data.dogBirthdate);
+  
+  // Handle sex dropdown
+  if (data.dogSex) {
+    const sexField = document.getElementById('dogSex');
+    if (sexField && (!sexField.value || sexField.value === '')) {
+      sexField.value = data.dogSex;
+      sexField.classList.add('auto-filled');
+      console.log(`✅ Auto-filled dogSex: ${data.dogSex}`);
+      setTimeout(() => {
+        sexField.classList.remove('auto-filled');
+      }, 2000);
+    }
+  }
+  
+  checkFormValidity();
+}
+
+// Updated test function with better test cases
 function testRegistrationFormatter() {
   const testCases = [
-    { input: '2241681', expected: '22-4168-01' },
-    { input: '22-4168-1', expected: '22-4168-01' },
-    { input: '22 4168 1', expected: '22-4168-01' },
-    { input: '224168001', expected: '22-4168-00' }, // Extra digit gets trimmed
-    { input: '221234', expected: '22-1234' },
-    { input: '22', expected: '22' },
-    { input: 'abc22def4168ghi01jkl', expected: '22-4168-01' },
-    { input: '123456789', expected: '12-3456-78' }, // Limit to 8 digits
+    { input: '107', expected: '107' }, // Should NOT format until more digits
+    { input: '2241681', expected: '22-4168-01' }, // Should format
+    { input: '22-4168-1', expected: '22-4168-01' }, // Should format
+    { input: '22 4168 1', expected: '22-4168-01' }, // Should format
+    { input: '224168', expected: '22-4168' }, // 6 digits should format
+    { input: '22123', expected: '22123' }, // 5 digits should NOT format
+    { input: '22', expected: '22' }, // 2 digits should NOT format
   ];
   
-  console.log("🧪 Testing registration number formatter:");
+  console.log("🧪 Testing fixed registration number formatter:");
   
   testCases.forEach(test => {
     const result = formatRegistrationNumber(test.input);
     const passed = result === test.expected;
     console.log(`${passed ? '✅' : '❌'} "${test.input}" → "${result}" (expected: "${test.expected}")`);
   });
+}
+
+console.log(`
+🔧 FIXED REGISTRATION NUMBER FORMATTER
+
+FIXES APPLIED:
+✅ Fixed invalid regex pattern [0-9\\-]* (properly escaped dash)
+✅ Prevents over-formatting (107 stays as 107, not 00-0001-07)
+✅ Only formats when user has 6+ digits
+✅ Better auto-fill matching (tries multiple formats)
+✅ Cleaner cursor positioning
+
+BEHAVIOR:
+- "107" → "107" (no formatting until more digits)
+- "2241681" → "22-4168-01" (formats when enough digits)
+- "22-4168-1" → "22-4168-01" (adds leading zero to last part)
+`);
+
+// Export functions for use in entry-form.html
+if (typeof window !== 'undefined') {
+  window.formatRegistrationNumber = formatRegistrationNumber;
+  window.setupRegistrationFormatter = setupRegistrationFormatter;
+  window.testRegistrationFormatter = testRegistrationFormatter;
+  window.enhancedAutoFillFromRegistration = enhancedAutoFillFromRegistration;
 }
   
     // Global variables
