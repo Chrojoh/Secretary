@@ -668,7 +668,45 @@
         return dateStr;
       }
     }
+   
+    function normalizeEntryData(entryData) {
+  const normalized = { ...entryData };
+  
+  // Normalize handler name
+  if (entryData.Handler && !entryData.handlerName) {
+    normalized.handlerName = entryData.Handler;
+  }
+  if (entryData.handler && !entryData.handlerName) {
+    normalized.handlerName = entryData.handler;
+  }
+  
+  // Normalize dog call name
+  if (entryData['Call Name'] && !entryData.dogCallName) {
+    normalized.dogCallName = entryData['Call Name'];
+  }
+  if (entryData.dogName && !entryData.dogCallName) {
+    normalized.dogCallName = entryData.dogName;
+  }
+  
+  // Normalize judge name (CRITICAL FIX)
+  if (entryData.judge && !entryData.judgeName) {
+    normalized.judgeName = entryData.judge;
+  }
+  if (entryData.judgeAssigned && !entryData.judgeName) {
+    normalized.judgeName = entryData.judgeAssigned;
+  }
+  
+  return normalized;
+}
 
+function getStandardizedJudgeName(entry) {
+  return entry.judgeName || 
+         entry.judge || 
+         entry.judgeAssigned || 
+         entry.selectedJudge ||
+         'TBD';
+}
+   
     function testDateHandling() {
       const testDate = '2025-07-15';
       console.log('1. Original date string:', testDate);
