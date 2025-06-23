@@ -1882,6 +1882,7 @@ function debugTrialData() {
 // debugTrialData();
     // Generate tabbed classes from trial data - FIXED FOR ROUND NAMING
     // Generate tabbed classes from trial data - FULLY FIXED
+// Generate tabbed classes with entry options per round
 function generateTabbedClasses() {
   console.log("🎯 Generating tabbed classes from trial data");
   console.log("📊 Current trial data:", currentTrialData);
@@ -1932,7 +1933,7 @@ function generateTabbedClasses() {
 
     html += `<div class="class-day-content ${dayIndex === 0 ? 'active' : ''}" id="day-${dayIndex}">`;
 
-    // Group classes by name - FIXED LOGIC
+    // Group classes by name
     const classGroups = new Map();
     day.classes.forEach((cls, classIndex) => {
       console.log(`🔍 Processing class ${classIndex}:`, cls);
@@ -1958,45 +1959,91 @@ function generateTabbedClasses() {
     classGroups.forEach((classInstances, className) => {
       console.log(`🎯 Generating HTML for class: ${className}`, classInstances);
       
-      // Calculate base fee (use first instance's fee or default)
-      const baseFee = fees.regular;
-      const feoFee = fees.feo;
-      
-      // Check if any instance has junior handler pricing
+      // Calculate fees
       const isJuniorHandler = document.getElementById('juniorHandler')?.value === 'Yes';
-      const displayFee = isJuniorHandler ? fees.juniorHandler : baseFee;
+      const regularFee = isJuniorHandler ? fees.juniorHandler : fees.regular;
+      const feoFee = isJuniorHandler ? fees.juniorHandler : fees.feo;
 
       html += `
         <div class="class-item">
           <div class="class-header">
             <div class="class-name">${className}</div>
-            <div class="class-fee">$${displayFee.toFixed(2)}</div>
+            <div class="class-fee">From $${Math.min(regularFee, feoFee).toFixed(2)}</div>
           </div>
           <div class="class-details">
             <div><strong>Level:</strong> ${classInstances[0].level || 'All levels'}</div>
-            <div><strong>Rounds:</strong> ${classInstances.reduce((total, inst) => total + (inst.rounds ? inst.rounds.length : 0), 0)}</div>
+            <div><strong>Total Rounds:</strong> ${classInstances.reduce((total, inst) => total + (inst.rounds ? inst.rounds.length : 0), 0)}</div>
             <div><strong>Prerequisites:</strong> ${getPrerequisitesText(className)}</div>
           </div>
           <div class="rounds-container">
       `;
 
+      // Process each round individually with its own entry options
+      let roundCounter = 0;
       classInstances.forEach((classInstance, instanceIndex) => {
         console.log(`🔄 Processing rounds for ${className}, instance ${instanceIndex}:`, classInstance.rounds);
         
         if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
           classInstance.rounds.forEach((round, roundIndex) => {
+            roundCounter++;
+            
             // Use appropriate property for judge name
             const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
             // Use appropriate property for round name
-            const roundName = round.name || round.roundName || `Round ${roundIndex + 1}`;
+            const roundName = round.name || round.roundName || `Round ${roundCounter}`;
+            
+            // Check if this specific round allows FEO
+            const roundAllowsFEO = round.feo === true || round.allowFEO === true;
+            
+            // Create unique IDs for this specific round
+            const roundId = `${className.replace(/\s+/g, '-').toLowerCase()}-day${dayIndex}-round${roundCounter}`;
             
             html += `
               <div class="round-item">
                 <div class="round-details">
                   <span class="judge-name">Judge: ${judgeName}</span>
-                  <span>${roundName}</span>
+                  <span style="font-weight: 600;">${roundName}</span>
                   ${round.time ? `<span>Time: ${round.time}</span>` : ''}
                   ${round.maxDogs ? `<span>Max Dogs: ${round.maxDogs}</span>` : ''}
+                </div>
+                <div class="round-entry-options">
+                  <div class="entry-option">
+                    <label class="entry-checkbox regular-entry" for="${roundId}-reg" style="background: #d4edda; border-color: #28a745; color: #155724;">
+                      <input type="checkbox" 
+                             id="${roundId}-reg" 
+                             data-class="${className}" 
+                             data-round="${roundName}"
+                             data-judge="${judgeName}"
+                             data-fee="${regularFee.toFixed(2)}" 
+                             data-type="regular"
+                             data-day="${dayIndex}"
+                             data-round-number="${roundCounter}">
+                      <span>Regular ($${regularFee.toFixed(2)})</span>
+                    </label>
+                  </div>
+            `;
+
+            // Only show FEO option if this round allows it and not junior handler
+            if (roundAllowsFEO && !isJuniorHandler) {
+              html += `
+                  <div class="entry-option">
+                    <label class="entry-checkbox feo-entry" for="${roundId}-feo" style="background: #fff3cd; border-color: #ffc107; color: #856404;">
+                      <input type="checkbox" 
+                             id="${roundId}-feo" 
+                             data-class="${className}" 
+                             data-round="${roundName}"
+                             data-judge="${judgeName}"
+                             data-fee="${feoFee.toFixed(2)}" 
+                             data-type="feo"
+                             data-day="${dayIndex}"
+                             data-round-number="${roundCounter}">
+                      <span>FEO ($${feoFee.toFixed(2)})</span>
+                    </label>
+                  </div>
+              `;
+            }
+
+            html += `
                 </div>
               </div>
             `;
@@ -2005,43 +2052,6 @@ function generateTabbedClasses() {
           console.warn(`⚠️ No rounds found for ${className}, instance ${instanceIndex}`);
         }
       });
-
-      html += `
-          </div>
-          <div class="entry-options">
-            <div class="entry-option">
-              <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg">
-                <input type="checkbox" 
-                       id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg" 
-                       data-class="${className}" 
-                       data-fee="${isJuniorHandler ? fees.juniorHandler.toFixed(2) : baseFee.toFixed(2)}" 
-                       data-type="regular"
-                       data-day="${dayIndex}">
-                <span>Regular Entry ($${isJuniorHandler ? fees.juniorHandler.toFixed(2) : baseFee.toFixed(2)})</span>
-              </label>
-            </div>
-      `;
-
-      // Check if FEO is available
-      const hasFEO = classInstances.some(inst => 
-        inst.rounds && inst.rounds.some(round => round.feo === true || round.allowFEO === true)
-      );
-
-      if (hasFEO && !isJuniorHandler) {
-        html += `
-            <div class="entry-option">
-              <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo">
-                <input type="checkbox" 
-                       id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo" 
-                       data-class="${className}" 
-                       data-fee="${feoFee.toFixed(2)}" 
-                       data-type="feo"
-                       data-day="${dayIndex}">
-                <span>FEO Entry ($${feoFee.toFixed(2)})</span>
-              </label>
-            </div>
-        `;
-      }
 
       html += `
           </div>
@@ -2075,6 +2085,89 @@ ${JSON.stringify(currentTrialData.days, null, 2)}
   }
 }
 
+// Updated entry selection handler for round-based entries
+function handleEntrySelection(checkbox) {
+  const className = checkbox.dataset.class;
+  const roundName = checkbox.dataset.round;
+  const judgeName = checkbox.dataset.judge;
+  const fee = parseFloat(checkbox.dataset.fee);
+  const entryType = checkbox.dataset.type;
+  const dayIndex = checkbox.dataset.day;
+  const roundNumber = checkbox.dataset.roundNumber;
+  
+  // Create unique identifier for this specific round entry
+  const entryId = `${className}-${roundName}-${dayIndex}-${roundNumber}`;
+  
+  if (checkbox.checked) {
+    // Prevent selecting both regular and FEO for same round
+    const otherType = entryType === 'regular' ? 'feo' : 'regular';
+    const otherCheckbox = document.querySelector(`input[data-class="${className}"][data-round="${roundName}"][data-type="${otherType}"][data-day="${dayIndex}"][data-round-number="${roundNumber}"]`);
+    if (otherCheckbox) {
+      otherCheckbox.checked = false;
+      otherCheckbox.parentElement.classList.remove('selected');
+      // Remove from selected entries if it was there
+      selectedEntries = selectedEntries.filter(entry => entry.entryId !== entryId || entry.type !== otherType);
+    }
+    
+    // Add to selected entries
+    selectedEntries.push({
+      entryId: entryId,
+      className: className,
+      roundName: roundName,
+      judgeName: judgeName,
+      fee: fee,
+      type: entryType,
+      dayIndex: dayIndex,
+      roundNumber: roundNumber
+    });
+    
+    checkbox.parentElement.classList.add('selected');
+  } else {
+    // Remove from selected entries
+    selectedEntries = selectedEntries.filter(entry => 
+      !(entry.entryId === entryId && entry.type === entryType)
+    );
+    
+    checkbox.parentElement.classList.remove('selected');
+  }
+  
+  updateEntrySummary();
+  checkFormValidity();
+}
+
+// Updated summary function for round-based entries
+function updateEntrySummary() {
+  const summaryDiv = document.getElementById('entrySummary');
+  const entriesList = document.getElementById('selectedEntriesList');
+  const totalFeeSpan = document.getElementById('totalFee');
+  
+  if (selectedEntries.length === 0) {
+    summaryDiv.style.display = 'none';
+    return;
+  }
+  
+  summaryDiv.style.display = 'block';
+  
+  // Update entries list with round information
+  entriesList.innerHTML = selectedEntries.map(entry => 
+    `<li class="selected-entry">
+      ${entry.className} - ${entry.roundName} 
+      ${entry.type === 'feo' ? '(FEO)' : '(Regular)'} 
+      - Judge: ${entry.judgeName} 
+      - $${entry.fee.toFixed(2)}
+    </li>`
+  ).join('');
+  
+  // Update total fee
+  totalFee = selectedEntries.reduce((sum, entry) => sum + entry.fee, 0);
+  totalFeeSpan.textContent = totalFee.toFixed(2);
+  
+  // Enable/disable submit button
+  const submitBtn = document.getElementById('submitEntry');
+  if (submitBtn) {
+    submitBtn.disabled = selectedEntries.length === 0;
+  }
+}
     // Populate form with existing entry data using timezone-safe dates
     function populateFormWithEntryData(entryData) {
       console.log("📝 Populating form with existing entry data");
