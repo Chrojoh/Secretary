@@ -1138,62 +1138,7 @@ async function generateAllScoreSheets() {
     alert(`Generated ${generatedSheets.length} score sheets across all trial dates!`);
 }
 
-        // Load existing running order or create default grouping
-        async function loadRunningOrder() {
-            const selectedDate = document.getElementById('dateSelect').value;
-            
-            try {
-                // Try to load confirmed running order first
-                const q = query(
-                    collection(db, "runningOrders"),
-                    where("trialId", "==", currentTrial.id),
-                    where("date", "==", selectedDate)
-                );
-                
-                const snapshot = await getDocs(q);
-                
-                if (!snapshot.empty) {
-                    // Use confirmed running order
-                    snapshot.forEach(doc => {
-                        const orderData = doc.data();
-                        runningOrderData[selectedDate] = orderData.runningOrder;
-                    });
-                    console.log('Loaded confirmed running order');
-                } else {
-                    // Create default grouping from entries
-                    runningOrderData = {};
-                    runningOrderData[selectedDate] = {};
-                    
-                    entries.forEach(entry => {
-                        const judge = entry.judge || 'Judge TBD';
-                        const classRound = `${entry.className || 'Unknown Class'} - Round ${entry.roundNumber || 1}`;
-
-                        if (!runningOrderData[selectedDate][judge]) {
-                            runningOrderData[selectedDate][judge] = {};
-                        }
-                        if (!runningOrderData[selectedDate][judge][classRound]) {
-                            runningOrderData[selectedDate][judge][classRound] = [];
-                        }
-
-                        const entrantName = `${entry.handlerName || 'Unknown Handler'} - ${entry.dogCallName || 'Unknown Dog'}`;
-                        runningOrderData[selectedDate][judge][classRound].push({
-                            id: `${entry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
-                            name: entrantName,
-                            entryType: entry.entryType || 'regular',
-                            handler: entry.handlerName || 'Unknown Handler',
-                            dog: entry.dogCallName || 'Unknown Dog',
-                            cwagsNumber: entry.cwagsNumber || '',
-                            originalEntry: entry
-                        });
-                    });
-                    
-                    console.log('Created default running order grouping');
-                }
-            } catch (error) {
-                console.error('Error loading running order:', error);
-                // Fallback to default grouping
-            }
-        }
+       
 
         // Generate all score sheets
         async function generateAllScoreSheets() {
