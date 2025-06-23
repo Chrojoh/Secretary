@@ -2881,32 +2881,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
   
-// Show success message
-function showSuccessMessage(entryId) {
-  // Hide the entry form
-  document.getElementById('entryForm').style.display = 'none';
-  
-  // Show success message
-  const successDiv = document.getElementById('successMessage');
-  if (successDiv) {
-    successDiv.classList.remove('hidden');
-    successDiv.style.display = 'block';
-  }
-  
-  // Generate edit link if this is a public entry
-  if (entryId && !isSecretary) {
-    const editUrl = `${window.location.origin}${window.location.pathname}?entry=${entryId}`;
-    const editLinkDiv = document.getElementById('editLinkSection');
-    const editUrlSpan = document.getElementById('editUrl');
-    
-    if (editLinkDiv && editUrlSpan) {
-      editUrlSpan.textContent = editUrl;
-      editLinkDiv.classList.remove('hidden');
-      editLinkDiv.style.display = 'block';
-    }
-  }
-}
-
 // Reset form function  
 function resetForm() {
   // Reset form fields
