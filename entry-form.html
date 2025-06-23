@@ -1093,7 +1093,7 @@
 
         <!-- Submit Section -->
         <div class="submit-section">
-          <button type="button" class="btn-submit" id="submitEntry" onclick="submitEntry()" disabled>
+          <button type="button" class="btn-submit" id="submitEntry" onclick="submitEntry()">
     Submit Entry
 </button>
             <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
@@ -1104,7 +1104,7 @@
     </div>
   </div>
 <script type="module">
-    import { auth, db } from './js/firebase.js';
+    import { auth, db } from '/js/firebase.js';
     import { collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     // ========================================
