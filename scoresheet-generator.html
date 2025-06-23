@@ -804,6 +804,15 @@
             }
         }
 
+        // Add this function near the top of scoresheet-generator.html
+function getStandardizedJudgeName(entry) {
+  return entry.judgeName || 
+         entry.judge || 
+         entry.judgeAssigned || 
+         entry.selectedJudge ||
+         'Judge TBD';
+}
+        
         // Load available trials
         async function loadTrials() {
             try {
