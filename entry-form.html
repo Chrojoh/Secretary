@@ -1858,7 +1858,8 @@
         day.classes.forEach((cls, classIndex) => {
           // FIXED: Use 'name' property instead of 'className' as shown in debug output
           if (cls && cls.name && cls.name.trim()) {
-            const className = cls.name.trim();
+           const className = cls.name || cls.className;
+           if (cls && className && className.trim()) {
             if (!classGroups.has(className)) {
               classGroups.set(className, []);
             }
