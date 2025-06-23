@@ -1879,9 +1879,44 @@
 
           classInstances.forEach((classInstance, instanceIndex) => {
             if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
-              classInstance\.rounds\.forEach\(\(round,\ roundIndex\)\ =>\ \{\ \ const\ judgeName\ =\ round\.judge\ \&\&\ round\.judge\.trim\(\)\ \?\ round\.judge\ :\ 'Judge\ TBD';\ \ const\ roundNumber\ =\ round\.roundNumber\ \|\|\ \(roundIndex\ \+\ 1\);\ \ const\ feoAvailable\ =\ round\.feo\ ===\ true\ \|\|\ round\.FEO\ ===\ true;\ \ const\ roundId\ =\ `\$\{className\.replace\(/\s\+/g,\ '\-'\)\.toLowerCase\(\)\}\-\$\{dayIndex\}\-r\$\{roundIndex\}`;\ \ html\ \+=\ `\ \ \ \ <div\ class="round\-item">\ \ \ \ \ \ <div\ class="round\-details">\ \ \ \ \ \ \ \ <span\ class="judge\-name">Judge:\ \$\{judgeName\}</span>\ \ \ \ \ \ \ \ <span>Round\ \$\{roundNumber\}</span>\ \ \ \ \ \ </div>\ \ \ \ \ \ <div\ class="entry\-options">\ \ \ \ \ \ \ \ <label\ class="entry\-checkbox"\ for="\$\{roundId\}\-reg">\ \ \ \ \ \ \ \ \ \ <input\ type="checkbox"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ id="\$\{roundId\}\-reg"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-class="\$\{className\}"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-round="\$\{roundNumber\}"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-fee="\$\{baseFee\.toFixed\(2\)\}"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-type="regular"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-day="\$\{dayIndex\}">\ \ \ \ \ \ \ \ \ \ <span>Regular\ Entry</span>\ \ \ \ \ \ \ \ </label>\ \ \ \ \ \ \ \ \$\{feoAvailable\ \?\ `\ \ \ \ \ \ \ \ <label\ class="entry\-checkbox"\ for="\$\{roundId\}\-feo">\ \ \ \ \ \ \ \ \ \ <input\ type="checkbox"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ id="\$\{roundId\}\-feo"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-class="\$\{className\}"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-round="\$\{roundNumber\}"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-fee="\$\{feoFee\.toFixed\(2\)\}"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-type="feo"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ data\-day="\$\{dayIndex\}">\ \ \ \ \ \ \ \ \ \ <span>FEO\ Entry</span>\ \ \ \ \ \ \ \ </label>\ \ \ \ \ \ \ \ `\ :\ ''\}\ \ \ \ \ \ </div>\ \ \ \ </div>\ \ `;\}\);
-            }
-          });
+             classInstance.rounds.forEach((round, roundIndex) => {
+  const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
+  const roundNumber = round.roundNumber || (roundIndex + 1);
+  const feoAvailable = round.feo === true || round.FEO === true;
+  const roundId = `${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-r${roundIndex}`;
+
+  html += `
+    <div class="round-item">
+      <div class="round-details">
+        <span class="judge-name">Judge: ${judgeName}</span>
+        <span>Round ${roundNumber}</span>
+      </div>
+      <div class="entry-options">
+        <label class="entry-checkbox" for="${roundId}-reg">
+          <input type="checkbox"
+                 id="${roundId}-reg"
+                 data-class="${className}"
+                 data-round="${roundNumber}"
+                 data-fee="${baseFee.toFixed(2)}"
+                 data-type="regular"
+                 data-day="${dayIndex}">
+          <span>Regular Entry</span>
+        </label>
+        ${feoAvailable ? `
+        <label class="entry-checkbox" for="${roundId}-feo">
+          <input type="checkbox"
+                 id="${roundId}-feo"
+                 data-class="${className}"
+                 data-round="${roundNumber}"
+                 data-fee="${feoFee.toFixed(2)}"
+                 data-type="feo"
+                 data-day="${dayIndex}">
+          <span>FEO Entry</span>
+        </label>` : ''}
+      </div>
+    </div>
+  `;
+});
 
           html += `
               </div>
