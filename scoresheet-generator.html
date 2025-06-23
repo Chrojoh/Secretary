@@ -900,89 +900,243 @@
             }
         }
 
-        // Load trial data and entries
-        async function loadTrialData() {
-            const trialId = document.getElementById('trialSelect').value;
-            const selectedDate = document.getElementById('dateSelect').value;
+     // REPLACE your loadTrialData() function with this version:
 
-            if (!trialId) {
-                alert('Please select a trial');
-                return;
-            }
+// Load trial data and entries
+async function loadTrialData() {
+    const trialId = document.getElementById('trialSelect').value;
+    const selectedDate = document.getElementById('dateSelect').value;
 
-            if (!selectedDate) {
-                alert('Please select a date');
-                return;
-            }
+    if (!trialId) {
+        alert('Please select a trial');
+        return;
+    }
 
-            document.getElementById('loadingIndicator').style.display = 'block';
-            document.getElementById('loadBtn').disabled = true;
+    if (!selectedDate) {
+        alert('Please select a date');
+        return;
+    }
 
-            try {
-                // Load entries for this trial
-                const q = query(
-                    collection(db, "entries"),
-                    where("trialId", "==", trialId)
-                );
-                
-                const snapshot = await getDocs(q);
-                entries = [];
-                
-                snapshot.forEach(doc => {
-                    const entryData = doc.data();
+    document.getElementById('loadingIndicator').style.display = 'block';
+    document.getElementById('loadBtn').disabled = true;
+
+    try {
+        // Load ALL entries for this trial (not just selected date)
+        const q = query(
+            collection(db, "entries"),
+            where("trialId", "==", trialId)
+        );
+        
+        const snapshot = await getDocs(q);
+        entries = [];
+        
+        snapshot.forEach(doc => {
+            const entryData = doc.data();
+            
+            // Fix selected entries dates
+            if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                entryData.selectedEntries.forEach(selectedEntry => {
+                    const processedEntry = {
+                        ...selectedEntry,
+                        date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
+                    };
                     
-                    // Fix selected entries dates
-                    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-                        entryData.selectedEntries.forEach(selectedEntry => {
-                            const processedEntry = {
-                                ...selectedEntry,
-                                date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
-                            };
-                            
-                            entries.push({
-                                id: doc.id,
-                                ...processedEntry,
-                                handlerName: entryData.handlerName,
-                                dogCallName: entryData.dogCallName,
-                                cwagsNumber: entryData.cwagsNumber,
-                                submittedAt: entryData.submittedAt
-                            });
-                        });
-                    }
+                    entries.push({
+                        id: doc.id,
+                        ...processedEntry,
+                        handlerName: entryData.handlerName,
+                        dogCallName: entryData.dogCallName,
+                        cwagsNumber: entryData.cwagsNumber,
+                        submittedAt: entryData.submittedAt
+                    });
                 });
-
-                // Filter entries for selected date using timezone-safe comparison
-                entries = entries.filter(entry => {
-                    const entryDate = getDateFromFirebase(entry.date);
-                    const filterDate = formatLocalDate(createLocalDate(selectedDate));
-                    return entryDate === filterDate;
-                });
-
-                console.log('Loaded entries for date:', selectedDate, entries);
-
-                if (entries.length === 0) {
-                    showError('No entries found for the selected date');
-                    return;
-                }
-
-                // Group entries and load any existing running order
-                await loadRunningOrder();
-                
-                // Generate statistics
-                generateStats();
-
-                // Show controls
-                document.getElementById('generateBtn').style.display = 'inline-block';
-                document.getElementById('printBtn').style.display = 'inline-block';
-                showLeagueButton();
-            } catch (error) {
-                console.error('Error loading trial data:', error);
-                showError('Error loading trial data: ' + error.message);
-            } finally {
-                document.getElementById('loadingIndicator').style.display = 'none';
-                document.getElementById('loadBtn').disabled = false;
             }
+        });
+
+        console.log('Loaded ALL entries for trial:', entries.length);
+
+        if (entries.length === 0) {
+            showError('No entries found for this trial');
+            return;
         }
+
+        // Group entries and load any existing running order for ALL dates
+        await loadRunningOrderForAllDates();
+        
+        // Generate statistics for all entries
+        generateStats();
+
+        // Show controls
+        document.getElementById('generateBtn').style.display = 'inline-block';
+        document.getElementById('printBtn').style.display = 'inline-block';
+        
+        // Add the league summary button
+        showLeagueButton();
+
+    } catch (error) {
+        console.error('Error loading trial data:', error);
+        showError('Error loading trial data: ' + error.message);
+    } finally {
+        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById('loadBtn').disabled = false;
+    }
+}
+
+// NEW function to load running order for all dates
+async function loadRunningOrderForAllDates() {
+    try {
+        // Get all unique dates from entries
+        const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
+        console.log('Found dates in trial:', allDates);
+        
+        runningOrderData = {};
+        
+        for (const date of allDates) {
+            await loadRunningOrderForDate(date);
+        }
+        
+        console.log('Loaded running order for all dates:', Object.keys(runningOrderData));
+        
+    } catch (error) {
+        console.error('Error loading running orders:', error);
+        // Continue with default grouping
+        createDefaultRunningOrderForAllDates();
+    }
+}
+
+// Load running order for a specific date
+async function loadRunningOrderForDate(date) {
+    try {
+        // Try to load confirmed running order for this date
+        const q = query(
+            collection(db, "runningOrders"),
+            where("trialId", "==", currentTrial.id),
+            where("date", "==", date)
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+            // Use confirmed running order
+            snapshot.forEach(doc => {
+                const orderData = doc.data();
+                runningOrderData[date] = orderData.runningOrder;
+            });
+            console.log(`Loaded confirmed running order for ${date}`);
+        } else {
+            // Create default grouping for this date
+            createDefaultRunningOrderForDate(date);
+        }
+        
+    } catch (error) {
+        console.error(`Error loading running order for ${date}:`, error);
+        createDefaultRunningOrderForDate(date);
+    }
+}
+
+// Create default running order for a specific date
+function createDefaultRunningOrderForDate(date) {
+    if (!runningOrderData[date]) {
+        runningOrderData[date] = {};
+    }
+    
+    // Filter entries for this specific date
+    const dateEntries = entries.filter(entry => {
+        const entryDate = getDateFromFirebase(entry.date);
+        const filterDate = formatLocalDate(createLocalDate(date));
+        return entryDate === filterDate;
+    });
+    
+    dateEntries.forEach(entry => {
+        const judge = entry.judgeName || entry.judge || 'Judge TBD'; // Fix: use judgeName
+        const classRound = `${entry.className || 'Unknown Class'} - Round ${entry.roundNumber || 1}`;
+
+        if (!runningOrderData[date][judge]) {
+            runningOrderData[date][judge] = {};
+        }
+        
+        if (!runningOrderData[date][judge][classRound]) {
+            runningOrderData[date][judge][classRound] = [];
+        }
+
+        const entrantName = `${entry.handlerName || 'Unknown Handler'} - ${entry.dogCallName || 'Unknown Dog'}`;
+        runningOrderData[date][judge][classRound].push({
+            id: `${entry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
+            name: entrantName,
+            entryType: entry.type || entry.entryType || 'regular',
+            handler: entry.handlerName || 'Unknown Handler',
+            dog: entry.dogCallName || 'Unknown Dog',
+            cwagsNumber: entry.cwagsNumber || '',
+            originalEntry: entry
+        });
+    });
+    
+    console.log(`Created default running order for ${date}:`, Object.keys(runningOrderData[date] || {}));
+}
+
+// Create default running order for all dates
+function createDefaultRunningOrderForAllDates() {
+    const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
+    
+    allDates.forEach(date => {
+        createDefaultRunningOrderForDate(date);
+    });
+}
+
+// UPDATE the generateAllScoreSheets function to process ALL dates:
+async function generateAllScoreSheets() {
+    const selectedJudge = document.getElementById('judgeSelect').value;
+
+    if (!runningOrderData || Object.keys(runningOrderData).length === 0) {
+        alert('No data available. Please load trial data first.');
+        return;
+    }
+
+    generatedSheets = [];
+
+    // Process ALL dates in the running order
+    Object.keys(runningOrderData).forEach(date => {
+        const judgeData = runningOrderData[date];
+
+        // Filter by judge if selected
+        const judgesToProcess = selectedJudge ? 
+            { [selectedJudge]: judgeData[selectedJudge] } : 
+            judgeData;
+
+        Object.keys(judgesToProcess).forEach(judge => {
+            Object.keys(judgesToProcess[judge]).forEach(classRound => {
+                const entrants = judgesToProcess[judge][classRound];
+                
+                const sheetData = {
+                    id: `${currentTrial.id}_${date}_${judge}_${classRound}`.replace(/[^a-zA-Z0-9]/g, '_'),
+                    trialId: currentTrial.id,
+                    trialName: currentTrial.clubName || 'Unnamed Trial',
+                    date: prepareDateForFirebase(date),
+                    judge: judge,
+                    classRound: classRound,
+                    className: classRound.split(' - Round')[0],
+                    roundNumber: classRound.split('Round ')[1] || '1',
+                    entrants: entrants,
+                    status: 'generated',
+                    createdAt: new Date(),
+                    createdBy: auth.currentUser.uid
+                };
+
+                generatedSheets.push(sheetData);
+            });
+        });
+    });
+
+    console.log(`Generated ${generatedSheets.length} score sheets across all dates`);
+
+    // Save to database
+    await saveScoreSheetsToDatabase();
+
+    // Display generated sheets
+    displayGeneratedSheets();
+
+    alert(`Generated ${generatedSheets.length} score sheets across all trial dates!`);
+}
 
         // Load existing running order or create default grouping
         async function loadRunningOrder() {
