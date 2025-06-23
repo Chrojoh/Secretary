@@ -626,6 +626,146 @@
       .entry-option {
         min-width: 100px;
       }
+      /* Round-based entry options styling */
+.round-entry-options {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.round-entry-options .entry-option {
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
+}
+
+/* Regular entry styling - Green */
+.entry-checkbox.regular-entry {
+  background: #d4edda !important;
+  border: 2px solid #28a745 !important;
+  color: #155724 !important;
+}
+
+.entry-checkbox.regular-entry:hover {
+  background: #28a745 !important;
+  color: white !important;
+}
+
+.entry-checkbox.regular-entry.selected {
+  background: #28a745 !important;
+  color: white !important;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+}
+
+/* FEO entry styling - Yellow */
+.entry-checkbox.feo-entry {
+  background: #fff3cd !important;
+  border: 2px solid #ffc107 !important;
+  color: #856404 !important;
+}
+
+.entry-checkbox.feo-entry:hover {
+  background: #ffc107 !important;
+  color: #212529 !important;
+}
+
+.entry-checkbox.feo-entry.selected {
+  background: #ffc107 !important;
+  color: #212529 !important;
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.3);
+}
+
+/* Round item styling updates */
+.round-item {
+  background: #f0f8ff;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  display: block; /* Changed from flex to block for stacking */
+}
+
+.round-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.judge-name {
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Enhanced entry checkbox base styling */
+.entry-checkbox {
+  display: block;
+  border-radius: 20px;
+  padding: 0.4rem 0.8rem;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  border: 2px solid;
+}
+
+.entry-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+/* Mobile responsiveness for round entries */
+@media (max-width: 768px) {
+  .round-entry-options {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .round-entry-options .entry-option {
+    min-width: auto;
+    max-width: none;
+  }
+  
+  .round-item {
+    padding: 0.5rem;
+  }
+  
+  .entry-checkbox {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+/* Selected entries list styling updates */
+.selected-entry {
+  background: white;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 6px;
+  border-left: 4px solid #28a745;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Class header updates for round-based pricing */
+.class-fee {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #666;
+}
+
+.class-details {
+  background: #f8f9fa;
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #dee2e6;
+}
     }
   </style>
 </head>
