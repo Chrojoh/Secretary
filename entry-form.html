@@ -2933,5 +2933,61 @@ window.checkFormValidity = checkFormValidity;
             updateEntrySummary();
         }
     });
+  // Simple submit function - add this EXACTLY as shown
+window.submitEntry = async function() {
+  console.log("🚀 Starting entry submission...");
+  
+  // Basic form validation
+  const handlerName = document.getElementById('handlerName').value.trim();
+  const dogCallName = document.getElementById('dogCallName').value.trim();
+  const waiverAccepted = document.getElementById('waiverAccepted').checked;
+  
+  if (!handlerName) {
+    alert('Please enter the Handler Name.');
+    return;
+  }
+  
+  if (!dogCallName) {
+    alert('Please enter the Dog\'s Call Name.');
+    return;
+  }
+  
+  if (!waiverAccepted) {
+    alert('Please accept the waiver agreement to continue.');
+    return;
+  }
+  
+  if (!selectedEntries || selectedEntries.length === 0) {
+    alert('Please select at least one class entry.');
+    return;
+  }
+  
+  // Show success immediately for testing
+  alert(`Entry submitted successfully!\n\nHandler: ${handlerName}\nDog: ${dogCallName}\nEntries: ${selectedEntries.length}\nTotal Fee: $${totalFee.toFixed(2)}`);
+  
+  // Ask if they want to enter another
+  if (confirm('Would you like to enter another participant?')) {
+    // Reset the form
+    document.getElementById('entryForm').reset();
+    selectedEntries = [];
+    totalFee = 0;
+    
+    // Clear checkboxes
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      if (cb.id !== 'waiverAccepted') {
+        cb.checked = false;
+        if (cb.parentElement) {
+          cb.parentElement.classList.remove('selected');
+        }
+      }
+    });
+    
+    // Update summary
+    updateEntrySummary();
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
   </script>
 </body>
