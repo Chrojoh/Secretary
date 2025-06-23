@@ -404,10 +404,6 @@
       text-align: center;
     }
     
-    .class-fee {
-      display: none;
-    }
-    
     .class-details {
       background: #f8f9fa;
       padding: 1rem;
@@ -438,18 +434,21 @@
       color: #495057;
     }
     
-    .entry-options {
-      display: flex;
-      gap: 0.5rem;
-    }
-    
     .rounds-container {
       padding: 1rem;
       background: #fff;
     }
     
+    .round-entry-options {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
     .entry-option {
       flex: 1;
+      min-width: 120px;
       max-width: 200px;
     }
     
@@ -469,20 +468,6 @@
     
     .entry-checkbox input[type="checkbox"] {
       display: none;
-    }
-    
-    /* Round-based entry options styling */
-    .round-entry-options {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    .round-entry-options .entry-option {
-      flex: 1;
-      min-width: 120px;
-      max-width: 200px;
     }
     
     /* Regular entry styling - Green */
@@ -926,79 +911,112 @@
           </div>
         </div>
 
-        <!-- Tabbed Class Entries Section -->
+        <!-- Class Entries Section -->
         <div class="form-section">
-          <h3>🎯 Class Entries</h3>
-          
-          <!-- Entry Summary -->
-          <div class="entry-summary" id="entrySummary" style="display: none;">
-            <div class="summary-title">Selected Entries:</div>
-            <ul class="selected-entries" id="selectedEntriesList">
-            </ul>
-            <div style="margin-top: 1rem; font-weight: 600; color: #0066cc;">
-              Total Fee: $<span id="totalFee">0.00</span>
+            <h3>🎯 Class Entries</h3>
+            
+            <!-- Entry Summary -->
+            <div class="entry-summary" id="entrySummary" style="display: none;">
+                <div class="summary-title">Selected Entries:</div>
+                <ul class="selected-entries" id="selectedEntriesList">
+                </ul>
+                <div style="margin-top: 1rem; font-weight: 600; color: #0066cc;">
+                    Total Fee: $<span id="totalFee">0.00</span>
+                </div>
             </div>
-          </div>
 
-          <!-- Day Tabs - Dynamically Generated -->
-          <div class="day-tabs-container">
-            <div class="day-tabs" id="dayTabs">
-              <!-- Tabs will be generated from trial data -->
+            <!-- Day Tabs - Dynamically Generated -->
+            <div class="day-tabs-container">
+                <div class="day-tabs" id="dayTabs">
+                    <!-- Tabs will be generated from trial data -->
+                </div>
             </div>
-          </div>
 
-          <!-- Scrollable Class Entries - Dynamically Generated -->
-          <div class="class-entries-container" id="classEntriesContainer">
-            <!-- Content will be generated from trial data -->
-            <div style="text-align: center; padding: 2rem; color: #666;">
-              Loading available classes...
+            <!-- Scrollable Class Entries - Dynamically Generated -->
+            <div class="class-entries-container" id="classEntriesContainer">
+                <!-- Content will be generated from trial data -->
+                <div style="text-align: center; padding: 2rem; color: #666;">
+                    Loading available classes...
+                </div>
             </div>
-          </div>
         </div>
 
         <!-- Submit Section -->
         <div class="submit-section">
-          <button type="button" class="btn-submit" id="submitEntry" disabled>Submit Entry</button>
-          <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
-            Please review your selections before submitting. Entry fees are due upon submission.
-          </p>
+            <button type="button" class="btn-submit" id="submitEntry" disabled>Submit Entry</button>
+            <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                Please review your selections before submitting. Entry fees are due upon submission.
+            </p>
         </div>
       </form>
     </div>
   </div>
 
-<script type="module">
+  <script type="module">
     import { auth, db } from './js/firebase.js';
     import { collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     // ========================================
-    // GLOBAL DATE HANDLING
+    // STANDARDIZED FIELD NAMES (CRITICAL)
+    // ========================================
+    
+    // Use these EXACT field names everywhere - NO EXCEPTIONS
+    const STANDARD_FIELDS = {
+      HANDLER_NAME: 'handlerName',      // NOT 'Handler' or 'handler'
+      DOG_CALL_NAME: 'dogCallName',     // NOT 'Call Name' or 'dogName'
+      JUDGE_NAME: 'judgeName',          // NOT 'judge' or 'judgeAssigned'
+      CLASS_NAME: 'className',          // NOT 'Class' or 'class'
+      CWAGS_NUMBER: 'cwagsNumber'       // NOT 'Registration'
+    };
+
+    // Data field mapping for backward compatibility
+    const FIELD_MAPPING = {
+      // Handler name variations
+      'Handler': 'handlerName',
+      'handler': 'handlerName',
+      
+      // Dog name variations  
+      'Call Name': 'dogCallName',
+      'dogName': 'dogCallName',
+      'callName': 'dogCallName',
+      
+      // Judge name variations
+      'judge': 'judgeName',
+      'judgeAssigned': 'judgeName',
+      'selectedJudge': 'judgeName',
+      
+      // Registration variations
+      'Registration': 'cwagsNumber',
+      'registration': 'cwagsNumber',
+      
+      // Class name variations
+      'Class': 'className',
+      'class': 'className'
+    };
+
+    // ========================================
+    // GLOBAL DATE HANDLING FIX
     // ========================================
     
     function createLocalDate(dateStr) {
       if (!dateStr) return null;
-      
       if (typeof dateStr === 'string') {
         const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
         return new Date(dateWithTime);
       }
-      
       return new Date(dateStr);
     }
 
     function formatLocalDate(date) {
       if (!date || !(date instanceof Date)) return '';
-      
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
-      
       return `${year}-${month}-${day}`;
     }
 
     function formatDateDisplay(dateInput, options = {}) {
       let date;
-      
       if (typeof dateInput === 'string') {
         date = createLocalDate(dateInput);
       } else if (dateInput instanceof Date) {
@@ -1023,15 +1041,12 @@
 
     function prepareDateForFirebase(dateStr) {
       if (!dateStr) return null;
-      const localDate = createLocalDate(dateStr);
-      return localDate;
+      return createLocalDate(dateStr);
     }
 
     function getDateFromFirebase(firebaseDate) {
       if (!firebaseDate) return '';
-      
       let date;
-      
       if (firebaseDate.toDate) {
         date = firebaseDate.toDate();
       } else if (firebaseDate instanceof Date) {
@@ -1041,146 +1056,48 @@
       } else {
         return '';
       }
-      
       return formatLocalDate(date);
     }
 
     // ========================================
-    // REGISTRATION NUMBER FORMATTER
+    // DATA NORMALIZATION FUNCTIONS
     // ========================================
-
-    function formatRegistrationNumber(input) {
-      if (!input) return '';
+    
+    function normalizeEntryData(entryData) {
+      const normalized = { ...entryData };
       
-      let cleaned = input.replace(/[^\d]/g, '');
-      
-      if (!cleaned) return '';
-      
-      if (cleaned.length < 6) {
-        return cleaned;
-      }
-      
-      if (cleaned.length > 8) {
-        cleaned = cleaned.substring(0, 8);
-      }
-      
-      if (cleaned.length === 6) {
-        const part1 = cleaned.substring(0, 2);
-        const part2 = cleaned.substring(2);
-        return `${part1}-${part2}`;
-      } else if (cleaned.length >= 7) {
-        const part1 = cleaned.substring(0, 2);
-        const part2 = cleaned.substring(2, 6);
-        let part3 = cleaned.substring(6);
-        
-        if (part3.length === 1) {
-          part3 = '0' + part3;
+      // Apply field mapping to normalize all field names
+      Object.keys(FIELD_MAPPING).forEach(oldField => {
+        if (entryData[oldField] && !entryData[FIELD_MAPPING[oldField]]) {
+          normalized[FIELD_MAPPING[oldField]] = entryData[oldField];
+          delete normalized[oldField]; // Remove old field
         }
-        
-        return `${part1}-${part2}-${part3}`;
-      }
+      });
       
-      return cleaned;
+      return normalized;
     }
 
-    function handleRegistrationInput(event) {
-      const input = event.target;
-      const cursorPosition = input.selectionStart;
-      const originalValue = input.value;
-      const originalLength = originalValue.length;
-      
-      const cleanedDigits = originalValue.replace(/[^\d]/g, '');
-      
-      let formattedValue;
-      if (cleanedDigits.length >= 6) {
-        formattedValue = formatRegistrationNumber(originalValue);
-      } else {
-        formattedValue = cleanedDigits;
-      }
-      
-      input.value = formattedValue;
-      
-      const lengthDifference = formattedValue.length - originalLength;
-      const newCursorPosition = Math.max(0, cursorPosition + lengthDifference);
-      
-      setTimeout(() => {
-        input.setSelectionRange(newCursorPosition, newCursorPosition);
-      }, 0);
-      
-      const hasCompleteRegistration = 
-        formattedValue.length >= 8 || 
-        (formattedValue.includes('-') && cleanedDigits.length >= 6);
-        
-      if (hasCompleteRegistration) {
-        enhancedAutoFillFromRegistration(formattedValue);
-      }
+    function getStandardizedHandlerName(entry) {
+      return entry.handlerName || 
+             entry.Handler || 
+             entry.handler || 
+             '';
     }
 
-    function handleRegistrationBlur(event) {
-      const input = event.target;
-      const currentValue = input.value;
-      
-      if (currentValue) {
-        const cleanedDigits = currentValue.replace(/[^\d]/g, '');
-        
-        let finalFormatted;
-        if (cleanedDigits.length >= 6) {
-          finalFormatted = formatRegistrationNumber(currentValue);
-          
-          if (finalFormatted !== currentValue) {
-            input.classList.add('auto-filled');
-            setTimeout(() => {
-              input.classList.remove('auto-filled');
-            }, 2000);
-          }
-          
-          input.value = finalFormatted;
-          enhancedAutoFillFromRegistration(finalFormatted);
-        } else {
-          finalFormatted = cleanedDigits;
-          input.value = finalFormatted;
-        }
-      }
+    function getStandardizedDogName(entry) {
+      return entry.dogCallName || 
+             entry['Call Name'] || 
+             entry.dogName || 
+             entry.callName || 
+             '';
     }
 
-    function handleRegistrationPaste(event) {
-      event.preventDefault();
-      
-      const pastedText = (event.clipboardData || window.clipboardData).getData('text');
-      
-      const cleanedDigits = pastedText.replace(/[^\d]/g, '');
-      let formattedValue;
-      
-      if (cleanedDigits.length >= 6) {
-        formattedValue = formatRegistrationNumber(pastedText);
-      } else {
-        formattedValue = cleanedDigits;
-      }
-      
-      event.target.value = formattedValue;
-      
-      if (formattedValue.length >= 8 || (formattedValue.includes('-') && cleanedDigits.length >= 6)) {
-        enhancedAutoFillFromRegistration(formattedValue);
-      }
-    }
-
-    function setupRegistrationFormatter() {
-      const regInput = document.getElementById('cwagsNumber');
-      
-      if (regInput) {
-        regInput.removeEventListener('input', handleRegistrationInput);
-        regInput.removeEventListener('paste', handleRegistrationPaste);
-        regInput.removeEventListener('blur', handleRegistrationBlur);
-        
-        regInput.addEventListener('input', handleRegistrationInput);
-        regInput.addEventListener('paste', handleRegistrationPaste);
-        regInput.addEventListener('blur', handleRegistrationBlur);
-        
-        regInput.setAttribute('inputmode', 'numeric');
-        regInput.setAttribute('pattern', '[0-9\\-]*');
-        regInput.setAttribute('maxlength', '10');
-        regInput.setAttribute('placeholder', 'e.g., 22-4168-01');
-      }
+    function getStandardizedJudgeName(entry) {
+      return entry.judgeName || 
+             entry.judge || 
+             entry.judgeAssigned || 
+             entry.selectedJudge ||
+             'TBD';
     }
 
     // ========================================
@@ -1195,10 +1112,10 @@
     let isSecretary = false;
     let isRegistrationDataLoaded = false;
     let formInitialized = false;
-
     let selectedEntries = [];
     let totalFee = 0;
 
+    // Prerequisites mapping
     const prerequisites = {
         "Investigator 3": ["Patrol 1", "Detective 2"],
         "Super Sleuth 4": ["Investigator 3"],
@@ -1215,6 +1132,7 @@
         "Obedience 5": ["Obedience 4"]
     };
 
+    // Fee structure - configurable by secretary
     let fees = {
       regular: 35.00,
       feo: 25.00,
@@ -1224,17 +1142,15 @@
     // ========================================
     // UTILITY FUNCTIONS
     // ========================================
-
+    
     function getPrerequisitesText(className) {
         const prereqs = prerequisites[className];
         if (!prereqs || prereqs.length === 0) {
             return "Open to all levels";
         }
-        
         if (className === "Investigator 3") {
             return "Patrol 1 OR Detective 2";
         }
-        
         return prereqs.join(", ");
     }
 
@@ -1242,11 +1158,9 @@
         document.querySelectorAll('.class-day-content').forEach(content => {
             content.classList.remove('active');
         });
-        
         document.querySelectorAll('.day-tab').forEach(tab => {
             tab.classList.remove('active');
         });
-        
         document.getElementById(`day-${dayIndex}`).classList.add('active');
         document.querySelectorAll('.day-tab')[dayIndex].classList.add('active');
     };
@@ -1254,7 +1168,7 @@
     // ========================================
     // ENTRY SELECTION HANDLING
     // ========================================
-
+    
     document.addEventListener('change', function(e) {
         if (e.target.type === 'checkbox' && e.target.dataset.class) {
             handleEntrySelection(e.target);
@@ -1273,6 +1187,7 @@
       const entryId = `${className}-${roundName}-${dayIndex}-${roundNumber}`;
       
       if (checkbox.checked) {
+        // Prevent selecting both regular and FEO for same round
         const otherType = entryType === 'regular' ? 'feo' : 'regular';
         const otherCheckbox = document.querySelector(`input[data-class="${className}"][data-round="${roundName}"][data-type="${otherType}"][data-day="${dayIndex}"][data-round-number="${roundNumber}"]`);
         if (otherCheckbox) {
@@ -1297,7 +1212,6 @@
         selectedEntries = selectedEntries.filter(entry => 
           !(entry.entryId === entryId && entry.type === entryType)
         );
-        
         checkbox.parentElement.classList.remove('selected');
       }
       
@@ -1317,6 +1231,7 @@
       
       summaryDiv.style.display = 'block';
       
+      // Group entries by day
       const entriesByDay = {};
       selectedEntries.forEach(entry => {
         const dayKey = `Day ${parseInt(entry.dayIndex) + 1}`;
@@ -1335,7 +1250,6 @@
         })
         .forEach(dayKey => {
           html += `<li class="day-group-header">${dayKey}</li>`;
-          
           entriesByDay[dayKey].forEach(entry => {
             html += `
               <li class="selected-entry">
@@ -1349,7 +1263,6 @@
         });
       
       entriesList.innerHTML = html;
-      
       totalFee = selectedEntries.reduce((sum, entry) => sum + entry.fee, 0);
       totalFeeSpan.textContent = totalFee.toFixed(2);
       
@@ -1362,7 +1275,7 @@
     // ========================================
     // FORM VALIDATION
     // ========================================
-
+    
     function checkFormValidity() {
       const waiverAccepted = document.getElementById('waiverAccepted').checked;
       const handlerName = document.getElementById('handlerName').value.trim();
@@ -1382,9 +1295,11 @@
     // ========================================
     // REGISTRATION DATA LOADING
     // ========================================
-
+    
     async function loadRegistrationData() {
       try {
+        console.log("📊 Loading registration data...");
+        
         const possiblePaths = [
           '/js/data.json',
           '../js/data.json',
@@ -1398,87 +1313,154 @@
         
         for (const path of possiblePaths) {
           try {
+            console.log(`🔍 Trying path: ${path}`);
             response = await fetch(path);
             if (response.ok) {
               successfulPath = path;
+              console.log(`✅ Found data.json at: ${path}`);
               break;
             }
           } catch (pathError) {
+            console.log(`❌ Failed to fetch from ${path}:`, pathError.message);
             continue;
           }
         }
         
         if (!response || !response.ok) {
-          throw new Error(`Could not find data.json at any of the expected locations`);
+          throw new Error(`Could not find data.json at any expected location`);
         }
         
         const data = await response.json();
         registrationData = data || [];
         isRegistrationDataLoaded = true;
+        console.log(`✅ Loaded ${registrationData.length} registration records from ${successfulPath}`);
         
       } catch (error) {
+        console.warn("⚠️ Could not load registration data:", error.message);
         registrationData = [];
         isRegistrationDataLoaded = true;
+        console.log("ℹ️ Registration lookup will not be available, but manual entry will work");
       }
     }
 
-    function enhancedAutoFillFromRegistration(cwagsNumber) {
-      if (!cwagsNumber || !isRegistrationDataLoaded || !registrationData) {
+    // ========================================
+    // AUTO-FILL FROM REGISTRATION
+    // ========================================
+    
+    async function autoFillFromRegistration(registrationNumber) {
+      if (isAutoFilling) {
+        console.log("⏳ Auto-fill already in progress, skipping");
         return;
       }
       
-      const cleanedInput = cwagsNumber.replace(/[^\d]/g, '');
+      if (!isRegistrationDataLoaded) {
+        console.log("⏳ Waiting for registration data to load...");
+        showLookupStatus('⏳ Loading registration database...', 'loading');
+        
+        let attempts = 0;
+        while (!isRegistrationDataLoaded && attempts < 50) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
+        
+        if (!isRegistrationDataLoaded) {
+          showLookupStatus('❌ Registration database not available', 'warning');
+          return;
+        }
+      }
       
-      let data = registrationData.find(entry => {
-        if (entry.Registration === cwagsNumber || entry.cwagsNumber === cwagsNumber) {
-          return true;
-        }
+      showLookupStatus('🔍 Looking up registration...', 'loading');
+      
+      try {
+        isAutoFilling = true;
         
-        const cleanedEntry = (entry.Registration || entry.cwagsNumber || '').replace(/[^\d]/g, '');
-        if (cleanedEntry === cleanedInput) {
-          return true;
-        }
+        const normalizedInput = registrationNumber.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        console.log("🔍 Looking up registration:", normalizedInput);
         
-        if (cleanedInput.length >= 6) {
-          const formattedInput = formatRegistrationNumber(cleanedInput);
-          if (entry.Registration === formattedInput || entry.cwagsNumber === formattedInput) {
-            return true;
+        let matchingRegistration = null;
+
+        // Search data.json with standardized field names
+        if (registrationData && registrationData.length > 0) {
+          console.log("🔍 Searching in local data.json...");
+          matchingRegistration = registrationData.find(record => {
+            // Normalize the record first
+            const normalizedRecord = normalizeEntryData(record);
+            const regNumber = (normalizedRecord.cwagsNumber || normalizedRecord.Registration || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+            return regNumber === normalizedInput;
+          });
+        }
+
+        // If not found, search Firebase entries
+        if (!matchingRegistration) {
+          console.log("🔍 Searching in Firebase entries...");
+          try {
+            const entriesQuery = query(
+              collection(db, "entries"),
+              where("cwagsNumber", "==", registrationNumber)
+            );
+            const entriesSnapshot = await getDocs(entriesQuery);
+            
+            if (!entriesSnapshot.empty) {
+              const entries = [];
+              entriesSnapshot.forEach(doc => {
+                const entryData = doc.data();
+                if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                  entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+                    ...entry,
+                    date: entry.date ? getDateFromFirebase(entry.date) : null
+                  }));
+                }
+                entries.push(entryData);
+              });
+              entries.sort((a, b) => b.submittedAt?.toDate() - a.submittedAt?.toDate());
+              matchingRegistration = entries[0];
+              console.log("✅ Found in Firebase entries");
+            }
+          } catch (firebaseError) {
+            console.warn("Could not search Firebase entries:", firebaseError);
           }
         }
         
-        return false;
-      });
-      
-      if (!data) {
-        return;
-      }
-      
-      function fillFieldEnhanced(fieldId, value) {
-        if (!value) return;
-        
-        const field = document.getElementById(fieldId);
-        if (field && (!field.value || field.value === '')) {
-          field.value = value;
-          field.classList.add('auto-filled');
-          setTimeout(() => {
-            field.classList.remove('auto-filled');
-          }, 2000);
+        if (matchingRegistration) {
+          console.log("✅ Found matching registration:", matchingRegistration);
+          showLookupStatus('✅ Registration found! Auto-filling information...', 'success');
+          populateForm(matchingRegistration);
+        } else {
+          console.log("❌ No matching registration found for:", normalizedInput);
+          showLookupStatus('ℹ️ Registration number not found in our records. You can still continue with manual entry.', 'warning');
         }
+        
+      } catch (error) {
+        console.error("❌ Error during registration lookup:", error);
+        showLookupStatus('❌ Error looking up registration', 'warning');
+      } finally {
+        isAutoFilling = false;
       }
+    }
+
+    function populateForm(data) {
+      if (!data || isAutoFilling === false) return;
       
-      fillFieldEnhanced('handlerName', data.handlerName || data.Handler);
-      fillFieldEnhanced('handlerPhone', data.handlerPhone);
-      fillFieldEnhanced('handlerEmail', data.handlerEmail);
-      fillFieldEnhanced('emergencyContact', data.emergencyContact);
-      fillFieldEnhanced('dogCallName', data.dogCallName || data['Call Name']);
-      fillFieldEnhanced('dogBreed', data.dogBreed);
-      fillFieldEnhanced('dogBirthdate', data.dogBirthdate);
+      console.log("🔄 Populating form with auto-fill data:", data);
       
-      if (data.dogSex) {
+      // Normalize the data first
+      const normalizedData = normalizeEntryData(data);
+      
+      // Use standardized field names for auto-fill
+      fillField('handlerName', getStandardizedHandlerName(normalizedData));
+      fillField('handlerPhone', normalizedData.handlerPhone);
+      fillField('handlerEmail', normalizedData.handlerEmail);
+      fillField('emergencyContact', normalizedData.emergencyContact);
+      fillField('dogCallName', getStandardizedDogName(normalizedData));
+      fillField('dogBreed', normalizedData.dogBreed);
+      fillField('dogBirthdate', normalizedData.dogBirthdate);
+      
+      if (normalizedData.dogSex) {
         const sexField = document.getElementById('dogSex');
         if (sexField && (!sexField.value || sexField.value === '')) {
-          sexField.value = data.dogSex;
+          sexField.value = normalizedData.dogSex;
           sexField.classList.add('auto-filled');
+          console.log(`✅ Auto-filled dogSex: ${normalizedData.dogSex}`);
           setTimeout(() => {
             sexField.classList.remove('auto-filled');
           }, 2000);
@@ -1488,13 +1470,28 @@
       checkFormValidity();
     }
 
-    // ========================================
-    // FORM SETUP AND EVENT LISTENERS
-    // ========================================
+    function fillField(fieldId, value) {
+      const field = document.getElementById(fieldId);
+      if (field && value && (!field.value || field.value.trim() === '')) {
+        field.value = value;
+        field.classList.add('auto-filled');
+        console.log(`✅ Auto-filled ${fieldId}: ${value}`);
+        setTimeout(() => {
+          field.classList.remove('auto-filled');
+        }, 2000);
+      }
+    }
 
+    // ========================================
+    // FORM EVENT LISTENERS
+    // ========================================
+    
     function setupFormEventListeners() {
+      console.log("🔧 Setting up form event listeners...");
+      
       const cwagsInput = document.getElementById('cwagsNumber');
       if (cwagsInput) {
+        console.log("✅ Setting up registration number lookup");
         cwagsInput.removeEventListener('input', handleRegistrationInput);
         cwagsInput.addEventListener('input', handleRegistrationInput);
       }
@@ -1518,12 +1515,32 @@
       }
 
       formInitialized = true;
+      console.log("✅ Form event listeners setup complete");
+    }
+
+    function handleRegistrationInput(e) {
+      const registrationNumber = e.target.value.trim();
+      
+      if (window.registrationTimeout) {
+        clearTimeout(window.registrationTimeout);
+      }
+      
+      if (registrationNumber.length >= 3) {
+        console.log("🔍 Setting up lookup for:", registrationNumber);
+        window.registrationTimeout = setTimeout(() => {
+          autoFillFromRegistration(registrationNumber);
+        }, 500);
+      } else {
+        hideLookupStatus();
+      }
+      
+      checkFormValidity();
     }
 
     // ========================================
-    // SECRETARY FUNCTIONS
+    // TRIAL SETUP AND MANAGEMENT
     // ========================================
-
+    
     async function setupSecretaryView() {
       try {
         await new Promise((resolve) => {
@@ -1566,14 +1583,57 @@
           });
           
           availableTrials.sort((a, b) => b.createdAt?.toDate() - a.createdAt?.toDate());
-          
           populateTrialSelector();
         } else {
           alert("No trials found. Please create a trial first.");
           window.location.href = 'main-dashboard.html';
         }
       } catch (error) {
+        console.error("❌ Error loading trial data:", error);
         alert("Error loading trial data: " + error.message);
+      }
+    }
+
+    async function loadSpecificTrial(trialId) {
+      try {
+        console.log("🔍 Loading specific trial:", trialId);
+        const trialDoc = await getDoc(doc(db, 'trials', trialId));
+        if (!trialDoc.exists()) {
+          alert('Trial not found');
+          return;
+        }
+
+        const trialData = trialDoc.data();
+        
+        if (trialData.days && Array.isArray(trialData.days)) {
+          trialData.days = trialData.days.map(day => ({
+            ...day,
+            date: day.date ? getDateFromFirebase(day.date) : null
+          }));
+        }
+
+        currentTrialData = { id: trialDoc.id, ...trialData };
+        console.log("✅ Trial loaded:", currentTrialData.clubName);
+        
+        document.getElementById('trialSelectionSection').style.display = 'none';
+        document.getElementById('entryFeeSection').style.display = 'none';
+        
+        if (trialData.entryFees) {
+          fees.regular = trialData.entryFees.regular || fees.regular;
+          fees.feo = trialData.entryFees.feo || fees.feo;
+          fees.juniorHandler = trialData.entryFees.juniorHandler || fees.juniorHandler;
+        }
+        
+        populateTrialInfo();
+        showEntryForm();
+        
+        setTimeout(() => {
+          setupFormEventListeners();
+        }, 100);
+        
+      } catch (error) {
+        console.error('Error loading specific trial:', error);
+        alert('Error loading trial: ' + error.message);
       }
     }
 
@@ -1609,10 +1669,13 @@
 
       trialSelect.addEventListener('change', function(event) {
         const trialId = event.target.value;
+        console.log("🎯 Trial selected:", trialId);
         
         if (trialId) {
           currentTrialData = availableTrials.find(t => t.id === trialId);
           if (currentTrialData) {
+            console.log("✅ Found trial data:", currentTrialData.clubName);
+            
             document.getElementById('entryFeeSection').style.display = 'block';
             setupFeeChangeListeners();
             generateShareableLink();
@@ -1638,22 +1701,24 @@
       const juniorFeeInput = document.getElementById('juniorFee');
       
       if (!regularFeeInput || !feoFeeInput || !juniorFeeInput) {
+        console.warn("⚠️ Fee input fields not found, skipping fee listeners setup");
         return;
       }
       
       loadTrialFees();
       
       function updateFees() {
+        console.log("💰 Updating fees from inputs");
         fees.regular = parseFloat(regularFeeInput.value) || 35.00;
         fees.feo = parseFloat(feoFeeInput.value) || 25.00;
         fees.juniorHandler = parseFloat(juniorFeeInput.value) || 20.00;
         
+        console.log("💰 New fees:", fees);
         saveTrialFees();
         
         if (currentTrialData) {
           generateTabbedClasses();
         }
-        
         updateEntrySummary();
       }
       
@@ -1664,6 +1729,8 @@
       regularFeeInput.addEventListener('input', updateFees);
       feoFeeInput.addEventListener('input', updateFees);
       juniorFeeInput.addEventListener('input', updateFees);
+      
+      console.log("✅ Fee change listeners setup complete");
     }
 
     async function loadTrialFees() {
@@ -1678,9 +1745,11 @@
           document.getElementById('regularFee').value = fees.regular.toFixed(2);
           document.getElementById('feoFee').value = fees.feo.toFixed(2);
           document.getElementById('juniorFee').value = fees.juniorHandler.toFixed(2);
+          
+          console.log("✅ Loaded saved fees for trial:", fees);
         }
       } catch (error) {
-        console.warn("Could not load saved fees:", error);
+        console.warn("⚠️ Could not load saved fees:", error);
       }
     }
 
@@ -1692,4 +1761,532 @@
           regular: fees.regular,
           feo: fees.feo,
           juniorHandler: fees.juniorHandler,
-          updatedAt: new
+          updatedAt: new Date()
+        };
+        
+        await updateDoc(doc(db, 'trials', currentTrialData.id), {
+          entryFees: currentTrialData.entryFees
+        });
+        
+        console.log("✅ Saved fees to trial data");
+      } catch (error) {
+        console.warn("⚠️ Could not save fees:", error);
+      }
+    }
+
+    function populateTrialInfo() {
+      if (!currentTrialData) return;
+
+      document.getElementById('trialTitle').textContent = `${currentTrialData.clubName || 'Trial'} Entry Form`;
+      
+      const dates = currentTrialData.days && currentTrialData.days.length > 0 
+        ? currentTrialData.days
+            .filter(day => day.date)
+            .map(day => formatDateDisplay(day.date, { 
+              weekday: undefined, 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric' 
+            }))
+            .join(', ')
+        : 'No dates specified';
+
+      document.getElementById('clubName').textContent = currentTrialData.clubName || 'TBD';
+      document.getElementById('trialDates').textContent = dates;
+      document.getElementById('trialLocation').textContent = 'TBD';
+      document.getElementById('trialSecretary').textContent = currentTrialData.secretary || 'TBD';
+
+      document.getElementById('trialInfoSection').style.display = 'block';
+      generateTabbedClasses();
+    }
+
+    function generateTabbedClasses() {
+      console.log("🎯 Generating tabbed classes from trial data");
+      
+      if (!currentTrialData.days || currentTrialData.days.length === 0) {
+        console.warn("❌ No days data found");
+        document.getElementById('classEntriesContainer').innerHTML = 
+          '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
+        return;
+      }
+
+      // Generate day tabs
+      const dayTabsContainer = document.getElementById('dayTabs');
+      dayTabsContainer.innerHTML = '';
+
+      currentTrialData.days.forEach((day, dayIndex) => {
+        const dayDate = day.date ? formatDateDisplay(day.date, { 
+          weekday: undefined, 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        }) : `Day ${dayIndex + 1}`;
+
+        const tabButton = document.createElement('button');
+        tabButton.type = 'button';
+        tabButton.className = `day-tab ${dayIndex === 0 ? 'active' : ''}`;
+        tabButton.onclick = () => showDay(dayIndex);
+        tabButton.textContent = `Day ${dayIndex + 1} - ${dayDate}`;
+        
+        dayTabsContainer.appendChild(tabButton);
+      });
+
+      // Generate class content for each day
+      const classEntriesContainer = document.getElementById('classEntriesContainer');
+      let html = '';
+
+      currentTrialData.days.forEach((day, dayIndex) => {
+        if (!day.classes || day.classes.length === 0) {
+          console.warn(`⚠️ No classes found for day ${dayIndex + 1}`);
+          return;
+        }
+
+        html += `<div class="class-day-content ${dayIndex === 0 ? 'active' : ''}" id="day-${dayIndex}">`;
+
+        // Group classes by name using standardized field names
+        const classGroups = new Map();
+        day.classes.forEach((cls, classIndex) => {
+          // Use both possible property names for backward compatibility
+          const className = cls.className || cls.name;
+          
+          if (className && className.trim()) {
+            const trimmedName = className.trim();
+            
+            if (!classGroups.has(trimmedName)) {
+              classGroups.set(trimmedName, []);
+            }
+            classGroups.get(trimmedName).push({...cls, dayIndex, classIndex});
+          }
+        });
+
+        classGroups.forEach((classInstances, className) => {
+          const isJuniorHandler = document.getElementById('juniorHandler')?.value === 'Yes';
+          const regularFee = isJuniorHandler ? fees.juniorHandler : fees.regular;
+          const feoFee = isJuniorHandler ? fees.juniorHandler : fees.feo;
+
+          html += `
+            <div class="class-item">
+              <div class="class-header">
+                <div class="class-name">${className}</div>
+              </div>
+              <div class="class-details">
+                <div><strong>Level:</strong> ${classInstances[0].level || 'All levels'}</div>
+                <div><strong>Total Rounds:</strong> ${classInstances.reduce((total, inst) => total + (inst.rounds ? inst.rounds.length : 0), 0)}</div>
+                <div><strong>Prerequisites:</strong> ${getPrerequisitesText(className)}</div>
+              </div>
+              <div class="rounds-container">
+          `;
+
+          let roundCounter = 0;
+          classInstances.forEach((classInstance, instanceIndex) => {
+            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
+              classInstance.rounds.forEach((round, roundIndex) => {
+                roundCounter++;
+                
+                // Use standardized field name for judge
+                const judgeName = getStandardizedJudgeName(round) || 'Judge TBD';
+                const roundName = round.name || round.roundName || `Round ${roundCounter}`;
+                
+                const roundAllowsFEO = round.feo === true || round.allowFEO === true;
+                const roundId = `${className.replace(/\s+/g, '-').toLowerCase()}-day${dayIndex}-round${roundCounter}`;
+                
+                html += `
+                  <div class="round-item">
+                    <div class="round-details">
+                      <span class="judge-name">Judge: ${judgeName}</span>
+                      <span style="font-weight: 600;">${roundName}</span>
+                      ${round.time ? `<span>Time: ${round.time}</span>` : ''}
+                      ${round.maxDogs ? `<span>Max Dogs: ${round.maxDogs}</span>` : ''}
+                    </div>
+                    <div class="round-entry-options">
+                      <div class="entry-option">
+                        <label class="entry-checkbox regular-entry" for="${roundId}-reg">
+                          <input type="checkbox" 
+                                 id="${roundId}-reg" 
+                                 data-class="${className}" 
+                                 data-round="${roundName}"
+                                 data-judge="${judgeName}"
+                                 data-fee="${regularFee.toFixed(2)}" 
+                                 data-type="regular"
+                                 data-day="${dayIndex}"
+                                 data-round-number="${roundCounter}">
+                          <span>Regular (${regularFee.toFixed(2)})</span>
+                        </label>
+                      </div>
+                `;
+
+                if (roundAllowsFEO && !isJuniorHandler) {
+                  html += `
+                      <div class="entry-option">
+                        <label class="entry-checkbox feo-entry" for="${roundId}-feo">
+                          <input type="checkbox" 
+                                 id="${roundId}-feo" 
+                                 data-class="${className}" 
+                                 data-round="${roundName}"
+                                 data-judge="${judgeName}"
+                                 data-fee="${feoFee.toFixed(2)}" 
+                                 data-type="feo"
+                                 data-day="${dayIndex}"
+                                 data-round-number="${roundCounter}">
+                          <span>FEO (${feoFee.toFixed(2)})</span>
+                        </label>
+                      </div>
+                  `;
+                }
+
+                html += `</div></div>`;
+              });
+            }
+          });
+
+          html += `</div></div>`;
+        });
+
+        html += `</div>`;
+      });
+
+      classEntriesContainer.innerHTML = html;
+      updateEntrySummary();
+      console.log("✅ Tabbed classes generated successfully");
+    }
+
+    // ========================================
+    // ENTRY SUBMISSION
+    // ========================================
+    
+    async function submitEntry() {
+      console.log("🚀 Starting entry submission...");
+      
+      const handlerName = document.getElementById('handlerName').value.trim();
+      const dogCallName = document.getElementById('dogCallName').value.trim();
+      const waiverAccepted = document.getElementById('waiverAccepted').checked;
+      
+      if (!handlerName) {
+        alert('Please enter the Handler Name.');
+        return;
+      }
+      
+      if (!dogCallName) {
+        alert('Please enter the Dog\'s Call Name.');
+        return;
+      }
+      
+      if (!waiverAccepted) {
+        alert('Please accept the waiver agreement to continue.');
+        return;
+      }
+      
+      if (!selectedEntries || selectedEntries.length === 0) {
+        alert('Please select at least one class entry.');
+        return;
+      }
+      
+      const submitBtn = document.getElementById('submitEntry');
+      const originalText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      
+      try {
+        // Collect form data using standardized field names
+        const entryData = {
+          trialId: currentTrialData.id,
+          trialName: currentTrialData.clubName,
+          handlerName: handlerName,
+          handlerEmail: document.getElementById('handlerEmail').value.trim(),
+          handlerPhone: document.getElementById('handlerPhone').value.trim(),
+          emergencyContact: document.getElementById('emergencyContact').value.trim(),
+          dogCallName: dogCallName,
+          dogBreed: document.getElementById('dogBreed').value.trim(),
+          dogBirthdate: document.getElementById('dogBirthdate').value,
+          dogSex: document.getElementById('dogSex').value,
+          cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
+          juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
+          selectedEntries: selectedEntries.map(entry => ({
+            ...entry,
+            date: currentTrialData.days[entry.dayIndex]?.date || null
+          })),
+          totalFee: totalFee,
+          submittedAt: new Date(),
+          waiverAccepted: true,
+          regularEntries: selectedEntries.filter(e => e.type === 'regular').length,
+          feoEntries: selectedEntries.filter(e => e.type === 'feo').length
+        };
+        
+        console.log("📝 Entry data prepared:", entryData);
+        
+        const docRef = await addDoc(collection(db, "entries"), entryData);
+        console.log("✅ Entry saved with ID:", docRef.id);
+        
+        showSuccessMessage();
+        
+      } catch (error) {
+        console.error("❌ Error submitting entry:", error);
+        alert("Error submitting entry: " + error.message);
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    }
+
+    function showSuccessMessage() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      document.getElementById('entryForm').style.display = 'none';
+      
+      const successDiv = document.getElementById('successMessage');
+      if (successDiv) {
+        successDiv.classList.remove('hidden');
+        successDiv.style.display = 'block';
+        
+        successDiv.innerHTML = `
+          <h3>✅ Entry Submitted Successfully!</h3>
+          <p>Your entry has been recorded for this trial.</p>
+          <div style="margin-top: 1.5rem;">
+            <button class="btn btn-primary" onclick="enterAnotherParticipant()" style="margin-right: 1rem;">
+              Enter Another Participant
+            </button>
+            <button class="btn btn-secondary" onclick="goToDashboard()">
+              Back to Dashboard
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    function enterAnotherParticipant() {
+      console.log("🔄 Resetting form for another entry...");
+      
+      document.getElementById('entryForm').reset();
+      selectedEntries = [];
+      totalFee = 0;
+      
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        if (cb.id !== 'waiverAccepted') {
+          cb.checked = false;
+          if (cb.parentElement) {
+            cb.parentElement.classList.remove('selected');
+          }
+        }
+      });
+      
+      const successDiv = document.getElementById('successMessage');
+      if (successDiv) {
+        successDiv.classList.add('hidden');
+        successDiv.style.display = 'none';
+      }
+      
+      document.getElementById('entryForm').style.display = 'block';
+      updateEntrySummary();
+      checkFormValidity();
+      
+      if (typeof showDay === 'function') {
+        showDay(0);
+      }
+      
+      const statusDiv = document.getElementById('lookupStatus');
+      if (statusDiv) {
+        statusDiv.style.display = 'none';
+      }
+      
+      document.getElementById('cwagsNumber').value = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goToDashboard() {
+      window.location.href = 'main-dashboard.html';
+    }
+
+    // ========================================
+    // UTILITY FUNCTIONS
+    // ========================================
+    
+    function showLookupStatus(message, type = 'loading') {
+      const statusDiv = document.getElementById('lookupStatus');
+      if (statusDiv) {
+        statusDiv.textContent = message;
+        statusDiv.className = `lookup-status ${type}`;
+        console.log(`📊 Lookup status: ${message} (${type})`);
+      }
+    }
+
+    function hideLookupStatus() {
+      const statusDiv = document.getElementById('lookupStatus');
+      if (statusDiv) {
+        statusDiv.style.display = 'none';
+      }
+    }
+
+    function showEntryForm() {
+      console.log("📝 Showing entry form");
+      document.getElementById('entryFormContainer').style.display = 'block';
+      
+      if (!formInitialized) {
+        setTimeout(() => {
+          setupFormEventListeners();
+        }, 100);
+      }
+    }
+
+    function hideEntryForm() {
+      document.getElementById('entryFormContainer').style.display = 'none';
+    }
+
+    function hideTrialInfo() {
+      document.getElementById('trialInfoSection').style.display = 'none';
+    }
+
+    function hideShareableLink() {
+      document.getElementById('shareableLinkSection').style.display = 'none';
+    }
+
+    function generateShareableLink() {
+      if (!isSecretary || !currentTrialData) return;
+
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shareableUrl = `${baseUrl}?trial=${currentTrialData.id}`;
+      
+      document.getElementById('shareableUrl').textContent = shareableUrl;
+      document.getElementById('shareableLinkSection').style.display = 'block';
+    }
+
+    // ========================================
+    // GLOBAL FUNCTIONS FOR BUTTONS
+    // ========================================
+    
+    window.copyShareableLink = function() {
+      const url = document.getElementById('shareableUrl').textContent;
+      copyToClipboard(url, 'Shareable link copied to clipboard!');
+    };
+
+    window.testShareableLink = function() {
+      const url = document.getElementById('shareableUrl').textContent;
+      window.open(url, '_blank');
+    };
+
+    window.copyEditLink = function() {
+      const url = document.getElementById('editUrl').textContent;
+      copyToClipboard(url, 'Edit link copied to clipboard!');
+    };
+
+    window.testEditLink = function() {
+      const url = document.getElementById('editUrl').textContent;
+      window.open(url, '_blank');
+    };
+
+    function copyToClipboard(text, successMessage) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert(successMessage);
+      }).catch(err => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert(successMessage);
+      });
+    }
+
+    window.resetForNewEntry = function() {
+      document.getElementById('editLinkSection').classList.add('hidden');
+      document.getElementById('entryForm').style.display = 'block';
+      resetForm();
+    };
+
+    function resetForm() {
+      document.getElementById('entryForm').reset();
+      selectedEntries = [];
+      
+      document.querySelectorAll('.entry-checkbox').forEach(label => {
+        label.classList.remove('selected');
+      });
+      
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        if (cb.id !== 'waiverAccepted') cb.checked = false;
+      });
+      
+      hideLookupStatus();
+      updateEntrySummary();
+      checkFormValidity();
+      showDay(0);
+    }
+
+    window.submitEntry = submitEntry;
+    window.checkFormValidity = checkFormValidity;
+    window.enterAnotherParticipant = enterAnotherParticipant;
+    window.goToDashboard = goToDashboard;
+    window.resetForm = resetForm;
+
+    // ========================================
+    // INITIALIZATION
+    // ========================================
+    
+    async function init() {
+      console.log("🚀 Initializing application...");
+      
+      await loadRegistrationData();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const entryId = urlParams.get('entry');
+      const trialId = urlParams.get('trial');
+
+      if (entryId) {
+        console.log("📝 Loading existing entry for editing:", entryId);
+        await loadExistingEntry(entryId);
+      } else if (trialId) {
+        console.log("🔗 Loading specific trial for public entry:", trialId);
+        await loadSpecificTrial(trialId);
+      } else {
+        console.log("👨‍💼 Setting up secretary view");
+        isSecretary = true;
+        await setupSecretaryView();
+      }
+    }
+
+    // Connect submit button to function
+    document.addEventListener('DOMContentLoaded', function() {
+      const submitBtn = document.getElementById('submitEntry');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', submitEntry);
+        console.log("✅ Submit button event listener attached");
+      }
+    });
+
+    // Enhanced form validation
+    document.addEventListener('DOMContentLoaded', function() {
+      ['handlerName', 'dogCallName', 'waiverAccepted'].forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.addEventListener('input', checkFormValidity);
+          field.addEventListener('change', checkFormValidity);
+        }
+      });
+    });
+
+    // Main initialization logic
+    console.log("🏁 Starting application initialization...");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasEntryParam = urlParams.get('entry');
+    const hasTrialParam = urlParams.get('trial');
+    const isPublicEntry = hasEntryParam || hasTrialParam;
+
+    if (isPublicEntry) {
+      console.log("🔗 Public entry detected, initializing immediately");
+      init();
+    } else {
+      console.log("👨‍💼 Secretary mode, waiting for auth");
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          console.log("✅ User authenticated, initializing secretary mode");
+          await init();
+        } else {
+          console.log("❌ No user authenticated, redirecting to login");
+          alert("Please log in to access the entry form");
+          window.location.href = 'index.html';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
