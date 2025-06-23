@@ -2221,15 +2221,42 @@ function updateEntrySummary() {
   
   summaryDiv.style.display = 'block';
   
-  // Update entries list with round information
-  entriesList.innerHTML = selectedEntries.map(entry => 
-    `<li class="selected-entry">
-      ${entry.className} - ${entry.roundName} 
-      ${entry.type === 'feo' ? '(FEO)' : '(Regular)'} 
-      - Judge: ${entry.judgeName} 
-      - $${entry.fee.toFixed(2)}
-    </li>`
-  ).join('');
+  // Group entries by day
+  const entriesByDay = {};
+  selectedEntries.forEach(entry => {
+    const dayKey = `Day ${parseInt(entry.dayIndex) + 1}`;
+    if (!entriesByDay[dayKey]) {
+      entriesByDay[dayKey] = [];
+    }
+    entriesByDay[dayKey].push(entry);
+  });
+  
+  // Generate grouped HTML
+  let html = '';
+  Object.keys(entriesByDay)
+    .sort((a, b) => {
+      const dayA = parseInt(a.replace('Day ', ''));
+      const dayB = parseInt(b.replace('Day ', ''));
+      return dayA - dayB;
+    })
+    .forEach(dayKey => {
+      html += `
+        <li class="day-group-header">${dayKey}</li>
+      `;
+      
+      entriesByDay[dayKey].forEach(entry => {
+        html += `
+          <li class="selected-entry">
+            ${entry.className} - ${entry.roundName} 
+            ${entry.type === 'feo' ? '(FEO)' : '(Regular)'} 
+            - Judge: ${entry.judgeName} 
+            - $${entry.fee.toFixed(2)}
+          </li>
+        `;
+      });
+    });
+  
+  entriesList.innerHTML = html;
   
   // Update total fee
   totalFee = selectedEntries.reduce((sum, entry) => sum + entry.fee, 0);
