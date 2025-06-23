@@ -1396,20 +1396,60 @@ document.addEventListener('change', function(e) {
     }
 
     // Load registration data from data.json
-    async function loadRegistrationData() {
+   // Fixed registration data loading with multiple path attempts
+async function loadRegistrationData() {
+  try {
+    console.log("📊 Loading registration data...");
+    
+    // Try multiple possible paths in order
+    const possiblePaths = [
+      '/js/data.json',           // Absolute from root
+      '../js/data.json',         // One level up from Secretary folder
+      './js/data.json',          // Current directory structure
+      '/Secretary/js/data.json', // If file was moved to Secretary folder
+      'js/data.json'             // Relative without ./
+    ];
+    
+    let response = null;
+    let successfulPath = null;
+    
+    for (const path of possiblePaths) {
       try {
-        console.log("📊 Loading registration data...");
-        const response = await fetch('/js/data.json');
-        const data = await response.json();
-        registrationData = data || [];
-        isRegistrationDataLoaded = true;
-        console.log(`✅ Loaded ${registrationData.length} registration records`);
-      } catch (error) {
-        console.warn("⚠️ Could not load registration data:", error);
-        registrationData = [];
-        isRegistrationDataLoaded = true; // Still mark as loaded even if failed
+        console.log(`🔍 Trying path: ${path}`);
+        response = await fetch(path);
+        if (response.ok) {
+          successfulPath = path;
+          console.log(`✅ Found data.json at: ${path}`);
+          break;
+        } else {
+          console.log(`❌ Path ${path} returned status: ${response.status}`);
+        }
+      } catch (pathError) {
+        console.log(`❌ Failed to fetch from ${path}:`, pathError.message);
+        continue;
       }
     }
+    
+    if (!response || !response.ok) {
+      throw new Error(`Could not find data.json at any of the expected locations: ${possiblePaths.join(', ')}`);
+    }
+    
+    const data = await response.json();
+    registrationData = data || [];
+    isRegistrationDataLoaded = true;
+    console.log(`✅ Loaded ${registrationData.length} registration records from ${successfulPath}`);
+    
+  } catch (error) {
+    console.warn("⚠️ Could not load registration data:", error.message);
+    
+    // Don't let this failure block the application
+    registrationData = [];
+    isRegistrationDataLoaded = true;
+    
+    // Show user-friendly message
+    console.log("ℹ️ Registration lookup will not be available, but manual entry will work");
+  }
+}
 
     // Setup form event listeners - CRITICAL FIX
     function setupFormEventListeners() {
