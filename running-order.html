@@ -844,7 +844,7 @@
                 columns.forEach((col, colIndex) => {
                     if (rowIndex < col.entrants.length) {
                         const entrant = col.entrants[rowIndex];
-                        const entrantName = `${entrant.handler} - ${entrant.dog}`;
+                        const entrantName = getEntrantName(entrant.originalEntry || entrant);
                         
                         html += `
                             <td class="entrant-cell ${entrant.entryType}" 
