@@ -1158,13 +1158,10 @@
                 });
                 
                 // ENHANCED DEBUG: Log judge assignment for troubleshooting
-                console.log(`🎯 Entry ${index + 1}: ${entry.className} Round ${roundNumber} - Judge: "${judge}"`, {
-                    'entry.judgeName': entry.judgeName,
-                    'entry.judge': entry.judge,
-                    'entry.judgeAssigned': entry.judgeAssigned,
-                    'selectedJudge': judge,
-                    'handlerDog': `${entry.handlerName} - ${entry.dogCallName}`
-                });
+              console.log(`🎯 Entry ${index + 1}: ${entry.className} Round ${roundNumber} - Judge: "${getStandardizedJudgeName(entry)}"`, {
+    'standardizedJudge': getStandardizedJudgeName(entry),
+    'handlerDog': `${entry.handlerName} - ${entry.dogCallName}`
+});
             });
             
             console.log(`✅ Created running order for ${date}:`, Object.keys(runningOrderData[date] || {}));
