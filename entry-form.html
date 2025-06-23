@@ -1902,27 +1902,6 @@ function testRegistrationFormatter() {
       console.log("✅ Form event listeners setup complete");
     }
 
-    // Registration input handler
-    function handleRegistrationInput(e) {
-      const registrationNumber = e.target.value.trim();
-      
-      // Clear any existing timeout
-      if (window.registrationTimeout) {
-        clearTimeout(window.registrationTimeout);
-      }
-      
-      if (registrationNumber.length >= 3) {
-        console.log("🔍 Setting up lookup for:", registrationNumber);
-        window.registrationTimeout = setTimeout(() => {
-          autoFillFromRegistration(registrationNumber);
-        }, 500);
-      } else {
-        hideLookupStatus();
-      }
-      
-      checkFormValidity();
-    }
-
     // Setup secretary view
     async function setupSecretaryView() {
       try {
