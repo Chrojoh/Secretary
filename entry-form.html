@@ -1,18 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trial Secretary Entry Form</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="form-styles.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            pa<!DOCTYPE html>
-<html lang="en">
-<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trial Entry Form</title>
@@ -461,6 +449,14 @@
       background: #fff;
     }
     
+    .entry-types {
+      padding: 1rem;
+      background: #fff;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+    
     .entry-option {
       flex: 1;
       max-width: 200px;
@@ -812,31 +808,6 @@
               <input type="text" id="handlerName" required placeholder="Will auto-fill from registration">
             </div>
             <div class="form-group">
-              <label>Phone Number</label>
-              <input type="tel" id="handlerPhone" placeholder="(xxx) xxx-xxxx">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Email Address</label>
-              <input type="email" id="handlerEmail" placeholder="handler@email.com">
-            </div>
-            <div class="form-group">
-              <label>Emergency Contact</label>
-              <input type="text" id="emergencyContact" placeholder="Name and phone number">
-            </div>
-          </div>
-        </div>
-
-        <!-- Dog Information -->
-        <div class="form-section">
-          <h3>🐕 Dog Information</h3>
-          <div class="form-row">
-            <div class="form-group required">
-              <label>Dog's Call Name</label>
-              <input type="text" id="dogCallName" required placeholder="Will auto-fill from registration">
-            </div>
-            <div class="form-group">
               <label>Breed</label>
               <input type="text" id="dogBreed" placeholder="Enter breed">
             </div>
@@ -1034,9 +1005,11 @@
 
     console.log("🎯 Entry form loaded");
 
-    // Global variables
+    // Global variables - FIXED: Added missing variables
     let currentTrialData = null;
     let selectedClasses = new Set();
+    let selectedEntries = []; // Fixed: Missing variable declaration
+    let totalFee = 0; // Fixed: Missing variable declaration
     let registrationData = [];
     let isAutoFilling = false;
     let availableTrials = [];
@@ -1670,509 +1643,29 @@
     function setupFeeChangeListeners() {
       const regularFeeInput = document.getElementById('regularFee');
       const feoFeeInput = document.getElementById('feoFee');
-      const juniorFeeInput = document.getElementById('juniorFee');
-      
-      if (!regularFeeInput || !feoFeeInput || !juniorFeeInput) {
-        console.warn("⚠️ Fee input fields not found, skipping fee listeners setup");
-        return;
-      }
-      
-      // Load saved fees for this trial if they exist
-      loadTrialFees();
-      
-      function updateFees() {
-        console.log("💰 Updating fees from inputs");
-        fees.regular = parseFloat(regularFeeInput.value) || 35.00;
-        fees.feo = parseFloat(feoFeeInput.value) || 25.00;
-        fees.juniorHandler = parseFloat(juniorFeeInput.value) || 20.00;
-        
-        console.log("💰 New fees:", fees);
-        
-        // Save fees to trial data
-        saveTrialFees();
-        
-        // Regenerate classes with new fees
-        if (currentTrialData) {
-          generateTabbedClasses();
-        }
-        
-        // Update summary if entries are selected
-        updateEntrySummary();
-      }
-      
-      // Remove existing listeners to prevent duplicates
-      regularFeeInput.removeEventListener('input', updateFees);
-      feoFeeInput.removeEventListener('input', updateFees);
-      juniorFeeInput.removeEventListener('input', updateFees);
-      
-      // Add new listeners
-      regularFeeInput.addEventListener('input', updateFees);
-      feoFeeInput.addEventListener('input', updateFees);
-      juniorFeeInput.addEventListener('input', updateFees);
-      
-      console.log("✅ Fee change listeners setup complete");
-    }
-
-    // Load saved fees for the current trial
-    async function loadTrialFees() {
-      if (!currentTrialData || !currentTrialData.id) return;
-      
-      try {
-        // Check if trial has saved fees
-        if (currentTrialData.entryFees) {
-          fees.regular = currentTrialData.entryFees.regular || fees.regular;
-          fees.feo = currentTrialData.entryFees.feo || fees.feo;
-          fees.juniorHandler = currentTrialData.entryFees.juniorHandler || fees.juniorHandler;
-          
-          // Update the input fields
-          document.getElementById('regularFee').value = fees.regular.toFixed(2);
-          document.getElementById('feoFee').value = fees.feo.toFixed(2);
-          document.getElementById('juniorFee').value = fees.juniorHandler.toFixed(2);
-          
-          console.log("✅ Loaded saved fees for trial:", fees);
-        }
-      } catch (error) {
-        console.warn("⚠️ Could not load saved fees:", error);
-      }
-    }
-
-    // Save fees to trial data in Firebase
-    async function saveTrialFees() {
-      if (!currentTrialData || !currentTrialData.id || !isSecretary) return;
-      
-      try {
-        // Update the current trial data
-        currentTrialData.entryFees = {
-          regular: fees.regular,
-          feo: fees.feo,
-          juniorHandler: fees.juniorHandler,
-          updatedAt: new Date()
-        };
-        
-        // Save to Firebase
-        await updateDoc(doc(db, 'trials', currentTrialData.id), {
-          entryFees: currentTrialData.entryFees
-        });
-        
-        console.log("✅ Saved fees to trial data");
-      } catch (error) {
-        console.warn("⚠️ Could not save fees:", error);
-      }
-    }
-
-    // Show entry form - ENHANCED
-    function showEntryForm() {
-      console.log("📝 Showing entry form");
-      document.getElementById('entryFormContainer').style.display = 'block';
-      
-      // Ensure form listeners are setup after form is visible
-      if (!formInitialized) {
-        setTimeout(() => {
-          setupFormEventListeners();
-        }, 100);
-      }
-    }
-
-    // Generate shareable link
-    function generateShareableLink() {
-      if (!isSecretary || !currentTrialData) return;
-
-      const baseUrl = window.location.origin + window.location.pathname;
-      const shareableUrl = `${baseUrl}?trial=${currentTrialData.id}`;
-      
-      document.getElementById('shareableUrl').textContent = shareableUrl;
-      document.getElementById('shareableLinkSection').style.display = 'block';
-    }
-
-    // Populate trial information and generate tabbed classes
-    function populateTrialInfo() {
-      if (!currentTrialData) return;
-
-      document.getElementById('trialTitle').textContent = `${currentTrialData.clubName || 'Trial'} Entry Form`;
-      
-      // Use timezone-safe date formatting for trial dates
-      const dates = currentTrialData.days && currentTrialData.days.length > 0 
-        ? currentTrialData.days
-            .filter(day => day.date)
-            .map(day => formatDateDisplay(day.date, { 
-              weekday: undefined, 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric' 
-            }))
-            .join(', ')
-        : 'No dates specified';
-
-      document.getElementById('clubName').textContent = currentTrialData.clubName || 'TBD';
-      document.getElementById('trialDates').textContent = dates;
-      document.getElementById('trialLocation').textContent = 'TBD';
-      document.getElementById('trialSecretary').textContent = currentTrialData.secretary || 'TBD';
-
-      document.getElementById('trialInfoSection').style.display = 'block';
-      
-      // Generate the tabbed class interface from trial data
-      generateTabbedClasses();
-    }
-
-    // Generate tabbed classes from trial data - FIXED WITH ROUND NAME SUPPORT
-    function generateTabbedClasses() {
-      console.log("🎯 Generating tabbed classes from trial data");
-      
-      if (!currentTrialData.days || currentTrialData.days.length === 0) {
-        document.getElementById('classEntriesContainer').innerHTML = 
-          '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
-        return;
-      }
-
-      // Generate day tabs
-      const dayTabsContainer = document.getElementById('dayTabs');
-      dayTabsContainer.innerHTML = '';
-
-      currentTrialData.days.forEach((day, dayIndex) => {
-        const dayDate = day.date ? formatDateDisplay(day.date, { 
-          weekday: undefined, 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric' 
-        }) : `Day ${dayIndex + 1}`;
-
-        const tabButton = document.createElement('button');
-        tabButton.type = 'button';
-        tabButton.className = `day-tab ${dayIndex === 0 ? 'active' : ''}`;
-        tabButton.onclick = () => showDay(dayIndex);
-        tabButton.textContent = `Day ${dayIndex + 1} - ${dayDate}`;
-        
-        dayTabsContainer.appendChild(tabButton);
-      });
-
-      // Generate class content for each day
-      const classEntriesContainer = document.getElementById('classEntriesContainer');
-      let html = '';
-
-      currentTrialData.days.forEach((day, dayIndex) => {
-        if (!day.classes || day.classes.length === 0) return;
-
-        html += `<div class="class-day-content ${dayIndex === 0 ? 'active' : ''}" id="day-${dayIndex}">`;
-
-        // Group classes by name
-        const classGroups = new Map();
-        day.classes.forEach((cls, classIndex) => {
-          if (cls && (cls.className || cls.name) && (cls.className || cls.name).trim()) {
-            const className = (cls.className || cls.name).trim();
-            if (!classGroups.has(className)) {
-              classGroups.set(className, []);
-            }
-            classGroups.get(className).push({...cls, dayIndex, classIndex});
-          }
-        });
-
-        classGroups.forEach((classInstances, className) => {
-          // Calculate base fee (use first instance's fee or default)
-          const baseFee = classInstances[0].entryFee || fees.regular;
-          const feoFee = fees.feo;
-
-          html += `
-            <div class="class-item">
-              <div class="class-header">
-                <div class="class-name">${className}</div>
-                <div class="class-fee">${baseFee.toFixed(2)}</div>
-              </div>
-              <div class="class-details">
-                <div><strong>Level:</strong> ${classInstances[0].level || 'All levels'}</div>
-                <div><strong>Rounds:</strong> ${classInstances.reduce((total, inst) => total + (inst.rounds ? inst.rounds.length : 0), 0)}</div>
-                <div><strong>Prerequisites:</strong> ${getPrerequisitesText(className)}</div>
-              </div>
-              <div class="rounds-container">
-          `;
-
-          classInstances.forEach((classInstance, instanceIndex) => {
-            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
-              classInstance.rounds.forEach((round, roundIndex) => {
-                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
-                const roundName = round.name || round.roundName || `Round ${round.roundNumber || (roundIndex + 1)}`;
-                
-                html += `
-                  <div class="round-item">
-                    <div class="round-details">
-                      <span class="judge-name">Judge: ${judgeName}</span>
-                      <span>${roundName}</span>
-                    </div>
-                  </div>
-                `;
-              });
-            }
-          });
-
-          html += `
-              </div>
-              <div class="entry-types">
-                <div class="entry-option">
-                  <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg">
-                    <input type="checkbox" 
-                           id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-reg" 
-                           data-class="${className}" 
-                           data-fee="${baseFee.toFixed(2)}" 
-                           data-type="regular"
-                           data-day="${dayIndex}">
-                    <span>Regular Entry</span>
-                  </label>
-                </div>
-          `;
-
-          // Check if FEO is available for this class
-          const hasFEO = classInstances.some(inst => 
-            inst.rounds && inst.rounds.some(round => round.feo === true || round.FEO === true)
-          );
-
-          if (hasFEO) {
-            html += `
-                <div class="entry-option">
-                  <label class="entry-checkbox" for="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo">
-                    <input type="checkbox" 
-                           id="${className.replace(/\s+/g, '-').toLowerCase()}-${dayIndex}-feo" 
-                           data-class="${className}" 
-                           data-fee="${feoFee.toFixed(2)}" 
-                           data-type="feo"
-                           data-day="${dayIndex}">
-                    <span>FEO Entry</span>
-                  </label>
-                </div>
-            `;
-          }
-
-          html += `
-              </div>
+      constPhone Number</label>
+              <input type="tel" id="handlerPhone" placeholder="(xxx) xxx-xxxx">
             </div>
-          `;
-        });
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="handlerEmail" placeholder="handler@email.com">
+            </div>
+            <div class="form-group">
+              <label>Emergency Contact</label>
+              <input type="text" id="emergencyContact" placeholder="Name and phone number">
+            </div>
+          </div>
+        </div>
 
-        html += `</div>`;
-      });
-
-      classEntriesContainer.innerHTML = html;
-      
-      // Initialize the tabbed interface
-      updateEntrySummary();
-      
-      console.log("✅ Tabbed classes generated successfully");
-    }
-
-    // Check form validity
-    function checkFormValidity() {
-      const waiverAccepted = document.getElementById('waiverAccepted').checked;
-      const handlerName = document.getElementById('handlerName').value.trim();
-      const dogCallName = document.getElementById('dogCallName').value.trim();
-      const hasClasses = selectedEntries.length > 0;
-      
-      const isValid = waiverAccepted && handlerName && dogCallName && hasClasses;
-      
-      const submitBtn = document.getElementById('submitEntry');
-      if (submitBtn) {
-        submitBtn.disabled = !isValid;
-      }
-    }
-
-    // Populate form with existing entry data using timezone-safe dates
-    function populateFormWithEntryData(entryData) {
-      console.log("📝 Populating form with existing entry data");
-      
-      document.getElementById('cwagsNumber').value = entryData.cwagsNumber || '';
-      document.getElementById('handlerName').value = entryData.handlerName || '';
-      document.getElementById('handlerPhone').value = entryData.handlerPhone || '';
-      document.getElementById('handlerEmail').value = entryData.handlerEmail || '';
-      document.getElementById('emergencyContact').value = entryData.emergencyContact || '';
-      document.getElementById('dogCallName').value = entryData.dogCallName || '';
-      document.getElementById('dogBreed').value = entryData.dogBreed || '';
-      document.getElementById('dogBirthdate').value = entryData.dogBirthdate || '';
-      document.getElementById('dogSex').value = entryData.dogSex || '';
-      document.getElementById('juniorHandler').value = entryData.juniorHandler ? 'Yes' : 'No';
-      document.getElementById('waiverAccepted').checked = true;
-
-      // Restore selected classes with timezone-safe date handling
-      if (entryData.selectedEntries) {
-        selectedEntries = entryData.selectedEntries.map(entry => ({
-          className: entry.className,
-          fee: entry.fee,
-          type: entry.type
-        }));
-        
-        // Mark checkboxes as selected
-        entryData.selectedEntries.forEach(entry => {
-          const checkbox = document.querySelector(`input[data-class="${entry.className}"][data-type="${entry.type}"]`);
-          if (checkbox) {
-            checkbox.checked = true;
-            checkbox.parentElement.classList.add('selected');
-          }
-        });
-      }
-
-      updateEntrySummary();
-      checkFormValidity();
-    }
-
-    // Utility functions
-    function showLookupStatus(message, type = 'loading') {
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) {
-        statusDiv.textContent = message;
-        statusDiv.className = `lookup-status ${type}`;
-        console.log(`📊 Lookup status: ${message} (${type})`);
-      }
-    }
-
-    function hideLookupStatus() {
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) {
-        statusDiv.style.display = 'none';
-      }
-    }
-
-    function fillField(fieldId, value) {
-      const field = document.getElementById(fieldId);
-      if (field && value && (!field.value || field.value.trim() === '')) {
-        field.value = value;
-        field.classList.add('auto-filled');
-        console.log(`✅ Auto-filled ${fieldId}: ${value}`);
-        setTimeout(() => {
-          field.classList.remove('auto-filled');
-        }, 2000);
-      }
-    }
-
-    function populateForm(data) {
-      if (!data || isAutoFilling === false) return;
-      
-      console.log("🔄 Populating form with auto-fill data:", data);
-      
-      // Map data.json field names to form fields
-      fillField('handlerName', data.Handler || data.handlerName);
-      fillField('handlerPhone', data.handlerPhone);
-      fillField('handlerEmail', data.handlerEmail);
-      fillField('emergencyContact', data.emergencyContact);
-      fillField('dogCallName', data['Call Name'] || data.dogCallName);
-      fillField('dogBreed', data.dogBreed);
-      fillField('dogBirthdate', data.dogBirthdate);
-      
-      if (data.dogSex) {
-        const sexField = document.getElementById('dogSex');
-        if (sexField && (!sexField.value || sexField.value === '')) {
-          sexField.value = data.dogSex;
-          sexField.classList.add('auto-filled');
-          console.log(`✅ Auto-filled dogSex: ${data.dogSex}`);
-          setTimeout(() => {
-            sexField.classList.remove('auto-filled');
-          }, 2000);
-        }
-      }
-      
-      checkFormValidity();
-    }
-
-    function hideEntryForm() {
-      document.getElementById('entryFormContainer').style.display = 'none';
-    }
-
-    function hideTrialInfo() {
-      document.getElementById('trialInfoSection').style.display = 'none';
-    }
-
-    function hideShareableLink() {
-      document.getElementById('shareableLinkSection').style.display = 'none';
-    }
-
-    // Global functions for buttons
-    window.copyShareableLink = function() {
-      const url = document.getElementById('shareableUrl').textContent;
-      copyToClipboard(url, 'Shareable link copied to clipboard!');
-    };
-
-    window.testShareableLink = function() {
-      const url = document.getElementById('shareableUrl').textContent;
-      window.open(url, '_blank');
-    };
-
-    window.copyEditLink = function() {
-      const url = document.getElementById('editUrl').textContent;
-      copyToClipboard(url, 'Edit link copied to clipboard!');
-    };
-
-    window.testEditLink = function() {
-      const url = document.getElementById('editUrl').textContent;
-      window.open(url, '_blank');
-    };
-
-    function copyToClipboard(text, successMessage) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert(successMessage);
-      }).catch(err => {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert(successMessage);
-      });
-    }
-
-    window.resetForNewEntry = function() {
-      document.getElementById('editLinkSection').classList.add('hidden');
-      document.getElementById('entryForm').style.display = 'block';
-      resetForm();
-    };
-
-    window.resetForm = function() {
-      document.getElementById('entryForm').reset();
-      selectedEntries = [];
-      
-      document.querySelectorAll('.entry-checkbox').forEach(label => {
-        label.classList.remove('selected');
-      });
-      
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        if (cb.id !== 'waiverAccepted') cb.checked = false;
-      });
-      
-      hideLookupStatus();
-      updateEntrySummary();
-      checkFormValidity();
-      
-      // Go back to Day 1
-      showDay(0);
-    };
-
-    // MAIN INITIALIZATION LOGIC - FIXED
-    console.log("🏁 Starting application initialization...");
-
-    // Check if this is a public entry link
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasEntryParam = urlParams.get('entry');
-    const hasTrialParam = urlParams.get('trial');
-    const isPublicEntry = hasEntryParam || hasTrialParam;
-
-    if (isPublicEntry) {
-      console.log("🔗 Public entry detected, initializing immediately");
-      // For public entries, initialize immediately without waiting for auth
-      init();
-    } else {
-      console.log("👨‍💼 Secretary mode, waiting for auth");
-      // For secretary mode, wait for auth
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          console.log("✅ User authenticated, initializing secretary mode");
-          await init();
-        } else {
-          console.log("❌ No user authenticated, redirecting to login");
-          alert("Please log in to access the entry form");
-          window.location.href = 'index.html';
-        }
-      });
-    }
-
-    // Initialize form
-    document.addEventListener('DOMContentLoaded', function() {
-        updateEntrySummary();
-    });
-  </script>
-</body>
-</html>
+        <!-- Dog Information -->
+        <div class="form-section">
+          <h3>🐕 Dog Information</h3>
+          <div class="form-row">
+            <div class="form-group required">
+              <label>Dog's Call Name</label>
+              <input type="text" id="dogCallName" required placeholder="Will auto-fill from registration">
+            </div>
+            <div class="form-group">
+              <label>
