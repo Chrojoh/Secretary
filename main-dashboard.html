@@ -787,73 +787,78 @@
       }
     }
 
-    function displayEntriesWithCorrectJudges(entries, trialData) {
-      const container = document.getElementById('entryManagementResults');
-      if (!container) {
-        console.error("❌ Could not find entry management results container");
-        return;
-      }
-      
-      let html = `<h3>📋 Entries for ${trialData.clubName || 'Trial'}</h3>`;
-      
-      if (entries.length === 0) {
-        html += '<p>No entries found for this trial.</p>';
-      } else {
-        html += `
-          <div class="entries-table-container">
-            <table id="entriesTable">
-              <thead>
-                <tr>
-                  <th>Handler</th>
-                  <th>Dog</th>
-                  <th>Class</th>
-                  <th>Round</th>
-                  <th>Judge</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
-        
-        entries.forEach(entry => {
-          // Use the same judge resolution as running order
-          const judgeName = entry.judgeName || 'TBD';
-          const judgeStyle = judgeName === 'TBD' ? 'background-color: #ffebee; color: #c62828;' : 'background-color: #e8f5e8; color: #2e7d32;';
-          
-          html += `
+   // Enhanced entry display function for dashboard:
+function displayEntriesWithStandardizedFields(entries, trialData) {
+  const container = document.getElementById('entryManagementResults') || document.getElementById('entriesContainer');
+  if (!container) {
+    console.error("❌ Could not find entries container");
+    return;
+  }
+  
+  let html = `<h3>📋 Entries for ${trialData.clubName || 'Trial'}</h3>`;
+  
+  if (entries.length === 0) {
+    html += '<p>No entries found for this trial.</p>';
+  } else {
+    html += `
+      <div class="entries-table-container">
+        <table id="entriesTable">
+          <thead>
             <tr>
-              <td>${entry.handlerName || 'Unknown'}</td>
-              <td>${entry.dogCallName || 'Unknown'}</td>
-              <td>${entry.className || 'Unknown'}</td>
-              <td>${entry.roundNumber || '1'}</td>
-              <td style="${judgeStyle}"><strong>${judgeName}</strong></td>
-              <td>${entry.date || 'Unknown'}</td>
-              <td>${entry.status || 'Pending'}</td>
-              <td class="entry-actions">
-                <button class="btn-edit" onclick="editEntry('${entry.id}')">✏️ Edit</button>
-                <button class="btn-delete" onclick="deleteEntry('${entry.id}')">🗑️ Delete</button>
-              </td>
+              <th>Handler</th>
+              <th>Dog</th>
+              <th>Class</th>
+              <th>Round</th>
+              <th>Judge</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
-          `;
-        });
-        
-        html += `
-              </tbody>
-            </table>
-          </div>
-          <div class="entries-summary" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-            <strong>Summary:</strong> 
-            Total entries: ${entries.length} | 
-            Entries with judges assigned: <span style="color: #2e7d32; font-weight: bold;">${entries.filter(e => e.judgeName && e.judgeName !== 'TBD').length}</span> | 
-            Entries with TBD judges: <span style="color: #c62828; font-weight: bold;">${entries.filter(e => !e.judgeName || e.judgeName === 'TBD').length}</span>
-          </div>
-        `;
-      }
+          </thead>
+          <tbody>
+    `;
+    
+    entries.forEach(entry => {
+      const normalizedEntry = normalizeEntryData(entry);
       
-      container.innerHTML = html;
-    }
+      // Use standardized judge resolution
+      const judgeName = getStandardizedJudgeName(normalizedEntry);
+      const judgeStyle = judgeName === 'TBD' || judgeName === 'Judge TBD' ? 
+        'background-color: #ffebee; color: #c62828;' : 
+        'background-color: #e8f5e8; color: #2e7d32;';
+      
+      html += `
+        <tr>
+          <td>${normalizedEntry.handlerName || 'Unknown'}</td>
+          <td>${normalizedEntry.dogCallName || 'Unknown'}</td>
+          <td>${normalizedEntry.className || 'Unknown'}</td>
+          <td>${normalizedEntry.roundNumber || '1'}</td>
+          <td style="${judgeStyle}"><strong>${judgeName}</strong></td>
+          <td>${normalizedEntry.date || 'Unknown'}</td>
+          <td>${normalizedEntry.status || 'Pending'}</td>
+          <td class="entry-actions">
+            <button class="btn-edit" onclick="editEntry('${normalizedEntry.id}')">✏️ Edit</button>
+            <button class="btn-delete" onclick="deleteEntry('${normalizedEntry.id}')">🗑️ Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+    
+    html += `
+          </tbody>
+        </table>
+      </div>
+      <div class="entries-summary" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+        <strong>Summary:</strong> 
+        Total entries: ${entries.length} | 
+        Entries with judges assigned: <span style="color: #2e7d32; font-weight: bold;">${entries.filter(e => getStandardizedJudgeName(normalizeEntryData(e)) !== 'TBD' && getStandardizedJudgeName(normalizeEntryData(e)) !== 'Judge TBD').length}</span> | 
+        Entries with TBD judges: <span style="color: #c62828; font-weight: bold;">${entries.filter(e => getStandardizedJudgeName(normalizeEntryData(e)) === 'TBD' || getStandardizedJudgeName(normalizeEntryData(e)) === 'Judge TBD').length}</span>
+      </div>
+    `;
+  }
+  
+  container.innerHTML = html;
+}
 
     // Enhanced entry management loading function with full functionality
     window.loadEntryManagement = async function() {
