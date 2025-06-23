@@ -716,51 +716,53 @@
             displayRunningOrder(groupedEntries);
         }
 
-        // Group entries
-        function groupEntries(entries, sortBy) {
-            const grouped = {};
+       // Replace the groupEntries function with this enhanced version:
+function groupEntriesWithStandardizedFields(entries, sortBy) {
+  const grouped = {};
 
-            entries.forEach(entry => {
-                const date = entry.date || 'Unknown Date';
-                const judge = entry.judgeName || 'Judge TBD';
-                const classRound = `${entry.className || 'Unknown Class'} - Round ${entry.roundNumber || 1}`;
+  entries.forEach(entry => {
+    const normalizedEntry = normalizeEntryData(entry);
+    
+    const date = normalizedEntry.date || 'Unknown Date';
+    const judge = getStandardizedJudgeName(normalizedEntry);
+    const classRound = `${normalizedEntry.className || 'Unknown Class'} - Round ${normalizedEntry.roundNumber || 1}`;
 
-                // Initialize nested structure
-                if (!grouped[date]) grouped[date] = {};
-                if (!grouped[date][judge]) grouped[date][judge] = {};
-                if (!grouped[date][judge][classRound]) grouped[date][judge][classRound] = [];
+    // Initialize nested structure
+    if (!grouped[date]) grouped[date] = {};
+    if (!grouped[date][judge]) grouped[date][judge] = {};
+    if (!grouped[date][judge][classRound]) grouped[date][judge][classRound] = [];
 
-                // Add entrant info
-                const entrantName = getEntrantName(entry);
-                grouped[date][judge][classRound].push({
-                    id: `${entry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
-                    name: entrantName,
-                    entryType: entry.entryType || 'regular',
-                    handler: entry.handlerName || 'Unknown Handler',
-                    dog: entry.dogCallName || 'Unknown Dog',
-                    cwagsNumber: entry.cwagsNumber || '',
-                    originalEntry: entry
-                });
-            });
+    // Add entrant info with standardized fields
+    const entrantName = getStandardizedEntrantName(normalizedEntry);
+    grouped[date][judge][classRound].push({
+      id: `${normalizedEntry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
+      name: entrantName,
+      entryType: normalizedEntry.entryType || 'regular',
+      handler: normalizedEntry.handlerName || 'Unknown Handler',
+      dog: normalizedEntry.dogCallName || 'Unknown Dog',
+      cwagsNumber: normalizedEntry.cwagsNumber || '',
+      originalEntry: normalizedEntry
+    });
+  });
 
-            // Sort entrants within each class/round
-            Object.keys(grouped).forEach(date => {
-                Object.keys(grouped[date]).forEach(judge => {
-                    Object.keys(grouped[date][judge]).forEach(classRound => {
-                        grouped[date][judge][classRound].sort((a, b) => {
-                            if (sortBy === 'handler') {
-                                return a.handler.localeCompare(b.handler);
-                            } else if (sortBy === 'dog') {
-                                return a.dog.localeCompare(b.dog);
-                            }
-                            return 0; // Keep original order for 'entry'
-                        });
-                    });
-                });
-            });
+  // Sort entrants within each class/round
+  Object.keys(grouped).forEach(date => {
+    Object.keys(grouped[date]).forEach(judge => {
+      Object.keys(grouped[date][judge]).forEach(classRound => {
+        grouped[date][judge][classRound].sort((a, b) => {
+          if (sortBy === 'handler') {
+            return a.handler.localeCompare(b.handler);
+          } else if (sortBy === 'dog') {
+            return a.dog.localeCompare(b.dog);
+          }
+          return 0; // Keep original order for 'entry'
+        });
+      });
+    });
+  });
 
-            return grouped;
-        }
+  return grouped;
+}
 
    function getStandardizedEntrantName(entry) {
   const normalizedEntry = normalizeEntryData(entry);
