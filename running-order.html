@@ -722,7 +722,7 @@
 
             entries.forEach(entry => {
                 const date = entry.date || 'Unknown Date';
-                const judge = entry.judge || 'Judge TBD';
+                const judge = entry.judgeName || 'Judge TBD';
                 const classRound = `${entry.className || 'Unknown Class'} - Round ${entry.roundNumber || 1}`;
 
                 // Initialize nested structure
