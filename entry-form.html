@@ -1234,12 +1234,12 @@
         document.querySelectorAll('.day-tab')[dayIndex].classList.add('active');
     };
 
-    // Handle entry selection
-    document.addEventListener('change', function(e) {
-        if (e.target.type === 'checkbox' && e.target.dataset.class) {
-            handleEntrySelection(e.target);
-        }
-    });
+  // Handle entry selection - Updated for round-based entries
+document.addEventListener('change', function(e) {
+    if (e.target.type === 'checkbox' && e.target.dataset.class) {
+        handleEntrySelection(e.target);
+    }
+});
 
     function handleEntrySelection(checkbox) {
         const className = checkbox.dataset.class;
