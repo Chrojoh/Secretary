@@ -293,7 +293,7 @@
       width: auto;
     }
     
-    /* NEW TABBED CLASS ENTRIES STYLES */
+    /* Tabbed Class Entries Styles */
     .entry-summary {
       background: #e7f3ff;
       border: 2px solid #0066cc;
@@ -423,15 +423,14 @@
       border-radius: 6px;
       padding: 0.75rem;
       margin-bottom: 0.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: block;
     }
     
     .round-details {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
+      margin-bottom: 0.75rem;
     }
     
     .judge-name {
@@ -456,32 +455,74 @@
     
     .entry-checkbox {
       display: block;
-      background: white;
-      border: 2px solid #28a745;
       border-radius: 20px;
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.8rem;
       text-align: center;
       cursor: pointer;
       font-weight: 600;
-      color: #28a745;
       transition: all 0.3s ease;
       position: relative;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       white-space: nowrap;
+      border: 2px solid;
     }
     
     .entry-checkbox input[type="checkbox"] {
       display: none;
     }
     
-    .entry-checkbox:hover {
-      background: #28a745;
-      color: white;
+    /* Round-based entry options styling */
+    .round-entry-options {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
     }
     
-    .entry-checkbox.selected {
-      background: #28a745;
-      color: white;
+    .round-entry-options .entry-option {
+      flex: 1;
+      min-width: 120px;
+      max-width: 200px;
+    }
+    
+    /* Regular entry styling - Green */
+    .entry-checkbox.regular-entry {
+      background: #d4edda !important;
+      border: 2px solid #28a745 !important;
+      color: #155724 !important;
+    }
+    
+    .entry-checkbox.regular-entry:hover:not(.selected) {
+      background: #28a745 !important;
+      color: white !important;
+    }
+    
+    .entry-checkbox.regular-entry.selected {
+      background: #155724 !important;
+      color: white !important;
+      box-shadow: 0 0 0 3px rgba(21, 87, 36, 0.4) !important;
+      transform: scale(1.02);
+      font-weight: 700;
+    }
+    
+    /* FEO entry styling - Yellow */
+    .entry-checkbox.feo-entry {
+      background: #fff3cd !important;
+      border: 2px solid #ffc107 !important;
+      color: #856404 !important;
+    }
+    
+    .entry-checkbox.feo-entry:hover:not(.selected) {
+      background: #ffc107 !important;
+      color: #212529 !important;
+    }
+    
+    .entry-checkbox.feo-entry.selected {
+      background: #856404 !important;
+      color: white !important;
+      box-shadow: 0 0 0 3px rgba(133, 100, 4, 0.4) !important;
+      transform: scale(1.02);
+      font-weight: 700;
     }
     
     .submit-section {
@@ -588,6 +629,30 @@
       display: none;
     }
     
+    /* Day group headers in summary */
+    .day-group-header {
+      background: #0066cc !important;
+      color: white !important;
+      padding: 0.5rem 1rem !important;
+      margin: 0.5rem 0 0.25rem 0 !important;
+      border-radius: 6px !important;
+      font-weight: 700 !important;
+      font-size: 0.9rem !important;
+      list-style: none !important;
+      border-left: none !important;
+    }
+    
+    .selected-entry {
+      background: white;
+      padding: 0.4rem 1rem;
+      margin-bottom: 0.25rem;
+      border-radius: 4px;
+      border-left: 4px solid #28a745;
+      font-size: 0.85rem;
+      line-height: 1.3;
+      margin-left: 1rem;
+    }
+    
     @media (max-width: 768px) {
       .container {
         padding: 10px;
@@ -614,223 +679,23 @@
       }
       
       .round-item {
+        padding: 0.5rem;
+      }
+      
+      .entry-checkbox {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+      }
+      
+      .round-entry-options {
         flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
+        gap: 0.25rem;
       }
       
-      .entry-options {
-        justify-content: center;
+      .round-entry-options .entry-option {
+        min-width: auto;
+        max-width: none;
       }
-      
-      .entry-option {
-        min-width: 100px;
-      }
-      /* Round-based entry options styling */
-.round-entry-options {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.round-entry-options .entry-option {
-  flex: 1;
-  min-width: 120px;
-  max-width: 200px;
-}
-
-/* Regular entry styling - Green */
-.entry-checkbox.regular-entry {
-  background: #d4edda !important;
-  border: 2px solid #28a745 !important;
-  color: #155724 !important;
-}
-
-.entry-checkbox.regular-entry:hover {
-  background: #28a745 !important;
-  color: white !important;
-}
-
-.entry-checkbox.regular-entry.selected {
-  background: #28a745 !important;
-  color: white !important;
-  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
-}
-
-/* FEO entry styling - Yellow */
-.entry-checkbox.feo-entry {
-  background: #fff3cd !important;
-  border: 2px solid #ffc107 !important;
-  color: #856404 !important;
-}
-
-.entry-checkbox.feo-entry:hover {
-  background: #ffc107 !important;
-  color: #212529 !important;
-}
-
-.entry-checkbox.feo-entry.selected {
-  background: #ffc107 !important;
-  color: #212529 !important;
-  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.3);
-}
-
-/* Round item styling updates */
-.round-item {
-  background: #f0f8ff;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  display: block; /* Changed from flex to block for stacking */
-}
-
-.round-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 0.75rem;
-}
-
-.judge-name {
-  font-weight: 600;
-  color: #495057;
-}
-
-/* Enhanced entry checkbox base styling */
-.entry-checkbox {
-  display: block;
-  border-radius: 20px;
-  padding: 0.4rem 0.8rem;
-  text-align: center;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  position: relative;
-  font-size: 0.8rem;
-  white-space: nowrap;
-  border: 2px solid;
-}
-
-.entry-checkbox input[type="checkbox"] {
-  display: none;
-}
-
-/* Mobile responsiveness for round entries */
-@media (max-width: 768px) {
-  .round-entry-options {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  
-  .round-entry-options .entry-option {
-    min-width: auto;
-    max-width: none;
-  }
-  
-  .round-item {
-    padding: 0.5rem;
-  }
-  
-  .entry-checkbox {
-    font-size: 0.75rem;
-    padding: 0.3rem 0.6rem;
-  }
-}
-
-/* Selected entries list styling updates */
-.selected-entry {
-  background: white;
-  padding: 0.5rem 1rem;
-  margin-bottom: 0.5rem;
-  border-radius: 6px;
-  border-left: 4px solid #28a745;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-/* Class header updates for round-based pricing */
-.class-fee {
-  font-weight: 700;
-  font-size: 1rem;
-  color: #666;
-}
-
-.class-details {
-  background: #f8f9fa;
-  padding: 1rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  border-bottom: 1px solid #dee2e6;
-}
-  /* Enhanced selected state styling */
-.entry-checkbox.regular-entry.selected {
-  background: #155724 !important; /* Much darker green */
-  color: white !important;
-  box-shadow: 0 0 0 3px rgba(21, 87, 36, 0.4) !important;
-  transform: scale(1.02);
-  font-weight: 700;
-}
-
-.entry-checkbox.feo-entry.selected {
-  background: #856404 !important; /* Much darker yellow/brown */
-  color: white !important;
-  box-shadow: 0 0 0 3px rgba(133, 100, 4, 0.4) !important;
-  transform: scale(1.02);
-  font-weight: 700;
-}
-
-/* Day group headers in summary */
-.day-group-header {
-  background: #0066cc !important;
-  color: white !important;
-  padding: 0.5rem 1rem !important;
-  margin: 0.5rem 0 0.25rem 0 !important;
-  border-radius: 6px !important;
-  font-weight: 700 !important;
-  font-size: 0.9rem !important;
-  list-style: none !important;
-  border-left: none !important;
-}
-
-/* Adjust selected entry styling to work with day groups */
-.selected-entry {
-  background: white;
-  padding: 0.4rem 1rem;
-  margin-bottom: 0.25rem;
-  border-radius: 4px;
-  border-left: 4px solid #28a745;
-  font-size: 0.85rem;
-  line-height: 1.3;
-  margin-left: 1rem; /* Indent under day headers */
-}
-
-/* Remove default list styling from the summary */
-.selected-entries {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* Add subtle animation to selection changes */
-.entry-checkbox {
-  transition: all 0.3s ease, transform 0.2s ease;
-}
-
-/* Hover states remain lighter */
-.entry-checkbox.regular-entry:hover:not(.selected) {
-  background: #28a745 !important;
-  color: white !important;
-}
-
-.entry-checkbox.feo-entry:hover:not(.selected) {
-  background: #ffc107 !important;
-  color: #212529 !important;
-}
-      
     }
   </style>
 </head>
@@ -842,25 +707,25 @@
       <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
     </div>
 
- <!-- Trial Selection (Secretary Only) -->
-<div class="trial-info" id="trialSelectionSection">
-  <!-- Back to Dashboard Button -->
-  <div class="back-to-dashboard">
-    <a href="main-dashboard.html" class="back-button">
-      ← Back to Dashboard
-    </a>
-  </div>
-  
-  <h3>🎯 Select Trial</h3>
-  <div class="form-row">
-    <div class="form-group required full-width">
-      <label for="trialSelection">Choose which trial to enter:</label>
-      <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
-        <option value="">Loading available trials...</option>
-      </select>
+    <!-- Trial Selection (Secretary Only) -->
+    <div class="trial-info" id="trialSelectionSection">
+      <!-- Back to Dashboard Button -->
+      <div class="back-to-dashboard">
+        <a href="main-dashboard.html" class="back-button">
+          ← Back to Dashboard
+        </a>
+      </div>
+      
+      <h3>🎯 Select Trial</h3>
+      <div class="form-row">
+        <div class="form-group required full-width">
+          <label for="trialSelection">Choose which trial to enter:</label>
+          <select id="trialSelection" required style="font-size: 1.1rem; padding: 1rem;">
+            <option value="">Loading available trials...</option>
+          </select>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
     <!-- Entry Fee Configuration (Secretary Only) -->
     <div class="trial-info" id="entryFeeSection" style="display: none;">
@@ -1061,43 +926,42 @@
           </div>
         </div>
 
-        <!-- NEW TABBED CLASS ENTRIES SECTION -->
+        <!-- Tabbed Class Entries Section -->
         <div class="form-section">
-            <h3>🎯 Class Entries</h3>
-            
-            <!-- Entry Summary -->
-            <div class="entry-summary" id="entrySummary" style="display: none;">
-                <div class="summary-title">Selected Entries:</div>
-                <ul class="selected-entries" id="selectedEntriesList">
-                </ul>
-                <div style="margin-top: 1rem; font-weight: 600; color: #0066cc;">
-                    Total Fee: $<span id="totalFee">0.00</span>
-                </div>
+          <h3>🎯 Class Entries</h3>
+          
+          <!-- Entry Summary -->
+          <div class="entry-summary" id="entrySummary" style="display: none;">
+            <div class="summary-title">Selected Entries:</div>
+            <ul class="selected-entries" id="selectedEntriesList">
+            </ul>
+            <div style="margin-top: 1rem; font-weight: 600; color: #0066cc;">
+              Total Fee: $<span id="totalFee">0.00</span>
             </div>
+          </div>
 
-            <!-- Day Tabs - Dynamically Generated -->
-            <div class="day-tabs-container">
-                <div class="day-tabs" id="dayTabs">
-                    <!-- Tabs will be generated from trial data -->
-                </div>
+          <!-- Day Tabs - Dynamically Generated -->
+          <div class="day-tabs-container">
+            <div class="day-tabs" id="dayTabs">
+              <!-- Tabs will be generated from trial data -->
             </div>
+          </div>
 
-            <!-- Scrollable Class Entries - Dynamically Generated -->
-            <div class="class-entries-container" id="classEntriesContainer">
-                <!-- Content will be generated from trial data -->
-                <div style="text-align: center; padding: 2rem; color: #666;">
-                    Loading available classes...
-                </div>
+          <!-- Scrollable Class Entries - Dynamically Generated -->
+          <div class="class-entries-container" id="classEntriesContainer">
+            <!-- Content will be generated from trial data -->
+            <div style="text-align: center; padding: 2rem; color: #666;">
+              Loading available classes...
             </div>
+          </div>
         </div>
 
-<!-- Replace your submit button with this version -->
-<!-- Submit Section -->
+        <!-- Submit Section -->
         <div class="submit-section">
-            <button type="button" class="btn-submit" id="submitEntry" disabled> Submit Entry </button>
-            <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
-                Please review your selections before submitting. Entry fees are due upon submission.
-            </p>
+          <button type="button" class="btn-submit" id="submitEntry" disabled>Submit Entry</button>
+          <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+            Please review your selections before submitting. Entry fees are due upon submission.
+          </p>
         </div>
       </form>
     </div>
@@ -1108,14 +972,12 @@
     import { collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     // ========================================
-    // GLOBAL DATE HANDLING FIX
+    // GLOBAL DATE HANDLING
     // ========================================
     
-    // Creates a date object that stays in local timezone
     function createLocalDate(dateStr) {
       if (!dateStr) return null;
       
-      // Always add noon time to prevent timezone shifts
       if (typeof dateStr === 'string') {
         const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
         return new Date(dateWithTime);
@@ -1124,7 +986,6 @@
       return new Date(dateStr);
     }
 
-    // Formats a date to YYYY-MM-DD string in local timezone
     function formatLocalDate(date) {
       if (!date || !(date instanceof Date)) return '';
       
@@ -1135,13 +996,6 @@
       return `${year}-${month}-${day}`;
     }
 
-    // Gets today's date in local timezone as YYYY-MM-DD string
-    function getTodayLocal() {
-      const now = new Date();
-      return formatLocalDate(now);
-    }
-
-    // Formats date for display with timezone consideration
     function formatDateDisplay(dateInput, options = {}) {
       let date;
       
@@ -1167,24 +1021,17 @@
       return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
     }
 
-    // Prepares date data for Firebase storage (prevents timezone conversion)
     function prepareDateForFirebase(dateStr) {
       if (!dateStr) return null;
-      
-      // Create a date that represents the exact local date at noon
       const localDate = createLocalDate(dateStr);
-      
-      // Store as a Firestore Timestamp to maintain precision
       return localDate;
     }
 
-    // Retrieves date data from Firebase (converts back to local date string)
     function getDateFromFirebase(firebaseDate) {
       if (!firebaseDate) return '';
       
       let date;
       
-      // Handle Firestore Timestamps
       if (firebaseDate.toDate) {
         date = firebaseDate.toDate();
       } else if (firebaseDate instanceof Date) {
@@ -1198,344 +1045,148 @@
       return formatLocalDate(date);
     }
 
-    // Test date handling function
-    function testDateHandling() {
-      console.log('=== Date Handling Test ===');
+    // ========================================
+    // REGISTRATION NUMBER FORMATTER
+    // ========================================
+
+    function formatRegistrationNumber(input) {
+      if (!input) return '';
       
-      const testDate = '2024-03-15';
-      console.log('1. Original date string:', testDate);
+      let cleaned = input.replace(/[^\d]/g, '');
       
-      const forFirebase = prepareDateForFirebase(testDate);
-      console.log('2. Prepared for Firebase:', forFirebase);
+      if (!cleaned) return '';
       
-      const fromFirebase = getDateFromFirebase(forFirebase);
-      console.log('3. Retrieved from Firebase:', fromFirebase);
+      if (cleaned.length < 6) {
+        return cleaned;
+      }
       
-      const display = formatDateDisplay(fromFirebase);
-      console.log('4. Formatted for display:', display);
+      if (cleaned.length > 8) {
+        cleaned = cleaned.substring(0, 8);
+      }
       
-      const matches = fromFirebase === testDate;
-      console.log('5. Round-trip successful:', matches);
+      if (cleaned.length === 6) {
+        const part1 = cleaned.substring(0, 2);
+        const part2 = cleaned.substring(2);
+        return `${part1}-${part2}`;
+      } else if (cleaned.length >= 7) {
+        const part1 = cleaned.substring(0, 2);
+        const part2 = cleaned.substring(2, 6);
+        let part3 = cleaned.substring(6);
+        
+        if (part3.length === 1) {
+          part3 = '0' + part3;
+        }
+        
+        return `${part1}-${part2}-${part3}`;
+      }
       
-      if (!matches) {
-        console.error('❌ Date handling is still broken!');
+      return cleaned;
+    }
+
+    function handleRegistrationInput(event) {
+      const input = event.target;
+      const cursorPosition = input.selectionStart;
+      const originalValue = input.value;
+      const originalLength = originalValue.length;
+      
+      const cleanedDigits = originalValue.replace(/[^\d]/g, '');
+      
+      let formattedValue;
+      if (cleanedDigits.length >= 6) {
+        formattedValue = formatRegistrationNumber(originalValue);
       } else {
-        console.log('✅ Date handling is working correctly!');
-      }
-    }
-
-    console.log("🎯 Entry form loaded");
-
-    // AUTO-FORMATTER FOR C-WAGS REGISTRATION NUMBERS
-// Add this to entry-form.html to automatically format registration numbers to xx-xxxx-xx format
-// FIXED REGISTRATION NUMBER AUTO-FORMATTER
-// Fixes: 1) Invalid regex pattern 2) Over-aggressive formatting
-
-// Fixed function - only formats when user has entered enough digits
-function formatRegistrationNumber(input) {
-  if (!input) return '';
-  
-  // Remove all non-digit characters first
-  let cleaned = input.replace(/[^\d]/g, '');
-  
-  // If empty after cleaning, return empty
-  if (!cleaned) return '';
-  
-  // Don't auto-format until we have at least 6 digits
-  // This prevents "107" from becoming "00-0001-07"
-  if (cleaned.length < 6) {
-    return cleaned; // Return as-is until user enters more digits
-  }
-  
-  // Limit to maximum 8 digits (xx-xxxx-xx format)
-  if (cleaned.length > 8) {
-    cleaned = cleaned.substring(0, 8);
-  }
-  
-  // Format based on length (only for 6+ digits)
-  if (cleaned.length === 6) {
-    // 6 digits: format as xx-xxxx
-    const part1 = cleaned.substring(0, 2);
-    const part2 = cleaned.substring(2);
-    return `${part1}-${part2}`;
-  } else if (cleaned.length >= 7) {
-    // 7-8 digits: format as xx-xxxx-xx
-    const part1 = cleaned.substring(0, 2);
-    const part2 = cleaned.substring(2, 6);
-    let part3 = cleaned.substring(6);
-    
-    // Ensure part3 is exactly 2 digits with leading zero if needed
-    if (part3.length === 1) {
-      part3 = '0' + part3;
-    }
-    
-    return `${part1}-${part2}-${part3}`;
-  }
-  
-  // Should never reach here, but just in case
-  return cleaned;
-}
-
-// Fixed function to handle live formatting with better logic
-function handleRegistrationInput(event) {
-  const input = event.target;
-  const cursorPosition = input.selectionStart;
-  const originalValue = input.value;
-  const originalLength = originalValue.length;
-  
-  // Only format if user has typed enough digits
-  const cleanedDigits = originalValue.replace(/[^\d]/g, '');
-  
-  let formattedValue;
-  if (cleanedDigits.length >= 6) {
-    // Format if we have enough digits
-    formattedValue = formatRegistrationNumber(originalValue);
-  } else {
-    // Just clean out non-digits but don't format yet
-    formattedValue = cleanedDigits;
-  }
-  
-  // Update the input value
-  input.value = formattedValue;
-  
-  // Adjust cursor position to account for added dashes
-  const lengthDifference = formattedValue.length - originalLength;
-  const newCursorPosition = Math.max(0, cursorPosition + lengthDifference);
-  
-  // Set cursor position after the browser updates the input
-  setTimeout(() => {
-    input.setSelectionRange(newCursorPosition, newCursorPosition);
-  }, 0);
-  
-  // Only trigger auto-fill for complete registration numbers (8+ digits or properly formatted)
-  const hasCompleteRegistration = 
-    formattedValue.length >= 8 || 
-    (formattedValue.includes('-') && cleanedDigits.length >= 6);
-    
-  if (hasCompleteRegistration) {
-    console.log("🔍 Triggering auto-fill for formatted registration:", formattedValue);
-    enhancedAutoFillFromRegistration(formattedValue);
-  }
-}
-
-// Fixed function to handle blur with better validation
-function handleRegistrationBlur(event) {
-  const input = event.target;
-  const currentValue = input.value;
-  
-  if (currentValue) {
-    const cleanedDigits = currentValue.replace(/[^\d]/g, '');
-    
-    // Only format if we have a reasonable number of digits
-    let finalFormatted;
-    if (cleanedDigits.length >= 6) {
-      finalFormatted = formatRegistrationNumber(currentValue);
-      
-      // Show visual feedback for formatting
-      if (finalFormatted !== currentValue) {
-        input.classList.add('auto-filled');
-        console.log(`✅ Auto-formatted registration: "${currentValue}" → "${finalFormatted}"`);
-        setTimeout(() => {
-          input.classList.remove('auto-filled');
-        }, 2000);
+        formattedValue = cleanedDigits;
       }
       
-      input.value = finalFormatted;
+      input.value = formattedValue;
       
-      // Trigger auto-fill for complete registration
-      enhancedAutoFillFromRegistration(finalFormatted);
-    } else {
-      // For incomplete entries, just clean but don't format
-      finalFormatted = cleanedDigits;
-      input.value = finalFormatted;
-    }
-  }
-}
-
-// Fixed setup function with corrected regex pattern
-function setupRegistrationFormatter() {
-  const regInput = document.getElementById('cwagsNumber');
-  
-  if (regInput) {
-    console.log("🎯 Setting up registration number auto-formatter");
-    
-    // Remove any existing event listeners first
-    regInput.removeEventListener('input', handleRegistrationInput);
-    regInput.removeEventListener('paste', handleRegistrationPaste);
-    regInput.removeEventListener('blur', handleRegistrationBlur);
-    
-    // Add the new event listeners
-    regInput.addEventListener('input', handleRegistrationInput);
-    regInput.addEventListener('paste', handleRegistrationPaste);
-    regInput.addEventListener('blur', handleRegistrationBlur);
-    
-    // FIXED: Set input attributes with corrected regex pattern
-    regInput.setAttribute('inputmode', 'numeric');
-    regInput.setAttribute('pattern', '[0-9\\-]*'); // FIXED: Properly escaped dash
-    regInput.setAttribute('maxlength', '10'); // xx-xxxx-xx = 10 characters
-    regInput.setAttribute('placeholder', 'e.g., 22-4168-01');
-    
-    console.log("✅ Registration formatter setup complete");
-  } else {
-    console.warn("⚠️ Could not find cwagsNumber input field");
-  }
-}
-
-// Keep the existing paste handler
-function handleRegistrationPaste(event) {
-  event.preventDefault();
-  
-  // Get pasted text
-  const pastedText = (event.clipboardData || window.clipboardData).getData('text');
-  
-  // Format the pasted text only if it has enough digits
-  const cleanedDigits = pastedText.replace(/[^\d]/g, '');
-  let formattedValue;
-  
-  if (cleanedDigits.length >= 6) {
-    formattedValue = formatRegistrationNumber(pastedText);
-  } else {
-    formattedValue = cleanedDigits;
-  }
-  
-  // Set the formatted value
-  event.target.value = formattedValue;
-  
-  // Trigger auto-fill if complete
-  if (formattedValue.length >= 8 || (formattedValue.includes('-') && cleanedDigits.length >= 6)) {
-    console.log("📋 Triggering auto-fill for pasted registration:", formattedValue);
-    enhancedAutoFillFromRegistration(formattedValue);
-  }
-}
-
-// Enhanced auto-fill function that handles both formatted and unformatted registration numbers
-function enhancedAutoFillFromRegistration(cwagsNumber) {
-  console.log("🔍 Enhanced auto-fill for registration:", cwagsNumber);
-  
-  if (!cwagsNumber || !isRegistrationDataLoaded || !registrationData) {
-    return;
-  }
-  
-  // Clean the input for comparison (remove dashes)
-  const cleanedInput = cwagsNumber.replace(/[^\d]/g, '');
-  
-  // Find registration data - try multiple formats
-  let data = registrationData.find(entry => {
-    // Try exact match first
-    if (entry.Registration === cwagsNumber || entry.cwagsNumber === cwagsNumber) {
-      return true;
-    }
-    
-    // Try cleaned number match
-    const cleanedEntry = (entry.Registration || entry.cwagsNumber || '').replace(/[^\d]/g, '');
-    if (cleanedEntry === cleanedInput) {
-      return true;
-    }
-    
-    // Try formatted version match
-    if (cleanedInput.length >= 6) {
-      const formattedInput = formatRegistrationNumber(cleanedInput);
-      if (entry.Registration === formattedInput || entry.cwagsNumber === formattedInput) {
-        return true;
-      }
-    }
-    
-    return false;
-  });
-  
-  if (!data) {
-    console.log("❌ No registration data found for:", cwagsNumber);
-    return;
-  }
-  
-  console.log("✅ Found registration data:", data);
-  
-  // Enhanced fill function that handles both old and new field names
-  function fillFieldEnhanced(fieldId, value) {
-    if (!value) return;
-    
-    const field = document.getElementById(fieldId);
-    if (field && (!field.value || field.value === '')) {
-      field.value = value;
-      field.classList.add('auto-filled');
-      console.log(`✅ Auto-filled ${fieldId}: ${value}`);
+      const lengthDifference = formattedValue.length - originalLength;
+      const newCursorPosition = Math.max(0, cursorPosition + lengthDifference);
+      
       setTimeout(() => {
-        field.classList.remove('auto-filled');
-      }, 2000);
+        input.setSelectionRange(newCursorPosition, newCursorPosition);
+      }, 0);
+      
+      const hasCompleteRegistration = 
+        formattedValue.length >= 8 || 
+        (formattedValue.includes('-') && cleanedDigits.length >= 6);
+        
+      if (hasCompleteRegistration) {
+        enhancedAutoFillFromRegistration(formattedValue);
+      }
     }
-  }
-  
-  // Use standardized field mapping with fallbacks
-  fillFieldEnhanced('handlerName', data.handlerName || data.Handler);
-  fillFieldEnhanced('handlerPhone', data.handlerPhone);
-  fillFieldEnhanced('handlerEmail', data.handlerEmail);
-  fillFieldEnhanced('emergencyContact', data.emergencyContact);
-  fillFieldEnhanced('dogCallName', data.dogCallName || data['Call Name']);
-  fillFieldEnhanced('dogBreed', data.dogBreed);
-  fillFieldEnhanced('dogBirthdate', data.dogBirthdate);
-  
-  // Handle sex dropdown
-  if (data.dogSex) {
-    const sexField = document.getElementById('dogSex');
-    if (sexField && (!sexField.value || sexField.value === '')) {
-      sexField.value = data.dogSex;
-      sexField.classList.add('auto-filled');
-      console.log(`✅ Auto-filled dogSex: ${data.dogSex}`);
-      setTimeout(() => {
-        sexField.classList.remove('auto-filled');
-      }, 2000);
+
+    function handleRegistrationBlur(event) {
+      const input = event.target;
+      const currentValue = input.value;
+      
+      if (currentValue) {
+        const cleanedDigits = currentValue.replace(/[^\d]/g, '');
+        
+        let finalFormatted;
+        if (cleanedDigits.length >= 6) {
+          finalFormatted = formatRegistrationNumber(currentValue);
+          
+          if (finalFormatted !== currentValue) {
+            input.classList.add('auto-filled');
+            setTimeout(() => {
+              input.classList.remove('auto-filled');
+            }, 2000);
+          }
+          
+          input.value = finalFormatted;
+          enhancedAutoFillFromRegistration(finalFormatted);
+        } else {
+          finalFormatted = cleanedDigits;
+          input.value = finalFormatted;
+        }
+      }
     }
-  }
-  
-  checkFormValidity();
-}
 
-// Updated test function with better test cases
-function testRegistrationFormatter() {
-  const testCases = [
-    { input: '107', expected: '107' }, // Should NOT format until more digits
-    { input: '2241681', expected: '22-4168-01' }, // Should format
-    { input: '22-4168-1', expected: '22-4168-01' }, // Should format
-    { input: '22 4168 1', expected: '22-4168-01' }, // Should format
-    { input: '224168', expected: '22-4168' }, // 6 digits should format
-    { input: '22123', expected: '22123' }, // 5 digits should NOT format
-    { input: '22', expected: '22' }, // 2 digits should NOT format
-  ];
-  
-  console.log("🧪 Testing fixed registration number formatter:");
-  
-  testCases.forEach(test => {
-    const result = formatRegistrationNumber(test.input);
-    const passed = result === test.expected;
-    console.log(`${passed ? '✅' : '❌'} "${test.input}" → "${result}" (expected: "${test.expected}")`);
-  });
-}
+    function handleRegistrationPaste(event) {
+      event.preventDefault();
+      
+      const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+      
+      const cleanedDigits = pastedText.replace(/[^\d]/g, '');
+      let formattedValue;
+      
+      if (cleanedDigits.length >= 6) {
+        formattedValue = formatRegistrationNumber(pastedText);
+      } else {
+        formattedValue = cleanedDigits;
+      }
+      
+      event.target.value = formattedValue;
+      
+      if (formattedValue.length >= 8 || (formattedValue.includes('-') && cleanedDigits.length >= 6)) {
+        enhancedAutoFillFromRegistration(formattedValue);
+      }
+    }
 
-console.log(`
-🔧 FIXED REGISTRATION NUMBER FORMATTER
+    function setupRegistrationFormatter() {
+      const regInput = document.getElementById('cwagsNumber');
+      
+      if (regInput) {
+        regInput.removeEventListener('input', handleRegistrationInput);
+        regInput.removeEventListener('paste', handleRegistrationPaste);
+        regInput.removeEventListener('blur', handleRegistrationBlur);
+        
+        regInput.addEventListener('input', handleRegistrationInput);
+        regInput.addEventListener('paste', handleRegistrationPaste);
+        regInput.addEventListener('blur', handleRegistrationBlur);
+        
+        regInput.setAttribute('inputmode', 'numeric');
+        regInput.setAttribute('pattern', '[0-9\\-]*');
+        regInput.setAttribute('maxlength', '10');
+        regInput.setAttribute('placeholder', 'e.g., 22-4168-01');
+      }
+    }
 
-FIXES APPLIED:
-✅ Fixed invalid regex pattern [0-9\\-]* (properly escaped dash)
-✅ Prevents over-formatting (107 stays as 107, not 00-0001-07)
-✅ Only formats when user has 6+ digits
-✅ Better auto-fill matching (tries multiple formats)
-✅ Cleaner cursor positioning
-
-BEHAVIOR:
-- "107" → "107" (no formatting until more digits)
-- "2241681" → "22-4168-01" (formats when enough digits)
-- "22-4168-1" → "22-4168-01" (adds leading zero to last part)
-`);
-
-// Export functions for use in entry-form.html
-if (typeof window !== 'undefined') {
-  window.formatRegistrationNumber = formatRegistrationNumber;
-  window.setupRegistrationFormatter = setupRegistrationFormatter;
-  window.testRegistrationFormatter = testRegistrationFormatter;
-  window.enhancedAutoFillFromRegistration = enhancedAutoFillFromRegistration;
-}
-  
-    // Global variables
+    // ========================================
+    // GLOBAL VARIABLES
+    // ========================================
+    
     let currentTrialData = null;
     let selectedClasses = new Set();
     let registrationData = [];
@@ -1545,13 +1196,11 @@ if (typeof window !== 'undefined') {
     let isRegistrationDataLoaded = false;
     let formInitialized = false;
 
-    // NEW TABBED CLASS ENTRY VARIABLES
     let selectedEntries = [];
     let totalFee = 0;
 
-    // Prerequisites mapping - hardcoded as they're always the same
     const prerequisites = {
-        "Investigator 3": ["Patrol 1", "Detective 2"],  // Special case - either/or
+        "Investigator 3": ["Patrol 1", "Detective 2"],
         "Super Sleuth 4": ["Investigator 3"],
         "Private Inv": ["Super Sleuth 4"],
         "Det Diversions": ["Super Sleuth 4"],
@@ -1566,14 +1215,22 @@ if (typeof window !== 'undefined') {
         "Obedience 5": ["Obedience 4"]
     };
 
-    // Get prerequisites text for a class
+    let fees = {
+      regular: 35.00,
+      feo: 25.00,
+      juniorHandler: 20.00
+    };
+
+    // ========================================
+    // UTILITY FUNCTIONS
+    // ========================================
+
     function getPrerequisitesText(className) {
         const prereqs = prerequisites[className];
         if (!prereqs || prereqs.length === 0) {
             return "Open to all levels";
         }
         
-        // Handle special either/or case
         if (className === "Investigator 3") {
             return "Patrol 1 OR Detective 2";
         }
@@ -1581,33 +1238,23 @@ if (typeof window !== 'undefined') {
         return prereqs.join(", ");
     }
 
-    // Fee structure - now configurable by secretary
-    let fees = {
-      regular: 35.00,
-      feo: 25.00,
-      juniorHandler: 20.00
-    };
-
-    // Show specific day tab
     window.showDay = function(dayIndex) {
-        // Hide all day content
         document.querySelectorAll('.class-day-content').forEach(content => {
             content.classList.remove('active');
         });
         
-        // Remove active class from all tabs
         document.querySelectorAll('.day-tab').forEach(tab => {
             tab.classList.remove('active');
         });
         
-        // Show selected day content
         document.getElementById(`day-${dayIndex}`).classList.add('active');
-        
-        // Add active class to selected tab
         document.querySelectorAll('.day-tab')[dayIndex].classList.add('active');
     };
 
-    // Handle entry selection
+    // ========================================
+    // ENTRY SELECTION HANDLING
+    // ========================================
+
     document.addEventListener('change', function(e) {
         if (e.target.type === 'checkbox' && e.target.dataset.class) {
             handleEntrySelection(e.target);
@@ -1623,21 +1270,17 @@ if (typeof window !== 'undefined') {
       const dayIndex = checkbox.dataset.day;
       const roundNumber = checkbox.dataset.roundNumber;
       
-      // Create unique identifier for this specific round entry
       const entryId = `${className}-${roundName}-${dayIndex}-${roundNumber}`;
       
       if (checkbox.checked) {
-        // Prevent selecting both regular and FEO for same round
         const otherType = entryType === 'regular' ? 'feo' : 'regular';
         const otherCheckbox = document.querySelector(`input[data-class="${className}"][data-round="${roundName}"][data-type="${otherType}"][data-day="${dayIndex}"][data-round-number="${roundNumber}"]`);
         if (otherCheckbox) {
           otherCheckbox.checked = false;
           otherCheckbox.parentElement.classList.remove('selected');
-          // Remove from selected entries if it was there
           selectedEntries = selectedEntries.filter(entry => entry.entryId !== entryId || entry.type !== otherType);
         }
         
-        // Add to selected entries
         selectedEntries.push({
           entryId: entryId,
           className: className,
@@ -1651,7 +1294,6 @@ if (typeof window !== 'undefined') {
         
         checkbox.parentElement.classList.add('selected');
       } else {
-        // Remove from selected entries
         selectedEntries = selectedEntries.filter(entry => 
           !(entry.entryId === entryId && entry.type === entryType)
         );
@@ -1663,7 +1305,6 @@ if (typeof window !== 'undefined') {
       checkFormValidity();
     }
 
-    // Updated summary function for round-based entries with day grouping
     function updateEntrySummary() {
       const summaryDiv = document.getElementById('entrySummary');
       const entriesList = document.getElementById('selectedEntriesList');
@@ -1676,7 +1317,6 @@ if (typeof window !== 'undefined') {
       
       summaryDiv.style.display = 'block';
       
-      // Group entries by day
       const entriesByDay = {};
       selectedEntries.forEach(entry => {
         const dayKey = `Day ${parseInt(entry.dayIndex) + 1}`;
@@ -1686,7 +1326,6 @@ if (typeof window !== 'undefined') {
         entriesByDay[dayKey].push(entry);
       });
       
-      // Generate grouped HTML
       let html = '';
       Object.keys(entriesByDay)
         .sort((a, b) => {
@@ -1695,9 +1334,7 @@ if (typeof window !== 'undefined') {
           return dayA - dayB;
         })
         .forEach(dayKey => {
-          html += `
-            <li class="day-group-header">${dayKey}</li>
-          `;
+          html += `<li class="day-group-header">${dayKey}</li>`;
           
           entriesByDay[dayKey].forEach(entry => {
             html += `
@@ -1705,7 +1342,7 @@ if (typeof window !== 'undefined') {
                 ${entry.className} - ${entry.roundName} 
                 ${entry.type === 'feo' ? '(FEO)' : '(Regular)'} 
                 - Judge: ${entry.judgeName} 
-                - $${entry.fee.toFixed(2)}
+                - ${entry.fee.toFixed(2)}
               </li>
             `;
           });
@@ -1713,18 +1350,19 @@ if (typeof window !== 'undefined') {
       
       entriesList.innerHTML = html;
       
-      // Update total fee
       totalFee = selectedEntries.reduce((sum, entry) => sum + entry.fee, 0);
       totalFeeSpan.textContent = totalFee.toFixed(2);
       
-      // Enable/disable submit button
       const submitBtn = document.getElementById('submitEntry');
       if (submitBtn) {
         submitBtn.disabled = selectedEntries.length === 0;
       }
     }
 
-    // Check form validity function
+    // ========================================
+    // FORM VALIDATION
+    // ========================================
+
     function checkFormValidity() {
       const waiverAccepted = document.getElementById('waiverAccepted').checked;
       const handlerName = document.getElementById('handlerName').value.trim();
@@ -1741,219 +1379,18 @@ if (typeof window !== 'undefined') {
       return isValid;
     }
 
-    // Submit entry function
-    async function submitEntry() {
-      console.log("🚀 Starting entry submission...");
-      
-      // Basic form validation
-      const handlerName = document.getElementById('handlerName').value.trim();
-      const dogCallName = document.getElementById('dogCallName').value.trim();
-      const waiverAccepted = document.getElementById('waiverAccepted').checked;
-      
-      if (!handlerName) {
-        alert('Please enter the Handler Name.');
-        return;
-      }
-      
-      if (!dogCallName) {
-        alert('Please enter the Dog\'s Call Name.');
-        return;
-      }
-      
-      if (!waiverAccepted) {
-        alert('Please accept the waiver agreement to continue.');
-        return;
-      }
-      
-      if (!selectedEntries || selectedEntries.length === 0) {
-        alert('Please select at least one class entry.');
-        return;
-      }
-      
-      // Disable submit button during submission
-      const submitBtn = document.getElementById('submitEntry');
-      const originalText = submitBtn.textContent;
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting...';
-      
-      try {
-        // Collect form data
-        const entryData = {
-          trialId: currentTrialData.id,
-          trialName: currentTrialData.clubName,
-          handlerName: handlerName,
-          handlerEmail: document.getElementById('handlerEmail').value.trim(),
-          handlerPhone: document.getElementById('handlerPhone').value.trim(),
-          emergencyContact: document.getElementById('emergencyContact').value.trim(),
-          dogCallName: dogCallName,
-          dogBreed: document.getElementById('dogBreed').value.trim(),
-          dogBirthdate: document.getElementById('dogBirthdate').value,
-          dogSex: document.getElementById('dogSex').value,
-          cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
-          juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
-          selectedEntries: selectedEntries.map(entry => ({
-            ...entry,
-            date: currentTrialData.days[entry.dayIndex]?.date || null
-          })),
-          totalFee: totalFee,
-          submittedAt: new Date(),
-          waiverAccepted: true,
-          regularEntries: selectedEntries.filter(e => e.type === 'regular').length,
-          feoEntries: selectedEntries.filter(e => e.type === 'feo').length
-        };
-        
-        console.log("📝 Entry data prepared:", entryData);
-        
-        // Save to Firebase
-        const docRef = await addDoc(collection(db, "entries"), entryData);
-        console.log("✅ Entry saved with ID:", docRef.id);
-        
-        // Show success and scroll to top
-        showSuccessMessage();
-        
-      } catch (error) {
-        console.error("❌ Error submitting entry:", error);
-        alert("Error submitting entry: " + error.message);
-        
-        // Re-enable submit button on error
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-      }
-    }
+    // ========================================
+    // REGISTRATION DATA LOADING
+    // ========================================
 
-    // Show success message function
-    function showSuccessMessage() {
-      // Scroll to top of page
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      // Hide the entry form
-      document.getElementById('entryForm').style.display = 'none';
-      
-      // Show success message
-      const successDiv = document.getElementById('successMessage');
-      if (successDiv) {
-        successDiv.classList.remove('hidden');
-        successDiv.style.display = 'block';
-        
-        // Update success message content
-        successDiv.innerHTML = `
-          <h3>✅ Entry Submitted Successfully!</h3>
-          <p>Your entry has been recorded for this trial.</p>
-          <div style="margin-top: 1.5rem;">
-            <button class="btn btn-primary" onclick="enterAnotherParticipant()" style="margin-right: 1rem;">
-              Enter Another Participant
-            </button>
-            <button class="btn btn-secondary" onclick="goToDashboard()">
-              Back to Dashboard
-            </button>
-          </div>
-        `;
-      }
-    }
-
-    // Reset form for another entry
-    function enterAnotherParticipant() {
-      console.log("🔄 Resetting form for another entry...");
-      
-      // Reset form fields
-      document.getElementById('entryForm').reset();
-      
-      // Clear selected entries
-      selectedEntries = [];
-      totalFee = 0;
-      
-      // Clear all checkboxes and remove selected styling
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        if (cb.id !== 'waiverAccepted') {
-          cb.checked = false;
-          if (cb.parentElement) {
-            cb.parentElement.classList.remove('selected');
-          }
-        }
-      });
-      
-      // Hide success messages
-      const successDiv = document.getElementById('successMessage');
-      if (successDiv) {
-        successDiv.classList.add('hidden');
-        successDiv.style.display = 'none';
-      }
-      
-      // Show form again
-      document.getElementById('entryForm').style.display = 'block';
-      
-      // Update summary and form validity
-      updateEntrySummary();
-      checkFormValidity();
-      
-      // Go back to Day 1
-      if (typeof showDay === 'function') {
-        showDay(0);
-      }
-      
-      // Clear lookup status
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) {
-        statusDiv.style.display = 'none';
-      }
-      
-      // Clear registration number to prevent auto-fill confusion
-      document.getElementById('cwagsNumber').value = '';
-      
-      // Scroll to top
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Go to dashboard function
-    function goToDashboard() {
-      window.location.href = 'main-dashboard.html';
-    }
-
-    // Initialize the application
-    async function init() {
-      console.log("🚀 Initializing application...");
-      
-      // Always load registration data first
-      await loadRegistrationData();
-
-      setupRegistrationFormatter();
-      
-      // Check URL parameters for entry link
-      const urlParams = new URLSearchParams(window.location.search);
-      const entryId = urlParams.get('entry');
-      const trialId = urlParams.get('trial');
-
-      if (entryId) {
-        // Load existing entry for editing
-        console.log("📝 Loading existing entry for editing:", entryId);
-        await loadExistingEntry(entryId);
-      } else if (trialId) {
-        // Load specific trial for public entry
-        console.log("🔗 Loading specific trial for public entry:", trialId);
-        await loadSpecificTrial(trialId);
-      } else {
-        // Normal secretary view
-        console.log("👨‍💼 Setting up secretary view");
-        isSecretary = true;
-        await setupSecretaryView();
-      }
-
-      // Test date handling (remove in production)
-      testDateHandling();
-    }
-
-    // Load registration data from data.json
     async function loadRegistrationData() {
       try {
-        console.log("📊 Loading registration data...");
-        
-        // Try multiple possible paths in order
         const possiblePaths = [
-          '/js/data.json',           // Absolute from root
-          '../js/data.json',         // One level up from Secretary folder
-          './js/data.json',          // Current directory structure
-          '/Secretary/js/data.json', // If file was moved to Secretary folder
-          'js/data.json'             // Relative without ./
+          '/js/data.json',
+          '../js/data.json',
+          './js/data.json',
+          '/Secretary/js/data.json',
+          'js/data.json'
         ];
         
         let response = null;
@@ -1961,61 +1398,107 @@ if (typeof window !== 'undefined') {
         
         for (const path of possiblePaths) {
           try {
-            console.log(`🔍 Trying path: ${path}`);
             response = await fetch(path);
             if (response.ok) {
               successfulPath = path;
-              console.log(`✅ Found data.json at: ${path}`);
               break;
-            } else {
-              console.log(`❌ Path ${path} returned status: ${response.status}`);
             }
           } catch (pathError) {
-            console.log(`❌ Failed to fetch from ${path}:`, pathError.message);
             continue;
           }
         }
         
         if (!response || !response.ok) {
-          throw new Error(`Could not find data.json at any of the expected locations: ${possiblePaths.join(', ')}`);
+          throw new Error(`Could not find data.json at any of the expected locations`);
         }
         
         const data = await response.json();
         registrationData = data || [];
         isRegistrationDataLoaded = true;
-        console.log(`✅ Loaded ${registrationData.length} registration records from ${successfulPath}`);
         
       } catch (error) {
-        console.warn("⚠️ Could not load registration data:", error.message);
-        
-        // Don't let this failure block the application
         registrationData = [];
         isRegistrationDataLoaded = true;
-        
-        // Show user-friendly message
-        console.log("ℹ️ Registration lookup will not be available, but manual entry will work");
       }
     }
 
-    // Setup form event listeners
-    function setupFormEventListeners() {
-      console.log("🔧 Setting up form event listeners...");
+    function enhancedAutoFillFromRegistration(cwagsNumber) {
+      if (!cwagsNumber || !isRegistrationDataLoaded || !registrationData) {
+        return;
+      }
       
-      // Registration number lookup with debouncing
+      const cleanedInput = cwagsNumber.replace(/[^\d]/g, '');
+      
+      let data = registrationData.find(entry => {
+        if (entry.Registration === cwagsNumber || entry.cwagsNumber === cwagsNumber) {
+          return true;
+        }
+        
+        const cleanedEntry = (entry.Registration || entry.cwagsNumber || '').replace(/[^\d]/g, '');
+        if (cleanedEntry === cleanedInput) {
+          return true;
+        }
+        
+        if (cleanedInput.length >= 6) {
+          const formattedInput = formatRegistrationNumber(cleanedInput);
+          if (entry.Registration === formattedInput || entry.cwagsNumber === formattedInput) {
+            return true;
+          }
+        }
+        
+        return false;
+      });
+      
+      if (!data) {
+        return;
+      }
+      
+      function fillFieldEnhanced(fieldId, value) {
+        if (!value) return;
+        
+        const field = document.getElementById(fieldId);
+        if (field && (!field.value || field.value === '')) {
+          field.value = value;
+          field.classList.add('auto-filled');
+          setTimeout(() => {
+            field.classList.remove('auto-filled');
+          }, 2000);
+        }
+      }
+      
+      fillFieldEnhanced('handlerName', data.handlerName || data.Handler);
+      fillFieldEnhanced('handlerPhone', data.handlerPhone);
+      fillFieldEnhanced('handlerEmail', data.handlerEmail);
+      fillFieldEnhanced('emergencyContact', data.emergencyContact);
+      fillFieldEnhanced('dogCallName', data.dogCallName || data['Call Name']);
+      fillFieldEnhanced('dogBreed', data.dogBreed);
+      fillFieldEnhanced('dogBirthdate', data.dogBirthdate);
+      
+      if (data.dogSex) {
+        const sexField = document.getElementById('dogSex');
+        if (sexField && (!sexField.value || sexField.value === '')) {
+          sexField.value = data.dogSex;
+          sexField.classList.add('auto-filled');
+          setTimeout(() => {
+            sexField.classList.remove('auto-filled');
+          }, 2000);
+        }
+      }
+      
+      checkFormValidity();
+    }
+
+    // ========================================
+    // FORM SETUP AND EVENT LISTENERS
+    // ========================================
+
+    function setupFormEventListeners() {
       const cwagsInput = document.getElementById('cwagsNumber');
       if (cwagsInput) {
-        console.log("✅ Setting up registration number lookup");
-        
-        // Remove any existing listeners first
         cwagsInput.removeEventListener('input', handleRegistrationInput);
-        
-        // Add the listener
         cwagsInput.addEventListener('input', handleRegistrationInput);
-      } else {
-        console.error("❌ Could not find cwagsNumber input field");
       }
 
-      // Form validation listeners
       const entryForm = document.getElementById('entryForm');
       if (entryForm) {
         entryForm.removeEventListener('input', checkFormValidity);
@@ -2035,13 +1518,14 @@ if (typeof window !== 'undefined') {
       }
 
       formInitialized = true;
-      console.log("✅ Form event listeners setup complete");
     }
 
-    // Setup secretary view
+    // ========================================
+    // SECRETARY FUNCTIONS
+    // ========================================
+
     async function setupSecretaryView() {
       try {
-        // Wait for auth
         await new Promise((resolve) => {
           if (auth.currentUser) {
             resolve();
@@ -2059,7 +1543,6 @@ if (typeof window !== 'undefined') {
           return;
         }
 
-        // Load trials for secretary
         const trialsQuery = query(
           collection(db, "trials"),
           where("createdBy", "==", auth.currentUser.uid)
@@ -2072,7 +1555,6 @@ if (typeof window !== 'undefined') {
           trialsSnapshot.forEach(doc => {
             const trialData = doc.data();
             
-            // Fix date handling for trial days
             if (trialData.days && Array.isArray(trialData.days)) {
               trialData.days = trialData.days.map(day => ({
                 ...day,
@@ -2091,254 +1573,10 @@ if (typeof window !== 'undefined') {
           window.location.href = 'main-dashboard.html';
         }
       } catch (error) {
-        console.error("❌ Error loading trial data:", error);
         alert("Error loading trial data: " + error.message);
       }
     }
 
-    // Load specific trial for public entry
-    async function loadSpecificTrial(trialId) {
-      try {
-        console.log("🔍 Loading specific trial:", trialId);
-        const trialDoc = await getDoc(doc(db, 'trials', trialId));
-        if (!trialDoc.exists()) {
-          alert('Trial not found');
-          return;
-        }
-
-        const trialData = trialDoc.data();
-        
-        // Fix date handling for trial days
-        if (trialData.days && Array.isArray(trialData.days)) {
-          trialData.days = trialData.days.map(day => ({
-            ...day,
-            date: day.date ? getDateFromFirebase(day.date) : null
-          }));
-        }
-
-        currentTrialData = { id: trialDoc.id, ...trialData };
-        console.log("✅ Trial loaded:", currentTrialData.clubName);
-        
-        // Hide secretary-only sections
-        document.getElementById('trialSelectionSection').style.display = 'none';
-        document.getElementById('entryFeeSection').style.display = 'none';
-        
-        // Load fees from trial data if available
-        if (trialData.entryFees) {
-          fees.regular = trialData.entryFees.regular || fees.regular;
-          fees.feo = trialData.entryFees.feo || fees.feo;
-          fees.juniorHandler = trialData.entryFees.juniorHandler || fees.juniorHandler;
-        }
-        
-        // Show trial info and entry form
-        populateTrialInfo();
-        showEntryForm();
-        
-        // Setup form event listeners after everything is ready
-        setTimeout(() => {
-          setupFormEventListeners();
-        }, 100);
-        
-      } catch (error) {
-        console.error('Error loading specific trial:', error);
-        alert('Error loading trial: ' + error.message);
-      }
-    }
-
-    // Load existing entry for editing
-async function loadExistingEntry(entryId) {
-  try {
-    console.log("📝 Loading existing entry for editing:", entryId);
-    
-    // Load the entry document from Firebase
-    const entryDoc = await getDoc(doc(db, 'entries', entryId));
-    if (!entryDoc.exists()) {
-      alert('Entry not found');
-      return;
-    }
-
-    const entryData = entryDoc.data();
-    console.log("📄 Entry data loaded:", entryData);
-    
-    // Load the trial data for this entry
-    if (entryData.trialId) {
-      const trialDoc = await getDoc(doc(db, 'trials', entryData.trialId));
-      if (!trialDoc.exists()) {
-        alert('Associated trial not found');
-        return;
-      }
-
-      const trialData = trialDoc.data();
-      
-      // Fix date handling for trial days
-      if (trialData.days && Array.isArray(trialData.days)) {
-        trialData.days = trialData.days.map(day => ({
-          ...day,
-          date: day.date ? getDateFromFirebase(day.date) : null
-        }));
-      }
-
-      currentTrialData = { id: trialDoc.id, ...trialData };
-      console.log("✅ Trial loaded for editing:", currentTrialData.clubName);
-      
-      // Hide secretary-only sections for editing
-      document.getElementById('trialSelectionSection').style.display = 'none';
-      if (document.getElementById('backToDashboardSection')) {
-        document.getElementById('backToDashboardSection').style.display = 'none';
-      }
-      document.getElementById('entryFeeSection').style.display = 'none';
-      
-      // Load fees from trial data if available
-      if (trialData.entryFees) {
-        fees.regular = trialData.entryFees.regular || fees.regular;
-        fees.feo = trialData.entryFees.feo || fees.feo;
-        fees.juniorHandler = trialData.entryFees.juniorHandler || fees.juniorHandler;
-      }
-      
-      // Show trial info and entry form
-      populateTrialInfo();
-      showEntryForm();
-      
-      // Wait for form to be ready, then populate it
-      setTimeout(() => {
-        populateFormForEditing(entryData);
-        setupFormEventListeners();
-      }, 500);
-      
-    } else {
-      alert('Entry has no associated trial');
-    }
-    
-  } catch (error) {
-    console.error('Error loading existing entry:', error);
-    alert('Error loading entry: ' + error.message);
-  }
-}
-
-// Populate form with existing entry data for editing
-function populateFormForEditing(entryData) {
-  console.log("📝 Populating form for editing with data:", entryData);
-  
-  // Fill in basic form fields
-  if (entryData.handlerName) document.getElementById('handlerName').value = entryData.handlerName;
-  if (entryData.handlerEmail) document.getElementById('handlerEmail').value = entryData.handlerEmail;
-  if (entryData.handlerPhone) document.getElementById('handlerPhone').value = entryData.handlerPhone;
-  if (entryData.emergencyContact) document.getElementById('emergencyContact').value = entryData.emergencyContact;
-  if (entryData.dogCallName) document.getElementById('dogCallName').value = entryData.dogCallName;
-  if (entryData.dogBreed) document.getElementById('dogBreed').value = entryData.dogBreed;
-  if (entryData.dogBirthdate) document.getElementById('dogBirthdate').value = entryData.dogBirthdate;
-  if (entryData.dogSex) document.getElementById('dogSex').value = entryData.dogSex;
-  if (entryData.cwagsNumber) document.getElementById('cwagsNumber').value = entryData.cwagsNumber;
-  if (entryData.juniorHandler !== undefined) {
-    document.getElementById('juniorHandler').value = entryData.juniorHandler ? 'Yes' : 'No';
-  }
-  
-  // Handle waiver acceptance
-  if (entryData.waiverAccepted) {
-    document.getElementById('waiverAccepted').checked = true;
-  }
-  
-  // Clear existing selected entries
-  selectedEntries = [];
-  
-  // Recreate selected entries from stored data
-  if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-    selectedEntries = entryData.selectedEntries.map(entry => ({
-      ...entry,
-      date: entry.date ? getDateFromFirebase(entry.date) : entry.date
-    }));
-    
-    // Check the corresponding checkboxes
-    setTimeout(() => {
-      selectedEntries.forEach(entry => {
-        // Find the matching checkbox
-        const selector = `input[data-class="${entry.className}"][data-round="${entry.roundName}"][data-type="${entry.type}"][data-day="${entry.dayIndex}"][data-round-number="${entry.roundNumber}"]`;
-        const checkbox = document.querySelector(selector);
-        
-        if (checkbox) {
-          checkbox.checked = true;
-          checkbox.parentElement.classList.add('selected');
-          console.log("✅ Checked entry:", entry.className, entry.roundName, entry.type);
-        } else {
-          console.warn("⚠️ Could not find checkbox for entry:", entry);
-        }
-      });
-      
-      // Update the entry summary
-      updateEntrySummary();
-      checkFormValidity();
-    }, 1000);
-  }
-  
-  console.log("✅ Form populated for editing");
-}
-  
-    // Replace the auto-fill function in entry-form.html with this enhanced version:
-function enhancedAutoFillFromRegistration(cwagsNumber) {
-  console.log("🔍 Enhanced auto-fill for registration:", cwagsNumber);
-  
-  if (!cwagsNumber || !isRegistrationDataLoaded || !registrationData) {
-    return;
-  }
-  
-  // Find registration data
-  const data = registrationData.find(entry => 
-    entry.Registration === cwagsNumber || 
-    entry.cwagsNumber === cwagsNumber
-  );
-  
-  if (!data) {
-    console.log("❌ No registration data found for:", cwagsNumber);
-    return;
-  }
-  
-  console.log("✅ Found registration data:", data);
-  
-  // Normalize the data to standard field names
-  const normalizedData = normalizeRegistrationData(data);
-  
-  // Enhanced fill function that handles both old and new field names
-  function fillFieldEnhanced(fieldId, value) {
-    if (!value) return;
-    
-    const field = document.getElementById(fieldId);
-    if (field && (!field.value || field.value === '')) {
-      field.value = value;
-      field.classList.add('auto-filled');
-      console.log(`✅ Auto-filled ${fieldId}: ${value}`);
-      setTimeout(() => {
-        field.classList.remove('auto-filled');
-      }, 2000);
-    }
-  }
-  
-  // Use standardized field mapping
-  fillFieldEnhanced('handlerName', normalizedData.handlerName);
-  fillFieldEnhanced('handlerPhone', normalizedData.handlerPhone);
-  fillFieldEnhanced('handlerEmail', normalizedData.handlerEmail);
-  fillFieldEnhanced('emergencyContact', normalizedData.emergencyContact);
-  fillFieldEnhanced('dogCallName', normalizedData.dogCallName);
-  fillFieldEnhanced('dogBreed', normalizedData.dogBreed);
-  fillFieldEnhanced('dogBirthdate', normalizedData.dogBirthdate);
-  
-  // Handle sex dropdown
-  if (normalizedData.dogSex) {
-    const sexField = document.getElementById('dogSex');
-    if (sexField && (!sexField.value || sexField.value === '')) {
-      sexField.value = normalizedData.dogSex;
-      sexField.classList.add('auto-filled');
-      console.log(`✅ Auto-filled dogSex: ${normalizedData.dogSex}`);
-      setTimeout(() => {
-        sexField.classList.remove('auto-filled');
-      }, 2000);
-    }
-  }
-  
-  checkFormValidity();
-}
-
-
-    // Populate trial selector dropdown
     function populateTrialSelector() {
       const trialSelect = document.getElementById('trialSelection');
       trialSelect.innerHTML = '<option value="">Select a trial...</option>';
@@ -2369,35 +1607,23 @@ function enhancedAutoFillFromRegistration(cwagsNumber) {
         trialSelect.appendChild(option);
       });
 
-      // Handle trial selection change
       trialSelect.addEventListener('change', function(event) {
         const trialId = event.target.value;
-        console.log("🎯 Trial selected:", trialId);
         
         if (trialId) {
           currentTrialData = availableTrials.find(t => t.id === trialId);
           if (currentTrialData) {
-            console.log("✅ Found trial data:", currentTrialData.clubName);
-            
-            // Show fee configuration section for secretary
             document.getElementById('entryFeeSection').style.display = 'block';
-            
-            // Setup fee change listeners
             setupFeeChangeListeners();
-            
             generateShareableLink();
             populateTrialInfo();
             showEntryForm();
             
-            // Setup form listeners after showing form
             setTimeout(() => {
               setupFormEventListeners();
             }, 100);
-          } else {
-            console.error("❌ Could not find trial data for ID:", trialId);
           }
         } else {
-          console.log("🚫 No trial selected, hiding sections");
           hideShareableLink();
           hideTrialInfo();
           hideEntryForm();
@@ -2406,547 +1632,64 @@ function enhancedAutoFillFromRegistration(cwagsNumber) {
       });
     }
 
-    // Setup fee change listeners for secretary
     function setupFeeChangeListeners() {
       const regularFeeInput = document.getElementById('regularFee');
       const feoFeeInput = document.getElementById('feoFee');
       const juniorFeeInput = document.getElementById('juniorFee');
       
       if (!regularFeeInput || !feoFeeInput || !juniorFeeInput) {
-        console.warn("⚠️ Fee input fields not found, skipping fee listeners setup");
         return;
       }
       
-      // Load saved fees for this trial if they exist
       loadTrialFees();
       
       function updateFees() {
-        console.log("💰 Updating fees from inputs");
         fees.regular = parseFloat(regularFeeInput.value) || 35.00;
         fees.feo = parseFloat(feoFeeInput.value) || 25.00;
         fees.juniorHandler = parseFloat(juniorFeeInput.value) || 20.00;
         
-        console.log("💰 New fees:", fees);
-        
-        // Save fees to trial data
         saveTrialFees();
         
-        // Regenerate classes with new fees
         if (currentTrialData) {
           generateTabbedClasses();
         }
         
-        // Update summary if entries are selected
         updateEntrySummary();
       }
       
-      // Remove existing listeners to prevent duplicates
       regularFeeInput.removeEventListener('input', updateFees);
       feoFeeInput.removeEventListener('input', updateFees);
       juniorFeeInput.removeEventListener('input', updateFees);
       
-      // Add new listeners
       regularFeeInput.addEventListener('input', updateFees);
       feoFeeInput.addEventListener('input', updateFees);
       juniorFeeInput.addEventListener('input', updateFees);
-      
-      console.log("✅ Fee change listeners setup complete");
     }
 
-    // Load saved fees for the current trial
     async function loadTrialFees() {
       if (!currentTrialData || !currentTrialData.id) return;
       
       try {
-        // Check if trial has saved fees
         if (currentTrialData.entryFees) {
           fees.regular = currentTrialData.entryFees.regular || fees.regular;
           fees.feo = currentTrialData.entryFees.feo || fees.feo;
           fees.juniorHandler = currentTrialData.entryFees.juniorHandler || fees.juniorHandler;
           
-          // Update the input fields
           document.getElementById('regularFee').value = fees.regular.toFixed(2);
           document.getElementById('feoFee').value = fees.feo.toFixed(2);
           document.getElementById('juniorFee').value = fees.juniorHandler.toFixed(2);
-          
-          console.log("✅ Loaded saved fees for trial:", fees);
         }
       } catch (error) {
-        console.warn("⚠️ Could not load saved fees:", error);
+        console.warn("Could not load saved fees:", error);
       }
     }
 
-    // Save fees to trial data in Firebase
     async function saveTrialFees() {
       if (!currentTrialData || !currentTrialData.id || !isSecretary) return;
       
       try {
-        // Update the current trial data
         currentTrialData.entryFees = {
           regular: fees.regular,
           feo: fees.feo,
           juniorHandler: fees.juniorHandler,
-          updatedAt: new Date()
-        };
-        
-        // Save to Firebase
-        await updateDoc(doc(db, 'trials', currentTrialData.id), {
-          entryFees: currentTrialData.entryFees
-        });
-        
-        console.log("✅ Saved fees to trial data");
-      } catch (error) {
-        console.warn("⚠️ Could not save fees:", error);
-      }
-    }
-    
-    // Show entry form
-    function showEntryForm() {
-      console.log("📝 Showing entry form");
-      document.getElementById('entryFormContainer').style.display = 'block';
-      
-      // Ensure form listeners are setup after form is visible
-      if (!formInitialized) {
-        setTimeout(() => {
-          setupFormEventListeners();
-        }, 100);
-      }
-    }
-
-    // Generate shareable link
-    function generateShareableLink() {
-      if (!isSecretary || !currentTrialData) return;
-
-      const baseUrl = window.location.origin + window.location.pathname;
-      const shareableUrl = `${baseUrl}?trial=${currentTrialData.id}`;
-      
-      document.getElementById('shareableUrl').textContent = shareableUrl;
-      document.getElementById('shareableLinkSection').style.display = 'block';
-    }
-
-    // Populate trial information and generate tabbed classes
-    function populateTrialInfo() {
-      if (!currentTrialData) return;
-
-      document.getElementById('trialTitle').textContent = `${currentTrialData.clubName || 'Trial'} Entry Form`;
-      
-      // Use timezone-safe date formatting for trial dates
-      const dates = currentTrialData.days && currentTrialData.days.length > 0 
-        ? currentTrialData.days
-            .filter(day => day.date)
-            .map(day => formatDateDisplay(day.date, { 
-              weekday: undefined, 
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric' 
-            }))
-            .join(', ')
-        : 'No dates specified';
-
-      document.getElementById('clubName').textContent = currentTrialData.clubName || 'TBD';
-      document.getElementById('trialDates').textContent = dates;
-      document.getElementById('trialLocation').textContent = 'TBD';
-      document.getElementById('trialSecretary').textContent = currentTrialData.secretary || 'TBD';
-
-      document.getElementById('trialInfoSection').style.display = 'block';
-      
-      // Generate the tabbed class interface from trial data
-      generateTabbedClasses();
-    }
-
-    // Generate tabbed classes with entry options per round
-    function generateTabbedClasses() {
-      console.log("🎯 Generating tabbed classes from trial data");
-      console.log("📊 Current trial data:", currentTrialData);
-      
-      if (!currentTrialData.days || currentTrialData.days.length === 0) {
-        console.warn("❌ No days data found");
-        document.getElementById('classEntriesContainer').innerHTML = 
-          '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
-        return;
-      }
-
-      console.log("📅 Processing", currentTrialData.days.length, "days");
-
-      // Generate day tabs
-      const dayTabsContainer = document.getElementById('dayTabs');
-      dayTabsContainer.innerHTML = '';
-
-      currentTrialData.days.forEach((day, dayIndex) => {
-        console.log(`📅 Day ${dayIndex + 1}:`, day);
-        
-        const dayDate = day.date ? formatDateDisplay(day.date, { 
-          weekday: undefined, 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric' 
-        }) : `Day ${dayIndex + 1}`;
-
-        const tabButton = document.createElement('button');
-        tabButton.type = 'button';
-        tabButton.className = `day-tab ${dayIndex === 0 ? 'active' : ''}`;
-        tabButton.onclick = () => showDay(dayIndex);
-        tabButton.textContent = `Day ${dayIndex + 1} - ${dayDate}`;
-        
-        dayTabsContainer.appendChild(tabButton);
-      });
-
-      // Generate class content for each day
-      const classEntriesContainer = document.getElementById('classEntriesContainer');
-      let html = '';
-
-      currentTrialData.days.forEach((day, dayIndex) => {
-        console.log(`🎓 Processing classes for day ${dayIndex + 1}:`, day.classes);
-        
-        if (!day.classes || day.classes.length === 0) {
-          console.warn(`⚠️ No classes found for day ${dayIndex + 1}`);
-          return;
-        }
-
-        html += `<div class="class-day-content ${dayIndex === 0 ? 'active' : ''}" id="day-${dayIndex}">`;
-
-        // Group classes by name
-        const classGroups = new Map();
-        day.classes.forEach((cls, classIndex) => {
-          console.log(`🔍 Processing class ${classIndex}:`, cls);
-          
-          // Try both possible property names
-          const className = cls.className || cls.name;
-          
-          if (className && className.trim()) {
-            const trimmedName = className.trim();
-            console.log(`✅ Found class: "${trimmedName}"`);
-            
-            if (!classGroups.has(trimmedName)) {
-              classGroups.set(trimmedName, []);
-            }
-            classGroups.get(trimmedName).push({...cls, dayIndex, classIndex});
-          } else {
-            console.warn(`⚠️ Class ${classIndex} has no valid name:`, cls);
-          }
-        });
-
-        console.log(`📊 Grouped classes for day ${dayIndex + 1}:`, Array.from(classGroups.keys()));
-
-        classGroups.forEach((classInstances, className) => {
-          console.log(`🎯 Generating HTML for class: ${className}`, classInstances);
-          
-          // Calculate fees
-          const isJuniorHandler = document.getElementById('juniorHandler')?.value === 'Yes';
-          const regularFee = isJuniorHandler ? fees.juniorHandler : fees.regular;
-          const feoFee = isJuniorHandler ? fees.juniorHandler : fees.feo;
-
-          html += `
-            <div class="class-item">
-              <div class="class-header">
-                <div class="class-name">${className}</div>
-              </div>
-              <div class="class-details">
-                <div><strong>Level:</strong> ${classInstances[0].level || 'All levels'}</div>
-                <div><strong>Total Rounds:</strong> ${classInstances.reduce((total, inst) => total + (inst.rounds ? inst.rounds.length : 0), 0)}</div>
-                <div><strong>Prerequisites:</strong> ${getPrerequisitesText(className)}</div>
-              </div>
-              <div class="rounds-container">
-          `;
-
-          // Process each round individually with its own entry options
-          let roundCounter = 0;
-          classInstances.forEach((classInstance, instanceIndex) => {
-            console.log(`🔄 Processing rounds for ${className}, instance ${instanceIndex}:`, classInstance.rounds);
-            
-            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
-              classInstance.rounds.forEach((round, roundIndex) => {
-                roundCounter++;
-                
-                // Use appropriate property for judge name
-                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
-                // Use appropriate property for round name
-                const roundName = round.name || round.roundName || `Round ${roundCounter}`;
-                
-                // Check if this specific round allows FEO
-                const roundAllowsFEO = round.feo === true || round.allowFEO === true;
-                
-                // Create unique IDs for this specific round
-                const roundId = `${className.replace(/\s+/g, '-').toLowerCase()}-day${dayIndex}-round${roundCounter}`;
-                
-                html += `
-                  <div class="round-item">
-                    <div class="round-details">
-                      <span class="judge-name">Judge: ${judgeName}</span>
-                      <span style="font-weight: 600;">${roundName}</span>
-                      ${round.time ? `<span>Time: ${round.time}</span>` : ''}
-                      ${round.maxDogs ? `<span>Max Dogs: ${round.maxDogs}</span>` : ''}
-                    </div>
-                    <div class="round-entry-options">
-                      <div class="entry-option">
-                        <label class="entry-checkbox regular-entry" for="${roundId}-reg" style="background: #d4edda; border-color: #28a745; color: #155724;">
-                          <input type="checkbox" 
-                                 id="${roundId}-reg" 
-                                 data-class="${className}" 
-                                 data-round="${roundName}"
-                                 data-judge="${judgeName}"
-                                 data-fee="${regularFee.toFixed(2)}" 
-                                 data-type="regular"
-                                 data-day="${dayIndex}"
-                                 data-round-number="${roundCounter}">
-                          <span>Regular (${regularFee.toFixed(2)})</span>
-                        </label>
-                      </div>
-                `;
-
-                // Only show FEO option if this round allows it and not junior handler
-                if (roundAllowsFEO && !isJuniorHandler) {
-                  html += `
-                      <div class="entry-option">
-                        <label class="entry-checkbox feo-entry" for="${roundId}-feo" style="background: #fff3cd; border-color: #ffc107; color: #856404;">
-                          <input type="checkbox" 
-                                 id="${roundId}-feo" 
-                                 data-class="${className}" 
-                                 data-round="${roundName}"
-                                 data-judge="${judgeName}"
-                                 data-fee="${feoFee.toFixed(2)}" 
-                                 data-type="feo"
-                                 data-day="${dayIndex}"
-                                 data-round-number="${roundCounter}">
-                          <span>FEO (${feoFee.toFixed(2)})</span>
-                        </label>
-                      </div>
-                  `;
-                }
-
-                html += `
-                    </div>
-                  </div>
-                `;
-              });
-            } else {
-              console.warn(`⚠️ No rounds found for ${className}, instance ${instanceIndex}`);
-            }
-          });
-
-          html += `
-              </div>
-            </div>
-          `;
-        });
-
-        html += `</div>`;
-      });
-
-      console.log("📝 Generated HTML length:", html.length);
-      classEntriesContainer.innerHTML = html;
-      
-      // Initialize the tabbed interface
-      updateEntrySummary();
-      
-      console.log("✅ Tabbed classes generated successfully");
-      
-      // Add debug information to the page if no classes were found
-      if (html.trim() === '') {
-        console.error("❌ No HTML was generated - classes may not be loading properly");
-        classEntriesContainer.innerHTML = `
-          <div style="text-align: center; padding: 2rem; color: #666;">
-            <h3>Debug Information</h3>
-            <p>Trial has ${currentTrialData.days.length} days</p>
-            <pre style="text-align: left; background: #f5f5f5; padding: 1rem; border-radius: 4px; overflow: auto;">
-    ${JSON.stringify(currentTrialData.days, null, 2)}
-            </pre>
-          </div>
-        `;
-      }
-    }
-
-    // Utility functions
-    function showLookupStatus(message, type = 'loading') {
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) {
-        statusDiv.textContent = message;
-        statusDiv.className = `lookup-status ${type}`;
-        console.log(`📊 Lookup status: ${message} (${type})`);
-      }
-    }
-
-    function hideLookupStatus() {
-      const statusDiv = document.getElementById('lookupStatus');
-      if (statusDiv) {
-        statusDiv.style.display = 'none';
-      }
-    }
-
-    function fillField(fieldId, value) {
-      const field = document.getElementById(fieldId);
-      if (field && value && (!field.value || field.value.trim() === '')) {
-        field.value = value;
-        field.classList.add('auto-filled');
-        console.log(`✅ Auto-filled ${fieldId}: ${value}`);
-        setTimeout(() => {
-          field.classList.remove('auto-filled');
-        }, 2000);
-      }
-    }
-
-    function populateForm(data) {
-      if (!data || isAutoFilling === false) return;
-      
-      console.log("🔄 Populating form with auto-fill data:", data);
-      
-      // Map data.json field names to form fields
-      fillField('handlerName', data.Handler || data.handlerName);
-      fillField('handlerPhone', data.handlerPhone);
-      fillField('handlerEmail', data.handlerEmail);
-      fillField('emergencyContact', data.emergencyContact);
-      fillField('dogCallName', data['Call Name'] || data.dogCallName);
-      fillField('dogBreed', data.dogBreed);
-      fillField('dogBirthdate', data.dogBirthdate);
-      
-      if (data.dogSex) {
-        const sexField = document.getElementById('dogSex');
-        if (sexField && (!sexField.value || sexField.value === '')) {
-          sexField.value = data.dogSex;
-          sexField.classList.add('auto-filled');
-          console.log(`✅ Auto-filled dogSex: ${data.dogSex}`);
-          setTimeout(() => {
-            sexField.classList.remove('auto-filled');
-          }, 2000);
-        }
-      }
-      
-      checkFormValidity();
-    }
-
-    function hideEntryForm() {
-      document.getElementById('entryFormContainer').style.display = 'none';
-    }
-
-    function hideTrialInfo() {
-      document.getElementById('trialInfoSection').style.display = 'none';
-    }
-
-    function hideShareableLink() {
-      document.getElementById('shareableLinkSection').style.display = 'none';
-    }
-
-    // Global functions for buttons
-    window.copyShareableLink = function() {
-      const url = document.getElementById('shareableUrl').textContent;
-      copyToClipboard(url, 'Shareable link copied to clipboard!');
-    };
-
-    window.testShareableLink = function() {
-      const url = document.getElementById('shareableUrl').textContent;
-      window.open(url, '_blank');
-    };
-
-    window.copyEditLink = function() {
-      const url = document.getElementById('editUrl').textContent;
-      copyToClipboard(url, 'Edit link copied to clipboard!');
-    };
-
-    window.testEditLink = function() {
-      const url = document.getElementById('editUrl').textContent;
-      window.open(url, '_blank');
-    };
-
-    function copyToClipboard(text, successMessage) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert(successMessage);
-      }).catch(err => {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert(successMessage);
-      });
-    }
-
-    window.resetForNewEntry = function() {
-      document.getElementById('editLinkSection').classList.add('hidden');
-      document.getElementById('entryForm').style.display = 'block';
-      resetForm();
-    };
-
-    function resetForm() {
-      document.getElementById('entryForm').reset();
-      selectedEntries = [];
-      
-      document.querySelectorAll('.entry-checkbox').forEach(label => {
-        label.classList.remove('selected');
-      });
-      
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        if (cb.id !== 'waiverAccepted') cb.checked = false;
-      });
-      
-      hideLookupStatus();
-      updateEntrySummary();
-      checkFormValidity();
-      
-      // Go back to Day 1
-      showDay(0);
-    }
-
-    // Make functions globally available
-    window.submitEntry = submitEntry;
-    window.checkFormValidity = checkFormValidity;
-    window.enterAnotherParticipant = enterAnotherParticipant;
-    window.goToDashboard = goToDashboard;
-    window.resetForm = resetForm;
-
-    // Connect submit button to function
-document.addEventListener('DOMContentLoaded', function() {
-  const submitBtn = document.getElementById('submitEntry');
-  if (submitBtn) {
-    submitBtn.addEventListener('click', submitEntry);
-    console.log("✅ Submit button event listener attached");
-  }
-});
-  
-    // Enhanced form validation that runs on form changes
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add validation listeners to key fields
-      ['handlerName', 'dogCallName', 'waiverAccepted'].forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        if (field) {
-          field.addEventListener('input', checkFormValidity);
-          field.addEventListener('change', checkFormValidity);
-        }
-      });
-    });
-
-    // MAIN INITIALIZATION LOGIC
-    console.log("🏁 Starting application initialization...");
-
-    // Check if this is a public entry link
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasEntryParam = urlParams.get('entry');
-    const hasTrialParam = urlParams.get('trial');
-    const isPublicEntry = hasEntryParam || hasTrialParam;
-
-    if (isPublicEntry) {
-      console.log("🔗 Public entry detected, initializing immediately");
-      // For public entries, initialize immediately without waiting for auth
-      init();
-    } else {
-      console.log("👨‍💼 Secretary mode, waiting for auth");
-      // For secretary mode, wait for auth
-      auth.onAuthStateChanged(async (user) => {
-        if (user) {
-          console.log("✅ User authenticated, initializing secretary mode");
-          await init();
-        } else {
-          console.log("❌ No user authenticated, redirecting to login");
-          alert("Please log in to access the entry form");
-          window.location.href = 'index.html';
-        }
-      });
-      if (typeof window !== 'undefined') {
-  window.formatRegistrationNumber = formatRegistrationNumber;
-  window.setupRegistrationFormatter = setupRegistrationFormatter;
-  window.testRegistrationFormatter = testRegistrationFormatter;
-}
-    }
-  </script>
-</body>
-</html>
+          updatedAt: new
