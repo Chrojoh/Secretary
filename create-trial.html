@@ -239,7 +239,71 @@
   }
 }
 
+    function populateJudgeData(judgeData) {
+  console.log("⚖️ Populating judge data into form...", judgeData);
+  
+  // Go through each day and class, and set the judge selects
+  const daysContainer = document.getElementById('daysContainer');
+  if (!daysContainer) return;
+  
+  const dayContainers = daysContainer.querySelectorAll('.day-container');
+  
+  dayContainers.forEach((dayContainer, dayIndex) => {
+    const day = currentTrialData.days[dayIndex];
+    if (!day) return;
     
+    const dayDate = day.date;
+    const classesContainer = dayContainer.querySelector(`.classes-container-${dayIndex}`);
+    
+    if (classesContainer) {
+      const classContainers = classesContainer.querySelectorAll('.class-container');
+      
+      classContainers.forEach((classContainer, classIndex) => {
+        const classSelect = classContainer.querySelector('select');
+        if (!classSelect || !classSelect.value) return;
+        
+        const className = classSelect.value;
+        const roundsContainer = classContainer.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
+        
+        if (roundsContainer) {
+          const judgeSelects = roundsContainer.querySelectorAll('select');
+          
+          judgeSelects.forEach((judgeSelect, roundIndex) => {
+            // Look up the real judge for this class/date/round
+            const roundNumber = roundIndex + 1;
+            const judgeKey = `${dayDate}_${className}_${roundNumber}`;
+            
+            if (judgeData[judgeKey] && judgeData[judgeKey].judgeName !== 'TBD') {
+              const realJudgeName = judgeData[judgeKey].judgeName;
+              console.log(`✅ Setting judge for ${className} Round ${roundNumber}: ${realJudgeName}`);
+              
+              // First, add the judge to the dropdown if it's not already there
+              let optionExists = false;
+              for (let option of judgeSelect.options) {
+                if (option.value === realJudgeName) {
+                  optionExists = true;
+                  break;
+                }
+              }
+              
+              if (!optionExists) {
+                const newOption = document.createElement('option');
+                newOption.value = realJudgeName;
+                newOption.textContent = realJudgeName;
+                judgeSelect.appendChild(newOption);
+              }
+              
+              // Set the select value
+              judgeSelect.value = realJudgeName;
+            }
+          });
+        }
+      });
+    }
+  });
+  
+  console.log("✅ Judge data populated successfully");
+}
     
     // Load existing trial data if in edit mode
     async function loadExistingTrialData() {
