@@ -941,7 +941,7 @@
             }
         }
 
-        // Load trial data and entries - FIXED VERSION
+        // Load trial data and entries - FIXED VERSION WITH ENHANCED DEBUGGING
         async function loadTrialData() {
             const trialId = document.getElementById('trialSelect').value;
             const selectedDate = document.getElementById('dateSelect').value;
@@ -956,6 +956,8 @@
                 return;
             }
 
+            console.log('🚀 STARTING loadTrialData - Trial:', trialId, 'Date:', selectedDate);
+
             document.getElementById('loadingIndicator').style.display = 'block';
             document.getElementById('loadBtn').disabled = true;
 
@@ -966,22 +968,28 @@
                     where("trialId", "==", trialId)
                 );
                 
+                console.log('🔍 Querying Firebase for entries...');
                 const snapshot = await getDocs(q);
                 entries = [];
                 
+                console.log('📊 Found', snapshot.size, 'entry documents');
+                
                 snapshot.forEach(doc => {
                     const entryData = doc.data();
+                    console.log('📄 Processing entry document:', doc.id, entryData);
                     
                     // Fix selected entries dates
                     if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-                        entryData.selectedEntries.forEach(selectedEntry => {
+                        console.log('🎯 Found selectedEntries array with', entryData.selectedEntries.length, 'items');
+                        
+                        entryData.selectedEntries.forEach((selectedEntry, index) => {
                             const processedEntry = {
                                 ...selectedEntry,
                                 date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
                             };
                             
-                            // DEBUG: Log entry data to understand structure
-                            console.log('📋 Processing entry:', {
+                            // ENHANCED DEBUG: Log entry data to understand structure
+                            console.log(`📋 Entry ${index + 1}:`, {
                                 className: processedEntry.className,
                                 roundNumber: processedEntry.roundNumber,
                                 roundName: processedEntry.roundName,
@@ -989,7 +997,10 @@
                                 judgeName: processedEntry.judgeName,
                                 judgeAssigned: processedEntry.judgeAssigned,
                                 handler: entryData.handlerName,
-                                dog: entryData.dogCallName
+                                dog: entryData.dogCallName,
+                                fee: processedEntry.fee,
+                                entryType: processedEntry.entryType || processedEntry.type,
+                                date: processedEntry.date
                             });
                             
                             entries.push({
@@ -1001,10 +1012,13 @@
                                 submittedAt: entryData.submittedAt
                             });
                         });
+                    } else {
+                        console.warn('⚠️ Entry document has no selectedEntries array:', doc.id);
                     }
                 });
 
-                console.log('Loaded ALL entries for trial:', entries.length);
+                console.log('✅ Loaded ALL entries for trial:', entries.length);
+                console.log('📋 First few entries:', entries.slice(0, 3));
 
                 if (entries.length === 0) {
                     showError('No entries found for this trial');
@@ -1025,7 +1039,7 @@
                 showLeagueButton();
 
             } catch (error) {
-                console.error('Error loading trial data:', error);
+                console.error('💥 Error loading trial data:', error);
                 showError('Error loading trial data: ' + error.message);
             } finally {
                 document.getElementById('loadingIndicator').style.display = 'none';
@@ -1087,6 +1101,8 @@
 
         // Create default running order for a specific date
         function createDefaultRunningOrderForDate(date) {
+            console.log('🏗️ Creating running order for date:', date);
+            
             if (!runningOrderData[date]) {
                 runningOrderData[date] = {};
             }
@@ -1095,10 +1111,16 @@
             const dateEntries = entries.filter(entry => {
                 const entryDate = getDateFromFirebase(entry.date);
                 const filterDate = formatLocalDate(createLocalDate(date));
-                return entryDate === filterDate;
+                const matches = entryDate === filterDate;
+                if (matches) {
+                    console.log('📅 Entry matches date:', entry.className, 'Round', entry.roundNumber);
+                }
+                return matches;
             });
             
-            dateEntries.forEach(entry => {
+            console.log('📊 Found', dateEntries.length, 'entries for date:', date);
+            
+            dateEntries.forEach((entry, index) => {
                 // FIX: Try multiple judge field names in correct priority order
                 const judge = entry.judgeName || entry.judge || entry.judgeAssigned || 'Judge TBD';
                 
@@ -1110,6 +1132,7 @@
                     const roundMatch = entry.roundName.match(/Round\s*(\d+)/i);
                     if (roundMatch) {
                         roundNumber = parseInt(roundMatch[1]);
+                        console.log('🔍 Extracted round number from roundName:', roundNumber);
                     }
                 }
                 
@@ -1134,11 +1157,18 @@
                     originalEntry: entry
                 });
                 
-                // DEBUG: Log judge assignment for troubleshooting
-                console.log(`Entry: ${entry.className} Round ${roundNumber} - Judge: "${judge}" (from: judgeName="${entry.judgeName}", judge="${entry.judge}")`);
+                // ENHANCED DEBUG: Log judge assignment for troubleshooting
+                console.log(`🎯 Entry ${index + 1}: ${entry.className} Round ${roundNumber} - Judge: "${judge}"`, {
+                    'entry.judgeName': entry.judgeName,
+                    'entry.judge': entry.judge,
+                    'entry.judgeAssigned': entry.judgeAssigned,
+                    'selectedJudge': judge,
+                    'handlerDog': `${entry.handlerName} - ${entry.dogCallName}`
+                });
             });
             
-            console.log(`Created default running order for ${date}:`, Object.keys(runningOrderData[date] || {}));
+            console.log(`✅ Created running order for ${date}:`, Object.keys(runningOrderData[date] || {}));
+            console.log('📋 Full running order data for date:', runningOrderData[date]);
         }
 
         // Create default running order for all dates
