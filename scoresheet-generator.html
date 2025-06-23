@@ -980,6 +980,18 @@
                                 date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
                             };
                             
+                            // DEBUG: Log entry data to understand structure
+                            console.log('📋 Processing entry:', {
+                                className: processedEntry.className,
+                                roundNumber: processedEntry.roundNumber,
+                                roundName: processedEntry.roundName,
+                                judge: processedEntry.judge,
+                                judgeName: processedEntry.judgeName,
+                                judgeAssigned: processedEntry.judgeAssigned,
+                                handler: entryData.handlerName,
+                                dog: entryData.dogCallName
+                            });
+                            
                             entries.push({
                                 id: doc.id,
                                 ...processedEntry,
@@ -1087,8 +1099,21 @@
             });
             
             dateEntries.forEach(entry => {
-                const judge = entry.judgeName || entry.judge || 'Judge TBD';
-                const classRound = `${entry.className || 'Unknown Class'} - Round ${entry.roundNumber || 1}`;
+                // FIX: Try multiple judge field names in correct priority order
+                const judge = entry.judgeName || entry.judge || entry.judgeAssigned || 'Judge TBD';
+                
+                // FIX: Better round number extraction and class round naming
+                let roundNumber = entry.roundNumber || 1;
+                
+                // Try to extract round number from roundName if available
+                if (entry.roundName && typeof entry.roundName === 'string') {
+                    const roundMatch = entry.roundName.match(/Round\s*(\d+)/i);
+                    if (roundMatch) {
+                        roundNumber = parseInt(roundMatch[1]);
+                    }
+                }
+                
+                const classRound = `${entry.className || 'Unknown Class'} - Round ${roundNumber}`;
 
                 if (!runningOrderData[date][judge]) {
                     runningOrderData[date][judge] = {};
@@ -1108,6 +1133,9 @@
                     cwagsNumber: entry.cwagsNumber || '',
                     originalEntry: entry
                 });
+                
+                // DEBUG: Log judge assignment for troubleshooting
+                console.log(`Entry: ${entry.className} Round ${roundNumber} - Judge: "${judge}" (from: judgeName="${entry.judgeName}", judge="${entry.judge}")`);
             });
             
             console.log(`Created default running order for ${date}:`, Object.keys(runningOrderData[date] || {}));
