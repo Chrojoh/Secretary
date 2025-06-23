@@ -1780,6 +1780,8 @@ function testRegistrationFormatter() {
       // Always load registration data first
       await loadRegistrationData();
 
+      setupRegistrationFormatter();
+      
       // Check URL parameters for entry link
       const urlParams = new URLSearchParams(window.location.search);
       const entryId = urlParams.get('entry');
