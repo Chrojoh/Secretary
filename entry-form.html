@@ -1226,6 +1226,179 @@
 
     console.log("🎯 Entry form loaded");
 
+    // AUTO-FORMATTER FOR C-WAGS REGISTRATION NUMBERS
+// Add this to entry-form.html to automatically format registration numbers to xx-xxxx-xx format
+
+// Function to clean and format registration number to xx-xxxx-xx format
+function formatRegistrationNumber(input) {
+  if (!input) return '';
+  
+  // Remove all non-digit characters first
+  let cleaned = input.replace(/[^\d]/g, '');
+  
+  // If empty after cleaning, return empty
+  if (!cleaned) return '';
+  
+  // Pad with leading zeros if too short
+  if (cleaned.length < 6) {
+    cleaned = cleaned.padStart(6, '0');
+  }
+  
+  // Limit to maximum 8 digits (xx-xxxx-xx format)
+  if (cleaned.length > 8) {
+    cleaned = cleaned.substring(0, 8);
+  }
+  
+  // Format based on length
+  if (cleaned.length <= 2) {
+    // Just the first part: "22"
+    return cleaned;
+  } else if (cleaned.length <= 6) {
+    // First and second parts: "22-4168"
+    const part1 = cleaned.substring(0, 2);
+    const part2 = cleaned.substring(2);
+    return `${part1}-${part2}`;
+  } else {
+    // All three parts: "22-4168-01"
+    const part1 = cleaned.substring(0, 2);
+    const part2 = cleaned.substring(2, 6);
+    let part3 = cleaned.substring(6);
+    
+    // Ensure part3 is exactly 2 digits with leading zero if needed
+    if (part3.length === 1) {
+      part3 = '0' + part3;
+    }
+    
+    return `${part1}-${part2}-${part3}`;
+  }
+}
+
+// Function to handle live formatting as user types
+function handleRegistrationInput(event) {
+  const input = event.target;
+  const cursorPosition = input.selectionStart;
+  const originalValue = input.value;
+  const originalLength = originalValue.length;
+  
+  // Format the value
+  const formattedValue = formatRegistrationNumber(originalValue);
+  
+  // Update the input value
+  input.value = formattedValue;
+  
+  // Adjust cursor position to account for added dashes
+  const lengthDifference = formattedValue.length - originalLength;
+  const newCursorPosition = Math.max(0, cursorPosition + lengthDifference);
+  
+  // Set cursor position after the browser updates the input
+  setTimeout(() => {
+    input.setSelectionRange(newCursorPosition, newCursorPosition);
+  }, 0);
+  
+  // Trigger auto-fill after formatting
+  if (formattedValue.length >= 8) { // Complete registration number
+    console.log("🔍 Triggering auto-fill for formatted registration:", formattedValue);
+    enhancedAutoFillFromRegistration(formattedValue);
+  }
+}
+
+// Function to handle paste events
+function handleRegistrationPaste(event) {
+  event.preventDefault();
+  
+  // Get pasted text
+  const pastedText = (event.clipboardData || window.clipboardData).getData('text');
+  
+  // Format the pasted text
+  const formattedValue = formatRegistrationNumber(pastedText);
+  
+  // Set the formatted value
+  event.target.value = formattedValue;
+  
+  // Trigger auto-fill if complete
+  if (formattedValue.length >= 8) {
+    console.log("📋 Triggering auto-fill for pasted registration:", formattedValue);
+    enhancedAutoFillFromRegistration(formattedValue);
+  }
+}
+
+// Function to handle blur (when user leaves the field)
+function handleRegistrationBlur(event) {
+  const input = event.target;
+  const currentValue = input.value;
+  
+  if (currentValue) {
+    // Ensure final formatting is correct
+    const finalFormatted = formatRegistrationNumber(currentValue);
+    input.value = finalFormatted;
+    
+    // Show visual feedback for formatting
+    if (finalFormatted !== currentValue) {
+      input.classList.add('auto-filled');
+      console.log(`✅ Auto-formatted registration: "${currentValue}" → "${finalFormatted}"`);
+      setTimeout(() => {
+        input.classList.remove('auto-filled');
+      }, 2000);
+    }
+    
+    // Trigger auto-fill if we have a complete registration number
+    if (finalFormatted.length >= 8) {
+      enhancedAutoFillFromRegistration(finalFormatted);
+    }
+  }
+}
+
+// Enhanced setup function for the registration input field
+function setupRegistrationFormatter() {
+  const regInput = document.getElementById('cwagsNumber');
+  
+  if (regInput) {
+    console.log("🎯 Setting up registration number auto-formatter");
+    
+    // Remove any existing event listeners first
+    regInput.removeEventListener('input', handleRegistrationInput);
+    regInput.removeEventListener('paste', handleRegistrationPaste);
+    regInput.removeEventListener('blur', handleRegistrationBlur);
+    
+    // Add the new event listeners
+    regInput.addEventListener('input', handleRegistrationInput);
+    regInput.addEventListener('paste', handleRegistrationPaste);
+    regInput.addEventListener('blur', handleRegistrationBlur);
+    
+    // Set input attributes for better mobile experience
+    regInput.setAttribute('inputmode', 'numeric');
+    regInput.setAttribute('pattern', '[0-9-]*');
+    regInput.setAttribute('maxlength', '10'); // xx-xxxx-xx = 10 characters
+    regInput.setAttribute('placeholder', 'e.g., 22-4168-01');
+    
+    console.log("✅ Registration formatter setup complete");
+  } else {
+    console.warn("⚠️ Could not find cwagsNumber input field");
+  }
+}
+
+// Test function to verify formatting works correctly
+function testRegistrationFormatter() {
+  const testCases = [
+    { input: '2241681', expected: '22-4168-01' },
+    { input: '22-4168-1', expected: '22-4168-01' },
+    { input: '22 4168 1', expected: '22-4168-01' },
+    { input: '224168001', expected: '22-4168-00' }, // Extra digit gets trimmed
+    { input: '221234', expected: '22-1234' },
+    { input: '22', expected: '22' },
+    { input: 'abc22def4168ghi01jkl', expected: '22-4168-01' },
+    { input: '123456789', expected: '12-3456-78' }, // Limit to 8 digits
+  ];
+  
+  console.log("🧪 Testing registration number formatter:");
+  
+  testCases.forEach(test => {
+    const result = formatRegistrationNumber(test.input);
+    const passed = result === test.expected;
+    console.log(`${passed ? '✅' : '❌'} "${test.input}" → "${result}" (expected: "${test.expected}")`);
+  });
+}
+  
     // Global variables
     let currentTrialData = null;
     let selectedClasses = new Set();
