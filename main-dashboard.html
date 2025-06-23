@@ -971,7 +971,7 @@
             </td>
             <td>${entry.cwagsNumber || 'Not provided'}</td>
             <td class="entry-classes">${classesHtml}</td>
-            <td><strong>$${entry.entryFee || '0.00'}</strong></td>
+            <td><strong>$${(entry.totalFee || 0).toFixed(2)}</strong></td> 
             <td>
               <small>${submittedDate.toLocaleDateString()}<br>
               ${submittedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
