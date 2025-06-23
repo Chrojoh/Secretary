@@ -763,9 +763,11 @@
         }
 
         function getEntrantName(entry) {
-            const handler = entry.handlerName || 'Unknown Handler';
-            const dog = entry.dogCallName || 'Unknown Dog';
-            return `${handler} - ${dog}`;
+    const fullHandler = entry.handlerName || 'Unknown Handler';
+    // Extract first name only
+    const handler = fullHandler.split(' ')[0];
+    const dog = entry.dogCallName || 'Unknown Dog';
+    return `${handler} - ${dog}`;
         }
 
         // Display running order with drag & drop in column format
