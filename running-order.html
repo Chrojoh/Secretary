@@ -762,13 +762,13 @@
             return grouped;
         }
 
-        function getEntrantName(entry) {
-    const fullHandler = entry.handlerName || 'Unknown Handler';
-    // Extract first name only
-    const handler = fullHandler.split(' ')[0];
-    const dog = entry.dogCallName || 'Unknown Dog';
-    return `${handler} - ${dog}`;
-        }
+   function getStandardizedEntrantName(entry) {
+  const normalizedEntry = normalizeEntryData(entry);
+  const fullHandler = normalizedEntry.handlerName || 'Unknown Handler';
+  const handler = fullHandler.split(' ')[0]; // First name only
+  const dog = normalizedEntry.dogCallName || 'Unknown Dog';
+  return `${handler} - ${dog}`;
+}
 
         // Display running order with drag & drop in column format
         function displayRunningOrder(groupedEntries) {
