@@ -1855,6 +1855,134 @@
       }
     }
 
+    // Load existing entry for editing
+async function loadExistingEntry(entryId) {
+  try {
+    console.log("📝 Loading existing entry for editing:", entryId);
+    
+    // Load the entry document from Firebase
+    const entryDoc = await getDoc(doc(db, 'entries', entryId));
+    if (!entryDoc.exists()) {
+      alert('Entry not found');
+      return;
+    }
+
+    const entryData = entryDoc.data();
+    console.log("📄 Entry data loaded:", entryData);
+    
+    // Load the trial data for this entry
+    if (entryData.trialId) {
+      const trialDoc = await getDoc(doc(db, 'trials', entryData.trialId));
+      if (!trialDoc.exists()) {
+        alert('Associated trial not found');
+        return;
+      }
+
+      const trialData = trialDoc.data();
+      
+      // Fix date handling for trial days
+      if (trialData.days && Array.isArray(trialData.days)) {
+        trialData.days = trialData.days.map(day => ({
+          ...day,
+          date: day.date ? getDateFromFirebase(day.date) : null
+        }));
+      }
+
+      currentTrialData = { id: trialDoc.id, ...trialData };
+      console.log("✅ Trial loaded for editing:", currentTrialData.clubName);
+      
+      // Hide secretary-only sections for editing
+      document.getElementById('trialSelectionSection').style.display = 'none';
+      if (document.getElementById('backToDashboardSection')) {
+        document.getElementById('backToDashboardSection').style.display = 'none';
+      }
+      document.getElementById('entryFeeSection').style.display = 'none';
+      
+      // Load fees from trial data if available
+      if (trialData.entryFees) {
+        fees.regular = trialData.entryFees.regular || fees.regular;
+        fees.feo = trialData.entryFees.feo || fees.feo;
+        fees.juniorHandler = trialData.entryFees.juniorHandler || fees.juniorHandler;
+      }
+      
+      // Show trial info and entry form
+      populateTrialInfo();
+      showEntryForm();
+      
+      // Wait for form to be ready, then populate it
+      setTimeout(() => {
+        populateFormForEditing(entryData);
+        setupFormEventListeners();
+      }, 500);
+      
+    } else {
+      alert('Entry has no associated trial');
+    }
+    
+  } catch (error) {
+    console.error('Error loading existing entry:', error);
+    alert('Error loading entry: ' + error.message);
+  }
+}
+
+// Populate form with existing entry data for editing
+function populateFormForEditing(entryData) {
+  console.log("📝 Populating form for editing with data:", entryData);
+  
+  // Fill in basic form fields
+  if (entryData.handlerName) document.getElementById('handlerName').value = entryData.handlerName;
+  if (entryData.handlerEmail) document.getElementById('handlerEmail').value = entryData.handlerEmail;
+  if (entryData.handlerPhone) document.getElementById('handlerPhone').value = entryData.handlerPhone;
+  if (entryData.emergencyContact) document.getElementById('emergencyContact').value = entryData.emergencyContact;
+  if (entryData.dogCallName) document.getElementById('dogCallName').value = entryData.dogCallName;
+  if (entryData.dogBreed) document.getElementById('dogBreed').value = entryData.dogBreed;
+  if (entryData.dogBirthdate) document.getElementById('dogBirthdate').value = entryData.dogBirthdate;
+  if (entryData.dogSex) document.getElementById('dogSex').value = entryData.dogSex;
+  if (entryData.cwagsNumber) document.getElementById('cwagsNumber').value = entryData.cwagsNumber;
+  if (entryData.juniorHandler !== undefined) {
+    document.getElementById('juniorHandler').value = entryData.juniorHandler ? 'Yes' : 'No';
+  }
+  
+  // Handle waiver acceptance
+  if (entryData.waiverAccepted) {
+    document.getElementById('waiverAccepted').checked = true;
+  }
+  
+  // Clear existing selected entries
+  selectedEntries = [];
+  
+  // Recreate selected entries from stored data
+  if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+    selectedEntries = entryData.selectedEntries.map(entry => ({
+      ...entry,
+      date: entry.date ? getDateFromFirebase(entry.date) : entry.date
+    }));
+    
+    // Check the corresponding checkboxes
+    setTimeout(() => {
+      selectedEntries.forEach(entry => {
+        // Find the matching checkbox
+        const selector = `input[data-class="${entry.className}"][data-round="${entry.roundName}"][data-type="${entry.type}"][data-day="${entry.dayIndex}"][data-round-number="${entry.roundNumber}"]`;
+        const checkbox = document.querySelector(selector);
+        
+        if (checkbox) {
+          checkbox.checked = true;
+          checkbox.parentElement.classList.add('selected');
+          console.log("✅ Checked entry:", entry.className, entry.roundName, entry.type);
+        } else {
+          console.warn("⚠️ Could not find checkbox for entry:", entry);
+        }
+      });
+      
+      // Update the entry summary
+      updateEntrySummary();
+      checkFormValidity();
+    }, 1000);
+  }
+  
+  console.log("✅ Form populated for editing");
+}
+  
     // Auto-fill from registration data
     async function autoFillFromRegistration(registrationNumber) {
       if (isAutoFilling) {
