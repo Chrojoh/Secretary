@@ -923,7 +923,7 @@
       
       // Update summary
       const totalFees = filteredEntries.reduce((sum, entry) => {
-        const fee = parseFloat(entry.entryFee?.replace('$', '') || 0);
+        const fee = parseFloat(entry.totalFee || 0);
         return sum + fee;
       }, 0);
       
