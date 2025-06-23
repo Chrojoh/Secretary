@@ -1100,7 +1100,7 @@
             `"${entry.dogBreed || ''}"`,
             `"${entry.cwagsNumber || ''}"`,
             `"${classes}"`,
-            `"${entry.entryFee || ''}"`,
+            `"$${(entry.totalFee || 0).toFixed(2)}"`,  
             `"${entry.juniorHandler ? 'Yes' : 'No'}"`,
             `"${submittedDate.toLocaleDateString()} ${submittedDate.toLocaleTimeString()}"`
           ].join(',');
