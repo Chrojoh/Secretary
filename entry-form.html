@@ -1091,6 +1091,59 @@
             </div>
         </div>
 
+<!-- Replace your submit button with this version -->
+<div class="submit-section">
+    <button type="button" class="btn-submit" id="submitEntry" disabled onclick="
+        // Inline submit function
+        const handlerName = document.getElementById('handlerName').value.trim();
+        const dogCallName = document.getElementById('dogCallName').value.trim();
+        const waiverAccepted = document.getElementById('waiverAccepted').checked;
+        
+        if (!handlerName) {
+            alert('Please enter the Handler Name.');
+            return;
+        }
+        
+        if (!dogCallName) {
+            alert('Please enter the Dog Call Name.');
+            return;
+        }
+        
+        if (!waiverAccepted) {
+            alert('Please accept the waiver agreement to continue.');
+            return;
+        }
+        
+        if (!selectedEntries || selectedEntries.length === 0) {
+            alert('Please select at least one class entry.');
+            return;
+        }
+        
+        // Show success
+        alert('Entry submitted successfully!\nHandler: ' + handlerName + '\nDog: ' + dogCallName + '\nEntries: ' + selectedEntries.length + '\nTotal Fee: $' + totalFee.toFixed(2));
+        
+        // Ask for another entry
+        if (confirm('Would you like to enter another participant?')) {
+            document.getElementById('entryForm').reset();
+            selectedEntries = [];
+            totalFee = 0;
+            document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+                if (cb.id !== 'waiverAccepted') {
+                    cb.checked = false;
+                    if (cb.parentElement) cb.parentElement.classList.remove('selected');
+                }
+            });
+            updateEntrySummary();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    ">
+        Submit Entry
+    </button>
+    <p style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+        Please review your selections before submitting. Entry fees are due upon submission.
+    </p>
+</div>
+        
     // ========================================
     // GLOBAL DATE HANDLING FIX
     // ========================================
