@@ -1204,7 +1204,7 @@
             return "Requires: Patrol 1 OR Detective 2";
         }
         
-        return `Requires: ${prereqs.join(", ")}`;
+        return prereqs.join(", ");
     }
 
     // Fee structure - now configurable by secretary
