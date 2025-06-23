@@ -2097,6 +2097,109 @@ function generateTabbedClasses() {
 
     classGroups.forEach((classInstances, className) => {
       console.log(`🎯 Generating HTML for class: ${className}`, classInstances);
+
+      // Submit entry function - add this to your JavaScript
+window.submitEntry = async function() {
+  console.log("🚀 Starting entry submission...");
+  
+  // Basic form validation
+  const handlerName = document.getElementById('handlerName').value.trim();
+  const handlerEmail = document.getElementById('handlerEmail').value.trim();
+  const dogName = document.getElementById('dogCallName').value.trim();
+  const waiverAccepted = document.getElementById('waiverAccepted').checked;
+  
+  if (!handlerName || !handlerEmail || !dogName) {
+    alert('Please fill in all required fields (Handler Name, Email, and Dog Name).');
+    return;
+  }
+  
+  if (!waiverAccepted) {
+    alert('Please accept the waiver agreement to continue.');
+    return;
+  }
+  
+  if (selectedEntries.length === 0) {
+    alert('Please select at least one class entry.');
+    return;
+  }
+  
+  // Disable submit button during submission
+  const submitBtn = document.getElementById('submitEntry');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  
+  try {
+    // Collect form data
+    const entryData = {
+      trialId: currentTrialData.id,
+      handlerName: handlerName,
+      handlerEmail: handlerEmail,
+      handlerPhone: document.getElementById('handlerPhone').value.trim(),
+      emergencyContact: document.getElementById('emergencyContact').value.trim(),
+      dogCallName: dogName,
+      dogBreed: document.getElementById('dogBreed').value.trim(),
+      dogBirthdate: document.getElementById('dogBirthdate').value,
+      dogSex: document.getElementById('dogSex').value,
+      cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
+      juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
+      selectedEntries: selectedEntries.map(entry => ({
+        ...entry,
+        date: currentTrialData.days[entry.dayIndex]?.date || null
+      })),
+      totalFee: totalFee,
+      submittedAt: new Date(),
+      waiverAccepted: true
+    };
+    
+    console.log("📝 Entry data prepared:", entryData);
+    
+    // Import Firebase functions if they exist
+    const { addDoc, collection } = await import("https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js");
+    
+    // Save to Firebase
+    const docRef = await addDoc(collection(db, "entries"), entryData);
+    console.log("✅ Entry saved with ID:", docRef.id);
+    
+    // Show success message
+    showSuccessMessage(docRef.id);
+    
+  } catch (error) {
+    console.error("❌ Error submitting entry:", error);
+    alert("Error submitting entry: " + error.message);
+    
+    // Re-enable submit button on error
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+};
+
+// Show success message function
+function showSuccessMessage(entryId) {
+  // Hide the entry form
+  document.getElementById('entryForm').style.display = 'none';
+  
+  // Show success message
+  const successDiv = document.getElementById('successMessage');
+  if (successDiv) {
+    successDiv.classList.remove('hidden');
+    successDiv.style.display = 'block';
+  }
+  
+  // Generate edit link if this is a public entry
+  if (entryId && !isSecretary) {
+    const editUrl = `${window.location.origin}${window.location.pathname}?entry=${entryId}`;
+    const editLinkDiv = document.getElementById('editLinkSection');
+    const editUrlSpan = document.getElementById('editUrl');
+    
+    if (editLinkDiv && editUrlSpan) {
+      editUrlSpan.textContent = editUrl;
+      editLinkDiv.classList.remove('hidden');
+      editLinkDiv.style.display = 'block';
+    }
+  }
+}
+
       
       // Calculate fees
       const isJuniorHandler = document.getElementById('juniorHandler')?.value === 'Yes';
