@@ -2770,6 +2770,212 @@ async function submitEntry() {
   }
 }
 
+// Complete submit entry and form validation functions
+// Add these functions to your entry-form.html script section
+
+// Check form validity function
+function checkFormValidity() {
+  const waiverAccepted = document.getElementById('waiverAccepted').checked;
+  const handlerName = document.getElementById('handlerName').value.trim();
+  const dogCallName = document.getElementById('dogCallName').value.trim();
+  const hasClasses = selectedEntries && selectedEntries.length > 0;
+  
+  const isValid = waiverAccepted && handlerName && dogCallName && hasClasses;
+  
+  const submitBtn = document.getElementById('submitEntry');
+  if (submitBtn) {
+    submitBtn.disabled = !isValid;
+  }
+  
+  return isValid;
+}
+
+// Submit entry function
+async function submitEntry() {
+  console.log("🚀 Starting entry submission...");
+  
+  // Basic form validation
+  const handlerName = document.getElementById('handlerName').value.trim();
+  const dogCallName = document.getElementById('dogCallName').value.trim();
+  const waiverAccepted = document.getElementById('waiverAccepted').checked;
+  
+  if (!handlerName) {
+    alert('Please enter the Handler Name.');
+    return;
+  }
+  
+  if (!dogCallName) {
+    alert('Please enter the Dog\'s Call Name.');
+    return;
+  }
+  
+  if (!waiverAccepted) {
+    alert('Please accept the waiver agreement to continue.');
+    return;
+  }
+  
+  if (!selectedEntries || selectedEntries.length === 0) {
+    alert('Please select at least one class entry.');
+    return;
+  }
+  
+  // Disable submit button during submission
+  const submitBtn = document.getElementById('submitEntry');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  
+  try {
+    // Collect form data
+    const entryData = {
+      trialId: currentTrialData.id,
+      trialName: currentTrialData.clubName,
+      handlerName: handlerName,
+      handlerEmail: document.getElementById('handlerEmail').value.trim(),
+      handlerPhone: document.getElementById('handlerPhone').value.trim(),
+      emergencyContact: document.getElementById('emergencyContact').value.trim(),
+      dogCallName: dogCallName,
+      dogBreed: document.getElementById('dogBreed').value.trim(),
+      dogBirthdate: document.getElementById('dogBirthdate').value,
+      dogSex: document.getElementById('dogSex').value,
+      cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
+      juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
+      selectedEntries: selectedEntries.map(entry => ({
+        ...entry,
+        date: currentTrialData.days[entry.dayIndex]?.date || null
+      })),
+      totalFee: totalFee,
+      submittedAt: new Date(),
+      waiverAccepted: true,
+      regularEntries: selectedEntries.filter(e => e.type === 'regular').length,
+      feoEntries: selectedEntries.filter(e => e.type === 'feo').length
+    };
+    
+    console.log("📝 Entry data prepared:", entryData);
+    
+    // Save to Firebase
+    const docRef = await addDoc(collection(db, "entries"), entryData);
+    console.log("✅ Entry saved with ID:", docRef.id);
+    
+    // Show success and scroll to top
+    showSuccessMessage();
+    
+  } catch (error) {
+    console.error("❌ Error submitting entry:", error);
+    alert("Error submitting entry: " + error.message);
+    
+    // Re-enable submit button on error
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+}
+
+// Show success message function
+function showSuccessMessage() {
+  // Scroll to top of page
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // Hide the entry form
+  document.getElementById('entryForm').style.display = 'none';
+  
+  // Show success message
+  const successDiv = document.getElementById('successMessage');
+  if (successDiv) {
+    successDiv.classList.remove('hidden');
+    successDiv.style.display = 'block';
+    
+    // Update success message content
+    successDiv.innerHTML = `
+      <h3>✅ Entry Submitted Successfully!</h3>
+      <p>Your entry has been recorded for this trial.</p>
+      <div style="margin-top: 1.5rem;">
+        <button class="btn btn-primary" onclick="enterAnotherParticipant()" style="margin-right: 1rem;">
+          Enter Another Participant
+        </button>
+        <button class="btn btn-secondary" onclick="goToDashboard()">
+          Back to Dashboard
+        </button>
+      </div>
+    `;
+  }
+}
+
+// Reset form for another entry
+function enterAnotherParticipant() {
+  console.log("🔄 Resetting form for another entry...");
+  
+  // Reset form fields
+  document.getElementById('entryForm').reset();
+  
+  // Clear selected entries
+  selectedEntries = [];
+  totalFee = 0;
+  
+  // Clear all checkboxes and remove selected styling
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    if (cb.id !== 'waiverAccepted') {
+      cb.checked = false;
+      if (cb.parentElement) {
+        cb.parentElement.classList.remove('selected');
+      }
+    }
+  });
+  
+  // Hide success messages
+  const successDiv = document.getElementById('successMessage');
+  if (successDiv) {
+    successDiv.classList.add('hidden');
+    successDiv.style.display = 'none';
+  }
+  
+  // Show form again
+  document.getElementById('entryForm').style.display = 'block';
+  
+  // Update summary and form validity
+  updateEntrySummary();
+  checkFormValidity();
+  
+  // Go back to Day 1
+  if (typeof showDay === 'function') {
+    showDay(0);
+  }
+  
+  // Clear lookup status
+  const statusDiv = document.getElementById('lookupStatus');
+  if (statusDiv) {
+    statusDiv.style.display = 'none';
+  }
+  
+  // Clear registration number to prevent auto-fill confusion
+  document.getElementById('cwagsNumber').value = '';
+  
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Go to dashboard function
+function goToDashboard() {
+  window.location.href = 'main-dashboard.html';
+}
+
+// Make functions globally available
+window.submitEntry = submitEntry;
+window.checkFormValidity = checkFormValidity;
+window.enterAnotherParticipant = enterAnotherParticipant;
+window.goToDashboard = goToDashboard;
+
+// Enhanced form validation that runs on form changes
+document.addEventListener('DOMContentLoaded', function() {
+  // Add validation listeners to key fields
+  ['handlerName', 'dogCallName', 'waiverAccepted'].forEach(fieldId => {
+    const field = document.getElementById(fieldId);
+    if (field) {
+      field.addEventListener('input', checkFormValidity);
+      field.addEventListener('change', checkFormValidity);
+    }
+  });
+});
+  
 // Show success message
 function showSuccessMessage(entryId) {
   // Hide the entry form
