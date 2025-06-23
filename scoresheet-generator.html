@@ -1083,60 +1083,6 @@ function createDefaultRunningOrderForAllDates() {
     });
 }
 
-// UPDATE the generateAllScoreSheets function to process ALL dates:
-async function generateAllScoreSheets() {
-    const selectedJudge = document.getElementById('judgeSelect').value;
-
-    if (!runningOrderData || Object.keys(runningOrderData).length === 0) {
-        alert('No data available. Please load trial data first.');
-        return;
-    }
-
-    generatedSheets = [];
-
-    // Process ALL dates in the running order
-    Object.keys(runningOrderData).forEach(date => {
-        const judgeData = runningOrderData[date];
-
-        // Filter by judge if selected
-        const judgesToProcess = selectedJudge ? 
-            { [selectedJudge]: judgeData[selectedJudge] } : 
-            judgeData;
-
-        Object.keys(judgesToProcess).forEach(judge => {
-            Object.keys(judgesToProcess[judge]).forEach(classRound => {
-                const entrants = judgesToProcess[judge][classRound];
-                
-                const sheetData = {
-                    id: `${currentTrial.id}_${date}_${judge}_${classRound}`.replace(/[^a-zA-Z0-9]/g, '_'),
-                    trialId: currentTrial.id,
-                    trialName: currentTrial.clubName || 'Unnamed Trial',
-                    date: prepareDateForFirebase(date),
-                    judge: judge,
-                    classRound: classRound,
-                    className: classRound.split(' - Round')[0],
-                    roundNumber: classRound.split('Round ')[1] || '1',
-                    entrants: entrants,
-                    status: 'generated',
-                    createdAt: new Date(),
-                    createdBy: auth.currentUser.uid
-                };
-
-                generatedSheets.push(sheetData);
-            });
-        });
-    });
-
-    console.log(`Generated ${generatedSheets.length} score sheets across all dates`);
-
-    // Save to database
-    await saveScoreSheetsToDatabase();
-
-    // Display generated sheets
-    displayGeneratedSheets();
-
-    alert(`Generated ${generatedSheets.length} score sheets across all trial dates!`);
-}
 
        
 
