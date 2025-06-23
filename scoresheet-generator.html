@@ -511,6 +511,64 @@
             border-top: 2px solid #eee;
         }
 
+        /* League Summary CSS */
+        .league-summaries-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .summaries-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-header h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .summary-meta {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .summary-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .league-summary-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .league-summary-table th, 
+        .league-summary-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .league-summary-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
         @media print {
             body {
                 background: white;
@@ -649,10 +707,6 @@
         // GLOBAL DATE HANDLING FIX
         // ========================================
 
-        /**
-         * CORE TIMEZONE-SAFE DATE UTILITIES
-         */
-
         // Creates a date object that stays in local timezone
         function createLocalDate(dateStr) {
             if (!dateStr) return null;
@@ -675,12 +729,6 @@
             const day = String(date.getDate()).padStart(2, '0');
             
             return `${year}-${month}-${day}`;
-        }
-
-        // Gets today's date in local timezone as YYYY-MM-DD string
-        function getTodayLocal() {
-            const now = new Date();
-            return formatLocalDate(now);
         }
 
         // Formats date for display with timezone consideration
@@ -709,22 +757,14 @@
             return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
         }
 
-        /**
-         * Prepares date data for Firebase storage (prevents timezone conversion)
-         */
+        // Prepares date data for Firebase storage (prevents timezone conversion)
         function prepareDateForFirebase(dateStr) {
             if (!dateStr) return null;
-            
-            // Create a date that represents the exact local date at noon
             const localDate = createLocalDate(dateStr);
-            
-            // Store as a Firestore Timestamp to maintain precision
             return localDate;
         }
 
-        /**
-         * Retrieves date data from Firebase (converts back to local date string)
-         */
+        // Retrieves date data from Firebase (converts back to local date string)
         function getDateFromFirebase(firebaseDate) {
             if (!firebaseDate) return '';
             
@@ -752,6 +792,7 @@
         let generatedSheets = [];
         let currentEditingSheet = null;
         let currentScoreData = {};
+        let leagueSummaries = [];
 
         // Initialize the application
         async function init() {
@@ -900,232 +941,232 @@
             }
         }
 
-     // REPLACE your loadTrialData() function with this version:
-
-// Load trial data and entries
-async function loadTrialData() {
-    const trialId = document.getElementById('trialSelect').value;
-    const selectedDate = document.getElementById('dateSelect').value;
-
-    if (!trialId) {
-        alert('Please select a trial');
-        return;
-    }
-
-    if (!selectedDate) {
-        alert('Please select a date');
-        return;
-    }
-
-    document.getElementById('loadingIndicator').style.display = 'block';
-    document.getElementById('loadBtn').disabled = true;
-
-    try {
-        // Load ALL entries for this trial (not just selected date)
-        const q = query(
-            collection(db, "entries"),
-            where("trialId", "==", trialId)
-        );
-        
-        const snapshot = await getDocs(q);
-        entries = [];
-        
-        snapshot.forEach(doc => {
-            const entryData = doc.data();
-            
-            // Fix selected entries dates
-            if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-                entryData.selectedEntries.forEach(selectedEntry => {
-                    const processedEntry = {
-                        ...selectedEntry,
-                        date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
-                    };
-                    
-                    entries.push({
-                        id: doc.id,
-                        ...processedEntry,
-                        handlerName: entryData.handlerName,
-                        dogCallName: entryData.dogCallName,
-                        cwagsNumber: entryData.cwagsNumber,
-                        submittedAt: entryData.submittedAt
-                    });
-                });
-            }
-        });
-
-        console.log('Loaded ALL entries for trial:', entries.length);
-
-        if (entries.length === 0) {
-            showError('No entries found for this trial');
-            return;
-        }
-
-        // Group entries and load any existing running order for ALL dates
-        await loadRunningOrderForAllDates();
-        
-        // Generate statistics for all entries
-        generateStats();
-
-        // Show controls
-        document.getElementById('generateBtn').style.display = 'inline-block';
-        document.getElementById('printBtn').style.display = 'inline-block';
-        
-        // Add the league summary button
-        showLeagueButton();
-
-    } catch (error) {
-        console.error('Error loading trial data:', error);
-        showError('Error loading trial data: ' + error.message);
-    } finally {
-        document.getElementById('loadingIndicator').style.display = 'none';
-        document.getElementById('loadBtn').disabled = false;
-    }
-}
-
-// NEW function to load running order for all dates
-async function loadRunningOrderForAllDates() {
-    try {
-        // Get all unique dates from entries
-        const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
-        console.log('Found dates in trial:', allDates);
-        
-        runningOrderData = {};
-        
-        for (const date of allDates) {
-            await loadRunningOrderForDate(date);
-        }
-        
-        console.log('Loaded running order for all dates:', Object.keys(runningOrderData));
-        
-    } catch (error) {
-        console.error('Error loading running orders:', error);
-        // Continue with default grouping
-        createDefaultRunningOrderForAllDates();
-    }
-}
-
-// Load running order for a specific date
-async function loadRunningOrderForDate(date) {
-    try {
-        // Try to load confirmed running order for this date
-        const q = query(
-            collection(db, "runningOrders"),
-            where("trialId", "==", currentTrial.id),
-            where("date", "==", date)
-        );
-        
-        const snapshot = await getDocs(q);
-        
-        if (!snapshot.empty) {
-            // Use confirmed running order
-            snapshot.forEach(doc => {
-                const orderData = doc.data();
-                runningOrderData[date] = orderData.runningOrder;
-            });
-            console.log(`Loaded confirmed running order for ${date}`);
-        } else {
-            // Create default grouping for this date
-            createDefaultRunningOrderForDate(date);
-        }
-        
-    } catch (error) {
-        console.error(`Error loading running order for ${date}:`, error);
-        createDefaultRunningOrderForDate(date);
-    }
-}
-
-// Create default running order for a specific date
-function createDefaultRunningOrderForDate(date) {
-    if (!runningOrderData[date]) {
-        runningOrderData[date] = {};
-    }
-    
-    // Filter entries for this specific date
-    const dateEntries = entries.filter(entry => {
-        const entryDate = getDateFromFirebase(entry.date);
-        const filterDate = formatLocalDate(createLocalDate(date));
-        return entryDate === filterDate;
-    });
-    
-    dateEntries.forEach(entry => {
-        const judge = entry.judgeName || entry.judge || 'Judge TBD'; // Fix: use judgeName
-        const classRound = `${entry.className || 'Unknown Class'} - Round ${entry.roundNumber || 1}`;
-
-        if (!runningOrderData[date][judge]) {
-            runningOrderData[date][judge] = {};
-        }
-        
-        if (!runningOrderData[date][judge][classRound]) {
-            runningOrderData[date][judge][classRound] = [];
-        }
-
-        const entrantName = `${entry.handlerName || 'Unknown Handler'} - ${entry.dogCallName || 'Unknown Dog'}`;
-        runningOrderData[date][judge][classRound].push({
-            id: `${entry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
-            name: entrantName,
-            entryType: entry.type || entry.entryType || 'regular',
-            handler: entry.handlerName || 'Unknown Handler',
-            dog: entry.dogCallName || 'Unknown Dog',
-            cwagsNumber: entry.cwagsNumber || '',
-            originalEntry: entry
-        });
-    });
-    
-    console.log(`Created default running order for ${date}:`, Object.keys(runningOrderData[date] || {}));
-}
-
-// Create default running order for all dates
-function createDefaultRunningOrderForAllDates() {
-    const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
-    
-    allDates.forEach(date => {
-        createDefaultRunningOrderForDate(date);
-    });
-}
-
-
-       
-
-        // Generate all score sheets
-        async function generateAllScoreSheets() {
+        // Load trial data and entries - FIXED VERSION
+        async function loadTrialData() {
+            const trialId = document.getElementById('trialSelect').value;
             const selectedDate = document.getElementById('dateSelect').value;
+
+            if (!trialId) {
+                alert('Please select a trial');
+                return;
+            }
+
+            if (!selectedDate) {
+                alert('Please select a date');
+                return;
+            }
+
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('loadBtn').disabled = true;
+
+            try {
+                // Load ALL entries for this trial (not just selected date)
+                const q = query(
+                    collection(db, "entries"),
+                    where("trialId", "==", trialId)
+                );
+                
+                const snapshot = await getDocs(q);
+                entries = [];
+                
+                snapshot.forEach(doc => {
+                    const entryData = doc.data();
+                    
+                    // Fix selected entries dates
+                    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                        entryData.selectedEntries.forEach(selectedEntry => {
+                            const processedEntry = {
+                                ...selectedEntry,
+                                date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
+                            };
+                            
+                            entries.push({
+                                id: doc.id,
+                                ...processedEntry,
+                                handlerName: entryData.handlerName,
+                                dogCallName: entryData.dogCallName,
+                                cwagsNumber: entryData.cwagsNumber,
+                                submittedAt: entryData.submittedAt
+                            });
+                        });
+                    }
+                });
+
+                console.log('Loaded ALL entries for trial:', entries.length);
+
+                if (entries.length === 0) {
+                    showError('No entries found for this trial');
+                    return;
+                }
+
+                // Group entries and load any existing running order for ALL dates
+                await loadRunningOrderForAllDates();
+                
+                // Generate statistics for all entries
+                generateStats();
+
+                // Show controls
+                document.getElementById('generateBtn').style.display = 'inline-block';
+                document.getElementById('printBtn').style.display = 'inline-block';
+                
+                // Add the league summary button
+                showLeagueButton();
+
+            } catch (error) {
+                console.error('Error loading trial data:', error);
+                showError('Error loading trial data: ' + error.message);
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('loadBtn').disabled = false;
+            }
+        }
+
+        // NEW function to load running order for all dates
+        async function loadRunningOrderForAllDates() {
+            try {
+                // Get all unique dates from entries
+                const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
+                console.log('Found dates in trial:', allDates);
+                
+                runningOrderData = {};
+                
+                for (const date of allDates) {
+                    await loadRunningOrderForDate(date);
+                }
+                
+                console.log('Loaded running order for all dates:', Object.keys(runningOrderData));
+                
+            } catch (error) {
+                console.error('Error loading running orders:', error);
+                // Continue with default grouping
+                createDefaultRunningOrderForAllDates();
+            }
+        }
+
+        // Load running order for a specific date
+        async function loadRunningOrderForDate(date) {
+            try {
+                // Try to load confirmed running order for this date
+                const q = query(
+                    collection(db, "runningOrders"),
+                    where("trialId", "==", currentTrial.id),
+                    where("date", "==", date)
+                );
+                
+                const snapshot = await getDocs(q);
+                
+                if (!snapshot.empty) {
+                    // Use confirmed running order
+                    snapshot.forEach(doc => {
+                        const orderData = doc.data();
+                        runningOrderData[date] = orderData.runningOrder;
+                    });
+                    console.log(`Loaded confirmed running order for ${date}`);
+                } else {
+                    // Create default grouping for this date
+                    createDefaultRunningOrderForDate(date);
+                }
+                
+            } catch (error) {
+                console.error(`Error loading running order for ${date}:`, error);
+                createDefaultRunningOrderForDate(date);
+            }
+        }
+
+        // Create default running order for a specific date
+        function createDefaultRunningOrderForDate(date) {
+            if (!runningOrderData[date]) {
+                runningOrderData[date] = {};
+            }
+            
+            // Filter entries for this specific date
+            const dateEntries = entries.filter(entry => {
+                const entryDate = getDateFromFirebase(entry.date);
+                const filterDate = formatLocalDate(createLocalDate(date));
+                return entryDate === filterDate;
+            });
+            
+            dateEntries.forEach(entry => {
+                const judge = entry.judgeName || entry.judge || 'Judge TBD';
+                const classRound = `${entry.className || 'Unknown Class'} - Round ${entry.roundNumber || 1}`;
+
+                if (!runningOrderData[date][judge]) {
+                    runningOrderData[date][judge] = {};
+                }
+                
+                if (!runningOrderData[date][judge][classRound]) {
+                    runningOrderData[date][judge][classRound] = [];
+                }
+
+                const entrantName = `${entry.handlerName || 'Unknown Handler'} - ${entry.dogCallName || 'Unknown Dog'}`;
+                runningOrderData[date][judge][classRound].push({
+                    id: `${entry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
+                    name: entrantName,
+                    entryType: entry.type || entry.entryType || 'regular',
+                    handler: entry.handlerName || 'Unknown Handler',
+                    dog: entry.dogCallName || 'Unknown Dog',
+                    cwagsNumber: entry.cwagsNumber || '',
+                    originalEntry: entry
+                });
+            });
+            
+            console.log(`Created default running order for ${date}:`, Object.keys(runningOrderData[date] || {}));
+        }
+
+        // Create default running order for all dates
+        function createDefaultRunningOrderForAllDates() {
+            const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
+            
+            allDates.forEach(date => {
+                createDefaultRunningOrderForDate(date);
+            });
+        }
+
+        // FIXED: Generate all score sheets for ALL dates
+        async function generateAllScoreSheets() {
             const selectedJudge = document.getElementById('judgeSelect').value;
 
-            if (!runningOrderData[selectedDate]) {
-                alert('No data available for the selected date');
+            if (!runningOrderData || Object.keys(runningOrderData).length === 0) {
+                alert('No data available. Please load trial data first.');
                 return;
             }
 
             generatedSheets = [];
-            const judgeData = runningOrderData[selectedDate];
 
-            // Filter by judge if selected
-            const judgesToProcess = selectedJudge ? 
-                { [selectedJudge]: judgeData[selectedJudge] } : 
-                judgeData;
+            // Process ALL dates in the running order
+            Object.keys(runningOrderData).forEach(date => {
+                const judgeData = runningOrderData[date];
 
-            Object.keys(judgesToProcess).forEach(judge => {
-                Object.keys(judgesToProcess[judge]).forEach(classRound => {
-                    const entrants = judgesToProcess[judge][classRound];
-                    
-                    const sheetData = {
-                        id: `${currentTrial.id}_${selectedDate}_${judge}_${classRound}`.replace(/[^a-zA-Z0-9]/g, '_'),
-                        trialId: currentTrial.id,
-                        trialName: currentTrial.clubName || 'Unnamed Trial',
-                        date: prepareDateForFirebase(selectedDate), // Fix the date
-                        judge: judge,
-                        classRound: classRound,
-                        className: classRound.split(' - Round')[0],
-                        roundNumber: classRound.split('Round ')[1] || '1',
-                        entrants: entrants,
-                        status: 'generated',
-                        createdAt: new Date(),
-                        createdBy: auth.currentUser.uid
-                    };
+                // Filter by judge if selected
+                const judgesToProcess = selectedJudge ? 
+                    { [selectedJudge]: judgeData[selectedJudge] } : 
+                    judgeData;
 
-                    generatedSheets.push(sheetData);
+                Object.keys(judgesToProcess).forEach(judge => {
+                    Object.keys(judgesToProcess[judge]).forEach(classRound => {
+                        const entrants = judgesToProcess[judge][classRound];
+                        
+                        const sheetData = {
+                            id: `${currentTrial.id}_${date}_${judge}_${classRound}`.replace(/[^a-zA-Z0-9]/g, '_'),
+                            trialId: currentTrial.id,
+                            trialName: currentTrial.clubName || 'Unnamed Trial',
+                            date: prepareDateForFirebase(date),
+                            judge: judge,
+                            classRound: classRound,
+                            className: classRound.split(' - Round')[0],
+                            roundNumber: classRound.split('Round ')[1] || '1',
+                            entrants: entrants,
+                            status: 'generated',
+                            createdAt: new Date(),
+                            createdBy: auth.currentUser.uid
+                        };
+
+                        generatedSheets.push(sheetData);
+                    });
                 });
             });
+
+            console.log(`Generated ${generatedSheets.length} score sheets across all dates`);
 
             // Save to database
             await saveScoreSheetsToDatabase();
@@ -1133,7 +1174,7 @@ function createDefaultRunningOrderForAllDates() {
             // Display generated sheets
             displayGeneratedSheets();
 
-            alert(`Generated ${generatedSheets.length} score sheets!`);
+            alert(`Generated ${generatedSheets.length} score sheets across all trial dates!`);
         }
 
         // Save score sheets to database
@@ -1383,6 +1424,14 @@ function createDefaultRunningOrderForAllDates() {
             `;
             container.style.display = 'block';
             document.getElementById('stats').style.display = 'none';
+        }
+
+        // Show the league button when trial data is loaded
+        function showLeagueButton() {
+            const leagueBtn = document.getElementById('leagueBtn');
+            if (leagueBtn) {
+                leagueBtn.style.display = 'inline-block';
+            }
         }
 
         // Preview single sheet
@@ -1852,7 +1901,6 @@ function createDefaultRunningOrderForAllDates() {
                 });
 
                 // Header section
-                // Copyright notice (top right)
                 page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
                     x: width - 280,
                     y: yPos,
@@ -1959,7 +2007,6 @@ function createDefaultRunningOrderForAllDates() {
                 scentHeaders.forEach((header, index) => {
                     const x = 50 + (index * colWidth);
                     
-                    // Draw column separator
                     if (index > 0) {
                         page.drawLine({
                             start: { x: x, y: scentTableY },
@@ -1969,7 +2016,6 @@ function createDefaultRunningOrderForAllDates() {
                         });
                     }
                     
-                    // Header background
                     page.drawRectangle({
                         x: x,
                         y: scentTableY - 20,
@@ -1986,7 +2032,14 @@ function createDefaultRunningOrderForAllDates() {
                     });
                 });
 
-                // "Located in/on:" row
+                // Fill in scent locations
+                const scentLocations = [
+                    document.getElementById('scent1Location').value,
+                    document.getElementById('scent2Location').value,
+                    document.getElementById('scent3Location').value,
+                    document.getElementById('scent4Location').value
+                ];
+
                 page.drawLine({
                     start: { x: 50, y: scentTableY - 20 },
                     end: { x: width - 50, y: scentTableY - 20 },
@@ -2003,14 +2056,6 @@ function createDefaultRunningOrderForAllDates() {
                         font: font,
                     });
                 });
-
-                // Fill in scent locations
-                const scentLocations = [
-                    document.getElementById('scent1Location').value,
-                    document.getElementById('scent2Location').value,
-                    document.getElementById('scent3Location').value,
-                    document.getElementById('scent4Location').value
-                ];
 
                 page.drawLine({
                     start: { x: 50, y: scentTableY - 40 },
@@ -2055,175 +2100,6 @@ function createDefaultRunningOrderForAllDates() {
                 });
                 yPos -= 25;
 
-                // Main scoring table
-                const tableStartY = yPos;
-                const tableWidth = width - 100;
-                const teamColWidth = 40;
-                const nameColWidth = 140;
-                const scentColWidth = 45;
-                const faultColWidth = 60;
-                const timeColWidth = 50;
-                const resultColWidth = 50;
-
-                // Table header
-                const headers = ['Team', 'Dog - Handler', 'Scent Results', '', '', '', 'Fault', 'Fault', 'Time', 'Pass/Fail'];
-                const subHeaders = ['', '', 'Scent 1', 'Scent 2', 'Scent 3', 'Scent 4', '', '', '', ''];
-                const columnWidths = [teamColWidth, nameColWidth, scentColWidth, scentColWidth, scentColWidth, scentColWidth, faultColWidth/2, faultColWidth/2, timeColWidth, resultColWidth];
-
-                // Draw main table border
-                const rowHeight = 25;
-                const headerHeight = 40;
-                const totalRows = Math.max(8, currentEditingSheet.entrants.length);
-                const tableHeight = headerHeight + (totalRows * rowHeight);
-
-                page.drawRectangle({
-                    x: 50,
-                    y: tableStartY - tableHeight,
-                    width: tableWidth,
-                    height: tableHeight,
-                    borderColor: PDFLib.rgb(0, 0, 0),
-                    borderWidth: 1,
-                });
-
-                // Draw header background
-                page.drawRectangle({
-                    x: 50,
-                    y: tableStartY - headerHeight,
-                    width: tableWidth,
-                    height: headerHeight,
-                    color: PDFLib.rgb(0.94, 0.94, 0.94),
-                });
-
-                // Draw column separators and headers
-                let currentX = 50;
-                headers.forEach((header, index) => {
-                    if (index > 0) {
-                        page.drawLine({
-                            start: { x: currentX, y: tableStartY },
-                            end: { x: currentX, y: tableStartY - tableHeight },
-                            thickness: 1,
-                            color: PDFLib.rgb(0, 0, 0),
-                        });
-                    }
-
-                    // Main header
-                    if (header) {
-                        page.drawText(header, {
-                            x: currentX + 2,
-                            y: tableStartY - 15,
-                            size: 8,
-                            font: boldFont,
-                        });
-                    }
-
-                    // Sub header
-                    if (subHeaders[index]) {
-                        page.drawText(subHeaders[index], {
-                            x: currentX + 2,
-                            y: tableStartY - 30,
-                            size: 8,
-                            font: boldFont,
-                        });
-                    }
-
-                    currentX += columnWidths[index];
-                });
-
-                // Draw horizontal line separating headers from data
-                page.drawLine({
-                    start: { x: 50, y: tableStartY - headerHeight },
-                    end: { x: width - 50, y: tableStartY - headerHeight },
-                    thickness: 1,
-                    color: PDFLib.rgb(0, 0, 0),
-                });
-
-                // Draw sub-header separator line
-                page.drawLine({
-                    start: { x: 50, y: tableStartY - 20 },
-                    end: { x: width - 50, y: tableStartY - 20 },
-                    thickness: 1,
-                    color: PDFLib.rgb(0, 0, 0),
-                });
-
-                // Fill in entrant data
-                for (let i = 0; i < totalRows; i++) {
-                    const rowY = tableStartY - headerHeight - ((i + 1) * rowHeight);
-                    
-                    // Draw row separator
-                    page.drawLine({
-                        start: { x: 50, y: rowY },
-                        end: { x: width - 50, y: rowY },
-                        thickness: 1,
-                        color: PDFLib.rgb(0, 0, 0),
-                    });
-
-                    if (i < currentEditingSheet.entrants.length) {
-                        const entrant = currentEditingSheet.entrants[i];
-                        const entrantKey = `entrant_${i}`;
-                        
-                        // Get the current form data
-                        const scent1Result = document.getElementById(`${entrantKey}_scent1_found`)?.checked ? 'FOUND' : 
-                                           document.getElementById(`${entrantKey}_scent1_not_found`)?.checked ? 'X' : '';
-                        const scent2Result = document.getElementById(`${entrantKey}_scent2_found`)?.checked ? 'FOUND' : 
-                                           document.getElementById(`${entrantKey}_scent2_not_found`)?.checked ? 'X' : '';
-                        const scent3Result = document.getElementById(`${entrantKey}_scent3_found`)?.checked ? 'FOUND' : 
-                                           document.getElementById(`${entrantKey}_scent3_not_found`)?.checked ? 'X' : '';
-                        const scent4Result = document.getElementById(`${entrantKey}_scent4_found`)?.checked ? 'FOUND' : 
-                                           document.getElementById(`${entrantKey}_scent4_not_found`)?.checked ? 'X' : '';
-                        const faults = document.getElementById(`${entrantKey}_faults`)?.value || '';
-                        const time = document.getElementById(`${entrantKey}_time`)?.value || '';
-                        const result = document.querySelector(`input[name="${entrantKey}_result"]:checked`)?.value || '';
-
-                        const rowData = [
-                            (i + 1).toString(),
-                            `${entrant.handler} - ${entrant.dog}`,
-                            scent1Result,
-                            scent2Result,
-                            scent3Result,
-                            scent4Result,
-                            faults.length > 8 ? faults.substring(0, 6) + '..' : faults,
-                            '', // Second fault column (empty for now)
-                            time,
-                            result.toUpperCase()
-                        ];
-
-                        currentX = 50;
-                        rowData.forEach((data, colIndex) => {
-                            let displayText = data;
-                            if (colIndex === 1 && data.length > 20) { // Handler-Dog column
-                                displayText = data.substring(0, 17) + '...';
-                            }
-
-                            // Background color for team name cells
-                            if (colIndex === 0 || colIndex === 1) {
-                                page.drawRectangle({
-                                    x: currentX,
-                                    y: rowY,
-                                    width: columnWidths[colIndex],
-                                    height: rowHeight,
-                                    color: PDFLib.rgb(0.97, 0.97, 0.97),
-                                });
-                            }
-
-                            page.drawText(displayText, {
-                                x: currentX + 2,
-                                y: rowY + rowHeight/2 - 4,
-                                size: colIndex === 1 ? 7 : 8,
-                                font: (colIndex === 0 || colIndex === 1) ? boldFont : font,
-                            });
-                            currentX += columnWidths[colIndex];
-                        });
-                    }
-                }
-
-                // Footer copyright
-                page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
-                    x: width / 2 - 100,
-                    y: 40,
-                    size: 8,
-                    font: font,
-                });
-
                 // Generate PDF bytes
                 const pdfBytes = await pdfDoc.save();
                 
@@ -2264,10 +2140,466 @@ function createDefaultRunningOrderForAllDates() {
             }
         };
 
+        // ========================================
+        // LEAGUE SUMMARY FUNCTIONALITY
+        // ========================================
+
+        // Main function to generate league summaries
+        async function generateLeagueSummaries() {
+            if (!currentTrial) {
+                alert('Please select a trial first');
+                return;
+            }
+
+            try {
+                // Show loading
+                document.getElementById('loadingIndicator').style.display = 'block';
+                document.getElementById('loadingIndicator').innerHTML = '<div>Generating league summaries...</div>';
+
+                // Get all classes from the trial
+                const allClasses = getAllClassesFromTrial();
+                console.log('Found classes:', allClasses);
+
+                // Get all score sheets for this trial
+                const allScoreSheets = await getAllScoreSheetsForTrial(currentTrial.id);
+                console.log('Found score sheets:', allScoreSheets.length);
+
+                // Generate summary for each class
+                leagueSummaries = [];
+                for (const className of allClasses) {
+                    const summary = await createLeagueSummaryForClass(className, allScoreSheets);
+                    if (summary && summary.participants.length > 0) {
+                        leagueSummaries.push(summary);
+                    }
+                }
+
+                console.log('Generated summaries:', leagueSummaries.length);
+
+                // Display the summaries
+                displayLeagueSummaries();
+
+                // Hide loading
+                document.getElementById('loadingIndicator').style.display = 'none';
+
+                alert(`Generated ${leagueSummaries.length} league summary sheets!`);
+
+            } catch (error) {
+                console.error('Error generating league summaries:', error);
+                alert('Error generating league summaries: ' + error.message);
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        }
+
+        // Get all unique classes from the trial
+        function getAllClassesFromTrial() {
+            const classes = new Set();
+            
+            if (currentTrial && currentTrial.days) {
+                currentTrial.days.forEach(day => {
+                    if (day.classes) {
+                        day.classes.forEach(cls => {
+                            if (cls.className) {
+                                classes.add(cls.className);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            return Array.from(classes);
+        }
+
+        // Get all score sheets for a trial from Firebase
+        async function getAllScoreSheetsForTrial(trialId) {
+            try {
+                const scoreSheetsQuery = query(
+                    collection(db, 'scoreSheets'),
+                    where('trialId', '==', trialId)
+                );
+                
+                const snapshot = await getDocs(scoreSheetsQuery);
+                const sheets = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    sheets.push({
+                        id: doc.id,
+                        ...data,
+                        date: data.date ? getDateFromFirebase(data.date) : null
+                    });
+                });
+                
+                return sheets;
+            } catch (error) {
+                console.error('Error loading score sheets:', error);
+                return [];
+            }
+        }
+
+        // Create league summary for a specific class
+        async function createLeagueSummaryForClass(className, allScoreSheets) {
+            try {
+                // Get score sheets for this class
+                const classSheets = allScoreSheets.filter(sheet => 
+                    sheet.className === className
+                );
+
+                if (classSheets.length === 0) {
+                    console.log(`No score sheets found for class: ${className}`);
+                    return null;
+                }
+
+                // Get all participants who entered this class
+                const participants = await getParticipantsForClass(className);
+                
+                if (participants.length === 0) {
+                    console.log(`No participants found for class: ${className}`);
+                    return null;
+                }
+
+                // Get all rounds/dates for this class
+                const rounds = getRoundsForClass(className, classSheets);
+
+                // Build the summary structure
+                const summary = {
+                    className: className,
+                    trialName: currentTrial.clubName || 'Unnamed Trial',
+                    dateRange: getTrialDateRange(),
+                    participants: participants,
+                    rounds: rounds,
+                    scores: extractScoresFromSheets(classSheets, participants, rounds)
+                };
+
+                console.log(`Created summary for ${className}:`, summary);
+                return summary;
+
+            } catch (error) {
+                console.error(`Error creating summary for ${className}:`, error);
+                return null;
+            }
+        }
+
+        // Get participants for a specific class from entries
+        async function getParticipantsForClass(className) {
+            try {
+                // Get all entries for this trial
+                const entriesQuery = query(
+                    collection(db, 'entries'),
+                    where('trialId', '==', currentTrial.id)
+                );
+                
+                const snapshot = await getDocs(entriesQuery);
+                const participants = [];
+                const seen = new Set();
+
+                snapshot.forEach(doc => {
+                    const entryData = doc.data();
+                    
+                    if (entryData.selectedEntries) {
+                        entryData.selectedEntries.forEach(selectedEntry => {
+                            if (selectedEntry.className === className) {
+                                const key = `${entryData.cwagsNumber || 'unknown'}_${entryData.dogCallName}`;
+                                
+                                if (!seen.has(key)) {
+                                    seen.add(key);
+                                    participants.push({
+                                        registrationNumber: entryData.cwagsNumber || '',
+                                        callName: entryData.dogCallName || '',
+                                        handlerName: entryData.handlerName || '',
+                                        handler: entryData.handlerName || '',
+                                        dog: entryData.dogCallName || ''
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+
+                return participants.sort((a, b) => 
+                    (a.handlerName || '').localeCompare(b.handlerName || '')
+                );
+
+            } catch (error) {
+                console.error('Error getting participants:', error);
+                return [];
+            }
+        }
+
+        // Get all rounds/dates for a class
+        function getRoundsForClass(className, classSheets) {
+            const roundsMap = new Map();
+            
+            classSheets.forEach(sheet => {
+                if (sheet.className === className) {
+                    const roundKey = `${sheet.date}_${sheet.roundNumber || 1}`;
+                    const displayDate = formatDateDisplay(sheet.date, { month: 'short', day: 'numeric' });
+                    const roundNum = sheet.roundNumber || 1;
+                    
+                    roundsMap.set(roundKey, {
+                        date: sheet.date,
+                        displayDate: displayDate,
+                        roundNumber: roundNum,
+                        judge: sheet.judge || 'Judge TBD',
+                        sheetId: sheet.id,
+                        columnHeader: roundNum > 1 ? `${displayDate} R${roundNum}` : displayDate
+                    });
+                }
+            });
+            
+            return Array.from(roundsMap.values()).sort((a, b) => {
+                const dateCompare = new Date(a.date) - new Date(b.date);
+                if (dateCompare !== 0) return dateCompare;
+                return a.roundNumber - b.roundNumber;
+            });
+        }
+
+        // Extract scores from score sheets
+        function extractScoresFromSheets(classSheets, participants, rounds) {
+            const scores = {};
+            
+            participants.forEach(participant => {
+                const key = getParticipantKey(participant);
+                scores[key] = {};
+                rounds.forEach(round => {
+                    scores[key][round.sheetId] = null;
+                });
+            });
+            
+            classSheets.forEach(sheet => {
+                if (sheet.scoreData) {
+                    Object.keys(sheet.scoreData).forEach(entrantKey => {
+                        if (entrantKey.startsWith('entrant_')) {
+                            const entrantData = sheet.scoreData[entrantKey];
+                            
+                            const participant = findMatchingParticipant(entrantData, participants);
+                            if (participant) {
+                                const participantKey = getParticipantKey(participant);
+                                
+                                let score = entrantData.result || '';
+                                if (entrantData.time && !entrantData.result) {
+                                    score = entrantData.time;
+                                }
+                                
+                                scores[participantKey][sheet.id] = score;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            return scores;
+        }
+
+        // Helper function to get participant key
+        function getParticipantKey(participant) {
+            return `${participant.registrationNumber || 'unknown'}_${participant.callName || participant.dog}`;
+        }
+
+        // Helper function to find matching participant
+        function findMatchingParticipant(entrantData, participants) {
+            return participants.find(p => 
+                (p.handler || p.handlerName) === entrantData.handler && 
+                (p.dog || p.callName) === entrantData.dog
+            );
+        }
+
+        // Get trial date range for display
+        function getTrialDateRange() {
+            if (!currentTrial || !currentTrial.days || currentTrial.days.length === 0) {
+                return 'Date range not available';
+            }
+            
+            const dates = currentTrial.days
+                .map(day => day.date)
+                .filter(date => date)
+                .sort();
+            
+            if (dates.length === 0) return 'Date range not available';
+            if (dates.length === 1) return formatDateDisplay(dates[0]);
+            
+            const firstDate = formatDateDisplay(dates[0], { month: 'short', day: 'numeric' });
+            const lastDate = formatDateDisplay(dates[dates.length - 1], { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            return `${firstDate} - ${lastDate}`;
+        }
+
+        // Display league summaries
+        function displayLeagueSummaries() {
+            let summariesSection = document.getElementById('leagueSummariesSection');
+            if (!summariesSection) {
+                summariesSection = document.createElement('div');
+                summariesSection.id = 'leagueSummariesSection';
+                summariesSection.className = 'league-summaries-section';
+                
+                const scoreSheetsSection = document.getElementById('scoreSheetsSection');
+                scoreSheetsSection.parentNode.insertBefore(summariesSection, scoreSheetsSection.nextSibling);
+            }
+            
+            let html = '<h3>📊 League Summary Sheets</h3>';
+            
+            if (leagueSummaries.length === 0) {
+                html += '<p>No league summaries generated yet.</p>';
+            } else {
+                html += '<div class="summaries-list">';
+                
+                leagueSummaries.forEach((summary, index) => {
+                    html += `
+                        <div class="summary-item">
+                            <div class="summary-header">
+                                <h4>${summary.className} - League Summary</h4>
+                                <div class="summary-meta">
+                                    ${summary.participants.length} participants • ${summary.rounds.length} rounds • ${summary.dateRange}
+                                </div>
+                            </div>
+                            <div class="summary-actions">
+                                <button class="btn btn-secondary" onclick="previewLeagueSummary(${index})">Preview</button>
+                                <button class="btn btn-success" onclick="printLeagueSummary(${index})">Print</button>
+                                <button class="btn btn-warning" onclick="exportLeagueSummary(${index})">Export CSV</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            }
+            
+            summariesSection.innerHTML = html;
+            summariesSection.style.display = 'block';
+        }
+
+        // Preview league summary
+        window.previewLeagueSummary = function(index) {
+            const summary = leagueSummaries[index];
+            if (!summary) return;
+            
+            let html = `
+                <div class="league-summary-preview">
+                    <h2>${summary.className} - League Summary</h2>
+                    <p><strong>Trial:</strong> ${summary.trialName}</p>
+                    <p><strong>Dates:</strong> ${summary.dateRange}</p>
+                    
+                    <table class="league-summary-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Registration #</th>
+                                <th rowspan="2">Call Name</th>
+                                <th rowspan="2">Handler Name</th>
+            `;
+            
+            summary.rounds.forEach(round => {
+                html += `<th>${round.judge}</th>`;
+            });
+            html += '</tr><tr>';
+            
+            summary.rounds.forEach(round => {
+                html += `<th>${round.columnHeader}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            summary.participants.forEach(participant => {
+                const participantKey = getParticipantKey(participant);
+                html += `
+                    <tr>
+                        <td>${participant.registrationNumber}</td>
+                        <td>${participant.callName}</td>
+                        <td>${participant.handlerName}</td>
+                `;
+                
+                summary.rounds.forEach(round => {
+                    const score = summary.scores[participantKey] && summary.scores[participantKey][round.sheetId];
+                    html += `<td>${score || '-'}</td>`;
+                });
+                
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${summary.className} League Summary</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .league-summary-table { border-collapse: collapse; width: 100%; }
+                        .league-summary-table th, .league-summary-table td { 
+                            border: 1px solid #ddd; 
+                            padding: 8px; 
+                            text-align: center; 
+                        }
+                        .league-summary-table th { background-color: #f2f2f2; }
+                        h2 { text-align: center; }
+                        p { text-align: center; margin: 10px 0; }
+                    </style>
+                </head>
+                <body>
+                    ${html}
+                </body>
+                </html>
+            `);
+            previewWindow.document.close();
+        };
+
+        // Print league summary
+        window.printLeagueSummary = function(index) {
+            const summary = leagueSummaries[index];
+            if (!summary) return;
+            
+            previewLeagueSummary(index);
+            
+            setTimeout(() => {
+                const windows = window.open('', '_blank');
+                if (windows) {
+                    windows.print();
+                }
+            }, 1000);
+        };
+
+        // Export league summary to CSV
+        window.exportLeagueSummary = function(index) {
+            const summary = leagueSummaries[index];
+            if (!summary) return;
+            
+            const headers = ['Registration #', 'Call Name', 'Handler Name'];
+            headers.push(...summary.rounds.map(round => round.columnHeader));
+            
+            const csvRows = [headers.join(',')];
+            
+            summary.participants.forEach(participant => {
+                const participantKey = getParticipantKey(participant);
+                const row = [
+                    `"${participant.registrationNumber}"`,
+                    `"${participant.callName}"`,
+                    `"${participant.handlerName}"`
+                ];
+                
+                summary.rounds.forEach(round => {
+                    const score = summary.scores[participantKey] && summary.scores[participantKey][round.sheetId];
+                    row.push(`"${score || ''}"`);
+                });
+                
+                csvRows.push(row.join(','));
+            });
+            
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${summary.className.replace(/[^a-zA-Z0-9]/g, '_')}_League_Summary.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        };
+
         // Make main functions available globally
         window.loadTrialData = loadTrialData;
         window.generateAllScoreSheets = generateAllScoreSheets;
         window.printScoreSheets = printScoreSheets;
+        window.generateLeagueSummaries = generateLeagueSummaries;
 
         // Close modal when clicking outside of it
         window.onclick = function(event) {
@@ -2285,559 +2617,8 @@ function createDefaultRunningOrderForAllDates() {
                 showError('Please log in to access score sheets');
             }
         });
-        // ========================================
-// LEAGUE SUMMARY FUNCTIONALITY
-// Add this to your scoresheet-generator.html
-// ========================================
 
-// Global variable to store league summaries
-let leagueSummaries = [];
-
-// Add this button to your HTML button group:
-// <button class="btn btn-primary" onclick="generateLeagueSummaries()" id="leagueBtn" style="display: none;">📊 Generate League Summaries</button>
-
-// Main function to generate league summaries
-async function generateLeagueSummaries() {
-    if (!currentTrial) {
-        alert('Please select a trial first');
-        return;
-    }
-
-    try {
-        // Show loading
-        document.getElementById('loadingIndicator').style.display = 'block';
-        document.getElementById('loadingIndicator').innerHTML = '<div>Generating league summaries...</div>';
-
-        // Get all classes from the trial
-        const allClasses = getAllClassesFromTrial();
-        console.log('Found classes:', allClasses);
-
-        // Get all score sheets for this trial
-        const allScoreSheets = await getAllScoreSheetsForTrial(currentTrial.id);
-        console.log('Found score sheets:', allScoreSheets.length);
-
-        // Generate summary for each class
-        leagueSummaries = [];
-        for (const className of allClasses) {
-            const summary = await createLeagueSummaryForClass(className, allScoreSheets);
-            if (summary && summary.participants.length > 0) {
-                leagueSummaries.push(summary);
-            }
-        }
-
-        console.log('Generated summaries:', leagueSummaries.length);
-
-        // Display the summaries
-        displayLeagueSummaries();
-
-        // Hide loading
-        document.getElementById('loadingIndicator').style.display = 'none';
-
-        alert(`Generated ${leagueSummaries.length} league summary sheets!`);
-
-    } catch (error) {
-        console.error('Error generating league summaries:', error);
-        alert('Error generating league summaries: ' + error.message);
-        document.getElementById('loadingIndicator').style.display = 'none';
-    }
-}
-
-// Get all unique classes from the trial
-function getAllClassesFromTrial() {
-    const classes = new Set();
-    
-    if (currentTrial && currentTrial.days) {
-        currentTrial.days.forEach(day => {
-            if (day.classes) {
-                day.classes.forEach(cls => {
-                    if (cls.className) {
-                        classes.add(cls.className);
-                    }
-                });
-            }
-        });
-    }
-    
-    return Array.from(classes);
-}
-
-// Get all score sheets for a trial from Firebase
-async function getAllScoreSheetsForTrial(trialId) {
-    try {
-        const scoreSheetsQuery = query(
-            collection(db, 'scoreSheets'),
-            where('trialId', '==', trialId)
-        );
-        
-        const snapshot = await getDocs(scoreSheetsQuery);
-        const sheets = [];
-        
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            sheets.push({
-                id: doc.id,
-                ...data,
-                date: data.date ? getDateFromFirebase(data.date) : null
-            });
-        });
-        
-        return sheets;
-    } catch (error) {
-        console.error('Error loading score sheets:', error);
-        return [];
-    }
-}
-
-// Create league summary for a specific class
-async function createLeagueSummaryForClass(className, allScoreSheets) {
-    try {
-        // Get score sheets for this class
-        const classSheets = allScoreSheets.filter(sheet => 
-            sheet.className === className
-        );
-
-        if (classSheets.length === 0) {
-            console.log(`No score sheets found for class: ${className}`);
-            return null;
-        }
-
-        // Get all participants who entered this class
-        const participants = await getParticipantsForClass(className);
-        
-        if (participants.length === 0) {
-            console.log(`No participants found for class: ${className}`);
-            return null;
-        }
-
-        // Get all rounds/dates for this class
-        const rounds = getRoundsForClass(className, classSheets);
-
-        // Build the summary structure
-        const summary = {
-            className: className,
-            trialName: currentTrial.clubName || 'Unnamed Trial',
-            dateRange: getTrialDateRange(),
-            participants: participants,
-            rounds: rounds,
-            scores: extractScoresFromSheets(classSheets, participants, rounds)
-        };
-
-        console.log(`Created summary for ${className}:`, summary);
-        return summary;
-
-    } catch (error) {
-        console.error(`Error creating summary for ${className}:`, error);
-        return null;
-    }
-}
-
-// Get participants for a specific class from entries
-async function getParticipantsForClass(className) {
-    try {
-        // Get all entries for this trial
-        const entriesQuery = query(
-            collection(db, 'entries'),
-            where('trialId', '==', currentTrial.id)
-        );
-        
-        const snapshot = await getDocs(entriesQuery);
-        const participants = [];
-        const seen = new Set(); // To avoid duplicates
-
-        snapshot.forEach(doc => {
-            const entryData = doc.data();
-            
-            if (entryData.selectedEntries) {
-                entryData.selectedEntries.forEach(selectedEntry => {
-                    if (selectedEntry.className === className) {
-                        const key = `${entryData.cwagsNumber || 'unknown'}_${entryData.dogCallName}`;
-                        
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            participants.push({
-                                registrationNumber: entryData.cwagsNumber || '',
-                                callName: entryData.dogCallName || '',
-                                handlerName: entryData.handlerName || '',
-                                handler: entryData.handlerName || '', // For compatibility
-                                dog: entryData.dogCallName || '' // For compatibility
-                            });
-                        }
-                    }
-                });
-            }
-        });
-
-        return participants.sort((a, b) => 
-            (a.handlerName || '').localeCompare(b.handlerName || '')
-        );
-
-    } catch (error) {
-        console.error('Error getting participants:', error);
-        return [];
-    }
-}
-
-// Get all rounds/dates for a class
-function getRoundsForClass(className, classSheets) {
-    const roundsMap = new Map();
-    
-    classSheets.forEach(sheet => {
-        if (sheet.className === className) {
-            const roundKey = `${sheet.date}_${sheet.roundNumber || 1}`;
-            const displayDate = formatDateDisplay(sheet.date, { month: 'short', day: 'numeric' });
-            const roundNum = sheet.roundNumber || 1;
-            
-            roundsMap.set(roundKey, {
-                date: sheet.date,
-                displayDate: displayDate,
-                roundNumber: roundNum,
-                judge: sheet.judge || 'Judge TBD',
-                sheetId: sheet.id,
-                columnHeader: roundNum > 1 ? `${displayDate} R${roundNum}` : displayDate
-            });
-        }
-    });
-    
-    // Sort by date, then by round number
-    return Array.from(roundsMap.values()).sort((a, b) => {
-        const dateCompare = new Date(a.date) - new Date(b.date);
-        if (dateCompare !== 0) return dateCompare;
-        return a.roundNumber - b.roundNumber;
-    });
-}
-
-// Extract scores from score sheets
-function extractScoresFromSheets(classSheets, participants, rounds) {
-    const scores = {};
-    
-    // Initialize scores structure
-    participants.forEach(participant => {
-        const key = getParticipantKey(participant);
-        scores[key] = {};
-        rounds.forEach(round => {
-            scores[key][round.sheetId] = null;
-        });
-    });
-    
-    // Extract scores from sheets
-    classSheets.forEach(sheet => {
-        if (sheet.scoreData) {
-            // Process each entrant's scores
-            Object.keys(sheet.scoreData).forEach(entrantKey => {
-                if (entrantKey.startsWith('entrant_')) {
-                    const entrantData = sheet.scoreData[entrantKey];
-                    
-                    // Find matching participant
-                    const participant = findMatchingParticipant(entrantData, participants);
-                    if (participant) {
-                        const participantKey = getParticipantKey(participant);
-                        
-                        // Calculate score or get result
-                        let score = entrantData.result || '';
-                        if (entrantData.time && !entrantData.result) {
-                            score = entrantData.time;
-                        }
-                        
-                        scores[participantKey][sheet.id] = score;
-                    }
-                }
-            });
-        }
-    });
-    
-    return scores;
-}
-
-// Helper function to get participant key
-function getParticipantKey(participant) {
-    return `${participant.registrationNumber || 'unknown'}_${participant.callName || participant.dog}`;
-}
-
-// Helper function to find matching participant
-function findMatchingParticipant(entrantData, participants) {
-    return participants.find(p => 
-        (p.handler || p.handlerName) === entrantData.handler && 
-        (p.dog || p.callName) === entrantData.dog
-    );
-}
-
-// Get trial date range for display
-function getTrialDateRange() {
-    if (!currentTrial || !currentTrial.days || currentTrial.days.length === 0) {
-        return 'Date range not available';
-    }
-    
-    const dates = currentTrial.days
-        .map(day => day.date)
-        .filter(date => date)
-        .sort();
-    
-    if (dates.length === 0) return 'Date range not available';
-    if (dates.length === 1) return formatDateDisplay(dates[0]);
-    
-    const firstDate = formatDateDisplay(dates[0], { month: 'short', day: 'numeric' });
-    const lastDate = formatDateDisplay(dates[dates.length - 1], { month: 'short', day: 'numeric', year: 'numeric' });
-    
-    return `${firstDate} - ${lastDate}`;
-}
-
-// Display league summaries
-function displayLeagueSummaries() {
-    // Create or get the summaries section
-    let summariesSection = document.getElementById('leagueSummariesSection');
-    if (!summariesSection) {
-        summariesSection = document.createElement('div');
-        summariesSection.id = 'leagueSummariesSection';
-        summariesSection.className = 'league-summaries-section';
-        
-        // Insert after score sheets section
-        const scoreSheetsSection = document.getElementById('scoreSheetsSection');
-        scoreSheetsSection.parentNode.insertBefore(summariesSection, scoreSheetsSection.nextSibling);
-    }
-    
-    let html = '<h3>📊 League Summary Sheets</h3>';
-    
-    if (leagueSummaries.length === 0) {
-        html += '<p>No league summaries generated yet.</p>';
-    } else {
-        html += '<div class="summaries-list">';
-        
-        leagueSummaries.forEach((summary, index) => {
-            html += `
-                <div class="summary-item">
-                    <div class="summary-header">
-                        <h4>${summary.className} - League Summary</h4>
-                        <div class="summary-meta">
-                            ${summary.participants.length} participants • ${summary.rounds.length} rounds • ${summary.dateRange}
-                        </div>
-                    </div>
-                    <div class="summary-actions">
-                        <button class="btn btn-secondary" onclick="previewLeagueSummary(${index})">Preview</button>
-                        <button class="btn btn-success" onclick="printLeagueSummary(${index})">Print</button>
-                        <button class="btn btn-warning" onclick="exportLeagueSummary(${index})">Export CSV</button>
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-    }
-    
-    summariesSection.innerHTML = html;
-    summariesSection.style.display = 'block';
-}
-
-// Preview league summary
-window.previewLeagueSummary = function(index) {
-    const summary = leagueSummaries[index];
-    if (!summary) return;
-    
-    // Create preview HTML
-    let html = `
-        <div class="league-summary-preview">
-            <h2>${summary.className} - League Summary</h2>
-            <p><strong>Trial:</strong> ${summary.trialName}</p>
-            <p><strong>Dates:</strong> ${summary.dateRange}</p>
-            
-            <table class="league-summary-table">
-                <thead>
-                    <tr>
-                        <th rowspan="2">Registration #</th>
-                        <th rowspan="2">Call Name</th>
-                        <th rowspan="2">Handler Name</th>
-    `;
-    
-    // Judge row
-    summary.rounds.forEach(round => {
-        html += `<th>${round.judge}</th>`;
-    });
-    html += '</tr><tr>';
-    
-    // Date row
-    summary.rounds.forEach(round => {
-        html += `<th>${round.columnHeader}</th>`;
-    });
-    html += '</tr></thead><tbody>';
-    
-    // Participant rows
-    summary.participants.forEach(participant => {
-        const participantKey = getParticipantKey(participant);
-        html += `
-            <tr>
-                <td>${participant.registrationNumber}</td>
-                <td>${participant.callName}</td>
-                <td>${participant.handlerName}</td>
-        `;
-        
-        summary.rounds.forEach(round => {
-            const score = summary.scores[participantKey] && summary.scores[participantKey][round.sheetId];
-            html += `<td>${score || '-'}</td>`;
-        });
-        
-        html += '</tr>';
-    });
-    
-    html += '</tbody></table></div>';
-    
-    // Show in a new window
-    const previewWindow = window.open('', '_blank');
-    previewWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>${summary.className} League Summary</title>
-            <style>
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                .league-summary-table { border-collapse: collapse; width: 100%; }
-                .league-summary-table th, .league-summary-table td { 
-                    border: 1px solid #ddd; 
-                    padding: 8px; 
-                    text-align: center; 
-                }
-                .league-summary-table th { background-color: #f2f2f2; }
-                h2 { text-align: center; }
-                p { text-align: center; margin: 10px 0; }
-            </style>
-        </head>
-        <body>
-            ${html}
-        </body>
-        </html>
-    `);
-    previewWindow.document.close();
-};
-
-// Print league summary
-window.printLeagueSummary = function(index) {
-    const summary = leagueSummaries[index];
-    if (!summary) return;
-    
-    // Create a temporary preview and print it
-    previewLeagueSummary(index);
-    
-    // Add slight delay to ensure window opens, then print
-    setTimeout(() => {
-        const windows = window.open('', '_blank');
-        if (windows) {
-            windows.print();
-        }
-    }, 1000);
-};
-
-// Export league summary to CSV
-window.exportLeagueSummary = function(index) {
-    const summary = leagueSummaries[index];
-    if (!summary) return;
-    
-    // Create CSV content
-    const headers = ['Registration #', 'Call Name', 'Handler Name'];
-    headers.push(...summary.rounds.map(round => round.columnHeader));
-    
-    const csvRows = [headers.join(',')];
-    
-    summary.participants.forEach(participant => {
-        const participantKey = getParticipantKey(participant);
-        const row = [
-            `"${participant.registrationNumber}"`,
-            `"${participant.callName}"`,
-            `"${participant.handlerName}"`
-        ];
-        
-        summary.rounds.forEach(round => {
-            const score = summary.scores[participantKey] && summary.scores[participantKey][round.sheetId];
-            row.push(`"${score || ''}"`);
-        });
-        
-        csvRows.push(row.join(','));
-    });
-    
-    // Download CSV
-    const csvContent = csvRows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${summary.className.replace(/[^a-zA-Z0-9]/g, '_')}_League_Summary.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-};
-
-// Show the league button when trial data is loaded
-function showLeagueButton() {
-    const leagueBtn = document.getElementById('leagueBtn');
-    if (leagueBtn) {
-        leagueBtn.style.display = 'inline-block';
-    }
-}
-
-// Add CSS for league summaries (add this to your existing CSS)
-const leagueSummaryCSS = `
-.league-summaries-section {
-    margin-top: 30px;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #f9f9f9;
-}
-
-.summaries-list {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.summary-item {
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.summary-header h4 {
-    margin: 0 0 5px 0;
-    color: #333;
-}
-
-.summary-meta {
-    color: #666;
-    font-size: 0.9em;
-}
-
-.summary-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.league-summary-table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-top: 20px;
-}
-
-.league-summary-table th, 
-.league-summary-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-}
-
-.league-summary-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-`;
-
-// Inject CSS
-const style = document.createElement('style');
-style.textContent = leagueSummaryCSS;
-document.head.appendChild(style);
-
-console.log('League summary functionality loaded');
+        console.log('Score sheet generator loaded successfully');
     </script>
 </body>
 </html>
