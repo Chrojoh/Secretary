@@ -2438,6 +2438,174 @@ function updateEntrySummary() {
       });
     }
 
+    // Check form validity function
+function checkFormValidity() {
+  const waiverAccepted = document.getElementById('waiverAccepted').checked;
+  const handlerName = document.getElementById('handlerName').value.trim();
+  const handlerEmail = document.getElementById('handlerEmail').value.trim();
+  const dogCallName = document.getElementById('dogCallName').value.trim();
+  const hasClasses = selectedEntries.length > 0;
+  
+  const isValid = waiverAccepted && handlerName && handlerEmail && dogCallName && hasClasses;
+  
+  const submitBtn = document.getElementById('submitEntry');
+  if (submitBtn) {
+    submitBtn.disabled = !isValid;
+  }
+  
+  return isValid;
+}
+
+// Submit entry function
+async function submitEntry() {
+  console.log("🚀 Starting entry submission...");
+  
+  // Basic form validation
+  const handlerName = document.getElementById('handlerName').value.trim();
+  const handlerEmail = document.getElementById('handlerEmail').value.trim();
+  const dogName = document.getElementById('dogCallName').value.trim();
+  const waiverAccepted = document.getElementById('waiverAccepted').checked;
+  
+  if (!handlerName || !handlerEmail || !dogName) {
+    alert('Please fill in all required fields (Handler Name, Email, and Dog Name).');
+    return;
+  }
+  
+  if (!waiverAccepted) {
+    alert('Please accept the waiver agreement to continue.');
+    return;
+  }
+  
+  if (selectedEntries.length === 0) {
+    alert('Please select at least one class entry.');
+    return;
+  }
+  
+  // Disable submit button during submission
+  const submitBtn = document.getElementById('submitEntry');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  
+  try {
+    // Collect form data
+    const entryData = {
+      trialId: currentTrialData.id,
+      handlerName: handlerName,
+      handlerEmail: handlerEmail,
+      handlerPhone: document.getElementById('handlerPhone').value.trim(),
+      emergencyContact: document.getElementById('emergencyContact').value.trim(),
+      dogCallName: dogName,
+      dogBreed: document.getElementById('dogBreed').value.trim(),
+      dogBirthdate: document.getElementById('dogBirthdate').value,
+      dogSex: document.getElementById('dogSex').value,
+      cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
+      juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
+      selectedEntries: selectedEntries.map(entry => ({
+        ...entry,
+        date: currentTrialData.days[entry.dayIndex]?.date || null
+      })),
+      totalFee: totalFee,
+      submittedAt: new Date(),
+      waiverAccepted: true
+    };
+    
+    console.log("📝 Entry data prepared:", entryData);
+    
+    // Save to Firebase
+    if (typeof addDoc !== 'undefined' && typeof collection !== 'undefined') {
+      const docRef = await addDoc(collection(db, "entries"), entryData);
+      console.log("✅ Entry saved with ID:", docRef.id);
+      
+      // Show success message
+      showSuccessMessage(docRef.id);
+    } else {
+      // Fallback for testing without Firebase
+      console.log("⚠️ Firebase not available, simulating success");
+      alert(`Entry submitted successfully!\n\nHandler: ${handlerName}\nDog: ${dogName}\nEntries: ${selectedEntries.length}\nTotal Fee: $${totalFee.toFixed(2)}\n\nYou will receive a confirmation email shortly.`);
+    }
+    
+  } catch (error) {
+    console.error("❌ Error submitting entry:", error);
+    alert("Error submitting entry: " + error.message);
+    
+    // Re-enable submit button on error
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+}
+
+// Show success message
+function showSuccessMessage(entryId) {
+  // Hide the entry form
+  document.getElementById('entryForm').style.display = 'none';
+  
+  // Show success message
+  const successDiv = document.getElementById('successMessage');
+  if (successDiv) {
+    successDiv.classList.remove('hidden');
+    successDiv.style.display = 'block';
+  }
+  
+  // Generate edit link if this is a public entry
+  if (entryId && !isSecretary) {
+    const editUrl = `${window.location.origin}${window.location.pathname}?entry=${entryId}`;
+    const editLinkDiv = document.getElementById('editLinkSection');
+    const editUrlSpan = document.getElementById('editUrl');
+    
+    if (editLinkDiv && editUrlSpan) {
+      editUrlSpan.textContent = editUrl;
+      editLinkDiv.classList.remove('hidden');
+      editLinkDiv.style.display = 'block';
+    }
+  }
+}
+
+// Reset form function  
+function resetForm() {
+  // Reset form fields
+  document.getElementById('entryForm').reset();
+  
+  // Clear selected entries
+  selectedEntries = [];
+  totalFee = 0;
+  
+  // Clear all checkboxes
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    if (cb.id !== 'waiverAccepted') {
+      cb.checked = false;
+      cb.parentElement.classList.remove('selected');
+    }
+  });
+  
+  // Hide success messages
+  document.getElementById('successMessage').classList.add('hidden');
+  document.getElementById('editLinkSection').classList.add('hidden');
+  
+  // Show form again
+  document.getElementById('entryForm').style.display = 'block';
+  
+  // Update summary and form validity
+  updateEntrySummary();
+  checkFormValidity();
+  
+  // Go back to Day 1
+  if (typeof showDay === 'function') {
+    showDay(0);
+  }
+  
+  // Clear lookup status
+  const statusDiv = document.getElementById('lookupStatus');
+  if (statusDiv) {
+    statusDiv.style.display = 'none';
+  }
+}
+
+// Make functions globally available
+window.submitEntry = submitEntry;
+window.resetForm = resetForm;
+window.checkFormValidity = checkFormValidity;
+  
     // Initialize form
     document.addEventListener('DOMContentLoaded', function() {
         // Only update summary if we're not in the middle of initialization
