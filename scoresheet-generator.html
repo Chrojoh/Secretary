@@ -560,6 +560,9 @@
         let generatedSheets = [];
         let currentEditingSheet = null;
         let currentScoreData = {};
+        
+        // Debug tracking
+        window.lastProcessedEntries = [];
 
         // ========================================
         // ENHANCED FIELD NORMALIZATION
@@ -655,24 +658,28 @@
                     ${Object.entries(STANDARD_FIELDS).map(([key, value]) => `${key}: '${value}'`).join('<br>')}<br><br>
                 `;
                 
+                // Add detailed entry analysis if we have processed any
+                if (typeof window.lastProcessedEntries !== 'undefined' && window.lastProcessedEntries.length > 0) {
+                    debugInfo += `<strong>Last Processed Entries (${window.lastProcessedEntries.length}):</strong><br>`;
+                    window.lastProcessedEntries.slice(0, 5).forEach((entry, i) => {
+                        debugInfo += `<br><strong>Entry ${i + 1}:</strong><br>`;
+                        debugInfo += `- Date: ${entry.date || 'MISSING'}<br>`;
+                        debugInfo += `- Class Name Fields: ${JSON.stringify(entry.classNameFields)}<br>`;
+                        debugInfo += `- Selected Class: "${entry.selectedClassName}"<br>`;
+                        debugInfo += `- Is Scent Detective: ${entry.isScentDetective}<br>`;
+                        debugInfo += `- All Fields: ${entry.allFields.join(', ')}<br>`;
+                    });
+                    if (window.lastProcessedEntries.length > 5) {
+                        debugInfo += `<br>... and ${window.lastProcessedEntries.length - 5} more entries<br>`;
+                    }
+                } else {
+                    debugInfo += `<strong>No entries processed yet. Click "Load Trial Data" first.</strong><br>`;
+                }
+                
                 if (entries.length > 0) {
-                    debugInfo += `<strong>Sample Entry Fields:</strong><br>`;
-                    const sampleEntry = entries[0];
-                    const allFields = Object.keys(sampleEntry).sort();
-                    debugInfo += allFields.map(field => `${field}: '${sampleEntry[field]}'`).join('<br>') + '<br><br>';
-                    
-                    debugInfo += `<strong>Entry Class Names Found:</strong><br>`;
-                    const classNames = [...new Set(entries.map(e => e[STANDARD_FIELDS.CLASS_NAME] || 'UNDEFINED'))];
-                    debugInfo += classNames.join('<br>') + '<br><br>';
-                    
-                    debugInfo += `<strong>Scent Detective Detection:</strong><br>`;
+                    debugInfo += `<br><strong>Successfully Loaded Entries:</strong><br>`;
                     entries.forEach((entry, i) => {
-                        const className = (entry[STANDARD_FIELDS.CLASS_NAME] || '').toLowerCase();
-                        const isScentDetective = className.includes('scent detective') || 
-                                               className.includes('scentdetective') || 
-                                               className.includes('scent work') || 
-                                               className.includes('nosework');
-                        debugInfo += `Entry ${i + 1}: "${entry[STANDARD_FIELDS.CLASS_NAME]}" → ${isScentDetective ? 'MATCH' : 'NO MATCH'}<br>`;
+                        debugInfo += `Entry ${i + 1}: Handler="${entry[STANDARD_FIELDS.HANDLER_NAME]}", Dog="${entry[STANDARD_FIELDS.DOG_CALL_NAME]}", Class="${entry[STANDARD_FIELDS.CLASS_NAME]}"<br>`;
                     });
                 }
                 
@@ -800,6 +807,7 @@
                 console.log(`📊 Found ${snapshot.size} entry documents`);
 
                 entries = [];
+                window.lastProcessedEntries = []; // Reset debug tracking
 
                 snapshot.forEach(doc => {
                     try {
@@ -819,20 +827,31 @@
                                         date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
                                     };
 
-                                    // Enhanced entry debugging
+                                    // Get all possible field names for debugging
+                                    const allPossibleClassNames = {
+                                        standardField: selectedEntry[STANDARD_FIELDS.CLASS_NAME],
+                                        className: selectedEntry.className,
+                                        class: selectedEntry.class,
+                                        Class: selectedEntry.Class,
+                                        classname: selectedEntry.classname
+                                    };
+
+                                    // Enhanced entry debugging with actual values
                                     console.log('📋 Processing entry:', {
-                                        rawEntry: selectedEntry,
+                                        entryIndex: index,
                                         processedDate: processedEntry.date,
                                         selectedDate: selectedDate,
-                                        rawClassName: selectedEntry[STANDARD_FIELDS.CLASS_NAME] || selectedEntry.className || selectedEntry.class || 'UNDEFINED',
-                                        allFields: Object.keys(selectedEntry)
+                                        allClassNameFields: allPossibleClassNames,
+                                        allFieldNames: Object.keys(selectedEntry),
+                                        hasStandardClassName: !!selectedEntry[STANDARD_FIELDS.CLASS_NAME]
                                     });
 
                                     const entryDate = processedEntry.date;
                                     const rawClassName = processedEntry[STANDARD_FIELDS.CLASS_NAME] || 
                                                         processedEntry.className || 
                                                         processedEntry.class || 
-                                                        processedEntry.Class || '';
+                                                        processedEntry.Class || 
+                                                        processedEntry.classname || '';
                                     
                                     const className = rawClassName.toLowerCase();
                                     
@@ -842,17 +861,30 @@
                                                            className.includes('scent work') || 
                                                            className.includes('nosework') ||
                                                            className.includes('scent') ||
-                                                           rawClassName.toLowerCase().includes('detective');
+                                                           className.includes('detective');
 
                                     console.log('🔍 Entry analysis:', {
+                                        entryIndex: index,
                                         date: entryDate,
                                         selectedDate: selectedDate,
-                                        rawClassName: rawClassName,
-                                        normalizedClassName: className,
+                                        rawClassName: `"${rawClassName}"`,
+                                        normalizedClassName: `"${className}"`,
                                         matchesDate: entryDate === selectedDate,
                                         isScentDetective: isScentDetective,
-                                        willInclude: entryDate === selectedDate && isScentDetective
+                                        willInclude: entryDate === selectedDate && isScentDetective,
+                                        classNameLength: rawClassName.length
                                     });
+
+                                    // Store debug info
+                                    const debugEntry = {
+                                        date: entryDate,
+                                        classNameFields: allPossibleClassNames,
+                                        selectedClassName: rawClassName,
+                                        isScentDetective: isScentDetective,
+                                        allFields: Object.keys(selectedEntry),
+                                        matchesDate: entryDate === selectedDate
+                                    };
+                                    window.lastProcessedEntries.push(debugEntry);
 
                                     if (entryDate === selectedDate && isScentDetective) {
                                         const normalizedEntry = normalizeEntry({
