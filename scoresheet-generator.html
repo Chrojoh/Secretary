@@ -560,9 +560,94 @@
         let generatedSheets = [];
         let currentEditingSheet = null;
         let currentScoreData = {};
+        let validClassNames = []; // Will be loaded from data.json
         
         // Debug tracking
         window.lastProcessedEntries = [];
+
+        // ========================================
+        // CLASS NAMES LOADING FROM DATA.JSON
+        // ========================================
+        
+        async function loadValidClassNames() {
+            try {
+                console.log('📚 Loading valid class names from data.json...');
+                
+                const possiblePaths = [
+                    '/secretary/js/data.json',
+                    './js/data.json',
+                    '../js/data.json',
+                    '/js/data.json',
+                    'js/data.json'
+                ];
+                
+                let classData = null;
+                
+                for (const path of possiblePaths) {
+                    try {
+                        const response = await fetch(path);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.classes && Array.isArray(data.classes)) {
+                                classData = data.classes;
+                                console.log(`✅ Loaded class data from: ${path}`);
+                                break;
+                            }
+                        }
+                    } catch (error) {
+                        console.log(`❌ Failed to load from: ${path}`);
+                    }
+                }
+                
+                if (classData) {
+                    // Extract class names (Column D in your data)
+                    validClassNames = classData.map(classItem => {
+                        // Handle different possible formats
+                        if (typeof classItem === 'string') {
+                            return classItem.toLowerCase();
+                        } else if (classItem.name) {
+                            return classItem.name.toLowerCase();
+                        } else if (classItem.className) {
+                            return classItem.className.toLowerCase();
+                        } else if (classItem.class) {
+                            return classItem.class.toLowerCase();
+                        }
+                        return null;
+                    }).filter(name => name && name.trim().length > 0);
+                    
+                    console.log(`📋 Loaded ${validClassNames.length} valid class names:`, validClassNames);
+                } else {
+                    console.warn('⚠️ Could not load class data, falling back to hardcoded detection');
+                    // Fallback to hardcoded class names if data.json not available
+                    validClassNames = [
+                        'super sleuth', 'sleuth', 'patrol', 'ranger', 'dasher', 
+                        'obedience', 'games', 'starter', 'pro', 'arf', 'advanced', 
+                        'zoom', 'scent detective', 'scent work', 'nosework'
+                    ];
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading class names:', error);
+                // Fallback to hardcoded class names
+                validClassNames = [
+                    'super sleuth', 'sleuth', 'patrol', 'ranger', 'dasher', 
+                    'obedience', 'games', 'starter', 'pro', 'arf', 'advanced', 
+                    'zoom', 'scent detective', 'scent work', 'nosework'
+                ];
+            }
+        }
+
+        function isValidScentClass(className) {
+            if (!className || typeof className !== 'string') return false;
+            
+            const normalizedClassName = className.toLowerCase().trim();
+            
+            // Check against loaded valid class names
+            return validClassNames.some(validClass => 
+                normalizedClassName.includes(validClass) || 
+                validClass.includes(normalizedClassName)
+            );
+        }
 
         // ========================================
         // ENHANCED FIELD NORMALIZATION
@@ -652,7 +737,11 @@
                 let debugInfo = `
                     <strong>Current Trial:</strong> ${currentTrial ? currentTrial.id : 'None'}<br>
                     <strong>Loaded Entries:</strong> ${entries.length}<br>
-                    <strong>Generated Sheets:</strong> ${generatedSheets.length}<br><br>
+                    <strong>Generated Sheets:</strong> ${generatedSheets.length}<br>
+                    <strong>Valid Class Names Loaded:</strong> ${validClassNames.length}<br><br>
+                    
+                    <strong>Valid Classes from data.json:</strong><br>
+                    ${validClassNames.length > 0 ? validClassNames.join(', ') : 'None loaded'}<br><br>
                     
                     <strong>Standard Fields:</strong><br>
                     ${Object.entries(STANDARD_FIELDS).map(([key, value]) => `${key}: '${value}'`).join('<br>')}<br><br>
@@ -855,31 +944,8 @@
                                     
                                     const className = rawClassName.toLowerCase();
                                     
-                                    // Enhanced Scent Detective detection for C-WAGS classes
-                                    const isScentDetective = className.includes('scent detective') || 
-                                                           className.includes('scentdetective') || 
-                                                           className.includes('scent work') || 
-                                                           className.includes('nosework') ||
-                                                           className.includes('scent') ||
-                                                           className.includes('detective') ||
-                                                           // C-WAGS specific scent classes
-                                                           className.includes('super sleuth') ||
-                                                           className.includes('supersleuth') ||
-                                                           className.includes('sleuth') ||
-                                                           className.includes('patrol') ||
-                                                           className.includes('ranger') ||
-                                                           className.includes('dasher') ||
-                                                           className.includes('obedience') ||
-                                                           className.includes('games') ||
-                                                           // C-WAGS levels
-                                                           className.includes('starter') ||
-                                                           className.includes('pro') ||
-                                                           className.includes('arf') ||
-                                                           className.includes('advanced') ||
-                                                           className.includes('zoom') ||
-                                                           // Additional detection keywords
-                                                           className.includes('detection') ||
-                                                           className.includes('search');
+                                    // Use dynamic class detection based on loaded data.json
+                                    const isScentDetective = isValidScentClass(rawClassName);
 
                                     console.log('🔍 Entry analysis:', {
                                         entryIndex: index,
@@ -1638,6 +1704,7 @@
         async function init() {
             try {
                 console.log('🐾 Initializing Scent Detective Score Sheet Generator...');
+                await loadValidClassNames(); // Load class names first
                 await loadTrialDropdown();
                 console.log('✅ Scent Detective Score Sheet Generator initialized');
             } catch (error) {
