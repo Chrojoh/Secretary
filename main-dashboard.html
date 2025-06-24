@@ -97,8 +97,9 @@
     .tab-navigation {
       display: flex;
       background: rgba(255, 255, 255, 0.95);
-      border-radius: 12px 12px 0 0;
-      overflow: hidden;
+      border-radius: 12px;
+      padding: 5px;
+      margin-bottom: 25px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
@@ -107,6 +108,7 @@
       padding: 15px 20px;
       border: none;
       background: transparent;
+      border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       transition: all 0.3s ease;
@@ -116,19 +118,16 @@
     .tab-button.active {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
     .tab-button:hover:not(.active) {
       background: rgba(102, 126, 234, 0.1);
+      color: #667eea;
     }
 
     .tab-content {
       display: none;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 30px;
-      border-radius: 0 0 12px 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      min-height: 500px;
     }
 
     .tab-content.active {
@@ -138,30 +137,29 @@
     .nav-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
+      gap: 20px;
+      margin: 20px 0;
     }
 
     .nav-card {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      background: rgba(255, 255, 255, 0.95);
       padding: 25px;
       border-radius: 12px;
-      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
       cursor: pointer;
       transition: all 0.3s ease;
       border: 2px solid transparent;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .nav-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       border-color: #667eea;
     }
 
     .nav-card h3 {
-      margin-bottom: 15px;
       color: #333;
+      margin-bottom: 10px;
       font-size: 1.3rem;
     }
 
@@ -175,11 +173,12 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      padding: 12px 24px;
+      padding: 12px 25px;
       border-radius: 8px;
       cursor: pointer;
       font-weight: 600;
       transition: all 0.3s ease;
+      width: 100%;
     }
 
     .nav-button:hover {
@@ -188,14 +187,103 @@
     }
 
     .nav-button.secondary {
-      background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
     }
 
     .nav-button.tertiary {
-      background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+      background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
       color: #212529;
     }
 
+    /* Entry Management Styles */
+    .trial-selector {
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group select, .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e1e5e9;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .entries-container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .entries-table-container {
+      max-height: 600px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    #entriesTable {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    #entriesTable th {
+      background: #f8f9fa;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #dee2e6;
+      position: sticky;
+      top: 0;
+    }
+
+    #entriesTable td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    #entriesTable tr:hover {
+      background: #f8f9fa;
+    }
+
+    .entry-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-edit, .btn-delete {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .btn-edit {
+      background: #007bff;
+      color: white;
+    }
+
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+    }
+
+    /* Summary Management Styles */
     .summary-list {
       display: grid;
       gap: 15px;
@@ -245,13 +333,6 @@
       box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     }
 
-    .btn:disabled {
-      background: #6c757d;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
     .btn-secondary {
       background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
       color: white;
@@ -267,22 +348,9 @@
       color: #212529;
     }
 
-    .btn-primary {
-      background: #007bff;
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: #0056b3;
-    }
-
     .btn-danger {
       background: #dc3545;
       color: white;
-    }
-
-    .btn-danger:hover {
-      background: #c82333;
     }
 
     .no-summaries {
@@ -292,155 +360,35 @@
       padding: 40px;
     }
 
-    /* Entry Management Styles */
-    .trial-selector {
-      margin-bottom: 2rem;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .entries-table-container {
-      max-height: 600px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-
-    #entriesTable {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-
-    #entriesTable th {
-      position: sticky;
-      top: 0;
-      background: #f8f9fa;
-      z-index: 1;
-      padding: 1rem 0.75rem;
-      text-align: left;
-      font-weight: 600;
-      border-bottom: 2px solid #dee2e6;
-    }
-
-    #entriesTable td {
-      padding: 0.75rem;
-      border-bottom: 1px solid #eee;
-      vertical-align: top;
-    }
-
-    #entriesTable tr:hover {
-      background: #f8f9fa;
-    }
-
-    .entry-classes {
-      font-size: 0.9rem;
-      line-height: 1.3;
-    }
-
-    .entry-class-item {
-      background: #e7f3ff;
-      border: 1px solid #0066cc;
-      border-radius: 12px;
-      padding: 0.2rem 0.5rem;
-      margin: 0.1rem;
-      display: inline-block;
-      font-size: 0.8rem;
-    }
-
-    .entry-class-item.feo {
-      background: #fff3cd;
-      border-color: #ffc107;
-      color: #856404;
-    }
-
-    .entry-actions {
-      display: flex;
-      gap: 0.5rem;
-      justify-content: center;
-    }
-
-    .btn-edit, .btn-delete {
-      padding: 0.25rem 0.5rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-    .btn-edit {
-      background: #17a2b8;
-      color: white;
-    }
-
-    .btn-edit:hover {
-      background: #138496;
-    }
-
-    .btn-delete {
-      background: #dc3545;
-      color: white;
-    }
-
-    .btn-delete:hover {
-      background: #c82333;
-    }
-
-    .entries-controls {
-      margin-bottom: 1rem;
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .entries-controls input, .entries-controls select {
-      padding: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-    }
-
-    .entries-controls input {
-      flex: 1;
-    }
-
-    .entries-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
     .entries-summary {
-      color: #666;
+      margin-top: 15px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 5px;
     }
 
-    select {
-      padding: 8px 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      background: white;
-      font-size: 14px;
-      width: 100%;
-    }
+    @media (max-width: 768px) {
+      .dashboard-container {
+        padding: 10px;
+      }
 
-    select:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+      .nav-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tab-navigation {
+        flex-direction: column;
+      }
+
+      .user-info {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
     }
   </style>
 </head>
@@ -501,138 +449,146 @@
         </div>
         
         <div class="nav-card" onclick="location.href='premium.html'">
-          <h3>🏆 Premium Generator</h3>
-          <p>Generate professional premium lists for your trials</p>
-          <button class="nav-button secondary">Generate Premium</button>
+          <h3>📄 Premium Lists</h3>
+          <p>Create premium lists and trial information packets</p>
+          <button class="nav-button">Generate Premium</button>
         </div>
         
         <div class="nav-card" onclick="location.href='waiver-generator.html'">
-          <h3>📝 Waiver Generator</h3>
-          <p>Create liability waivers for your events</p>
-          <button class="nav-button tertiary">Generate Waivers</button>
-        </div>
-
-         <div class="nav-card" onclick="location.href='running-order.html'">
-          <h3>📝 Running Order</h3>
-          <p>Rearrange the running order of your event</p>
-          <button class="nav-button tertiary">Running Order</button>
+          <h3>📋 Waiver Forms</h3>
+          <p>Generate and customize liability waivers</p>
+          <button class="nav-button secondary">Create Waiver</button>
         </div>
         
-        <div class="nav-card" onclick="location.href='scoresheet-generator.html'">
-          <h3>📋 Score Sheets</h3>
-          <p>Generate and manage official C-WAGS score sheets for judges</p>
-          <button class="nav-button">Generate Score Sheets</button>
+        <div class="nav-card" onclick="location.href='running-order.html'">
+          <h3>📊 Running Orders</h3>
+          <p>Generate running orders for your trials</p>
+          <button class="nav-button tertiary">Create Running Order</button>
+        </div>
+        
+        <div class="nav-card" onclick="location.href='class-summary-generator.html'">
+          <h3>📈 Class Summaries</h3>
+          <p>Create detailed class summary reports</p>
+          <button class="nav-button">Generate Summary</button>
         </div>
       </div>
     </div>
 
     <!-- Entry Management Tab -->
     <div id="entries-tab" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2>📝 Entry Management</h2>
-        <div style="color: #666; font-size: 14px;">View and edit entries for your trials</div>
-      </div>
-
-      <!-- Trial Selector for Entry Management -->
-      <div class="trial-selector">
-        <div class="form-group">
-          <label for="entryManagementTrialSelect">Select Trial to Manage Entries:</label>
-          <select id="entryManagementTrialSelect">
-            <option value="">Loading trials...</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" onclick="loadEntryManagement()">Load Entries</button>
-      </div>
-
-      <!-- Entries List -->
-      <div id="entriesContainer" style="display: none;">
-        <div class="entries-header">
-          <h3 id="entriesTitle">Entries for Trial</h3>
-          <div class="entries-summary">
-            <span id="entriesCount">0 entries</span> • 
-            <span id="totalFees">$0.00 total</span>
+      <div class="entries-container">
+        <h3>📝 Entry Management</h3>
+        <div class="trial-selector">
+          <div class="form-group">
+            <label for="entryManagementTrialSelect">Select Trial:</label>
+            <select id="entryManagementTrialSelect">
+              <option value="">Loading trials...</option>
+            </select>
           </div>
+          <button class="btn btn-success" onclick="loadEntryManagement()">Load Entries</button>
         </div>
 
-        <!-- Search and Filter -->
-        <div class="entries-controls">
-          <input type="text" id="entrySearch" placeholder="🔍 Search by handler name, dog name, or registration...">
+        <div class="form-group">
+          <label for="entrySearch">Search Entries:</label>
+          <input type="text" id="entrySearch" placeholder="Search by handler name, dog name, or class...">
+        </div>
+
+        <div class="form-group">
+          <label for="classFilter">Filter by Class:</label>
           <select id="classFilter">
             <option value="">All Classes</option>
           </select>
-          <button onclick="exportEntries()" class="btn-secondary" style="white-space: nowrap;">
-            📊 Export CSV
-          </button>
         </div>
 
-        <!-- Entries Table -->
-        <div class="entries-table-container">
-          <table id="entriesTable">
-            <thead>
-              <tr>
-                <th>Handler</th>
-                <th>Dog</th>
-                <th>Registration</th>
-                <th>Classes</th>
-                <th>Judge</th>
-                <th>Fee</th>
-                <th>Submitted</th>
-                <th style="text-align: center;">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="entriesTableBody">
-              <!-- Entries will be populated here -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- No entries message -->
-        <div id="noEntriesMessage" style="text-align: center; padding: 3rem; color: #666; display: none;">
-          <h4>No entries found for this trial</h4>
-          <p>Entries will appear here once participants submit them.</p>
+        <div id="entryManagementResults">
+          <p>Select a trial to view entries.</p>
         </div>
       </div>
     </div>
 
     <!-- Class Summaries Tab -->
     <div id="summaries-tab" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2>📊 Class Summaries</h2>
-        <button class="btn btn-success" onclick="location.href='class-summary-generator.html'">+ Create New Summary</button>
+      <div class="entries-container">
+        <h3>📊 Class Summaries</h3>
+        <div style="margin-bottom: 20px;">
+          <button class="btn btn-success" onclick="location.href='class-summary-generator.html'">
+            Create New Summary
+          </button>
+        </div>
+        <div id="summariesList">
+          <p>Loading summaries...</p>
+        </div>
       </div>
-      <div id="summariesList">Loading summaries...</div>
     </div>
 
     <!-- Generated Reports Tab -->
     <div id="reports-tab" class="tab-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2>📄 Generated Reports</h2>
-        <div style="color: #666; font-size: 14px;">Access your generated premium lists, applications, and other documents</div>
-      </div>
-      <div id="reportsList">
-        <div class="no-summaries">
-          <h4>📋 Available Reports</h4>
-          <p>Your generated reports will appear here. Use the tools above to create:</p>
-          <ul style="text-align: left; display: inline-block; margin-top: 15px;">
-            <li>Trial Applications</li>
-            <li>Premium Lists</li>
-            <li>Waiver Forms</li>
-            <li>Running Orders</li>
-            <li>Score Sheets</li>
-            <li>Class Summaries</li>
-          </ul>
+      <div class="entries-container">
+        <h3>📄 Generated Reports</h3>
+        <div id="reportsList">
+          <div class="no-summaries">
+            <h4>📋 Available Reports</h4>
+            <p>Your generated reports will appear here. Use the tools above to create:</p>
+            <ul style="text-align: left; display: inline-block; margin-top: 15px;">
+              <li>Trial Applications</li>
+              <li>Premium Lists</li>
+              <li>Waiver Forms</li>
+              <li>Running Orders</li>
+              <li>Score Sheets</li>
+              <li>Class Summaries</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
- <script type="module">
+  <script type="module">
     // Firebase imports
     import { auth, db } from './js/firebase.js';
     import { collection, query, where, getDocs, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
     import { signOut } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+
     // ========================================
-    // TIMEZONE-SAFE DATE UTILITIES
+    // STANDARDIZED FIELD NAMES (CRITICAL)
+    // ========================================
+    
+    // Use these EXACT field names everywhere - NO EXCEPTIONS
+    const STANDARD_FIELDS = {
+      HANDLER_NAME: 'handlerName',      // NOT 'Handler' or 'handler'
+      DOG_CALL_NAME: 'dogCallName',     // NOT 'Call Name' or 'dogName'
+      JUDGE_NAME: 'judgeName',          // NOT 'judge' or 'judgeAssigned'
+      CLASS_NAME: 'className',          // NOT 'Class' or 'class'
+      CWAGS_NUMBER: 'cwagsNumber'       // NOT 'Registration'
+    };
+
+    // Data field mapping for backward compatibility
+    const FIELD_MAPPING = {
+      // Handler name variations
+      'Handler': 'handlerName',
+      'handler': 'handlerName',
+      
+      // Dog name variations  
+      'Call Name': 'dogCallName',
+      'dogName': 'dogCallName',
+      'callName': 'dogCallName',
+      
+      // Judge name variations
+      'judge': 'judgeName',
+      'judgeAssigned': 'judgeName',
+      'selectedJudge': 'judgeName',
+      
+      // Registration variations
+      'Registration': 'cwagsNumber',
+      'registration': 'cwagsNumber',
+      
+      // Class name variations
+      'Class': 'className',
+      'class': 'className'
+    };
+
+    // ========================================
+    // GLOBAL DATE HANDLING FIX
     // ========================================
     
     function prepareDateForFirebase(dateStr) {
@@ -668,75 +624,69 @@
         return dateStr;
       }
     }
-   
-    function normalizeEntryData(entryData) {
-  const normalized = { ...entryData };
-  
-  // Normalize handler name
-  if (entryData.Handler && !entryData.handlerName) {
-    normalized.handlerName = entryData.Handler;
-  }
-  if (entryData.handler && !entryData.handlerName) {
-    normalized.handlerName = entryData.handler;
-  }
-  
-  // Normalize dog call name
-  if (entryData['Call Name'] && !entryData.dogCallName) {
-    normalized.dogCallName = entryData['Call Name'];
-  }
-  if (entryData.dogName && !entryData.dogCallName) {
-    normalized.dogCallName = entryData.dogName;
-  }
-  
-  // Normalize judge name (CRITICAL FIX)
-  if (entryData.judge && !entryData.judgeName) {
-    normalized.judgeName = entryData.judge;
-  }
-  if (entryData.judgeAssigned && !entryData.judgeName) {
-    normalized.judgeName = entryData.judgeAssigned;
-  }
-  
-  return normalized;
-}
 
-function getStandardizedJudgeName(entry) {
-  return entry.judgeName || 
-         entry.judge || 
-         entry.judgeAssigned || 
-         entry.selectedJudge ||
-         'TBD';
-}
-   
-    function testDateHandling() {
-      const testDate = '2025-07-15';
-      console.log('1. Original date string:', testDate);
+    // ========================================
+    // DATA NORMALIZATION FUNCTIONS
+    // ========================================
+    
+    function normalizeEntryData(entryData) {
+      const normalized = { ...entryData };
       
-      const forFirebase = prepareDateForFirebase(testDate);
-      console.log('2. Prepared for Firebase:', forFirebase);
+      // Apply field mapping to normalize all field names
+      Object.keys(FIELD_MAPPING).forEach(oldField => {
+        if (entryData[oldField] && !entryData[FIELD_MAPPING[oldField]]) {
+          normalized[FIELD_MAPPING[oldField]] = entryData[oldField];
+          delete normalized[oldField]; // Remove old field
+        }
+      });
       
-      const fromFirebase = getDateFromFirebase(forFirebase);
-      console.log('3. Retrieved from Firebase:', fromFirebase);
-      
-      const display = formatDateDisplay(fromFirebase);
-      console.log('4. Formatted for display:', display);
-      
-      const matches = fromFirebase === testDate;
-      console.log('5. Round-trip successful:', matches);
-      
-      if (!matches) {
-        console.error('❌ Date handling is still broken!');
-      } else {
-        console.log('✅ Date handling is working correctly!');
-      }
+      return normalized;
     }
 
+    function getStandardizedHandlerName(entry) {
+      return entry.handlerName || 
+             entry.Handler || 
+             entry.handler || 
+             'Unknown Handler';
+    }
+
+    function getStandardizedDogName(entry) {
+      return entry.dogCallName || 
+             entry['Call Name'] || 
+             entry.dogName || 
+             entry.callName || 
+             'Unknown Dog';
+    }
+
+    function getStandardizedJudgeName(entry) {
+      return entry.judgeName || 
+             entry.judge || 
+             entry.judgeAssigned || 
+             entry.selectedJudge ||
+             'TBD';
+    }
+
+    function getStandardizedClassName(entry) {
+      return entry.className || 
+             entry.Class || 
+             entry.class || 
+             'Unknown Class';
+    }
+
+    // ========================================
+    // GLOBAL VARIABLES
+    // ========================================
+    
     let authCheckComplete = false;
     let currentUser = null;
     let availableTrials = [];
     let currentTrialEntries = [];
     let filteredEntries = [];
 
-    // Tab Management
+    // ========================================
+    // TAB MANAGEMENT
+    // ========================================
+    
     window.showTab = function(tabName) {
       // Hide all tabs
       document.querySelectorAll('.tab-content').forEach(tab => {
@@ -760,373 +710,17 @@ function getStandardizedJudgeName(entry) {
       } else if (tabName === 'reports') {
         loadReports();
       } else if (tabName === 'entries') {
-        loadEntryManagement();
+        loadTrialsForEntryManagement();
       }
     };
 
-    // Entry Management Functions
-    async function loadEntryManagement() {
-      console.log("📝 Loading entry management...");
-      
-      if (!currentUser) {
-        console.log("No user found for entry management");
-        return;
-      }
-
-      // Load trials for entry management
-      await loadTrialsForEntryManagement();
-    }
-
-    // JUDGE FIX FUNCTIONS - Added here for Entry Management
-    async function loadTrialEntriesWithJudges(trialId) {
-      console.log("📝 Loading entries with real judge names for trial:", trialId);
-      
-      try {
-        // Load trial data
-        const trialDoc = await getDoc(doc(db, 'trials', trialId));
-        if (!trialDoc.exists()) {
-          alert('Trial not found');
-          return;
-        }
-        
-        const trialData = trialDoc.data();
-        
-        // Load all entries for this trial
-        const q = query(
-          collection(db, "entries"),
-          where("trialId", "==", trialId)
-        );
-        const snapshot = await getDocs(q);
-        
-        const entries = [];
-        snapshot.forEach(doc => {
-          const entry = { id: doc.id, ...doc.data() };
-          
-          // CRITICAL: Ensure judge name is visible (same as running order)
-          if (!entry.judgeName && entry.judge) {
-            entry.judgeName = entry.judge;
-          }
-          // Default to 'TBD' if no judge found
-          if (!entry.judgeName) {
-            entry.judgeName = 'TBD';
-          }
-          
-          entries.push(entry);
-        });
-        
-        console.log("✅ Loaded entries with judge data:", entries);
-        
-        // Update the entry management display
-        displayEntriesWithCorrectJudges(entries, trialData);
-        
-      } catch (error) {
-        console.error("❌ Error loading entry management:", error);
-        alert('Error loading entries: ' + error.message);
-      }
-    }
-
-   // Enhanced entry display function for dashboard:
-function displayEntriesWithStandardizedFields(entries, trialData) {
-  const container = document.getElementById('entryManagementResults') || document.getElementById('entriesContainer');
-  if (!container) {
-    console.error("❌ Could not find entries container");
-    return;
-  }
-  
-  let html = `<h3>📋 Entries for ${trialData.clubName || 'Trial'}</h3>`;
-  
-  if (entries.length === 0) {
-    html += '<p>No entries found for this trial.</p>';
-  } else {
-    html += `
-      <div class="entries-table-container">
-        <table id="entriesTable">
-          <thead>
-            <tr>
-              <th>Handler</th>
-              <th>Dog</th>
-              <th>Class</th>
-              <th>Round</th>
-              <th>Judge</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-    `;
+    // ========================================
+    // ENTRY MANAGEMENT FUNCTIONS
+    // ========================================
     
-    entries.forEach(entry => {
-      const normalizedEntry = normalizeEntryData(entry);
-      
-      // Use standardized judge resolution
-      const judgeName = getStandardizedJudgeName(normalizedEntry);
-      const judgeStyle = judgeName === 'TBD' || judgeName === 'Judge TBD' ? 
-        'background-color: #ffebee; color: #c62828;' : 
-        'background-color: #e8f5e8; color: #2e7d32;';
-      
-      html += `
-        <tr>
-          <td>${normalizedEntry.handlerName || 'Unknown'}</td>
-          <td>${normalizedEntry.dogCallName || 'Unknown'}</td>
-          <td>${normalizedEntry.className || 'Unknown'}</td>
-          <td>${normalizedEntry.roundNumber || '1'}</td>
-          <td style="${judgeStyle}"><strong>${judgeName}</strong></td>
-          <td>${normalizedEntry.date || 'Unknown'}</td>
-          <td>${normalizedEntry.status || 'Pending'}</td>
-          <td class="entry-actions">
-            <button class="btn-edit" onclick="editEntry('${normalizedEntry.id}')">✏️ Edit</button>
-            <button class="btn-delete" onclick="deleteEntry('${normalizedEntry.id}')">🗑️ Delete</button>
-          </td>
-        </tr>
-      `;
-    });
-    
-    html += `
-          </tbody>
-        </table>
-      </div>
-      <div class="entries-summary" style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-        <strong>Summary:</strong> 
-        Total entries: ${entries.length} | 
-        Entries with judges assigned: <span style="color: #2e7d32; font-weight: bold;">${entries.filter(e => getStandardizedJudgeName(normalizeEntryData(e)) !== 'TBD' && getStandardizedJudgeName(normalizeEntryData(e)) !== 'Judge TBD').length}</span> | 
-        Entries with TBD judges: <span style="color: #c62828; font-weight: bold;">${entries.filter(e => getStandardizedJudgeName(normalizeEntryData(e)) === 'TBD' || getStandardizedJudgeName(normalizeEntryData(e)) === 'Judge TBD').length}</span>
-      </div>
-    `;
-  }
-  
-  container.innerHTML = html;
-}
-
-    // Enhanced entry management loading function with full functionality
-    window.loadEntryManagement = async function() {
-      const trialId = document.getElementById('entryManagementTrialSelect').value;
-      
-      if (!trialId) {
-        alert('Please select a trial first');
-        return;
-      }
-      
-      console.log("📝 Loading entry management for trial:", trialId);
-      await loadTrialEntries(trialId);
-    };
-
-    // Load entries for a specific trial (RESTORED ORIGINAL FUNCTIONALITY)
-    async function loadTrialEntries(trialId) {
-      console.log("📊 Loading entries for trial:", trialId);
-      
-      try {
-        const entriesQuery = query(
-          collection(db, "entries"),
-          where("trialId", "==", trialId)
-        );
-        
-        const entriesSnapshot = await getDocs(entriesQuery);
-        currentTrialEntries = [];
-        
-        entriesSnapshot.forEach(doc => {
-          const entryData = doc.data();
-          
-          // Fix selected entries dates using global date fix
-          if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
-              ...entry,
-              date: entry.date ? getDateFromFirebase(entry.date) : null,
-              // CRITICAL: Ensure judge name is visible (same as running order)
-              judgeName: entry.judgeName || entry.judge || 'TBD'
-            }));
-          }
-          
-          currentTrialEntries.push({ id: doc.id, ...entryData });
-        });
-        
-        console.log(`✅ Loaded ${currentTrialEntries.length} entries`);
-        
-        // Update UI
-        displayEntries();
-        populateClassFilter();
-        document.getElementById('entriesContainer').style.display = 'block';
-        
-      } catch (error) {
-        console.error("❌ Error loading entries:", error);
-        alert('Error loading entries: ' + error.message);
-      }
-    }
-
-    // Display entries in table (RESTORED ORIGINAL FUNCTIONALITY)
-    function displayEntries(entriesToShow = null) {
-      const entries = entriesToShow || currentTrialEntries;
-      const tableBody = document.getElementById('entriesTableBody');
-      const noEntriesMsg = document.getElementById('noEntriesMessage');
-      
-      if (entries.length === 0) {
-        tableBody.innerHTML = '';
-        noEntriesMsg.style.display = 'block';
-        updateEntriesSummary(0, 0);
-        return;
-      }
-      
-      noEntriesMsg.style.display = 'none';
-      
-      // Calculate total fees
-      let totalFees = 0;
-      entries.forEach(entry => {
-        totalFees += entry.totalFee || 0;
-      });
-      
-      // Update summary
-      updateEntriesSummary(entries.length, totalFees);
-      
-      // Generate table rows
-      tableBody.innerHTML = entries.map(entry => {
-        const submittedDate = entry.submittedAt ? entry.submittedAt.toDate() : new Date();
-        
-        // Handle both new selectedEntries format and legacy selectedClasses
-        const classesHtml = entry.selectedEntries ? 
-          entry.selectedEntries.map(selectedEntry => {
-            const feoClass = selectedEntry.entryType === 'feo' ? ' feo' : '';
-            const feoText = selectedEntry.entryType === 'feo' ? ' (FEO)' : '';
-            const judgeName = selectedEntry.judgeName || selectedEntry.judge || 'TBD';
-            return `<span class="entry-class-item${feoClass}">${selectedEntry.className}${feoText} - ${judgeName}</span>`;
-          }).join(' ') : 
-          (entry.selectedClasses || []).map(className => 
-            `<span class="entry-class-item">${className}</span>`
-          ).join(' ');
-
-        // Get primary judge for this entry
-        const primaryJudge = entry.selectedEntries && entry.selectedEntries.length > 0 ? 
-          (entry.selectedEntries[0].judgeName || entry.selectedEntries[0].judge || 'TBD') : 'TBD';
-        const judgeStyle = primaryJudge === 'TBD' ? 'color: #c62828; font-weight: bold;' : 'color: #2e7d32; font-weight: bold;';
-        
-        return `
-          <tr>
-            <td>
-              <strong>${entry.handlerName || 'N/A'}</strong><br>
-              <small style="color: #666;">${entry.handlerEmail || ''}</small>
-            </td>
-            <td>
-              <strong>${entry.dogCallName || 'N/A'}</strong><br>
-              <small style="color: #666;">${entry.dogBreed || ''}</small>
-            </td>
-            <td>${entry.cwagsNumber || 'Not provided'}</td>
-            <td class="entry-classes">${classesHtml}</td>
-            <td style="${judgeStyle}">${primaryJudge}</td>
-            <td><strong>${(entry.totalFee || 0).toFixed(2)}</strong></td> 
-            <td>
-              <small>${submittedDate.toLocaleDateString()}<br>
-              ${submittedDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small>
-            </td>
-            <td>
-              <div class="entry-actions">
-                <a href="entry-form.html?entry=${entry.id}" class="btn-edit" target="_blank">
-                  ✏️ Edit
-                </a>
-                <button onclick="deleteEntry('${entry.id}')" class="btn-delete">
-                  🗑️ Delete
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    // Update entries summary
-    function updateEntriesSummary(count, totalFees) {
-      document.getElementById('entriesCount').textContent = `${count} entries`;
-      document.getElementById('totalFees').textContent = `${totalFees.toFixed(2)} total`;
-    }
-
-    // Populate class filter dropdown (RESTORED)
-    function populateClassFilter() {
-      const classFilter = document.getElementById('classFilter');
-      const allClasses = new Set();
-      
-      currentTrialEntries.forEach(entry => {
-        if (entry.selectedEntries) {
-          entry.selectedEntries.forEach(selectedEntry => {
-            allClasses.add(selectedEntry.className);
-          });
-        } else if (entry.selectedClasses) {
-          entry.selectedClasses.forEach(className => {
-            allClasses.add(className);
-          });
-        }
-      });
-      
-      classFilter.innerHTML = '<option value="">All Classes</option>';
-      Array.from(allClasses).sort().forEach(className => {
-        const option = document.createElement('option');
-        option.value = className;
-        option.textContent = className;
-        classFilter.appendChild(option);
-      });
-    }
-
-    // Filter entries based on search and class filter (RESTORED)
-    function filterEntries() {
-      const searchTerm = document.getElementById('entrySearch').value.toLowerCase();
-      const classFilter = document.getElementById('classFilter').value;
-      
-      const filtered = currentTrialEntries.filter(entry => {
-        // Search filter
-        const matchesSearch = !searchTerm || 
-          (entry.handlerName && entry.handlerName.toLowerCase().includes(searchTerm)) ||
-          (entry.dogCallName && entry.dogCallName.toLowerCase().includes(searchTerm)) ||
-          (entry.cwagsNumber && entry.cwagsNumber.toLowerCase().includes(searchTerm)) ||
-          (entry.handlerEmail && entry.handlerEmail.toLowerCase().includes(searchTerm));
-        
-        // Class filter
-        const matchesClass = !classFilter || 
-          (entry.selectedEntries && entry.selectedEntries.some(se => se.className === classFilter)) ||
-          (entry.selectedClasses && entry.selectedClasses.includes(classFilter));
-        
-        return matchesSearch && matchesClass;
-      });
-      
-      displayEntries(filtered);
-    }
-
-    // Export entries to CSV (RESTORED)
-    window.exportEntries = function() {
-      if (currentTrialEntries.length === 0) {
-        alert('No entries to export');
-        return;
-      }
-      
-      const headers = ['Handler Name', 'Handler Email', 'Dog Call Name', 'Dog Breed', 'CWAGS Number', 'Classes', 'Total Fee', 'Submitted Date'];
-      const csvData = [headers];
-      
-      currentTrialEntries.forEach(entry => {
-        const classes = entry.selectedEntries ? 
-          entry.selectedEntries.map(se => `${se.className}${se.entryType === 'feo' ? ' (FEO)' : ''}`).join('; ') :
-          (entry.selectedClasses || []).join('; ');
-        
-        const submittedDate = entry.submittedAt ? entry.submittedAt.toDate().toLocaleDateString() : '';
-        
-        csvData.push([
-          entry.handlerName || '',
-          entry.handlerEmail || '',
-          entry.dogCallName || '',
-          entry.dogBreed || '',
-          entry.cwagsNumber || '',
-          classes,
-          (entry.totalFee || 0).toFixed(2),
-          submittedDate
-        ]);
-      });
-      
-      const csvContent = csvData.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `trial-entries-${new Date().toISOString().split('T')[0]}.csv`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    };
-
     async function loadTrialsForEntryManagement() {
+      console.log("📝 Loading trials for entry management...");
+      
       try {
         const trialsQuery = query(
           collection(db, "trials"),
@@ -1139,7 +733,7 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
         trialsSnapshot.forEach(doc => {
           const trialData = doc.data();
           
-          // Fix date handling for trial days using global date fix
+          // Fix date handling for trial days
           if (trialData.days && Array.isArray(trialData.days)) {
             trialData.days = trialData.days.map(day => ({
               ...day,
@@ -1162,17 +756,16 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
           
           let trialLabel = trial.clubName || 'Unnamed Trial';
           if (trial.days && trial.days.length > 0) {
-           const dates = trial.days
-  .filter(day => day.date)
-  .map(day => {
-    // Simple date formatting without createLocalDate
-    const localDate = new Date(day.date + 'T12:00:00');
-    return localDate.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
-    });
-  })
-  .join(', ');
+            const dates = trial.days
+              .filter(day => day.date)
+              .map(day => {
+                const localDate = new Date(day.date + 'T12:00:00');
+                return localDate.toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric' 
+                });
+              })
+              .join(', ');
             if (dates) {
               trialLabel += ` (${dates})`;
             }
@@ -1193,9 +786,219 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
       }
     }
 
+    window.loadEntryManagement = async function() {
+      const trialId = document.getElementById('entryManagementTrialSelect').value;
+      
+      if (!trialId) {
+        alert('Please select a trial first');
+        return;
+      }
+      
+      console.log("📝 Loading entry management for trial:", trialId);
+      await loadTrialEntries(trialId);
+    };
+
+    async function loadTrialEntries(trialId) {
+      console.log("📊 Loading entries for trial:", trialId);
+      
+      try {
+        const entriesQuery = query(
+          collection(db, "entries"),
+          where("trialId", "==", trialId)
+        );
+        
+        const entriesSnapshot = await getDocs(entriesQuery);
+        currentTrialEntries = [];
+        
+        entriesSnapshot.forEach(doc => {
+          const entryData = doc.data();
+          
+          // Fix selected entries dates
+          if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+              ...entry,
+              date: entry.date ? getDateFromFirebase(entry.date) : entry.date
+            }));
+          }
+          
+          // Process each selected entry as a separate row
+          if (entryData.selectedEntries && entryData.selectedEntries.length > 0) {
+            entryData.selectedEntries.forEach((selectedEntry, index) => {
+              const processedEntry = {
+                id: doc.id,
+                entryIndex: index,
+                handlerName: entryData.handlerName,
+                handlerEmail: entryData.handlerEmail,
+                handlerPhone: entryData.handlerPhone,
+                dogCallName: entryData.dogCallName,
+                dogBreed: entryData.dogBreed,
+                cwagsNumber: entryData.cwagsNumber,
+                className: selectedEntry.className,
+                roundName: selectedEntry.roundName,
+                roundNumber: selectedEntry.roundNumber,
+                judgeName: selectedEntry.judgeName,
+                entryType: selectedEntry.type,
+                fee: selectedEntry.fee,
+                submittedAt: entryData.submittedAt,
+                date: selectedEntry.date
+              };
+              currentTrialEntries.push(processedEntry);
+            });
+          } else {
+            // Fallback for entries without selectedEntries
+            currentTrialEntries.push({
+              id: doc.id,
+              entryIndex: 0,
+              ...entryData
+            });
+          }
+        });
+
+        console.log('Loaded entries:', currentTrialEntries);
+        
+        // Get trial data for context
+        const trialDoc = await getDoc(doc(db, 'trials', trialId));
+        const trialData = trialDoc.exists() ? trialDoc.data() : {};
+        
+        // Update class filter
+        updateClassFilter();
+        
+        // Display entries
+        displayEntries(currentTrialEntries, trialData);
+        
+      } catch (error) {
+        console.error('Error loading entries:', error);
+        document.getElementById('entryManagementResults').innerHTML = 
+          '<div class="error">Error loading entries: ' + error.message + '</div>';
+      }
+    }
+
+    function updateClassFilter() {
+      const classFilter = document.getElementById('classFilter');
+      const uniqueClasses = [...new Set(currentTrialEntries.map(entry => 
+        getStandardizedClassName(normalizeEntryData(entry))
+      ))].sort();
+      
+      classFilter.innerHTML = '<option value="">All Classes</option>';
+      uniqueClasses.forEach(className => {
+        const option = document.createElement('option');
+        option.value = className;
+        option.textContent = className;
+        classFilter.appendChild(option);
+      });
+    }
+
+    function displayEntries(entries, trialData) {
+      const container = document.getElementById('entryManagementResults');
+      
+      if (entries.length === 0) {
+        container.innerHTML = '<p>No entries found for this trial.</p>';
+        return;
+      }
+      
+      let html = `<h4>📋 Entries for ${trialData.clubName || 'Trial'}</h4>`;
+      
+      html += `
+        <div class="entries-table-container">
+          <table id="entriesTable">
+            <thead>
+              <tr>
+                <th>Handler</th>
+                <th>Dog</th>
+                <th>Class</th>
+                <th>Round</th>
+                <th>Judge</th>
+                <th>Type</th>
+                <th>Fee</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      entries.forEach(entry => {
+        const normalizedEntry = normalizeEntryData(entry);
+        
+        // Use standardized field resolution
+        const handlerName = getStandardizedHandlerName(normalizedEntry);
+        const dogCallName = getStandardizedDogName(normalizedEntry);
+        const className = getStandardizedClassName(normalizedEntry);
+        const judgeName = getStandardizedJudgeName(normalizedEntry);
+        
+        const judgeStyle = judgeName === 'TBD' || judgeName === 'Judge TBD' ?
+          'background-color: #ffebee; color: #c62828;' : 
+          'background-color: #e8f5e8; color: #2e7d32;';
+        
+        html += `
+          <tr>
+            <td>${handlerName}</td>
+            <td>${dogCallName}</td>
+            <td>${className}</td>
+            <td>${normalizedEntry.roundName || normalizedEntry.roundNumber || '1'}</td>
+            <td style="${judgeStyle}"><strong>${judgeName}</strong></td>
+            <td>${normalizedEntry.entryType || 'Regular'}</td>
+            <td>${(normalizedEntry.fee || 0).toFixed(2)}</td>
+            <td>${formatDateDisplay(normalizedEntry.date) || 'No date'}</td>
+            <td class="entry-actions">
+              <button class="btn-edit" onclick="editEntry('${normalizedEntry.id}')">✏️ Edit</button>
+              <button class="btn-delete" onclick="deleteEntry('${normalizedEntry.id}')">🗑️ Delete</button>
+            </td>
+          </tr>
+        `;
+      });
+      
+      html += `
+            </tbody>
+          </table>
+        </div>
+        <div class="entries-summary">
+          <strong>Summary:</strong> 
+          Total entries: ${entries.length} | 
+          Entries with judges assigned: <span style="color: #2e7d32; font-weight: bold;">${entries.filter(e => {
+            const judge = getStandardizedJudgeName(normalizeEntryData(e));
+            return judge !== 'TBD' && judge !== 'Judge TBD';
+          }).length}</span> | 
+          Entries with TBD judges: <span style="color: #c62828; font-weight: bold;">${entries.filter(e => {
+            const judge = getStandardizedJudgeName(normalizeEntryData(e));
+            return judge === 'TBD' || judge === 'Judge TBD';
+          }).length}</span>
+        </div>
+      `;
+      
+      container.innerHTML = html;
+    }
+
+    function filterEntries() {
+      const searchTerm = document.getElementById('entrySearch').value.toLowerCase();
+      const classFilter = document.getElementById('classFilter').value;
+      
+      filteredEntries = currentTrialEntries.filter(entry => {
+        const normalizedEntry = normalizeEntryData(entry);
+        
+        const handlerName = getStandardizedHandlerName(normalizedEntry).toLowerCase();
+        const dogCallName = getStandardizedDogName(normalizedEntry).toLowerCase();
+        const className = getStandardizedClassName(normalizedEntry);
+        
+        const matchesSearch = !searchTerm || 
+          handlerName.includes(searchTerm) || 
+          dogCallName.includes(searchTerm) || 
+          className.toLowerCase().includes(searchTerm);
+        
+        const matchesClass = !classFilter || className === classFilter;
+        
+        return matchesSearch && matchesClass;
+      });
+      
+      // Get trial data for redisplay
+      const trialSelect = document.getElementById('entryManagementTrialSelect');
+      const selectedTrial = availableTrials.find(t => t.id === trialSelect.value);
+      
+      displayEntries(filteredEntries, selectedTrial || {});
+    }
+
     // Global functions for entry actions
     window.editEntry = function(entryId) {
-      // Redirect to entry form with entry ID for editing
       window.location.href = `entry-form.html?entry=${entryId}`;
     };
 
@@ -1204,10 +1007,11 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
         try {
           await deleteDoc(doc(db, 'entries', entryId));
           alert('Entry deleted successfully');
+          
           // Reload the current trial's entries
           const trialId = document.getElementById('entryManagementTrialSelect').value;
           if (trialId) {
-            await loadTrialEntriesWithJudges(trialId);
+            await loadTrialEntries(trialId);
           }
         } catch (error) {
           console.error('Error deleting entry:', error);
@@ -1216,7 +1020,10 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
       }
     };
 
-    // Summary Management Functions
+    // ========================================
+    // SUMMARY MANAGEMENT FUNCTIONS
+    // ========================================
+    
     async function loadSummaries() {
       console.log("📊 Loading summaries...");
       
@@ -1249,7 +1056,8 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
         
         summariesSnapshot.forEach(doc => {
           const summary = doc.data();
-          const createdDate = summary.createdAt ? summary.createdAt.toDate().toLocaleDateString() : 'Unknown date';
+          const createdDate = summary.createdAt ? 
+            summary.createdAt.toDate().toLocaleDateString() : 'Unknown date';
           
           summariesHTML += `
             <div class="summary-item">
@@ -1301,10 +1109,12 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
       }
     };
 
-    // Reports loading function
+    // ========================================
+    // REPORTS MANAGEMENT
+    // ========================================
+    
     function loadReports() {
       console.log("📄 Loading reports...");
-      // This is a placeholder - you can expand this based on your needs
       const reportsList = document.getElementById('reportsList');
       reportsList.innerHTML = `
         <div class="no-summaries">
@@ -1322,28 +1132,10 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
       `;
     }
 
-    // Authentication and initialization
-    auth.onAuthStateChanged(async user => {
-      if (!user) {
-        window.location.href = "index.html";
-        return;
-      }
-
-      currentUser = user;
-      authCheckComplete = true;
-
-      // Update UI with user info
-      const username = user.email.split('@')[0];
-      document.getElementById('username').textContent = username;
-      document.getElementById('userEmail').textContent = user.email;
-
-      // Load initial stats
-      await loadStats(user);
-
-      console.log("Dashboard initialized for user:", user.email);
-    });
-
-    // Load user statistics
+    // ========================================
+    // USER STATS AND AUTHENTICATION
+    // ========================================
+    
     async function loadStats(user) {
       try {
         // Count trials
@@ -1425,6 +1217,30 @@ function displayEntriesWithStandardizedFields(entries, trialData) {
         }
       }
     };
+
+    // ========================================
+    // AUTHENTICATION AND INITIALIZATION
+    // ========================================
+    
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      currentUser = user;
+      authCheckComplete = true;
+
+      // Update UI with user info
+      const username = user.email.split('@')[0];
+      document.getElementById('username').textContent = username;
+      document.getElementById('userEmail').textContent = user.email;
+
+      // Load initial stats
+      await loadStats(user);
+
+      console.log("Dashboard initialized for user:", user.email);
+    });
 
   </script>
 </body>
