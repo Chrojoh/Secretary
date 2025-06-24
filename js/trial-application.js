@@ -116,8 +116,7 @@ function populateFormFromTrial() {
   document.getElementById('submittedDate').value = new Date().toISOString().split('T')[0];
   
   // Populate schedule table
-  populateScheduleTable();
-  
+populateScheduleTableWithRealJudges();
   console.log("Form populated with trial data");
 }
 
