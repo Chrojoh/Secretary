@@ -110,6 +110,10 @@
             background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         }
 
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        }
+
         .button-group {
             display: flex;
             gap: 10px;
@@ -177,6 +181,11 @@
             color: #856404;
         }
 
+        .status-scored {
+            background: #d4edda;
+            color: #155724;
+        }
+
         .loading-indicator {
             text-align: center;
             padding: 20px;
@@ -188,128 +197,6 @@
             padding: 40px;
             color: #666;
             font-style: italic;
-        }
-
-        /* Score Sheet Styles */
-        .score-sheet {
-            width: 8.5in;
-            min-height: 11in;
-            background: white;
-            padding: 0.5in;
-            margin: 0 auto 1in auto;
-            border: 1px solid #000;
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            page-break-after: always;
-        }
-
-        .score-sheet:last-child {
-            page-break-after: auto;
-        }
-
-        .score-sheet-header {
-            text-align: center;
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .cwags-logo {
-            position: absolute;
-            right: 0;
-            top: 20px;
-            width: 80px;
-            height: 80px;
-        }
-
-        .cwags-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .score-sheet-title-text {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .score-sheet-date {
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-
-        .score-sheet-class {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .score-sheet-rounds {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-
-        .score-sheet-rounds label {
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .round-checkbox {
-            margin-right: 5px;
-        }
-
-        .scent-info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-
-        .scent-info-table th,
-        .scent-info-table td {
-            border: 1px solid #000;
-            padding: 8px;
-            text-align: center;
-        }
-
-        .scent-info-table th {
-            background: #f0f0f0;
-            font-weight: bold;
-        }
-
-        .faults-section {
-            margin-bottom: 15px;
-            font-size: 9px;
-        }
-
-        .scoring-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .scoring-table th,
-        .scoring-table td {
-            border: 1px solid #000;
-            padding: 4px;
-            text-align: center;
-            font-size: 9px;
-        }
-
-        .scoring-table th {
-            background: #f0f0f0;
-            font-weight: bold;
-        }
-
-        .team-name-cell {
-            text-align: left;
-            font-weight: bold;
-            background: #f8f8f8;
-        }
-
-        .scent-cell {
-            font-size: 8px;
-            padding: 2px;
         }
 
         .stats {
@@ -338,7 +225,7 @@
             opacity: 0.9;
         }
 
-        /* PDF Editor Modal Styles */
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -511,62 +398,31 @@
             border-top: 2px solid #eee;
         }
 
-        /* League Summary CSS */
-        .league-summaries-section {
-            margin-top: 30px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background: #f9f9f9;
-        }
-
-        .summaries-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .summary-item {
+        /* Score Sheet Print Styles */
+        .score-sheet {
+            width: 8.5in;
+            min-height: 11in;
             background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 0.5in;
+            margin: 0 auto 1in auto;
+            border: 1px solid #000;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
         }
 
-        .summary-header h4 {
-            margin: 0 0 5px 0;
-            color: #333;
-        }
-
-        .summary-meta {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .summary-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .league-summary-table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .league-summary-table th, 
-        .league-summary-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        .score-sheet-header {
             text-align: center;
+            margin-bottom: 20px;
         }
 
-        .league-summary-table th {
-            background-color: #f2f2f2;
+        .cwags-logo img {
+            height: 60px;
+        }
+
+        .score-sheet-title-text {
+            font-size: 18px;
             font-weight: bold;
+            margin: 10px 0;
         }
 
         @media print {
@@ -594,8 +450,6 @@
             }
         }
     </style>
-    <!-- Add PDF-lib for PDF generation -->
-    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -701,17 +555,27 @@
     <script type="module">
         // Firebase imports
         import { auth, db } from './js/firebase.js';
-        import { collection, query, where, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+        import { collection, query, where, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
         // ========================================
-        // GLOBAL DATE HANDLING FIX
+        // STANDARDIZED FIELD NAMES (CRITICAL FIX)
         // ========================================
 
-        // Creates a date object that stays in local timezone
+        const STANDARD_FIELDS = {
+            HANDLER_NAME: 'handlerName',      // NOT 'Handler' or 'handler'
+            DOG_CALL_NAME: 'dogCallName',     // NOT 'Call Name' or 'dogName'
+            JUDGE_NAME: 'judgeName',          // NOT 'judge' or 'judgeAssigned'
+            CLASS_NAME: 'className',          // NOT 'Class' or 'class'
+            CWAGS_NUMBER: 'cwagsNumber'       // NOT 'Registration'
+        };
+
+        // ========================================
+        // TIMEZONE-SAFE DATE UTILITIES
+        // ========================================
+
         function createLocalDate(dateStr) {
             if (!dateStr) return null;
             
-            // Always add noon time to prevent timezone shifts
             if (typeof dateStr === 'string') {
                 const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
                 return new Date(dateWithTime);
@@ -720,71 +584,38 @@
             return new Date(dateStr);
         }
 
-        // Formats a date to YYYY-MM-DD string in local timezone
         function formatLocalDate(date) {
-            if (!date || !(date instanceof Date)) return '';
-            
+            if (!date || !(date instanceof Date)) return null;
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
-            
             return `${year}-${month}-${day}`;
         }
 
-        // Formats date for display with timezone consideration
-        function formatDateDisplay(dateInput, options = {}) {
-            let date;
-            
-            if (typeof dateInput === 'string') {
-                date = createLocalDate(dateInput);
-            } else if (dateInput instanceof Date) {
-                date = new Date(dateInput);
-            } else {
-                return 'Invalid Date';
-            }
-            
-            if (!date || isNaN(date.getTime())) return 'Invalid Date';
-            
-            const defaultOptions = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-            };
-            
-            const formatOptions = { ...defaultOptions, ...options };
-            return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
-        }
-
-        // Prepares date data for Firebase storage (prevents timezone conversion)
         function prepareDateForFirebase(dateStr) {
             if (!dateStr) return null;
-            const localDate = createLocalDate(dateStr);
-            return localDate;
+            const date = createLocalDate(dateStr);
+            return date ? Timestamp.fromDate(date) : null;
         }
 
-        // Retrieves date data from Firebase (converts back to local date string)
-        function getDateFromFirebase(firebaseDate) {
-            if (!firebaseDate) return '';
-            
-            let date;
-            
-            // Handle Firestore Timestamps
-            if (firebaseDate.toDate) {
-                date = firebaseDate.toDate();
-            } else if (firebaseDate instanceof Date) {
-                date = firebaseDate;
-            } else if (typeof firebaseDate === 'string') {
-                date = createLocalDate(firebaseDate);
-            } else {
-                return '';
+        function getDateFromFirebase(timestamp) {
+            if (!timestamp) return null;
+            if (timestamp.toDate) {
+                return formatLocalDate(timestamp.toDate());
             }
-            
-            return formatLocalDate(date);
+            return null;
         }
 
-        // Global variables
+        function formatDateDisplay(dateStr) {
+            if (!dateStr) return 'Unknown Date';
+            const date = createLocalDate(dateStr);
+            return date ? date.toLocaleDateString() : 'Unknown Date';
+        }
+
+        // ========================================
+        // GLOBAL VARIABLES
+        // ========================================
+
         let trials = [];
         let currentTrial = null;
         let entries = [];
@@ -794,26 +625,66 @@
         let currentScoreData = {};
         let leagueSummaries = [];
 
-        // Initialize the application
+        // ========================================
+        // FIELD NORMALIZATION
+        // ========================================
+
+        function getStandardizedJudgeName(entry) {
+            return entry[STANDARD_FIELDS.JUDGE_NAME] || 
+                   entry.judge || 
+                   entry.judgeAssigned || 
+                   entry.selectedJudge ||
+                   'Judge TBD';
+        }
+
+        function normalizeEntryFields(entry) {
+            return {
+                [STANDARD_FIELDS.HANDLER_NAME]: entry[STANDARD_FIELDS.HANDLER_NAME] || entry.handler || entry.handlerName || '',
+                [STANDARD_FIELDS.DOG_CALL_NAME]: entry[STANDARD_FIELDS.DOG_CALL_NAME] || entry.dog || entry.dogName || entry.callName || '',
+                [STANDARD_FIELDS.CWAGS_NUMBER]: entry[STANDARD_FIELDS.CWAGS_NUMBER] || entry.registration || entry.registrationNumber || '',
+                [STANDARD_FIELDS.CLASS_NAME]: entry[STANDARD_FIELDS.CLASS_NAME] || entry.class || entry.classname || '',
+                [STANDARD_FIELDS.JUDGE_NAME]: getStandardizedJudgeName(entry),
+                roundNumber: entry.roundNumber || '1',
+                roundName: entry.roundName || '',
+                date: entry.date,
+                fee: entry.fee || '',
+                entryType: entry.entryType || entry.type || ''
+            };
+        }
+
+        // ========================================
+        // UTILITY FUNCTIONS
+        // ========================================
+
+        function showError(message) {
+            console.error(message);
+            alert(message);
+        }
+
+        function showSuccess(message) {
+            console.log(message);
+            alert(message);
+        }
+
+        // ========================================
+        // INITIALIZATION
+        // ========================================
+
         async function init() {
             try {
+                console.log('Initializing Score Sheet Generator...');
                 await loadTrials();
+                console.log('Score Sheet Generator initialized successfully');
             } catch (error) {
                 console.error('Error initializing:', error);
                 showError('Error loading trials: ' + error.message);
             }
         }
 
-        // Add this function near the top of scoresheet-generator.html
-function getStandardizedJudgeName(entry) {
-  return entry.judgeName || 
-         entry.judge || 
-         entry.judgeAssigned || 
-         entry.selectedJudge ||
-         'Judge TBD';
-}
-        
-        // Load available trials
+        // ========================================
+        // TRIAL LOADING
+        // ========================================
+
         async function loadTrials() {
             try {
                 if (!auth.currentUser) {
@@ -832,7 +703,6 @@ function getStandardizedJudgeName(entry) {
                 snapshot.forEach(doc => {
                     const trialData = doc.data();
                     
-                    // Fix date handling for trial days
                     if (trialData.days && Array.isArray(trialData.days)) {
                         trialData.days = trialData.days.map(day => ({
                             ...day,
@@ -843,116 +713,69 @@ function getStandardizedJudgeName(entry) {
                     trials.push({ id: doc.id, ...trialData });
                 });
 
-                // Sort by creation date (most recent first)
                 trials.sort((a, b) => {
                     const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
                     const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
                     return dateB - dateA;
                 });
 
-                populateTrialSelector();
+                populateTrialDropdown();
+
             } catch (error) {
                 console.error('Error loading trials:', error);
                 showError('Error loading trials: ' + error.message);
             }
         }
 
-        // Populate trial selector dropdown
-        function populateTrialSelector() {
-            const trialSelect = document.getElementById('trialSelect');
-            trialSelect.innerHTML = '<option value="">Select a trial...</option>';
-
+        function populateTrialDropdown() {
+            const select = document.getElementById('trialSelect');
+            select.innerHTML = '<option value="">Select a trial...</option>';
+            
             trials.forEach(trial => {
                 const option = document.createElement('option');
                 option.value = trial.id;
-                
-                let trialLabel = trial.clubName || 'Unnamed Trial';
-                
-                if (trial.days && trial.days.length > 0) {
-                    const dates = trial.days
-                        .filter(day => day.date)
-                        .map(day => {
-                            const date = createLocalDate(day.date);
-                            return date.toLocaleDateString('en-US', { 
-                                month: 'short', 
-                                day: 'numeric' 
-                            });
-                        })
-                        .join(', ');
-                    if (dates) {
-                        trialLabel += ` (${dates})`;
-                    }
-                }
-                
-                option.textContent = trialLabel;
-                trialSelect.appendChild(option);
+                option.textContent = `${trial.clubName || 'Unnamed Trial'} - ${trial.secretary || 'No Secretary'}`;
+                select.appendChild(option);
             });
 
-            // Handle trial selection change
-            trialSelect.addEventListener('change', function() {
+            select.addEventListener('change', function() {
                 const trialId = this.value;
                 if (trialId) {
                     currentTrial = trials.find(t => t.id === trialId);
-                    populateDateSelector();
-                    populateJudgeSelector();
+                    populateDateDropdown();
                 } else {
                     currentTrial = null;
-                    document.getElementById('dateSelect').innerHTML = '<option value="">Select trial first...</option>';
-                    document.getElementById('judgeSelect').innerHTML = '<option value="">All Judges</option>';
+                    clearDateDropdown();
                 }
             });
         }
 
-        // Populate date selector based on selected trial
-        function populateDateSelector() {
-            const dateSelect = document.getElementById('dateSelect');
-            dateSelect.innerHTML = '<option value="">Select a date...</option>';
-
+        function populateDateDropdown() {
+            const select = document.getElementById('dateSelect');
+            select.innerHTML = '<option value="">Select a date...</option>';
+            
             if (currentTrial && currentTrial.days) {
                 currentTrial.days.forEach(day => {
                     if (day.date) {
                         const option = document.createElement('option');
                         option.value = day.date;
                         option.textContent = formatDateDisplay(day.date);
-                        dateSelect.appendChild(option);
+                        select.appendChild(option);
                     }
                 });
             }
         }
 
-        // Populate judge selector based on selected trial
-        function populateJudgeSelector() {
-            const judgeSelect = document.getElementById('judgeSelect');
-            judgeSelect.innerHTML = '<option value="">All Judges</option>';
-
-            if (currentTrial && currentTrial.days) {
-                const judges = new Set();
-                currentTrial.days.forEach(day => {
-                    if (day.classes) {
-                        day.classes.forEach(cls => {
-                            if (cls.rounds) {
-                                cls.rounds.forEach(round => {
-                                   const judgeName = getStandardizedJudgeName(round);
-if (judgeName && judgeName !== 'Judge TBD') {
-    judges.add(judgeName);
-}
-                                });
-                            }
-                        });
-                    }
-                });
-
-                Array.from(judges).sort().forEach(judge => {
-                    const option = document.createElement('option');
-                    option.value = judge;
-                    option.textContent = judge;
-                    judgeSelect.appendChild(option);
-                });
-            }
+        function clearDateDropdown() {
+            const select = document.getElementById('dateSelect');
+            select.innerHTML = '<option value="">Select trial first...</option>';
         }
 
-        // Load trial data and entries - FIXED VERSION WITH ENHANCED DEBUGGING
-        async function loadTrialData() {
+        // ========================================
+        // DATA LOADING
+        // ========================================
+
+        window.loadTrialData = async function() {
             const trialId = document.getElementById('trialSelect').value;
             const selectedDate = document.getElementById('dateSelect').value;
 
@@ -972,7 +795,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
             document.getElementById('loadBtn').disabled = true;
 
             try {
-                // Load ALL entries for this trial (not just selected date)
                 const q = query(
                     collection(db, "entries"),
                     where("trialId", "==", trialId)
@@ -988,7 +810,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
                     const entryData = doc.data();
                     console.log('📄 Processing entry document:', doc.id, entryData);
                     
-                    // Fix selected entries dates
                     if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
                         console.log('🎯 Found selectedEntries array with', entryData.selectedEntries.length, 'items');
                         
@@ -998,25 +819,28 @@ if (judgeName && judgeName !== 'Judge TBD') {
                                 date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
                             };
                             
-                            // ENHANCED DEBUG: Log entry data to understand structure
                             console.log(`📋 Entry ${index + 1}:`, {
-                                className: processedEntry.className,
+                                className: processedEntry[STANDARD_FIELDS.CLASS_NAME],
                                 roundNumber: processedEntry.roundNumber,
                                 roundName: processedEntry.roundName,
                                 judgeName: getStandardizedJudgeName(processedEntry),
-                                handler: entryData.handlerName,
-                                dog: entryData.dogCallName,
+                                handler: entryData[STANDARD_FIELDS.HANDLER_NAME],
+                                dog: entryData[STANDARD_FIELDS.DOG_CALL_NAME],
                                 fee: processedEntry.fee,
                                 entryType: processedEntry.entryType || processedEntry.type,
                                 date: processedEntry.date
                             });
                             
+                            const normalizedEntry = normalizeEntryFields({
+                                ...processedEntry,
+                                [STANDARD_FIELDS.HANDLER_NAME]: entryData[STANDARD_FIELDS.HANDLER_NAME],
+                                [STANDARD_FIELDS.DOG_CALL_NAME]: entryData[STANDARD_FIELDS.DOG_CALL_NAME],
+                                [STANDARD_FIELDS.CWAGS_NUMBER]: entryData[STANDARD_FIELDS.CWAGS_NUMBER]
+                            });
+
                             entries.push({
                                 id: doc.id,
-                                ...processedEntry,
-                                handlerName: entryData.handlerName,
-                                dogCallName: entryData.dogCallName,
-                                cwagsNumber: entryData.cwagsNumber,
+                                ...normalizedEntry,
                                 submittedAt: entryData.submittedAt
                             });
                         });
@@ -1026,181 +850,117 @@ if (judgeName && judgeName !== 'Judge TBD') {
                 });
 
                 console.log('✅ Loaded ALL entries for trial:', entries.length);
-                console.log('📋 First few entries:', entries.slice(0, 3));
 
                 if (entries.length === 0) {
-                    showError('No entries found for this trial');
+                    showError('No entries found for this trial. Please ensure entries have been submitted.');
                     return;
                 }
 
-                // Group entries and load any existing running order for ALL dates
-                await loadRunningOrderForAllDates();
-                
-                // Generate statistics for all entries
-                generateStats();
-
-                // Show controls
-                document.getElementById('generateBtn').style.display = 'inline-block';
-                document.getElementById('printBtn').style.display = 'inline-block';
-                
-                // Add the league summary button
-                showLeagueButton();
+                // Build running order and show stats
+                buildRunningOrder();
+                showButtons();
+                displayStats();
 
             } catch (error) {
-                console.error('💥 Error loading trial data:', error);
+                console.error('Error loading trial data:', error);
                 showError('Error loading trial data: ' + error.message);
             } finally {
                 document.getElementById('loadingIndicator').style.display = 'none';
                 document.getElementById('loadBtn').disabled = false;
             }
-        }
+        };
 
-        // NEW function to load running order for all dates
-        async function loadRunningOrderForAllDates() {
-            try {
-                // Get all unique dates from entries
-                const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
-                console.log('Found dates in trial:', allDates);
-                
-                runningOrderData = {};
-                
-                for (const date of allDates) {
-                    await loadRunningOrderForDate(date);
-                }
-                
-                console.log('Loaded running order for all dates:', Object.keys(runningOrderData));
-                
-            } catch (error) {
-                console.error('Error loading running orders:', error);
-                // Continue with default grouping
-                createDefaultRunningOrderForAllDates();
-            }
-        }
-
-        // Load running order for a specific date
-        async function loadRunningOrderForDate(date) {
-            try {
-                // Try to load confirmed running order for this date
-                const q = query(
-                    collection(db, "runningOrders"),
-                    where("trialId", "==", currentTrial.id),
-                    where("date", "==", date)
-                );
-                
-                const snapshot = await getDocs(q);
-                
-                if (!snapshot.empty) {
-                    // Use confirmed running order
-                    snapshot.forEach(doc => {
-                        const orderData = doc.data();
-                        runningOrderData[date] = orderData.runningOrder;
-                    });
-                    console.log(`Loaded confirmed running order for ${date}`);
-                } else {
-                    // Create default grouping for this date
-                    createDefaultRunningOrderForDate(date);
-                }
-                
-            } catch (error) {
-                console.error(`Error loading running order for ${date}:`, error);
-                createDefaultRunningOrderForDate(date);
-            }
-        }
-
-        // Create default running order for a specific date
-        function createDefaultRunningOrderForDate(date) {
-            console.log('🏗️ Creating running order for date:', date);
+        function buildRunningOrder() {
+            runningOrderData = {};
             
-            if (!runningOrderData[date]) {
-                runningOrderData[date] = {};
-            }
-            
-            // Filter entries for this specific date
-            const dateEntries = entries.filter(entry => {
-                const entryDate = getDateFromFirebase(entry.date);
-                const filterDate = formatLocalDate(createLocalDate(date));
-                const matches = entryDate === filterDate;
-                if (matches) {
-                    console.log('📅 Entry matches date:', entry.className, 'Round', entry.roundNumber);
+            entries.forEach(entry => {
+                const date = entry.date;
+                const judge = entry[STANDARD_FIELDS.JUDGE_NAME];
+                const className = entry[STANDARD_FIELDS.CLASS_NAME];
+                const roundNumber = entry.roundNumber || '1';
+                const classRound = `${className} - Round ${roundNumber}`;
+                
+                if (!runningOrderData[date]) {
+                    runningOrderData[date] = {};
                 }
-                return matches;
-            });
-            
-            console.log('📊 Found', dateEntries.length, 'entries for date:', date);
-            
-            dateEntries.forEach((entry, index) => {
-                // FIX: Try multiple judge field names in correct priority order
-               const judge = getStandardizedJudgeName(entry);
-                
-                // FIX: Better round number extraction and class round naming
-                let roundNumber = entry.roundNumber || 1;
-                
-                // Try to extract round number from roundName if available
-                if (entry.roundName && typeof entry.roundName === 'string') {
-                    const roundMatch = entry.roundName.match(/Round\s*(\d+)/i);
-                    if (roundMatch) {
-                        roundNumber = parseInt(roundMatch[1]);
-                        console.log('🔍 Extracted round number from roundName:', roundNumber);
-                    }
-                }
-                
-                const classRound = `${entry.className || 'Unknown Class'} - Round ${roundNumber}`;
-
                 if (!runningOrderData[date][judge]) {
                     runningOrderData[date][judge] = {};
                 }
-                
                 if (!runningOrderData[date][judge][classRound]) {
                     runningOrderData[date][judge][classRound] = [];
                 }
-
-                const entrantName = `${entry.handlerName || 'Unknown Handler'} - ${entry.dogCallName || 'Unknown Dog'}`;
-                runningOrderData[date][judge][classRound].push({
-                    id: `${entry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
-                    name: entrantName,
-                    entryType: entry.type || entry.entryType || 'regular',
-                    handler: entry.handlerName || 'Unknown Handler',
-                    dog: entry.dogCallName || 'Unknown Dog',
-                    cwagsNumber: entry.cwagsNumber || '',
-                    originalEntry: entry
-                });
                 
-                // ENHANCED DEBUG: Log judge assignment for troubleshooting
-              console.log(`🎯 Entry ${index + 1}: ${entry.className} Round ${roundNumber} - Judge: "${getStandardizedJudgeName(entry)}"`, {
-    'standardizedJudge': getStandardizedJudgeName(entry),
-    'handlerDog': `${entry.handlerName} - ${entry.dogCallName}`
-});
+                runningOrderData[date][judge][classRound].push({
+                    handler: entry[STANDARD_FIELDS.HANDLER_NAME],
+                    dog: entry[STANDARD_FIELDS.DOG_CALL_NAME],
+                    registrationNumber: entry[STANDARD_FIELDS.CWAGS_NUMBER]
+                });
             });
             
-            console.log(`✅ Created running order for ${date}:`, Object.keys(runningOrderData[date] || {}));
-            console.log('📋 Full running order data for date:', runningOrderData[date]);
+            console.log('📋 Built running order data:', runningOrderData);
         }
 
-        // Create default running order for all dates
-        function createDefaultRunningOrderForAllDates() {
-            const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
-            
-            allDates.forEach(date => {
-                createDefaultRunningOrderForDate(date);
+        function displayStats() {
+            const stats = document.getElementById('stats');
+            const totalEntries = entries.length;
+            const uniqueJudges = new Set();
+            const uniqueClasses = new Set();
+            let totalSheets = 0;
+
+            Object.keys(runningOrderData).forEach(date => {
+                Object.keys(runningOrderData[date]).forEach(judge => {
+                    uniqueJudges.add(judge);
+                    Object.keys(runningOrderData[date][judge]).forEach(classRound => {
+                        uniqueClasses.add(classRound.split(' - Round')[0]);
+                        totalSheets++;
+                    });
+                });
             });
+
+            stats.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-number">${totalEntries}</span>
+                    <span class="stat-label">Total Entries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueJudges.size}</span>
+                    <span class="stat-label">Judges</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueClasses.size}</span>
+                    <span class="stat-label">Classes</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${totalSheets}</span>
+                    <span class="stat-label">Score Sheets</span>
+                </div>
+            `;
+            stats.style.display = 'grid';
         }
 
-        // FIXED: Generate all score sheets for ALL dates
-        async function generateAllScoreSheets() {
+        function showButtons() {
+            document.getElementById('generateBtn').style.display = 'inline-block';
+            document.getElementById('printBtn').style.display = 'inline-block';
+            document.getElementById('leagueBtn').style.display = 'inline-block';
+        }
+
+        // ========================================
+        // SCORE SHEET GENERATION
+        // ========================================
+
+        window.generateAllScoreSheets = async function() {
             const selectedJudge = document.getElementById('judgeSelect').value;
 
-            if (!runningOrderData || Object.keys(runningOrderData).length === 0) {
-                alert('No data available. Please load trial data first.');
+            if (Object.keys(runningOrderData).length === 0) {
+                alert('Please load trial data first.');
                 return;
             }
 
             generatedSheets = [];
 
-            // Process ALL dates in the running order
             Object.keys(runningOrderData).forEach(date => {
                 const judgeData = runningOrderData[date];
 
-                // Filter by judge if selected
                 const judgesToProcess = selectedJudge ? 
                     { [selectedJudge]: judgeData[selectedJudge] } : 
                     judgeData;
@@ -1231,16 +991,12 @@ if (judgeName && judgeName !== 'Judge TBD') {
 
             console.log(`Generated ${generatedSheets.length} score sheets across all dates`);
 
-            // Save to database
             await saveScoreSheetsToDatabase();
-
-            // Display generated sheets
             displayGeneratedSheets();
 
             alert(`Generated ${generatedSheets.length} score sheets across all trial dates!`);
         }
 
-        // Save score sheets to database
         async function saveScoreSheetsToDatabase() {
             try {
                 for (const sheet of generatedSheets) {
@@ -1253,7 +1009,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
             }
         }
 
-        // Display generated sheets list
         function displayGeneratedSheets() {
             const section = document.getElementById('scoreSheetsSection');
             const list = document.getElementById('scoreSheetsList');
@@ -1284,8 +1039,56 @@ if (judgeName && judgeName !== 'Judge TBD') {
             section.style.display = 'block';
         }
 
-        // Print score sheets
-        function printScoreSheets() {
+        // ========================================
+        // SCORE SHEET ACTIONS
+        // ========================================
+
+        window.previewSheet = function(sheetId) {
+            const sheet = generatedSheets.find(s => s.id === sheetId);
+            if (!sheet) return;
+
+            const container = document.getElementById('scoreSheetsContainer');
+            container.innerHTML = generateScoreSheetHTML(sheet);
+            container.style.display = 'block';
+            
+            container.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.printSingleSheet = function(sheetId) {
+            const sheet = generatedSheets.find(s => s.id === sheetId);
+            if (!sheet) return;
+
+            const container = document.getElementById('scoreSheetsContainer');
+            container.innerHTML = generateScoreSheetHTML(sheet);
+            
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        };
+
+        window.markCompleted = async function(sheetId) {
+            try {
+                const sheet = generatedSheets.find(s => s.id === sheetId);
+                if (!sheet) return;
+
+                sheet.status = 'completed';
+                sheet.completedAt = new Date();
+
+                await updateDoc(doc(db, 'scoreSheets', sheetId), {
+                    status: 'completed',
+                    completedAt: new Date()
+                });
+
+                displayGeneratedSheets();
+                alert('Score sheet marked as completed!');
+                
+            } catch (error) {
+                console.error('Error updating sheet status:', error);
+                alert('Error updating sheet status: ' + error.message);
+            }
+        };
+
+        window.printScoreSheets = function() {
             if (generatedSheets.length === 0) {
                 alert('No score sheets generated. Please generate sheets first.');
                 return;
@@ -1300,17 +1103,14 @@ if (judgeName && judgeName !== 'Judge TBD') {
 
             container.innerHTML = html;
             
-            // Print
             setTimeout(() => {
                 window.print();
             }, 100);
         }
 
-        // Generate score sheet HTML with dynamic sizing
         function generateScoreSheetHTML(sheetData) {
             const entrantCount = sheetData.entrants.length;
             
-            // Calculate optimal font sizes and spacing based on entrant count
             let scoringTableFontSize = '9px';
             let cellPadding = '4px';
             let rowHeight = '40px';
@@ -1327,7 +1127,7 @@ if (judgeName && judgeName !== 'Judge TBD') {
 
             const displayDate = formatDateDisplay(getDateFromFirebase(sheetData.date));
 
-            let html = `
+            return `
                 <div class="score-sheet">
                     <div class="score-sheet-header">
                         <div style="text-align: right; font-size: 8px;">Copyright © by Canine-Work And Games, LLC, 2024</div>
@@ -1347,209 +1147,55 @@ if (judgeName && judgeName !== 'Judge TBD') {
                             <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '4' ? 'checked' : ''}> 4
                         </div>
                     </div>
-
-                    <table class="scent-info-table">
-                        <tr>
-                            <th>Scent 1</th>
-                            <th>Scent 2</th>
-                            <th>Scent 3</th>
-                            <th>Scent 4</th>
-                        </tr>
-                        <tr>
-                            <td>Located in/on:</td>
-                            <td>Located in/on:</td>
-                            <td>Located in/on:</td>
-                            <td>Located in/on:</td>
-                        </tr>
-                        <tr>
-                            <td style="height: 30px;"></td>
-                            <td style="height: 30px;"></td>
-                            <td style="height: 30px;"></td>
-                            <td style="height: 30px;"></td>
-                        </tr>
-                    </table>
-
-                    <div class="faults-section">
-                        <strong>Faults:</strong> Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior; 
-                        Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert"; 
-                        SR crossing line less than half.
-                    </div>
-
-                    <table class="scoring-table" style="font-size: ${scoringTableFontSize};">
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: ${scoringTableFontSize};">
                         <thead>
-                            <tr>
-                                <th rowspan="2">Team</th>
-                                <th rowspan="2">Dog - Handler</th>
-                                <th colspan="4">Scent Results</th>
-                                <th rowspan="2">Fault</th>
-                                <th rowspan="2">Fault</th>
-                                <th rowspan="2">Time</th>
-                                <th rowspan="2">Pass/Fail</th>
-                            </tr>
-                            <tr>
-                                <th>Scent 1</th>
-                                <th>Scent 2</th>
-                                <th>Scent 3</th>
-                                <th>Scent 4</th>
+                            <tr style="background: #f0f0f0;">
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: left;">Handler</th>
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: left;">Dog</th>
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: left;">Reg #</th>
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;">Scent 1</th>
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;">Scent 2</th>
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;">Scent 3</th>
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;">Scent 4</th>
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;">Faults</th>
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;">Time</th>
+                                <th style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;">Result</th>
                             </tr>
                         </thead>
                         <tbody>
-            `;
-
-            // Add entrant rows - use actual count or minimum 8, whichever is larger
-            const minRows = Math.max(8, entrantCount);
-            for (let i = 0; i < minRows; i++) {
-                const entrant = sheetData.entrants[i];
-                const teamName = entrant ? `${entrant.handler} - ${entrant.dog}` : '';
-                
-                html += `
-                    <tr>
-                        <td class="team-name-cell" style="padding: ${cellPadding};">${i + 1}</td>
-                        <td class="team-name-cell" style="padding: ${cellPadding};">${teamName}</td>
-                        <td class="scent-cell" style="padding: ${cellPadding};">
-                            <div>Scent 1</div>
-                            <div style="height: 12px;"></div>
-                        </td>
-                        <td class="scent-cell" style="padding: ${cellPadding};">
-                            <div>Scent 2</div>
-                            <div style="height: 12px;"></div>
-                        </td>
-                        <td class="scent-cell" style="padding: ${cellPadding};">
-                            <div>Scent 3</div>
-                            <div style="height: 12px;"></div>
-                        </td>
-                        <td class="scent-cell" style="padding: ${cellPadding};">
-                            <div>Scent 4</div>
-                            <div style="height: 12px;"></div>
-                        </td>
-                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
-                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
-                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
-                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
-                    </tr>
-                `;
-            }
-
-            html += `
+                            ${sheetData.entrants.map((entrant, index) => `
+                                <tr style="height: ${rowHeight};">
+                                    <td style="border: 1px solid #000; padding: ${cellPadding};">${entrant.handler || ''}</td>
+                                    <td style="border: 1px solid #000; padding: ${cellPadding};">${entrant.dog || ''}</td>
+                                    <td style="border: 1px solid #000; padding: ${cellPadding};">${entrant.registrationNumber || ''}</td>
+                                    <td style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;"></td>
+                                    <td style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;"></td>
+                                    <td style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;"></td>
+                                    <td style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;"></td>
+                                    <td style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;"></td>
+                                    <td style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;"></td>
+                                    <td style="border: 1px solid #000; padding: ${cellPadding}; text-align: center;"></td>
+                                </tr>
+                            `).join('')}
                         </tbody>
                     </table>
                     
-                    <div style="margin-top: 20px; text-align: center; font-size: 8px;">
-                        Copyright © by Canine-Work And Games, LLC, 2024
+                    <div style="margin-top: 20px; font-size: 10px;">
+                        <p><strong>Scent Locations:</strong></p>
+                        <p>Scent 1: ________________________</p>
+                        <p>Scent 2: ________________________</p>
+                        <p>Scent 3: ________________________</p>
+                        <p>Scent 4: ________________________</p>
                     </div>
                 </div>
             `;
-
-            return html;
         }
 
-        // Generate statistics
-        function generateStats() {
-            const totalEntries = entries.length;
-            const uniqueHandlers = new Set(entries.map(e => e.handlerName)).size;
-            const uniqueDogs = new Set(entries.map(e => e.dogCallName)).size;
-            const regularEntries = entries.filter(e => e.entryType === 'regular').length;
-            const feoEntries = entries.filter(e => e.entryType === 'feo').length;
+        // ========================================
+        // STORED SHEETS MANAGEMENT
+        // ========================================
 
-            const statsContainer = document.getElementById('stats');
-            statsContainer.style.display = 'grid';
-            statsContainer.innerHTML = `
-                <div class="stat-item">
-                    <span class="stat-number">${totalEntries}</span>
-                    <span class="stat-label">Total Entries</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${uniqueHandlers}</span>
-                    <span class="stat-label">Handlers</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${uniqueDogs}</span>
-                    <span class="stat-label">Dogs</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${regularEntries}</span>
-                    <span class="stat-label">Regular</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${feoEntries}</span>
-                    <span class="stat-label">FEO</span>
-                </div>
-            `;
-        }
-
-        // Show error message
-        function showError(message) {
-            const container = document.getElementById('scoreSheetsSection');
-            container.innerHTML = `
-                <div class="no-data">
-                    ❌ ${message}
-                </div>
-            `;
-            container.style.display = 'block';
-            document.getElementById('stats').style.display = 'none';
-        }
-
-        // Show the league button when trial data is loaded
-        function showLeagueButton() {
-            const leagueBtn = document.getElementById('leagueBtn');
-            if (leagueBtn) {
-                leagueBtn.style.display = 'inline-block';
-            }
-        }
-
-        // Preview single sheet
-        window.previewSheet = function(sheetId) {
-            const sheet = generatedSheets.find(s => s.id === sheetId);
-            if (!sheet) return;
-
-            const container = document.getElementById('scoreSheetsContainer');
-            container.innerHTML = generateScoreSheetHTML(sheet);
-            container.style.display = 'block';
-            
-            // Scroll to preview
-            container.scrollIntoView({ behavior: 'smooth' });
-        };
-
-        // Print single sheet
-        window.printSingleSheet = function(sheetId) {
-            const sheet = generatedSheets.find(s => s.id === sheetId);
-            if (!sheet) return;
-
-            const container = document.getElementById('scoreSheetsContainer');
-            container.innerHTML = generateScoreSheetHTML(sheet);
-            
-            setTimeout(() => {
-                window.print();
-            }, 100);
-        };
-
-        // Mark sheet as completed
-        window.markCompleted = async function(sheetId) {
-            try {
-                const sheet = generatedSheets.find(s => s.id === sheetId);
-                if (!sheet) return;
-
-                // Update status in memory
-                sheet.status = 'completed';
-                sheet.completedAt = new Date();
-
-                // Update in database
-                await updateDoc(doc(db, 'scoreSheets', sheetId), {
-                    status: 'completed',
-                    completedAt: new Date()
-                });
-
-                // Refresh display
-                displayGeneratedSheets();
-                
-                alert('Score sheet marked as completed!');
-            } catch (error) {
-                console.error('Error updating sheet status:', error);
-                alert('Error updating sheet status: ' + error.message);
-            }
-        };
-
-        // View stored sheets
         window.viewStoredSheets = async function() {
             try {
                 if (!auth.currentUser) {
@@ -1559,7 +1205,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
 
                 document.getElementById('loadingIndicator').style.display = 'block';
 
-                // Load all stored score sheets for this user
                 const q = query(
                     collection(db, "scoreSheets"),
                     where("createdBy", "==", auth.currentUser.uid)
@@ -1571,7 +1216,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
                 snapshot.forEach(doc => {
                     const sheetData = doc.data();
                     
-                    // Fix date handling when loading
                     const processedSheet = {
                         ...sheetData,
                         date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
@@ -1580,14 +1224,12 @@ if (judgeName && judgeName !== 'Judge TBD') {
                     storedSheets.push({ id: doc.id, ...processedSheet });
                 });
 
-                // Sort by creation date (most recent first)
                 storedSheets.sort((a, b) => {
                     const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
                     const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
                     return dateB - dateA;
                 });
 
-                // Display stored sheets
                 displayStoredSheets(storedSheets);
 
             } catch (error) {
@@ -1598,7 +1240,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
             }
         };
 
-        // Display stored sheets
         function displayStoredSheets(sheets) {
             const section = document.getElementById('scoreSheetsSection');
             const list = document.getElementById('scoreSheetsList');
@@ -1609,7 +1250,8 @@ if (judgeName && judgeName !== 'Judge TBD') {
                 html = '<div class="no-data">No stored score sheets found.</div>';
             } else {
                 sheets.forEach(sheet => {
-                    const createdDate = sheet.createdAt ? sheet.createdAt.toDate().toLocaleDateString() : 'Unknown';
+                    const createdDate = sheet.createdAt ? 
+                        sheet.createdAt.toDate().toLocaleDateString() : 'Unknown';
                     const displayDate = formatDateDisplay(sheet.date);
                     const hasScores = sheet.scoreData && Object.keys(sheet.scoreData).length > 0;
                     const statusClass = hasScores ? 'status-completed' : sheet.status;
@@ -1639,7 +1281,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
             section.style.display = 'block';
         }
 
-        // Preview stored sheet
         window.previewStoredSheet = async function(sheetId) {
             try {
                 const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
@@ -1659,7 +1300,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
                 container.innerHTML = generateScoreSheetHTML(sheet);
                 container.style.display = 'block';
                 
-                // Scroll to preview
                 container.scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
                 console.error('Error loading sheet:', error);
@@ -1667,7 +1307,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
             }
         };
 
-        // Print stored sheet
         window.printStoredSheet = async function(sheetId) {
             try {
                 const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
@@ -1695,7 +1334,23 @@ if (judgeName && judgeName !== 'Judge TBD') {
             }
         };
 
-        // Edit scores - Open the scoring modal
+        window.deleteSheet = async function(sheetId) {
+            if (confirm('Are you sure you want to delete this score sheet? This action cannot be undone.')) {
+                try {
+                    await deleteDoc(doc(db, 'scoreSheets', sheetId));
+                    alert('Score sheet deleted successfully!');
+                    viewStoredSheets(); // Refresh the list
+                } catch (error) {
+                    console.error('Error deleting sheet:', error);
+                    alert('Error deleting sheet: ' + error.message);
+                }
+            }
+        };
+
+        // ========================================
+        // SCORE EDITING MODAL
+        // ========================================
+
         window.editScores = async function(sheetId) {
             try {
                 const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
@@ -1711,13 +1366,10 @@ if (judgeName && judgeName !== 'Judge TBD') {
                     date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
                 };
                 
-                // Load existing score data if available
                 currentScoreData = currentEditingSheet.scoreData || {};
                 
-                // Populate the scoring form
                 populateScoringForm();
                 
-                // Show the modal
                 document.getElementById('scoreEntryModal').style.display = 'block';
                 
             } catch (error) {
@@ -1726,17 +1378,14 @@ if (judgeName && judgeName !== 'Judge TBD') {
             }
         };
 
-        // Populate the scoring form with sheet data
         function populateScoringForm() {
             if (!currentEditingSheet) return;
 
-            // Set scent locations
             document.getElementById('scent1Location').value = currentScoreData.scent1Location || '';
             document.getElementById('scent2Location').value = currentScoreData.scent2Location || '';
             document.getElementById('scent3Location').value = currentScoreData.scent3Location || '';
             document.getElementById('scent4Location').value = currentScoreData.scent4Location || '';
 
-            // Generate entrant scoring rows
             const entrantsContainer = document.getElementById('entrantsScoring');
             let html = '';
 
@@ -1813,27 +1462,23 @@ if (judgeName && judgeName !== 'Judge TBD') {
                             <!-- Faults -->
                             <div>
                                 <label>Faults</label>
-                                <input type="text" class="fault-input" id="${entrantKey}_faults" 
-                                       value="${entrantScores.faults || ''}" placeholder="Enter faults...">
+                                <input type="text" class="fault-input" id="${entrantKey}_faults" value="${entrantScores.faults || ''}" placeholder="Enter faults">
                             </div>
                             
                             <!-- Time -->
                             <div>
                                 <label>Time</label>
-                                <input type="text" class="time-input" id="${entrantKey}_time" 
-                                       value="${entrantScores.time || ''}" placeholder="MM:SS">
+                                <input type="text" class="time-input" id="${entrantKey}_time" value="${entrantScores.time || ''}" placeholder="MM:SS">
                             </div>
                             
                             <!-- Pass/Fail -->
                             <div class="pass-fail-group">
                                 <div class="pass-fail-option">
-                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_pass" 
-                                           value="pass" ${entrantScores.result === 'pass' ? 'checked' : ''}>
+                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_pass" value="Pass" ${entrantScores.result === 'Pass' ? 'checked' : ''}>
                                     <label for="${entrantKey}_pass">Pass</label>
                                 </div>
                                 <div class="pass-fail-option">
-                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_fail" 
-                                           value="fail" ${entrantScores.result === 'fail' ? 'checked' : ''}>
+                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_fail" value="Fail" ${entrantScores.result === 'Fail' ? 'checked' : ''}>
                                     <label for="${entrantKey}_fail">Fail</label>
                                 </div>
                             </div>
@@ -1843,41 +1488,14 @@ if (judgeName && judgeName !== 'Judge TBD') {
             });
 
             entrantsContainer.innerHTML = html;
-
-            // Add event listeners for mutual exclusivity of checkboxes
-            currentEditingSheet.entrants.forEach((entrant, index) => {
-                const entrantKey = `entrant_${index}`;
-                
-                // For each scent, make found/not found mutually exclusive
-                for (let scent = 1; scent <= 4; scent++) {
-                    const foundCheckbox = document.getElementById(`${entrantKey}_scent${scent}_found`);
-                    const notFoundCheckbox = document.getElementById(`${entrantKey}_scent${scent}_not_found`);
-                    
-                    if (foundCheckbox && notFoundCheckbox) {
-                        foundCheckbox.addEventListener('change', function() {
-                            if (this.checked) {
-                                notFoundCheckbox.checked = false;
-                            }
-                        });
-                        
-                        notFoundCheckbox.addEventListener('change', function() {
-                            if (this.checked) {
-                                foundCheckbox.checked = false;
-                            }
-                        });
-                    }
-                }
-            });
         }
 
-        // Close score modal
         window.closeScoreModal = function() {
             document.getElementById('scoreEntryModal').style.display = 'none';
             currentEditingSheet = null;
             currentScoreData = {};
         };
 
-        // Save scores to database
         window.saveScores = async function() {
             if (!currentEditingSheet) {
                 alert('No sheet selected for editing');
@@ -1885,7 +1503,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
             }
 
             try {
-                // Collect all score data
                 const scoreData = {
                     scent1Location: document.getElementById('scent1Location').value,
                     scent2Location: document.getElementById('scent2Location').value,
@@ -1893,7 +1510,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
                     scent4Location: document.getElementById('scent4Location').value
                 };
 
-                // Collect entrant scores
                 currentEditingSheet.entrants.forEach((entrant, index) => {
                     const entrantKey = `entrant_${index}`;
                     
@@ -1914,7 +1530,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
                     };
                 });
 
-                // Update the sheet in Firebase
                 await updateDoc(doc(db, 'scoreSheets', currentEditingSheet.id), {
                     scoreData: scoreData,
                     status: 'scored',
@@ -1924,9 +1539,7 @@ if (judgeName && judgeName !== 'Judge TBD') {
 
                 alert('Scores saved successfully!');
                 closeScoreModal();
-                
-                // Refresh the stored sheets view
-                viewStoredSheets();
+                viewStoredSheets(); // Refresh the list
 
             } catch (error) {
                 console.error('Error saving scores:', error);
@@ -1934,300 +1547,30 @@ if (judgeName && judgeName !== 'Judge TBD') {
             }
         };
 
-        // Generate filled PDF that matches the printed score sheet exactly
-        window.generateFilledPDF = async function() {
-            if (!currentEditingSheet) {
-                alert('No sheet selected');
-                return;
-            }
-
-            try {
-                // Create a new PDF document (8.5 x 11 inches)
-                const pdfDoc = await PDFLib.PDFDocument.create();
-                const page = pdfDoc.addPage([612, 792]);
-                
-                // Get fonts
-                const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-                const boldFont = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-
-                const { width, height } = page.getSize();
-                let yPos = height - 40;
-
-                // Draw border around entire page
-                page.drawRectangle({
-                    x: 30,
-                    y: 30,
-                    width: width - 60,
-                    height: height - 60,
-                    borderColor: PDFLib.rgb(0, 0, 0),
-                    borderWidth: 1,
-                });
-
-                // Header section
-                page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
-                    x: width - 280,
-                    y: yPos,
-                    size: 8,
-                    font: font,
-                });
-                yPos -= 25;
-
-                // Title
-                page.drawText(`${currentEditingSheet.className} Score Sheet`, {
-                    x: width / 2 - 100,
-                    y: yPos,
-                    size: 16,
-                    font: boldFont,
-                });
-                yPos -= 25;
-
-                // Date
-                const displayDate = formatDateDisplay(currentEditingSheet.date);
-                page.drawText(`Date: ${displayDate}`, {
-                    x: width / 2 - 80,
-                    y: yPos,
-                    size: 12,
-                    font: font,
-                });
-                yPos -= 20;
-
-                // Class
-                page.drawText(`CLASS: ${currentEditingSheet.className}`, {
-                    x: width / 2 - 60,
-                    y: yPos,
-                    size: 14,
-                    font: boldFont,
-                });
-                yPos -= 20;
-
-                // Judge
-                page.drawText(`JUDGE: ${currentEditingSheet.judge}`, {
-                    x: width / 2 - 60,
-                    y: yPos,
-                    size: 14,
-                    font: boldFont,
-                });
-                yPos -= 30;
-
-                // Round checkboxes
-                page.drawText('Round', {
-                    x: 50,
-                    y: yPos,
-                    size: 10,
-                    font: boldFont,
-                });
-
-                const rounds = ['1', '2', '3', '4'];
-                let roundX = 100;
-                rounds.forEach((round, index) => {
-                    // Draw checkbox
-                    page.drawRectangle({
-                        x: roundX,
-                        y: yPos - 3,
-                        width: 12,
-                        height: 12,
-                        borderColor: PDFLib.rgb(0, 0, 0),
-                        borderWidth: 1,
-                    });
-                    
-                    // Check the appropriate round
-                    if (round === currentEditingSheet.roundNumber) {
-                        page.drawText('X', {
-                            x: roundX + 3,
-                            y: yPos - 1,
-                            size: 9,
-                            font: boldFont,
-                        });
-                    }
-                    
-                    page.drawText(round, {
-                        x: roundX + 20,
-                        y: yPos,
-                        size: 10,
-                        font: font,
-                    });
-                    roundX += 60;
-                });
-                yPos -= 35;
-
-                // Scent information table
-                const scentTableY = yPos;
-                const scentTableHeight = 60;
-                const colWidth = (width - 100) / 4;
-
-                // Draw scent table border
-                page.drawRectangle({
-                    x: 50,
-                    y: scentTableY - scentTableHeight,
-                    width: width - 100,
-                    height: scentTableHeight,
-                    borderColor: PDFLib.rgb(0, 0, 0),
-                    borderWidth: 1,
-                });
-
-                // Scent table headers
-                const scentHeaders = ['Scent 1', 'Scent 2', 'Scent 3', 'Scent 4'];
-                scentHeaders.forEach((header, index) => {
-                    const x = 50 + (index * colWidth);
-                    
-                    if (index > 0) {
-                        page.drawLine({
-                            start: { x: x, y: scentTableY },
-                            end: { x: x, y: scentTableY - scentTableHeight },
-                            thickness: 1,
-                            color: PDFLib.rgb(0, 0, 0),
-                        });
-                    }
-                    
-                    page.drawRectangle({
-                        x: x,
-                        y: scentTableY - 20,
-                        width: colWidth,
-                        height: 20,
-                        color: PDFLib.rgb(0.94, 0.94, 0.94),
-                    });
-                    
-                    page.drawText(header, {
-                        x: x + colWidth/2 - 20,
-                        y: scentTableY - 15,
-                        size: 10,
-                        font: boldFont,
-                    });
-                });
-
-                // Fill in scent locations
-                const scentLocations = [
-                    document.getElementById('scent1Location').value,
-                    document.getElementById('scent2Location').value,
-                    document.getElementById('scent3Location').value,
-                    document.getElementById('scent4Location').value
-                ];
-
-                page.drawLine({
-                    start: { x: 50, y: scentTableY - 20 },
-                    end: { x: width - 50, y: scentTableY - 20 },
-                    thickness: 1,
-                    color: PDFLib.rgb(0, 0, 0),
-                });
-
-                scentHeaders.forEach((header, index) => {
-                    const x = 50 + (index * colWidth);
-                    page.drawText('Located in/on:', {
-                        x: x + 5,
-                        y: scentTableY - 35,
-                        size: 9,
-                        font: font,
-                    });
-                });
-
-                page.drawLine({
-                    start: { x: 50, y: scentTableY - 40 },
-                    end: { x: width - 50, y: scentTableY - 40 },
-                    thickness: 1,
-                    color: PDFLib.rgb(0, 0, 0),
-                });
-
-                scentLocations.forEach((location, index) => {
-                    const x = 50 + (index * colWidth);
-                    const text = location || '';
-                    page.drawText(text.length > 12 ? text.substring(0, 12) + '...' : text, {
-                        x: x + 5,
-                        y: scentTableY - 55,
-                        size: 8,
-                        font: font,
-                    });
-                });
-
-                yPos = scentTableY - scentTableHeight - 20;
-
-                // Faults section
-                page.drawText('Faults: Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior;', {
-                    x: 50,
-                    y: yPos,
-                    size: 9,
-                    font: boldFont,
-                });
-                yPos -= 12;
-                page.drawText('Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert";', {
-                    x: 50,
-                    y: yPos,
-                    size: 9,
-                    font: boldFont,
-                });
-                yPos -= 12;
-                page.drawText('SR crossing line less than half.', {
-                    x: 50,
-                    y: yPos,
-                    size: 9,
-                    font: boldFont,
-                });
-                yPos -= 25;
-
-                // Generate PDF bytes
-                const pdfBytes = await pdfDoc.save();
-                
-                // Create download link
-                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = `${currentEditingSheet.trialName}_${currentEditingSheet.judge}_${currentEditingSheet.classRound}_Scored.pdf`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-
-                alert('Filled PDF generated and downloaded successfully!');
-
-            } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Error generating PDF: ' + error.message);
-            }
-        };
-
-        // Delete sheet
-        window.deleteSheet = async function(sheetId) {
-            if (!confirm('Are you sure you want to delete this score sheet? This action cannot be undone.')) {
-                return;
-            }
-
-            try {
-                await deleteDoc(doc(db, 'scoreSheets', sheetId));
-                alert('Score sheet deleted successfully');
-                
-                // Refresh the stored sheets view
-                viewStoredSheets();
-            } catch (error) {
-                console.error('Error deleting sheet:', error);
-                alert('Error deleting sheet: ' + error.message);
-            }
-        };
-
         // ========================================
-        // LEAGUE SUMMARY FUNCTIONALITY
+        // LEAGUE SUMMARIES
         // ========================================
 
-        // Main function to generate league summaries
-        async function generateLeagueSummaries() {
-            if (!currentTrial) {
-                alert('Please select a trial first');
-                return;
-            }
-
+        window.generateLeagueSummaries = async function() {
             try {
-                // Show loading
+                if (!currentTrial) {
+                    alert('Please select a trial first');
+                    return;
+                }
+
                 document.getElementById('loadingIndicator').style.display = 'block';
-                document.getElementById('loadingIndicator').innerHTML = '<div>Generating league summaries...</div>';
 
-                // Get all classes from the trial
                 const allClasses = getAllClassesFromTrial();
-                console.log('Found classes:', allClasses);
+                console.log('All classes found:', allClasses);
 
-                // Get all score sheets for this trial
+                if (allClasses.length === 0) {
+                    alert('No classes found in the current trial');
+                    return;
+                }
+
                 const allScoreSheets = await getAllScoreSheetsForTrial(currentTrial.id);
                 console.log('Found score sheets:', allScoreSheets.length);
 
-                // Generate summary for each class
                 leagueSummaries = [];
                 for (const className of allClasses) {
                     const summary = await createLeagueSummaryForClass(className, allScoreSheets);
@@ -2238,22 +1581,16 @@ if (judgeName && judgeName !== 'Judge TBD') {
 
                 console.log('Generated summaries:', leagueSummaries.length);
 
-                // Display the summaries
-                displayLeagueSummaries();
-
-                // Hide loading
-                document.getElementById('loadingIndicator').style.display = 'none';
-
                 alert(`Generated ${leagueSummaries.length} league summary sheets!`);
 
             } catch (error) {
                 console.error('Error generating league summaries:', error);
                 alert('Error generating league summaries: ' + error.message);
+            } finally {
                 document.getElementById('loadingIndicator').style.display = 'none';
             }
         }
 
-        // Get all unique classes from the trial
         function getAllClassesFromTrial() {
             const classes = new Set();
             
@@ -2261,8 +1598,8 @@ if (judgeName && judgeName !== 'Judge TBD') {
                 currentTrial.days.forEach(day => {
                     if (day.classes) {
                         day.classes.forEach(cls => {
-                            if (cls.className) {
-                                classes.add(cls.className);
+                            if (cls[STANDARD_FIELDS.CLASS_NAME]) {
+                                classes.add(cls[STANDARD_FIELDS.CLASS_NAME]);
                             }
                         });
                     }
@@ -2272,7 +1609,6 @@ if (judgeName && judgeName !== 'Judge TBD') {
             return Array.from(classes);
         }
 
-        // Get all score sheets for a trial from Firebase
         async function getAllScoreSheetsForTrial(trialId) {
             try {
                 const scoreSheetsQuery = query(
@@ -2299,370 +1635,71 @@ if (judgeName && judgeName !== 'Judge TBD') {
             }
         }
 
-        // Create league summary for a specific class
         async function createLeagueSummaryForClass(className, allScoreSheets) {
-            try {
-                // Get score sheets for this class
-                const classSheets = allScoreSheets.filter(sheet => 
-                    sheet.className === className
-                );
+            const classSheets = allScoreSheets.filter(sheet => sheet.className === className);
+            
+            if (classSheets.length === 0) return null;
 
-                if (classSheets.length === 0) {
-                    console.log(`No score sheets found for class: ${className}`);
-                    return null;
-                }
+            const participants = new Set();
+            const scores = {};
+            const rounds = [];
 
-                // Get all participants who entered this class
-                const participants = await getParticipantsForClass(className);
-                
-                if (participants.length === 0) {
-                    console.log(`No participants found for class: ${className}`);
-                    return null;
-                }
+            classSheets.forEach(sheet => {
+                const columnHeader = `${formatDateDisplay(sheet.date)} - ${sheet.judge} - R${sheet.roundNumber}`;
+                rounds.push({
+                    sheetId: sheet.id,
+                    columnHeader: columnHeader,
+                    date: sheet.date,
+                    judge: sheet.judge,
+                    roundNumber: sheet.roundNumber
+                });
 
-                // Get all rounds/dates for this class
-                const rounds = getRoundsForClass(className, classSheets);
+                sheet.entrants.forEach(entrant => {
+                    const participantKey = getParticipantKey(entrant);
+                    participants.add(JSON.stringify({
+                        registrationNumber: entrant.registrationNumber || '',
+                        callName: entrant.dog || '',
+                        handlerName: entrant.handler || ''
+                    }));
 
-                // Build the summary structure
-                const summary = {
-                    className: className,
-                    trialName: currentTrial.clubName || 'Unnamed Trial',
-                    dateRange: getTrialDateRange(),
-                    participants: participants,
-                    rounds: rounds,
-                    scores: extractScoresFromSheets(classSheets, participants, rounds)
-                };
+                    if (!scores[participantKey]) {
+                        scores[participantKey] = {};
+                    }
 
-                console.log(`Created summary for ${className}:`, summary);
-                return summary;
-
-            } catch (error) {
-                console.error(`Error creating summary for ${className}:`, error);
-                return null;
-            }
-        }
-
-        // Get participants for a specific class from entries
-        async function getParticipantsForClass(className) {
-            try {
-                // Get all entries for this trial
-                const entriesQuery = query(
-                    collection(db, 'entries'),
-                    where('trialId', '==', currentTrial.id)
-                );
-                
-                const snapshot = await getDocs(entriesQuery);
-                const participants = [];
-                const seen = new Set();
-
-                snapshot.forEach(doc => {
-                    const entryData = doc.data();
-                    
-                    if (entryData.selectedEntries) {
-                        entryData.selectedEntries.forEach(selectedEntry => {
-                            if (selectedEntry.className === className) {
-                                const key = `${entryData.cwagsNumber || 'unknown'}_${entryData.dogCallName}`;
-                                
-                                if (!seen.has(key)) {
-                                    seen.add(key);
-                                    participants.push({
-                                        registrationNumber: entryData.cwagsNumber || '',
-                                        callName: entryData.dogCallName || '',
-                                        handlerName: entryData.handlerName || '',
-                                        handler: entryData.handlerName || '',
-                                        dog: entryData.dogCallName || ''
-                                    });
-                                }
+                    if (sheet.scoreData) {
+                        const entrantIndex = sheet.entrants.findIndex(e => 
+                            getParticipantKey(e) === participantKey
+                        );
+                        if (entrantIndex >= 0) {
+                            const entrantScoreKey = `entrant_${entrantIndex}`;
+                            const entrantScore = sheet.scoreData[entrantScoreKey];
+                            if (entrantScore && entrantScore.result) {
+                                scores[participantKey][sheet.id] = entrantScore.result;
                             }
-                        });
+                        }
                     }
                 });
+            });
 
-                return participants.sort((a, b) => 
-                    (a.handlerName || '').localeCompare(b.handlerName || '')
-                );
-
-            } catch (error) {
-                console.error('Error getting participants:', error);
-                return [];
-            }
+            return {
+                className: className,
+                participants: Array.from(participants).map(p => JSON.parse(p)),
+                rounds: rounds.sort((a, b) => new Date(a.date) - new Date(b.date)),
+                scores: scores
+            };
         }
 
-        // Get all rounds/dates for a class
-        function getRoundsForClass(className, classSheets) {
-            const roundsMap = new Map();
-            
-            classSheets.forEach(sheet => {
-                if (sheet.className === className) {
-                    const roundKey = `${sheet.date}_${sheet.roundNumber || 1}`;
-                    const displayDate = formatDateDisplay(sheet.date, { month: 'short', day: 'numeric' });
-                    const roundNum = sheet.roundNumber || 1;
-                    
-                    roundsMap.set(roundKey, {
-                        date: sheet.date,
-                        displayDate: displayDate,
-                        roundNumber: roundNum,
-                        judge: sheet.judge || 'Judge TBD',
-                        sheetId: sheet.id,
-                        columnHeader: roundNum > 1 ? `${displayDate} R${roundNum}` : displayDate
-                    });
-                }
-            });
-            
-            return Array.from(roundsMap.values()).sort((a, b) => {
-                const dateCompare = new Date(a.date) - new Date(b.date);
-                if (dateCompare !== 0) return dateCompare;
-                return a.roundNumber - b.roundNumber;
-            });
+        function getParticipantKey(entrant) {
+            return `${entrant.handler || ''}_${entrant.dog || ''}_${entrant.registrationNumber || ''}`;
         }
 
-        // Extract scores from score sheets
-        function extractScoresFromSheets(classSheets, participants, rounds) {
-            const scores = {};
-            
-            participants.forEach(participant => {
-                const key = getParticipantKey(participant);
-                scores[key] = {};
-                rounds.forEach(round => {
-                    scores[key][round.sheetId] = null;
-                });
-            });
-            
-            classSheets.forEach(sheet => {
-                if (sheet.scoreData) {
-                    Object.keys(sheet.scoreData).forEach(entrantKey => {
-                        if (entrantKey.startsWith('entrant_')) {
-                            const entrantData = sheet.scoreData[entrantKey];
-                            
-                            const participant = findMatchingParticipant(entrantData, participants);
-                            if (participant) {
-                                const participantKey = getParticipantKey(participant);
-                                
-                                let score = entrantData.result || '';
-                                if (entrantData.time && !entrantData.result) {
-                                    score = entrantData.time;
-                                }
-                                
-                                scores[participantKey][sheet.id] = score;
-                            }
-                        }
-                    });
-                }
-            });
-            
-            return scores;
-        }
+        // ========================================
+        // UTILITY FUNCTIONS
+        // ========================================
 
-        // Helper function to get participant key
-        function getParticipantKey(participant) {
-            return `${participant.registrationNumber || 'unknown'}_${participant.callName || participant.dog}`;
-        }
-
-        // Helper function to find matching participant
-        function findMatchingParticipant(entrantData, participants) {
-            return participants.find(p => 
-                (p.handler || p.handlerName) === entrantData.handler && 
-                (p.dog || p.callName) === entrantData.dog
-            );
-        }
-
-        // Get trial date range for display
-        function getTrialDateRange() {
-            if (!currentTrial || !currentTrial.days || currentTrial.days.length === 0) {
-                return 'Date range not available';
-            }
-            
-            const dates = currentTrial.days
-                .map(day => day.date)
-                .filter(date => date)
-                .sort();
-            
-            if (dates.length === 0) return 'Date range not available';
-            if (dates.length === 1) return formatDateDisplay(dates[0]);
-            
-            const firstDate = formatDateDisplay(dates[0], { month: 'short', day: 'numeric' });
-            const lastDate = formatDateDisplay(dates[dates.length - 1], { month: 'short', day: 'numeric', year: 'numeric' });
-            
-            return `${firstDate} - ${lastDate}`;
-        }
-
-        // Display league summaries
-        function displayLeagueSummaries() {
-            let summariesSection = document.getElementById('leagueSummariesSection');
-            if (!summariesSection) {
-                summariesSection = document.createElement('div');
-                summariesSection.id = 'leagueSummariesSection';
-                summariesSection.className = 'league-summaries-section';
-                
-                const scoreSheetsSection = document.getElementById('scoreSheetsSection');
-                scoreSheetsSection.parentNode.insertBefore(summariesSection, scoreSheetsSection.nextSibling);
-            }
-            
-            let html = '<h3>📊 League Summary Sheets</h3>';
-            
-            if (leagueSummaries.length === 0) {
-                html += '<p>No league summaries generated yet.</p>';
-            } else {
-                html += '<div class="summaries-list">';
-                
-                leagueSummaries.forEach((summary, index) => {
-                    html += `
-                        <div class="summary-item">
-                            <div class="summary-header">
-                                <h4>${summary.className} - League Summary</h4>
-                                <div class="summary-meta">
-                                    ${summary.participants.length} participants • ${summary.rounds.length} rounds • ${summary.dateRange}
-                                </div>
-                            </div>
-                            <div class="summary-actions">
-                                <button class="btn btn-secondary" onclick="previewLeagueSummary(${index})">Preview</button>
-                                <button class="btn btn-success" onclick="printLeagueSummary(${index})">Print</button>
-                                <button class="btn btn-warning" onclick="exportLeagueSummary(${index})">Export CSV</button>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div>';
-            }
-            
-            summariesSection.innerHTML = html;
-            summariesSection.style.display = 'block';
-        }
-
-        // Preview league summary
-        window.previewLeagueSummary = function(index) {
-            const summary = leagueSummaries[index];
-            if (!summary) return;
-            
-            let html = `
-                <div class="league-summary-preview">
-                    <h2>${summary.className} - League Summary</h2>
-                    <p><strong>Trial:</strong> ${summary.trialName}</p>
-                    <p><strong>Dates:</strong> ${summary.dateRange}</p>
-                    
-                    <table class="league-summary-table">
-                        <thead>
-                            <tr>
-                                <th rowspan="2">Registration #</th>
-                                <th rowspan="2">Call Name</th>
-                                <th rowspan="2">Handler Name</th>
-            `;
-            
-            summary.rounds.forEach(round => {
-                html += `<th>${round.judge}</th>`;
-            });
-            html += '</tr><tr>';
-            
-            summary.rounds.forEach(round => {
-                html += `<th>${round.columnHeader}</th>`;
-            });
-            html += '</tr></thead><tbody>';
-            
-            summary.participants.forEach(participant => {
-                const participantKey = getParticipantKey(participant);
-                html += `
-                    <tr>
-                        <td>${participant.registrationNumber}</td>
-                        <td>${participant.callName}</td>
-                        <td>${participant.handlerName}</td>
-                `;
-                
-                summary.rounds.forEach(round => {
-                    const score = summary.scores[participantKey] && summary.scores[participantKey][round.sheetId];
-                    html += `<td>${score || '-'}</td>`;
-                });
-                
-                html += '</tr>';
-            });
-            
-            html += '</tbody></table></div>';
-            
-            const previewWindow = window.open('', '_blank');
-            previewWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>${summary.className} League Summary</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        .league-summary-table { border-collapse: collapse; width: 100%; }
-                        .league-summary-table th, .league-summary-table td { 
-                            border: 1px solid #ddd; 
-                            padding: 8px; 
-                            text-align: center; 
-                        }
-                        .league-summary-table th { background-color: #f2f2f2; }
-                        h2 { text-align: center; }
-                        p { text-align: center; margin: 10px 0; }
-                    </style>
-                </head>
-                <body>
-                    ${html}
-                </body>
-                </html>
-            `);
-            previewWindow.document.close();
+        window.generateFilledPDF = function() {
+            alert('PDF generation feature coming soon!');
         };
-
-        // Print league summary
-        window.printLeagueSummary = function(index) {
-            const summary = leagueSummaries[index];
-            if (!summary) return;
-            
-            previewLeagueSummary(index);
-            
-            setTimeout(() => {
-                const windows = window.open('', '_blank');
-                if (windows) {
-                    windows.print();
-                }
-            }, 1000);
-        };
-
-        // Export league summary to CSV
-        window.exportLeagueSummary = function(index) {
-            const summary = leagueSummaries[index];
-            if (!summary) return;
-            
-            const headers = ['Registration #', 'Call Name', 'Handler Name'];
-            headers.push(...summary.rounds.map(round => round.columnHeader));
-            
-            const csvRows = [headers.join(',')];
-            
-            summary.participants.forEach(participant => {
-                const participantKey = getParticipantKey(participant);
-                const row = [
-                    `"${participant.registrationNumber}"`,
-                    `"${participant.callName}"`,
-                    `"${participant.handlerName}"`
-                ];
-                
-                summary.rounds.forEach(round => {
-                    const score = summary.scores[participantKey] && summary.scores[participantKey][round.sheetId];
-                    row.push(`"${score || ''}"`);
-                });
-                
-                csvRows.push(row.join(','));
-            });
-            
-            const csvContent = csvRows.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${summary.className.replace(/[^a-zA-Z0-9]/g, '_')}_League_Summary.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        };
-
-        // Make main functions available globally
-        window.loadTrialData = loadTrialData;
-        window.generateAllScoreSheets = generateAllScoreSheets;
-        window.printScoreSheets = printScoreSheets;
-        window.generateLeagueSummaries = generateLeagueSummaries;
 
         // Close modal when clicking outside of it
         window.onclick = function(event) {
@@ -2671,6 +1708,12 @@ if (judgeName && judgeName !== 'Judge TBD') {
                 closeScoreModal();
             }
         };
+
+        // Make main functions available globally
+        window.loadTrialData = loadTrialData;
+        window.generateAllScoreSheets = generateAllScoreSheets;
+        window.printScoreSheets = printScoreSheets;
+        window.generateLeagueSummaries = generateLeagueSummaries;
 
         // Initialize when auth is ready
         auth.onAuthStateChanged(async (user) => {
@@ -2681,7 +1724,7 @@ if (judgeName && judgeName !== 'Judge TBD') {
             }
         });
 
-        console.log('Score sheet generator loaded successfully');
+        console.log('Score sheet generator loaded successfully with standardized field names');
     </script>
 </body>
 </html>
