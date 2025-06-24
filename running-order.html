@@ -374,7 +374,13 @@
             <button class="btn btn-success" onclick="generateRunningOrder()" id="generateBtn" style="display: none;">Generate Running Order</button>
             <button class="btn btn-warning" onclick="resetOrder()" id="resetBtn" style="display: none;">Reset Order</button>
             <button class="btn btn-secondary" onclick="window.print()" id="printBtn" style="display: none;">Print Running Order</button>
+            <button class="btn btn-secondary" onclick="showDebugInfo()" id="debugBtn">🔧 Debug Info</button>
             <button class="btn btn-secondary" onclick="location.href='main-dashboard.html'">← Back to Dashboard</button>
+        </div>
+
+        <div id="debugSection" style="display: none; background: #f8f9fa; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin: 20px 0; font-family: monospace; font-size: 12px;">
+            <h4 style="font-family: 'Segoe UI', sans-serif; color: #2c3e50; margin-bottom: 10px;">Debug Information</h4>
+            <div id="debugContent"></div>
         </div>
 
         <div id="loadingIndicator" class="loading-indicator" style="display: none;">
@@ -515,6 +521,84 @@
         let entries = [];
         let runningOrderData = {};
         let originalOrder = {};
+        let validClassNames = []; // Will be loaded from data.json
+
+        // ========================================
+        // CLASS NAMES LOADING FROM DATA.JSON
+        // ========================================
+        
+        async function loadValidClassNames() {
+            try {
+                console.log('📚 Loading valid class names from data.json...');
+                
+                const possiblePaths = [
+                    '/secretary/js/data.json',
+                    './js/data.json',
+                    '../js/data.json',
+                    '/js/data.json',
+                    'js/data.json'
+                ];
+                
+                let classData = null;
+                
+                for (const path of possiblePaths) {
+                    try {
+                        const response = await fetch(path);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.classes && Array.isArray(data.classes)) {
+                                classData = data.classes;
+                                console.log(`✅ Loaded class data from: ${path}`);
+                                break;
+                            }
+                        }
+                    } catch (error) {
+                        console.log(`❌ Failed to load from: ${path}`);
+                    }
+                }
+                
+                if (classData) {
+                    // Extract class names (Column D in your data)
+                    validClassNames = classData.map(classItem => {
+                        // Handle different possible formats
+                        if (typeof classItem === 'string') {
+                            return classItem.toLowerCase();
+                        } else if (classItem.name) {
+                            return classItem.name.toLowerCase();
+                        } else if (classItem.className) {
+                            return classItem.className.toLowerCase();
+                        } else if (classItem.class) {
+                            return classItem.class.toLowerCase();
+                        }
+                        return null;
+                    }).filter(name => name && name.trim().length > 0);
+                    
+                    console.log(`📋 Loaded ${validClassNames.length} valid class names for running orders`);
+                } else {
+                    console.warn('⚠️ Could not load class data, will accept all class names');
+                    validClassNames = []; // Empty means accept all classes
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading class names:', error);
+                validClassNames = []; // Empty means accept all classes
+            }
+        }
+
+        function isValidClass(className) {
+            if (!className || typeof className !== 'string') return false;
+            
+            // If no valid class names loaded, accept all classes (running orders need all entries)
+            if (validClassNames.length === 0) return true;
+            
+            const normalizedClassName = className.toLowerCase().trim();
+            
+            // Check against loaded valid class names
+            return validClassNames.some(validClass => 
+                normalizedClassName.includes(validClass) || 
+                validClass.includes(normalizedClassName)
+            );
+        }
 
         // ========================================
         // INITIALIZATION
@@ -523,6 +607,7 @@
         async function init() {
             try {
                 console.log('Initializing Running Order Generator...');
+                await loadValidClassNames(); // Load class names first
                 await loadTrials();
                 console.log('Running Order Generator initialized successfully');
             } catch (error) {
@@ -663,8 +748,25 @@
                                         submittedAt: entryData.submittedAt
                                     };
                                     
-                                    // Filter by date if specified
-                                    if (!selectedDate || processedEntry.date === selectedDate) {
+                                    // Enhanced debugging for running order entries
+                                    console.log(`📋 Processing entry ${index}:`, {
+                                        entryDate: processedEntry.date,
+                                        selectedDate: selectedDate,
+                                        handlerName: processedEntry[STANDARD_FIELDS.HANDLER_NAME],
+                                        dogName: processedEntry[STANDARD_FIELDS.DOG_CALL_NAME],
+                                        className: processedEntry[STANDARD_FIELDS.CLASS_NAME],
+                                        judgeName: processedEntry[STANDARD_FIELDS.JUDGE_NAME],
+                                        isValidClass: isValidClass(processedEntry[STANDARD_FIELDS.CLASS_NAME]),
+                                        matchesDate: !selectedDate || processedEntry.date === selectedDate,
+                                        willInclude: (!selectedDate || processedEntry.date === selectedDate) && isValidClass(processedEntry[STANDARD_FIELDS.CLASS_NAME]),
+                                        allFields: Object.keys(selectedEntry)
+                                    });
+                                    
+                                    // Filter by date if specified AND ensure it's a valid class
+                                    const dateMatches = !selectedDate || processedEntry.date === selectedDate;
+                                    const classIsValid = isValidClass(processedEntry[STANDARD_FIELDS.CLASS_NAME]);
+                                    
+                                    if (dateMatches && classIsValid) {
                                         entries.push(processedEntry);
                                     }
                                 } catch (error) {
@@ -974,6 +1076,49 @@
                 }
             });
         }
+
+        // ========================================
+        // DEBUG UTILITIES
+        // ========================================
+        
+        window.showDebugInfo = function() {
+            const debugSection = document.getElementById('debugSection');
+            const debugContent = document.getElementById('debugContent');
+            
+            if (debugSection.style.display === 'none') {
+                debugSection.style.display = 'block';
+                
+                let debugInfo = `
+                    <strong>Current Trial:</strong> ${currentTrial ? currentTrial.id : 'None'}<br>
+                    <strong>Loaded Entries:</strong> ${entries.length}<br>
+                    <strong>Valid Class Names Loaded:</strong> ${validClassNames.length}<br><br>
+                    
+                    <strong>Valid Classes from data.json:</strong><br>
+                    ${validClassNames.length > 0 ? validClassNames.join(', ') : 'None loaded (accepting all classes)'}<br><br>
+                    
+                    <strong>Standard Fields:</strong><br>
+                    ${Object.entries(STANDARD_FIELDS).map(([key, value]) => `${key}: '${value}'`).join('<br>')}<br><br>
+                `;
+                
+                if (entries.length > 0) {
+                    debugInfo += `<strong>Sample Loaded Entry:</strong><br>`;
+                    const sampleEntry = entries[0];
+                    debugInfo += `Handler: "${sampleEntry[STANDARD_FIELDS.HANDLER_NAME]}"<br>`;
+                    debugInfo += `Dog: "${sampleEntry[STANDARD_FIELDS.DOG_CALL_NAME]}"<br>`;
+                    debugInfo += `Class: "${sampleEntry[STANDARD_FIELDS.CLASS_NAME]}"<br>`;
+                    debugInfo += `Judge: "${sampleEntry[STANDARD_FIELDS.JUDGE_NAME]}"<br>`;
+                    debugInfo += `Date: "${sampleEntry.date}"<br><br>`;
+                    
+                    debugInfo += `<strong>All Entry Classes Found:</strong><br>`;
+                    const allClasses = [...new Set(entries.map(e => e[STANDARD_FIELDS.CLASS_NAME] || 'UNDEFINED'))];
+                    debugInfo += allClasses.join('<br>');
+                }
+                
+                debugContent.innerHTML = debugInfo;
+            } else {
+                debugSection.style.display = 'none';
+            }
+        };
 
         // ========================================
         // UTILITY FUNCTIONS
