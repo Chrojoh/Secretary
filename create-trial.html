@@ -57,17 +57,20 @@
   <form id="trialForm">
     <div style="margin-bottom: 15px;">
       <label>Club Name:</label><br>
-      <input type="text" name="clubName" placeholder="Club Name" style="width: 300px; padding: 5px;">
+      <input type="text" name="clubName" placeholder="Club Name" style="width: 300px; padding: 5px;" 
+             onkeydown="handleEnterKey(event)">
     </div>
     
     <div style="margin-bottom: 15px;">
       <label>Trial Secretary:</label><br>
-      <input type="text" name="secretary" placeholder="Trial Secretary" style="width: 300px; padding: 5px;">
+      <input type="text" name="secretary" placeholder="Trial Secretary" style="width: 300px; padding: 5px;"
+             onkeydown="handleEnterKey(event)">
     </div>
     
     <div style="margin-bottom: 15px;">
       <label>How many days?</label><br>
-      <input type="number" id="numDays" min="1" max="10" style="width: 100px; padding: 5px;">
+      <input type="number" id="numDays" min="1" max="10" style="width: 100px; padding: 5px;"
+             onkeydown="handleEnterKey(event)">
       <button type="button" onclick="generateDays()">Create Days</button>
     </div>
     
@@ -81,6 +84,27 @@
     import { addDoc, collection, doc, getDoc, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     console.log("Script starting to load...");
+
+    // ========================================
+    // ENTER KEY HANDLING FIX
+    // ========================================
+
+    function handleEnterKey(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent form submission
+        
+        // Find the next input field
+        const inputs = Array.from(document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]'));
+        const currentIndex = inputs.indexOf(event.target);
+        
+        if (currentIndex !== -1 && currentIndex < inputs.length - 1) {
+          inputs[currentIndex + 1].focus();
+        }
+      }
+    }
+
+    // Make handleEnterKey globally available
+    window.handleEnterKey = handleEnterKey;
 
     // ========================================
     // STANDARDIZED FIELD NAMES (CRITICAL FIX)
@@ -218,10 +242,10 @@
           dayDiv.innerHTML = `
             <h3>Day ${d + 1}</h3>
             <label>Date:</label>
-            <input type="date" name="date${d}" style="margin-left: 10px; margin-bottom: 10px;">
+            <input type="date" name="date${d}" style="margin-left: 10px; margin-bottom: 10px;" onkeydown="handleEnterKey(event)">
             
             <label style="display: block; margin: 10px 0;">How many classes for Day ${d + 1}?</label>
-            <input type="number" id="numClasses_${d}" min="1" max="20" style="width: 100px; padding: 5px;">
+            <input type="number" id="numClasses_${d}" min="1" max="20" style="width: 100px; padding: 5px;" onkeydown="handleEnterKey(event)">
             <button type="button" onclick="generateClasses(${d})">Create Classes</button>
             
             <div class="classes-container-${d}"></div>
@@ -258,13 +282,14 @@
                    style="margin-left: 10px; width: 200px; padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px;" 
                    placeholder="Type class name..." 
                    list="classes-datalist-${dayIndex}-${c}"
-                   class="class-autocomplete">
+                   class="class-autocomplete"
+                   onkeydown="handleEnterKey(event)">
             <datalist id="classes-datalist-${dayIndex}-${c}">
               ${globalClasses.map(className => `<option value="${className}">${className}</option>`).join('')}
             </datalist>
             
             <label style="display: block; margin: 10px 0;">How many rounds for Class ${c + 1}?</label>
-            <input type="number" id="numRounds_${dayIndex}_${c}" min="1" max="10" style="width: 100px; padding: 5px;">
+            <input type="number" id="numRounds_${dayIndex}_${c}" min="1" max="10" style="width: 100px; padding: 5px;" onkeydown="handleEnterKey(event)">
             <button type="button" onclick="generateRounds(${dayIndex}, ${c})">Create Rounds</button>
             
             <div class="rounds-container-${dayIndex}-${c}"></div>
@@ -302,7 +327,8 @@
                      style="margin-left: 5px; width: 150px; padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px;" 
                      placeholder="Type judge name..." 
                      list="judges-datalist-${dayIndex}-${classIndex}-${r}"
-                     class="judge-autocomplete">
+                     class="judge-autocomplete"
+                     onkeydown="handleEnterKey(event)">
               <datalist id="judges-datalist-${dayIndex}-${classIndex}-${r}">
                 ${globalJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
               </datalist>
