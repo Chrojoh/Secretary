@@ -747,7 +747,11 @@
                                     const processedEntry = {
                                         ...selectedEntry,
                                         trialId: trialId,
-                                        date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null,
+                                        // Enhanced date processing with multiple fallbacks
+                                        date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : 
+                                              (selectedEntry.dateStr ? selectedEntry.dateStr :
+                                               (data.trialDate ? getDateFromFirebase(data.trialDate) : 
+                                                (currentTrial && currentTrial.days && currentTrial.days[0] ? currentTrial.days[0].date : selectedDate))),
                                         // Normalize all field names using standardized fields
                                         [STANDARD_FIELDS.HANDLER_NAME]: entryData[STANDARD_FIELDS.HANDLER_NAME] || entryData.handlerName,
                                         [STANDARD_FIELDS.DOG_CALL_NAME]: entryData[STANDARD_FIELDS.DOG_CALL_NAME] || entryData.dogCallName,
