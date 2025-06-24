@@ -139,10 +139,54 @@
             align-items: center;
         }
 
+        .score-sheet-info {
+            flex: 1;
+        }
+
+        .score-sheet-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .score-sheet-details {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .score-sheet-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-generated {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
         .loading-indicator {
             text-align: center;
             padding: 20px;
             color: #666;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
         }
 
         /* Modal Styles */
@@ -591,37 +635,79 @@
         };
 
         // ===========================================
-        // TIMEZONE-SAFE DATE UTILITIES
+        // ENHANCED DATE UTILITIES WITH VALIDATION
         // ===========================================
         function createLocalDate(dateStr) {
-            if (!dateStr) return null;
-            if (typeof dateStr === 'string') {
-                const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
-                return new Date(dateWithTime);
+            if (!dateStr || dateStr === null || dateStr === undefined) return null;
+            
+            try {
+                if (typeof dateStr === 'string') {
+                    const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+                    const date = new Date(dateWithTime);
+                    return isNaN(date.getTime()) ? null : date;
+                }
+                
+                const date = new Date(dateStr);
+                return isNaN(date.getTime()) ? null : date;
+            } catch (error) {
+                console.warn('Date creation error:', error, 'for input:', dateStr);
+                return null;
             }
-            return new Date(dateStr);
         }
 
         function formatLocalDate(date) {
-            if (!date || !(date instanceof Date)) return null;
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
+            if (!date || !(date instanceof Date) || isNaN(date.getTime())) return null;
+            
+            try {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            } catch (error) {
+                console.warn('Date formatting error:', error);
+                return null;
+            }
+        }
+
+        function prepareDateForFirebase(dateStr) {
+            if (!dateStr || dateStr === null || dateStr === undefined) return null;
+            
+            try {
+                const date = createLocalDate(dateStr);
+                if (!date || isNaN(date.getTime())) {
+                    console.warn('Invalid date detected, skipping:', dateStr);
+                    return null;
+                }
+                return Timestamp.fromDate(date);
+            } catch (error) {
+                console.error('Date conversion error:', error, 'for date:', dateStr);
+                return null;
+            }
         }
 
         function getDateFromFirebase(timestamp) {
             if (!timestamp) return null;
-            if (timestamp.toDate) {
-                return formatLocalDate(timestamp.toDate());
+            
+            try {
+                if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+                    return formatLocalDate(timestamp.toDate());
+                }
+                return null;
+            } catch (error) {
+                console.warn('Firebase date conversion error:', error);
+                return null;
             }
-            return null;
         }
 
         function formatDateDisplay(dateStr) {
             if (!dateStr) return 'Unknown Date';
-            const date = createLocalDate(dateStr);
-            return date ? date.toLocaleDateString() : 'Unknown Date';
+            
+            try {
+                const date = createLocalDate(dateStr);
+                return date ? date.toLocaleDateString() : 'Unknown Date';
+            } catch (error) {
+                return 'Unknown Date';
+            }
         }
 
         // ===========================================
@@ -635,16 +721,48 @@
         let currentScoreData = {};
 
         // ===========================================
-        // FIELD NORMALIZATION
+        // ENHANCED FIELD NORMALIZATION
         // ===========================================
         function normalizeEntry(entry) {
+            if (!entry) return {};
+            
             return {
                 [STANDARD_FIELDS.HANDLER_NAME]: entry[STANDARD_FIELDS.HANDLER_NAME] || entry.handler || entry.handlerName || '',
                 [STANDARD_FIELDS.DOG_CALL_NAME]: entry[STANDARD_FIELDS.DOG_CALL_NAME] || entry.dog || entry.dogName || entry.callName || '',
                 [STANDARD_FIELDS.CWAGS_NUMBER]: entry[STANDARD_FIELDS.CWAGS_NUMBER] || entry.registration || entry.registrationNumber || '',
                 [STANDARD_FIELDS.CLASS_NAME]: entry[STANDARD_FIELDS.CLASS_NAME] || entry.class || entry.classname || '',
-                [STANDARD_FIELDS.JUDGE_NAME]: entry[STANDARD_FIELDS.JUDGE_NAME] || entry.judge || entry.judgeAssigned || 'Judge TBD'
+                [STANDARD_FIELDS.JUDGE_NAME]: entry[STANDARD_FIELDS.JUDGE_NAME] || entry.judge || entry.judgeAssigned || 'Judge TBD',
+                roundNumber: entry.roundNumber || '1',
+                roundName: entry.roundName || '',
+                date: entry.date,
+                fee: entry.fee || '',
+                entryType: entry.entryType || entry.type || ''
             };
+        }
+
+        function getStandardizedJudgeName(entry) {
+            return entry[STANDARD_FIELDS.JUDGE_NAME] || 
+                   entry.judge || 
+                   entry.judgeAssigned || 
+                   entry.selectedJudge ||
+                   'Judge TBD';
+        }
+
+        // ===========================================
+        // ERROR HANDLING UTILITIES
+        // ===========================================
+        function showError(message) {
+            console.error('❌ Error:', message);
+            alert(`Error: ${message}`);
+        }
+
+        function showSuccess(message) {
+            console.log('✅ Success:', message);
+            alert(`Success: ${message}`);
+        }
+
+        function showWarning(message) {
+            console.warn('⚠️ Warning:', message);
         }
 
         // ===========================================
@@ -657,17 +775,17 @@
                 console.log('✅ Scent Detective Score Sheet Generator initialized');
             } catch (error) {
                 console.error('❌ Error initializing:', error);
-                alert('Error loading trials: ' + error.message);
+                showError('Failed to initialize: ' + error.message);
             }
         }
 
         // ===========================================
-        // TRIAL LOADING
+        // ENHANCED TRIAL LOADING
         // ===========================================
         async function loadTrials() {
             try {
                 if (!auth.currentUser) {
-                    alert('Please log in to access trials');
+                    showError('Please log in to access trials');
                     return;
                 }
 
@@ -680,14 +798,18 @@
                 trials = [];
                 
                 snapshot.forEach(doc => {
-                    const trialData = doc.data();
-                    if (trialData.days && Array.isArray(trialData.days)) {
-                        trialData.days = trialData.days.map(day => ({
-                            ...day,
-                            date: day.date ? getDateFromFirebase(day.date) : null
-                        }));
+                    try {
+                        const trialData = doc.data();
+                        if (trialData.days && Array.isArray(trialData.days)) {
+                            trialData.days = trialData.days.map(day => ({
+                                ...day,
+                                date: day.date ? getDateFromFirebase(day.date) : null
+                            }));
+                        }
+                        trials.push({ id: doc.id, ...trialData });
+                    } catch (error) {
+                        console.warn('Skipping invalid trial data:', doc.id, error);
                     }
-                    trials.push({ id: doc.id, ...trialData });
                 });
 
                 trials.sort((a, b) => {
@@ -700,7 +822,7 @@
 
             } catch (error) {
                 console.error('Error loading trials:', error);
-                alert('Error loading trials: ' + error.message);
+                showError('Failed to load trials: ' + error.message);
             }
         }
 
@@ -749,14 +871,14 @@
         }
 
         // ===========================================
-        // DATA LOADING
+        // ENHANCED DATA LOADING WITH BETTER FILTERING
         // ===========================================
         window.loadTrialData = async function() {
             const trialId = document.getElementById('trialSelect').value;
             const selectedDate = document.getElementById('dateSelect').value;
 
             if (!trialId || !selectedDate) {
-                alert('Please select both a trial and date');
+                showError('Please select both a trial and date');
                 return;
             }
 
@@ -764,6 +886,8 @@
             document.getElementById('loadBtn').disabled = true;
 
             try {
+                console.log('🚀 Loading trial data for:', trialId, 'Date:', selectedDate);
+
                 const q = query(
                     collection(db, "entries"),
                     where("trialId", "==", trialId)
@@ -772,41 +896,60 @@
                 const snapshot = await getDocs(q);
                 entries = [];
                 
+                console.log('📊 Found', snapshot.size, 'entry documents');
+                
                 snapshot.forEach(doc => {
-                    const entryData = doc.data();
-                    
-                    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-                        entryData.selectedEntries.forEach(selectedEntry => {
-                            const processedEntry = {
-                                ...selectedEntry,
-                                date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
-                            };
+                    try {
+                        const entryData = doc.data();
+                        
+                        if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                            entryData.selectedEntries.forEach(selectedEntry => {
+                                try {
+                                    const processedEntry = {
+                                        ...selectedEntry,
+                                        date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
+                                    };
 
-                            // Only include entries for the selected date and Scent Detective classes
-                            if (processedEntry.date === selectedDate && 
-                                (processedEntry[STANDARD_FIELDS.CLASS_NAME] || '').toLowerCase().includes('scent detective')) {
-                                
-                                const normalizedEntry = normalizeEntry({
-                                    ...processedEntry,
-                                    [STANDARD_FIELDS.HANDLER_NAME]: entryData[STANDARD_FIELDS.HANDLER_NAME],
-                                    [STANDARD_FIELDS.DOG_CALL_NAME]: entryData[STANDARD_FIELDS.DOG_CALL_NAME],
-                                    [STANDARD_FIELDS.CWAGS_NUMBER]: entryData[STANDARD_FIELDS.CWAGS_NUMBER]
-                                });
+                                    // Enhanced filtering for Scent Detective classes and correct date
+                                    const entryDate = processedEntry.date;
+                                    const className = (processedEntry[STANDARD_FIELDS.CLASS_NAME] || '').toLowerCase();
+                                    
+                                    console.log('📋 Checking entry:', {
+                                        date: entryDate,
+                                        selectedDate: selectedDate,
+                                        className: className,
+                                        matchesDate: entryDate === selectedDate,
+                                        isScentDetective: className.includes('scent detective')
+                                    });
 
-                                entries.push({
-                                    id: doc.id,
-                                    ...normalizedEntry,
-                                    submittedAt: entryData.submittedAt
-                                });
-                            }
-                        });
+                                    if (entryDate === selectedDate && className.includes('scent detective')) {
+                                        const normalizedEntry = normalizeEntry({
+                                            ...processedEntry,
+                                            [STANDARD_FIELDS.HANDLER_NAME]: entryData[STANDARD_FIELDS.HANDLER_NAME] || entryData.handlerName,
+                                            [STANDARD_FIELDS.DOG_CALL_NAME]: entryData[STANDARD_FIELDS.DOG_CALL_NAME] || entryData.dogCallName,
+                                            [STANDARD_FIELDS.CWAGS_NUMBER]: entryData[STANDARD_FIELDS.CWAGS_NUMBER] || entryData.cwagsNumber
+                                        });
+
+                                        entries.push({
+                                            id: doc.id,
+                                            ...normalizedEntry,
+                                            submittedAt: entryData.submittedAt
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.warn('Skipping invalid entry:', error);
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.warn('Skipping invalid document:', doc.id, error);
                     }
                 });
 
                 console.log(`✅ Loaded ${entries.length} Scent Detective entries for ${selectedDate}`);
 
                 if (entries.length === 0) {
-                    alert('No Scent Detective entries found for this date. Please ensure Scent Detective entries have been submitted.');
+                    showWarning('No Scent Detective entries found for this date. Please ensure Scent Detective entries have been submitted.');
                     return;
                 }
 
@@ -815,7 +958,7 @@
 
             } catch (error) {
                 console.error('Error loading trial data:', error);
-                alert('Error loading trial data: ' + error.message);
+                showError('Failed to load trial data: ' + error.message);
             } finally {
                 document.getElementById('loadingIndicator').style.display = 'none';
                 document.getElementById('loadBtn').disabled = false;
@@ -827,8 +970,9 @@
             const judges = new Set();
             
             entries.forEach(entry => {
-                if (entry[STANDARD_FIELDS.JUDGE_NAME]) {
-                    judges.add(entry[STANDARD_FIELDS.JUDGE_NAME]);
+                const judgeName = getStandardizedJudgeName(entry);
+                if (judgeName && judgeName !== 'Judge TBD') {
+                    judges.add(judgeName);
                 }
             });
 
@@ -847,69 +991,125 @@
         }
 
         // ===========================================
-        // SCORE SHEET GENERATION
+        // ENHANCED SCORE SHEET GENERATION WITH PROPER DATE HANDLING
         // ===========================================
         window.generateScoreSheets = async function() {
             const selectedJudge = document.getElementById('judgeSelect').value;
 
             if (entries.length === 0) {
-                alert('Please load trial data first.');
+                showError('Please load trial data first.');
                 return;
             }
 
-            generatedSheets = [];
+            try {
+                generatedSheets = [];
 
-            // Group entries by judge and class
-            const groupedEntries = {};
-            
-            entries.forEach(entry => {
-                const judge = entry[STANDARD_FIELDS.JUDGE_NAME];
-                const className = entry[STANDARD_FIELDS.CLASS_NAME];
+                // Group entries by judge and class
+                const groupedEntries = {};
                 
-                // Skip if filtering by specific judge
-                if (selectedJudge && judge !== selectedJudge) return;
-                
-                const key = `${judge}_${className}`;
-                if (!groupedEntries[key]) {
-                    groupedEntries[key] = {
-                        judge: judge,
-                        className: className,
-                        entries: []
-                    };
-                }
-                
-                groupedEntries[key].entries.push({
-                    handler: entry[STANDARD_FIELDS.HANDLER_NAME],
-                    dog: entry[STANDARD_FIELDS.DOG_CALL_NAME],
-                    registration: entry[STANDARD_FIELDS.CWAGS_NUMBER]
+                entries.forEach(entry => {
+                    const judge = getStandardizedJudgeName(entry);
+                    const className = entry[STANDARD_FIELDS.CLASS_NAME];
+                    
+                    // Skip if filtering by specific judge
+                    if (selectedJudge && judge !== selectedJudge) return;
+                    
+                    const key = `${judge}_${className}`;
+                    if (!groupedEntries[key]) {
+                        groupedEntries[key] = {
+                            judge: judge,
+                            className: className,
+                            entries: []
+                        };
+                    }
+                    
+                    groupedEntries[key].entries.push({
+                        handler: entry[STANDARD_FIELDS.HANDLER_NAME],
+                        dog: entry[STANDARD_FIELDS.DOG_CALL_NAME],
+                        registration: entry[STANDARD_FIELDS.CWAGS_NUMBER]
+                    });
                 });
-            });
 
-            // Create score sheets
-            Object.values(groupedEntries).forEach(group => {
-                const sheetId = `scent_detective_${currentTrial.id}_${group.judge}_${group.className}`.replace(/[^a-zA-Z0-9]/g, '_');
+                // Create score sheets with enhanced date handling
+                Object.values(groupedEntries).forEach(group => {
+                    const sheetId = `scent_detective_${currentTrial.id}_${group.judge}_${group.className}`.replace(/[^a-zA-Z0-9]/g, '_');
+                    
+                    const sheetData = {
+                        id: sheetId,
+                        type: 'scent_detective',
+                        trialId: currentTrial.id,
+                        trialName: currentTrial.clubName || 'Unnamed Trial',
+                        date: document.getElementById('dateSelect').value, // Keep as string for consistency
+                        judge: group.judge,
+                        className: group.className,
+                        entries: group.entries,
+                        status: 'generated',
+                        createdBy: auth.currentUser.uid
+                    };
+
+                    generatedSheets.push(sheetData);
+                });
+
+                console.log(`Generated ${generatedSheets.length} Scent Detective score sheets`);
                 
-                const sheetData = {
-                    id: sheetId,
-                    type: 'scent_detective',
-                    trialId: currentTrial.id,
-                    trialName: currentTrial.clubName || 'Unnamed Trial',
-                    date: document.getElementById('dateSelect').value,
-                    judge: group.judge,
-                    className: group.className,
-                    entries: group.entries,
-                    status: 'generated',
-                    createdAt: new Date(),
-                    createdBy: auth.currentUser.uid
-                };
+                // Save to database with enhanced error handling
+                await saveScoreSheetsToDatabase();
+                displayGeneratedSheets();
+                showSuccess(`Generated ${generatedSheets.length} Scent Detective score sheets!`);
 
-                generatedSheets.push(sheetData);
-            });
-
-            console.log(`Generated ${generatedSheets.length} Scent Detective score sheets`);
-            displayGeneratedSheets();
-            alert(`Generated ${generatedSheets.length} Scent Detective score sheets!`);
+            } catch (error) {
+                console.error('Error generating score sheets:', error);
+                showError('Failed to generate score sheets: ' + error.message);
+            }
         };
+
+        // ===========================================
+        // ENHANCED DATABASE SAVE WITH PROPER ERROR HANDLING
+        // ===========================================
+        async function saveScoreSheetsToDatabase() {
+            try {
+                for (const sheet of generatedSheets) {
+                    // Create a clean copy for Firebase with enhanced date handling
+                    const firebaseSheet = {
+                        ...sheet,
+                        createdAt: Timestamp.now(),
+                        lastModified: Timestamp.now()
+                    };
+                    
+                    // Handle date field safely
+                    if (sheet.date && sheet.date !== null && sheet.date !== undefined) {
+                        try {
+                            const preparedDate = prepareDateForFirebase(sheet.date);
+                            if (preparedDate) {
+                                firebaseSheet.date = preparedDate;
+                            } else {
+                                console.warn('Skipping invalid date for sheet:', sheet.id, 'date:', sheet.date);
+                                firebaseSheet.date = null;
+                            }
+                        } catch (error) {
+                            console.warn('Date preparation failed for sheet:', sheet.id, error);
+                            firebaseSheet.date = null;
+                        }
+                    } else {
+                        firebaseSheet.date = null;
+                    }
+                    
+                    // Remove any undefined or invalid fields
+                    Object.keys(firebaseSheet).forEach(key => {
+                        if (firebaseSheet[key] === undefined) {
+                            delete firebaseSheet[key];
+                        }
+                    });
+                    
+                    await setDoc(doc(db, 'scentDetectiveScores', sheet.id), firebaseSheet);
+                }
+                console.log('✅ Score sheets saved to database successfully');
+            } catch (error) {
+                console.error('❌ Error saving score sheets:', error);
+                showError('Failed to save score sheets to database: ' + error.message);
+                throw error; // Re-throw to prevent false success message
+            }
+        }
 
         function displayGeneratedSheets() {
             const section = document.getElementById('scoreSheetsSection');
@@ -917,7 +1117,7 @@
             
             let html = '';
             
-                            generatedSheets.forEach(sheet => {
+            generatedSheets.forEach(sheet => {
                 html += `
                     <div class="score-sheet-item">
                         <div class="score-sheet-info">
@@ -945,7 +1145,10 @@
         // ===========================================
         window.previewSheet = function(sheetId) {
             const sheet = generatedSheets.find(s => s.id === sheetId);
-            if (!sheet) return;
+            if (!sheet) {
+                showError('Score sheet not found');
+                return;
+            }
 
             const container = document.getElementById('scoreSheetsContainer');
             container.innerHTML = generateScentDetectiveSheetHTML(sheet);
@@ -956,7 +1159,10 @@
 
         window.printSingleSheet = function(sheetId) {
             const sheet = generatedSheets.find(s => s.id === sheetId);
-            if (!sheet) return;
+            if (!sheet) {
+                showError('Score sheet not found');
+                return;
+            }
 
             const container = document.getElementById('scoreSheetsContainer');
             container.innerHTML = generateScentDetectiveSheetHTML(sheet);
@@ -968,7 +1174,7 @@
 
         window.printScoreSheets = function() {
             if (generatedSheets.length === 0) {
-                alert('No score sheets generated. Please generate sheets first.');
+                showError('No score sheets generated. Please generate sheets first.');
                 return;
             }
 
@@ -987,7 +1193,7 @@
         };
 
         // ===========================================
-        // SCENT DETECTIVE SCORE SHEET HTML GENERATION
+        // ENHANCED SCENT DETECTIVE SCORE SHEET HTML GENERATION
         // ===========================================
         function generateScentDetectiveSheetHTML(sheetData) {
             const displayDate = formatDateDisplay(sheetData.date);
@@ -1139,7 +1345,7 @@
         }
 
         // ===========================================
-        // DIGITAL SCORE ENTRY
+        // DIGITAL SCORE ENTRY WITH ENHANCED ERROR HANDLING
         // ===========================================
         window.editDigitalScores = async function(sheetId) {
             try {
@@ -1149,9 +1355,14 @@
                     // Try to load from database
                     const sheetDoc = await getDoc(doc(db, 'scentDetectiveScores', sheetId));
                     if (sheetDoc.exists()) {
-                        sheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                        const data = sheetDoc.data();
+                        sheet = { 
+                            id: sheetDoc.id, 
+                            ...data,
+                            date: data.date ? getDateFromFirebase(data.date) : data.date
+                        };
                     } else {
-                        alert('Score sheet not found');
+                        showError('Score sheet not found');
                         return;
                     }
                 }
@@ -1164,7 +1375,7 @@
                 
             } catch (error) {
                 console.error('Error loading sheet for editing:', error);
-                alert('Error loading sheet: ' + error.message);
+                showError('Failed to load sheet for editing: ' + error.message);
             }
         };
 
@@ -1188,9 +1399,9 @@
                 html += `
                     <div class="entry-grid">
                         <div class="entry-team-info">
-                            <div class="handler-name">${entry.handler}</div>
-                            <div class="dog-name">${entry.dog}</div>
-                            <div style="font-size: 10px;">Reg: ${entry.registration}</div>
+                            <div class="handler-name">${entry.handler || 'Unknown Handler'}</div>
+                            <div class="dog-name">${entry.dog || 'Unknown Dog'}</div>
+                            <div style="font-size: 10px;">Reg: ${entry.registration || 'N/A'}</div>
                         </div>
                         
                         <!-- Scent 1 -->
@@ -1274,29 +1485,29 @@
         }
 
         // ===========================================
-        // DIGITAL SCORE MANAGEMENT
+        // ENHANCED DIGITAL SCORE MANAGEMENT
         // ===========================================
         window.saveDigitalScores = async function() {
             if (!currentEditingSheet) {
-                alert('No sheet selected for editing');
+                showError('No sheet selected for editing');
                 return;
             }
 
             try {
                 const digitalScores = {
-                    scent1Location: document.getElementById('scent1Location').value,
-                    scent2Location: document.getElementById('scent2Location').value,
-                    scent3Location: document.getElementById('scent3Location').value,
-                    scent4Location: document.getElementById('scent4Location').value
+                    scent1Location: document.getElementById('scent1Location').value || '',
+                    scent2Location: document.getElementById('scent2Location').value || '',
+                    scent3Location: document.getElementById('scent3Location').value || '',
+                    scent4Location: document.getElementById('scent4Location').value || ''
                 };
 
                 currentEditingSheet.entries.forEach((entry, index) => {
                     const entrantKey = `team_${index}`;
                     
                     digitalScores[entrantKey] = {
-                        handler: entry.handler,
-                        dog: entry.dog,
-                        registration: entry.registration,
+                        handler: entry.handler || '',
+                        dog: entry.dog || '',
+                        registration: entry.registration || '',
                         scent1Found: document.getElementById(`${entrantKey}_scent1_found`)?.checked || false,
                         scent1Missed: document.getElementById(`${entrantKey}_scent1_missed`)?.checked || false,
                         scent2Found: document.getElementById(`${entrantKey}_scent2_found`)?.checked || false,
@@ -1311,27 +1522,40 @@
                     };
                 });
 
-                // Save to Firebase
-                await setDoc(doc(db, 'scentDetectiveScores', currentEditingSheet.id), {
-                    ...currentEditingSheet,
+                // Prepare data for Firebase with enhanced date handling
+                const updateData = {
                     digitalScores: digitalScores,
                     status: 'digitally_scored',
                     lastModified: Timestamp.now(),
                     scoredBy: auth.currentUser.uid
+                };
+
+                // Handle date field safely if it exists
+                if (currentEditingSheet.date) {
+                    const preparedDate = prepareDateForFirebase(currentEditingSheet.date);
+                    if (preparedDate) {
+                        updateData.date = preparedDate;
+                    }
+                }
+
+                // Save to Firebase
+                await setDoc(doc(db, 'scentDetectiveScores', currentEditingSheet.id), {
+                    ...currentEditingSheet,
+                    ...updateData
                 });
 
-                alert('Digital scores saved successfully!');
+                showSuccess('Digital scores saved successfully!');
                 closeScoreModal();
 
             } catch (error) {
                 console.error('Error saving digital scores:', error);
-                alert('Error saving digital scores: ' + error.message);
+                showError('Failed to save digital scores: ' + error.message);
             }
         };
 
         window.exportToPDF = function() {
             if (!currentEditingSheet) {
-                alert('No sheet data available for export');
+                showError('No sheet data available for export');
                 return;
             }
 
@@ -1345,21 +1569,18 @@
         };
 
         function generateFilledScentDetectiveSheetHTML(sheetData, scoreData) {
-            const baseHTML = generateScentDetectiveSheetHTML(sheetData);
-            
-            // TODO: Fill in the digital scores into the HTML
-            // This would involve replacing the empty fields with the saved digital scores
             // For now, return the base HTML
-            return baseHTML;
+            // TODO: In future, fill in the digital scores into the HTML
+            return generateScentDetectiveSheetHTML(sheetData);
         }
 
         // ===========================================
-        // STORED SHEETS MANAGEMENT
+        // ENHANCED STORED SHEETS MANAGEMENT
         // ===========================================
         window.viewStoredSheets = async function() {
             try {
                 if (!auth.currentUser) {
-                    alert('Please log in first');
+                    showError('Please log in first');
                     return;
                 }
 
@@ -1374,7 +1595,16 @@
                 const storedSheets = [];
                 
                 snapshot.forEach(doc => {
-                    storedSheets.push({ id: doc.id, ...doc.data() });
+                    try {
+                        const data = doc.data();
+                        storedSheets.push({ 
+                            id: doc.id, 
+                            ...data,
+                            date: data.date ? getDateFromFirebase(data.date) : data.date
+                        });
+                    } catch (error) {
+                        console.warn('Skipping invalid stored sheet:', doc.id, error);
+                    }
                 });
 
                 storedSheets.sort((a, b) => {
@@ -1387,7 +1617,7 @@
 
             } catch (error) {
                 console.error('Error loading stored sheets:', error);
-                alert('Error loading stored sheets: ' + error.message);
+                showError('Failed to load stored sheets: ' + error.message);
             } finally {
                 document.getElementById('loadingIndicator').style.display = 'none';
             }
@@ -1413,9 +1643,9 @@
                     html += `
                         <div class="score-sheet-item">
                             <div class="score-sheet-info">
-                                <div class="score-sheet-title">🐾 ${sheet.trialName} - ${sheet.judge} - ${sheet.className}</div>
+                                <div class="score-sheet-title">🐾 ${sheet.trialName || 'Unknown Trial'} - ${sheet.judge || 'Unknown Judge'} - ${sheet.className || 'Unknown Class'}</div>
                                 <div class="score-sheet-details">
-                                    ${sheet.entries.length} teams • ${displayDate} • Created: ${createdDate}
+                                    ${sheet.entries ? sheet.entries.length : 0} teams • ${displayDate} • Created: ${createdDate}
                                     <span class="status-badge ${statusClass}">${statusText}</span>
                                 </div>
                             </div>
@@ -1438,11 +1668,17 @@
             try {
                 const sheetDoc = await getDoc(doc(db, 'scentDetectiveScores', sheetId));
                 if (!sheetDoc.exists()) {
-                    alert('Score sheet not found');
+                    showError('Score sheet not found');
                     return;
                 }
 
-                const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                const data = sheetDoc.data();
+                const sheet = { 
+                    id: sheetDoc.id, 
+                    ...data,
+                    date: data.date ? getDateFromFirebase(data.date) : data.date
+                };
+                
                 const container = document.getElementById('scoreSheetsContainer');
                 container.innerHTML = generateScentDetectiveSheetHTML(sheet);
                 container.style.display = 'block';
@@ -1450,7 +1686,7 @@
                 container.scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
                 console.error('Error loading sheet:', error);
-                alert('Error loading sheet: ' + error.message);
+                showError('Failed to load sheet: ' + error.message);
             }
         };
 
@@ -1458,11 +1694,17 @@
             try {
                 const sheetDoc = await getDoc(doc(db, 'scentDetectiveScores', sheetId));
                 if (!sheetDoc.exists()) {
-                    alert('Score sheet not found');
+                    showError('Score sheet not found');
                     return;
                 }
 
-                const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                const data = sheetDoc.data();
+                const sheet = { 
+                    id: sheetDoc.id, 
+                    ...data,
+                    date: data.date ? getDateFromFirebase(data.date) : data.date
+                };
+                
                 const container = document.getElementById('scoreSheetsContainer');
                 container.innerHTML = generateScentDetectiveSheetHTML(sheet);
                 
@@ -1471,7 +1713,7 @@
                 }, 100);
             } catch (error) {
                 console.error('Error printing sheet:', error);
-                alert('Error printing sheet: ' + error.message);
+                showError('Failed to print sheet: ' + error.message);
             }
         };
 
@@ -1483,11 +1725,11 @@
             if (confirm('Are you sure you want to delete this score sheet? This action cannot be undone.')) {
                 try {
                     await deleteDoc(doc(db, 'scentDetectiveScores', sheetId));
-                    alert('Score sheet deleted successfully!');
+                    showSuccess('Score sheet deleted successfully!');
                     viewStoredSheets(); // Refresh the list
                 } catch (error) {
                     console.error('Error deleting sheet:', error);
-                    alert('Error deleting sheet: ' + error.message);
+                    showError('Failed to delete sheet: ' + error.message);
                 }
             }
         };
@@ -1510,18 +1752,180 @@
         };
 
         // ===========================================
-        // INITIALIZATION
+        // MISSING FUNCTION IMPLEMENTATIONS
+        // ===========================================
+        
+        // This function was referenced in the original console error
+        async function loadJudgesFromEntries(trialId) {
+            try {
+                console.log("🔍 Loading judges from entry data for trial:", trialId);
+                
+                const entriesQuery = query(
+                    collection(db, "entries"),
+                    where("trialId", "==", trialId)
+                );
+                
+                const entriesSnapshot = await getDocs(entriesQuery);
+                const judgeData = {};
+                
+                entriesSnapshot.forEach(doc => {
+                    const entry = doc.data();
+                    
+                    // Process each selectedEntry using standardized field names
+                    if (entry.selectedEntries && Array.isArray(entry.selectedEntries)) {
+                        entry.selectedEntries.forEach((selectedEntry, index) => {
+                            const normalizedEntry = normalizeEntry({
+                                ...selectedEntry,
+                                [STANDARD_FIELDS.HANDLER_NAME]: entry[STANDARD_FIELDS.HANDLER_NAME] || entry.handlerName,
+                                [STANDARD_FIELDS.DOG_CALL_NAME]: entry[STANDARD_FIELDS.DOG_CALL_NAME] || entry.dogCallName,
+                                [STANDARD_FIELDS.CWAGS_NUMBER]: entry[STANDARD_FIELDS.CWAGS_NUMBER] || entry.cwagsNumber
+                            });
+
+                            if (normalizedEntry[STANDARD_FIELDS.JUDGE_NAME]) {
+                                const dayClassKey = `${normalizedEntry.date}_${normalizedEntry[STANDARD_FIELDS.CLASS_NAME]}_${normalizedEntry.roundNumber || '1'}`;
+                                
+                                judgeData[dayClassKey] = {
+                                    [STANDARD_FIELDS.JUDGE_NAME]: normalizedEntry[STANDARD_FIELDS.JUDGE_NAME],
+                                    [STANDARD_FIELDS.CLASS_NAME]: normalizedEntry[STANDARD_FIELDS.CLASS_NAME],
+                                    [STANDARD_FIELDS.HANDLER_NAME]: normalizedEntry[STANDARD_FIELDS.HANDLER_NAME],
+                                    [STANDARD_FIELDS.DOG_CALL_NAME]: normalizedEntry[STANDARD_FIELDS.DOG_CALL_NAME]
+                                };
+                            }
+                        });
+                    }
+                });
+                
+                console.log("✅ Loaded judge data with standardized fields:", Object.keys(judgeData).length, "assignments");
+                return judgeData;
+                
+            } catch (error) {
+                console.error("❌ Error loading judges from entries:", error);
+                return {};
+            }
+        }
+
+        // Make the function available globally for other scripts that might need it
+        window.loadJudgesFromEntries = loadJudgesFromEntries;
+
+        // ===========================================
+        // ENHANCED ERROR RECOVERY AND VALIDATION
+        // ===========================================
+        
+        // Validate entries before processing
+        function validateEntry(entry) {
+            const errors = [];
+            
+            if (!entry[STANDARD_FIELDS.HANDLER_NAME] || entry[STANDARD_FIELDS.HANDLER_NAME].trim() === '') {
+                errors.push('Missing handler name');
+            }
+            
+            if (!entry[STANDARD_FIELDS.DOG_CALL_NAME] || entry[STANDARD_FIELDS.DOG_CALL_NAME].trim() === '') {
+                errors.push('Missing dog call name');
+            }
+            
+            if (!entry[STANDARD_FIELDS.CLASS_NAME] || entry[STANDARD_FIELDS.CLASS_NAME].trim() === '') {
+                errors.push('Missing class name');
+            }
+            
+            return {
+                isValid: errors.length === 0,
+                errors: errors
+            };
+        }
+
+        // Enhanced date validation
+        function isValidDate(dateStr) {
+            if (!dateStr) return false;
+            const date = createLocalDate(dateStr);
+            return date && !isNaN(date.getTime());
+        }
+
+        // Sanitize data before Firebase operations
+        function sanitizeForFirebase(data) {
+            const sanitized = {};
+            
+            Object.keys(data).forEach(key => {
+                const value = data[key];
+                
+                // Skip undefined values
+                if (value === undefined) return;
+                
+                // Handle null values
+                if (value === null) {
+                    sanitized[key] = null;
+                    return;
+                }
+                
+                // Handle dates
+                if (key === 'date' && typeof value === 'string') {
+                    if (isValidDate(value)) {
+                        sanitized[key] = prepareDateForFirebase(value);
+                    } else {
+                        console.warn(`Invalid date for key ${key}:`, value);
+                        sanitized[key] = null;
+                    }
+                    return;
+                }
+                
+                // Handle other values normally
+                sanitized[key] = value;
+            });
+            
+            return sanitized;
+        }
+
+        // ===========================================
+        // INITIALIZATION WITH ENHANCED ERROR HANDLING
         // ===========================================
         auth.onAuthStateChanged(async (user) => {
             if (user) {
-                await init();
+                try {
+                    await init();
+                } catch (error) {
+                    console.error('❌ Initialization failed:', error);
+                    showError('Failed to initialize application. Please refresh the page and try again.');
+                }
             } else {
-                alert('Please log in to access Scent Detective score sheets');
-                window.location.href = 'index.html';
+                showError('Please log in to access Scent Detective score sheets');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
             }
         });
 
-        console.log('🐾 Scent Detective Master Score Sheet Generator loaded with standardized field names');
+        // ===========================================
+        // GLOBAL ERROR HANDLER
+        // ===========================================
+        window.addEventListener('error', function(event) {
+            console.error('Global error caught:', event.error);
+            // Don't show every error to user, but log for debugging
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            // Don't show every error to user, but log for debugging
+        });
+
+        // ===========================================
+        // DEBUGGING HELPERS (REMOVE IN PRODUCTION)
+        // ===========================================
+        window.debugScentDetective = {
+            entries: () => entries,
+            trials: () => trials,
+            currentTrial: () => currentTrial,
+            generatedSheets: () => generatedSheets,
+            STANDARD_FIELDS: STANDARD_FIELDS,
+            testDateValidation: (dateStr) => ({
+                input: dateStr,
+                createLocalDate: createLocalDate(dateStr),
+                formatLocalDate: formatLocalDate(createLocalDate(dateStr)),
+                prepareDateForFirebase: prepareDateForFirebase(dateStr),
+                isValid: isValidDate(dateStr)
+            })
+        };
+
+        console.log('🐾 Scent Detective Master Score Sheet Generator loaded with enhanced error handling and standardized field names');
+        console.log('🔧 Debug tools available at window.debugScentDetective');
     </script>
 </body>
 </html>
