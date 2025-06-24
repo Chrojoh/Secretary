@@ -15,16 +15,16 @@
       margin-bottom: 20px;
     }
 
-     .judge-autocomplete:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
+    .judge-autocomplete:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
 
-.judge-autocomplete::placeholder {
-    color: #999;
-    font-style: italic;
-}
+    .judge-autocomplete::placeholder {
+      color: #999;
+      font-style: italic;
+    }
     
     .back-button:hover {
       background-color: #005a8b;
@@ -78,9 +78,21 @@
 
   <script type="module">
     import { db, auth } from './js/firebase.js';
-    import { addDoc, collection, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { addDoc, collection, doc, getDoc, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     console.log("Script starting to load...");
+
+    // ========================================
+    // STANDARDIZED FIELD NAMES (CRITICAL FIX)
+    // ========================================
+
+    const STANDARD_FIELDS = {
+      HANDLER_NAME: 'handlerName',      // NOT 'Handler' or 'handler'
+      DOG_CALL_NAME: 'dogCallName',     // NOT 'Call Name' or 'dogName'
+      JUDGE_NAME: 'judgeName',          // NOT 'judge' or 'judgeAssigned'
+      CLASS_NAME: 'className',          // NOT 'Class' or 'class'
+      CWAGS_NUMBER: 'cwagsNumber'       // NOT 'Registration'
+    };
 
     // ========================================
     // TIMEZONE-SAFE DATE UTILITIES - CRITICAL FIX
@@ -99,7 +111,7 @@
      * Formats a date to YYYY-MM-DD string in local timezone
      */
     function formatLocalDate(date) {
-      if (!date || !(date instanceof Date)) return '';
+      if (!date || !(date instanceof Date)) return null;
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
@@ -107,243 +119,232 @@
     }
 
     /**
-     * Prepares date data for Firebase storage (prevents timezone conversion)
+     * Prepares a date for Firebase storage
      */
     function prepareDateForFirebase(dateStr) {
       if (!dateStr) return null;
-      const localDate = createLocalDate(dateStr);
-      return localDate;
+      const date = createLocalDate(dateStr);
+      return date ? Timestamp.fromDate(date) : null;
     }
 
     /**
-     * Retrieves date data from Firebase (converts back to local date string)
+     * Gets a date string from Firebase timestamp
      */
-    function getDateFromFirebase(firebaseDate) {
-      if (!firebaseDate) return '';
-      
-      let date;
-      if (firebaseDate.toDate) {
-        date = firebaseDate.toDate();
-      } else if (firebaseDate instanceof Date) {
-        date = firebaseDate;
-      } else if (typeof firebaseDate === 'string') {
-        date = createLocalDate(firebaseDate);
-      } else {
-        return '';
+    function getDateFromFirebase(timestamp) {
+      if (!timestamp) return null;
+      if (timestamp.toDate) {
+        return formatLocalDate(timestamp.toDate());
       }
-      
-      return formatLocalDate(date);
+      return null;
     }
 
-    /**
-     * Test function to verify dates work correctly
-     */
-    function testDateHandling() {
-      console.log('=== Date Handling Test ===');
-      
-      const testDate = '2024-03-15';
-      console.log('1. Original date string:', testDate);
-      
-      const forFirebase = prepareDateForFirebase(testDate);
-      console.log('2. Prepared for Firebase:', forFirebase);
-      
-      const fromFirebase = getDateFromFirebase(forFirebase);
-      console.log('3. Retrieved from Firebase:', fromFirebase);
-      
-      const matches = fromFirebase === testDate;
-      console.log('4. Round-trip successful:', matches);
-      
-      if (!matches) {
-        console.error('❌ Date handling is still broken!');
-      } else {
-        console.log('✅ Date handling is working correctly!');
-      }
-    }
+    // ========================================
+    // GLOBAL VARIABLES
+    // ========================================
 
-    // Test the date handling on page load
-    testDateHandling();
+    let globalClasses = [
+      "Level 1 Container Search",
+      "Level 2 Container Search", 
+      "Level 3 Container Search",
+      "Level 1 Interior Search",
+      "Level 2 Interior Search",
+      "Level 3 Interior Search",
+      "Level 1 Exterior Search",
+      "Level 2 Exterior Search",
+      "Level 3 Exterior Search",
+      "Level 1 Vehicle Search",
+      "Level 2 Vehicle Search",
+      "Level 3 Vehicle Search",
+      "Level 1 Buried Search",
+      "Level 2 Buried Search",
+      "Level 3 Buried Search"
+    ];
 
-    // Check if we're editing an existing trial
-    const editTrialId = sessionStorage.getItem('editTrialId');
-    let isEditMode = false;
+    let globalJudges = [
+      "Barbara Andrews",
+      "Barb Levine", 
+      "Barb Long",
+      "Betty Campbell",
+      "Carol Milliken",
+      "Carole Herder",
+      "Dave Kroyer",
+      "Debbie Skinner",
+      "Debbie Walker",
+      "Erin McCarthy",
+      "Gail Marshall",
+      "Heidi Linke",
+      "Janet Gaunce",
+      "Jennifer Mackinnon",
+      "Jill Duffield",
+      "Jordan Gaunce",
+      "Kathy Chittenden",
+      "Kim Shannon",
+      "Lesley Mattucci",
+      "Lori Drouin",
+      "Lynda Keer",
+      "Mary MacKenzie-Little",
+      "Mary Tiernay",
+      "Nancy Tucker",
+      "Patti Strand",
+      "Sandra Kruger",
+      "Shelagh Braley",
+      "Sherry Dooley",
+      "Sherry Marceau",
+      "Sue Power",
+      "Susan Wallace"
+    ];
+
     let currentTrialData = null;
+    let isEditMode = false;
 
-    // Simple predefined lists to avoid JSON loading issues
-    const DEFAULT_CLASSES = [
-      "Scent Work Novice Birch", "Scent Work Novice Anise", "Scent Work Novice Clove",
-      "Scent Work Open Birch", "Scent Work Open Anise", "Scent Work Open Clove",
-      "Scent Work Advanced Birch", "Scent Work Advanced Anise", "Scent Work Advanced Clove",
-      "Scent Work Expert Birch", "Scent Work Expert Anise", "Scent Work Expert Clove",
-      "Scent Work Master Birch", "Scent Work Master Anise", "Scent Work Master Clove"
-    ];
+    // ========================================
+    // DYNAMIC GENERATION FUNCTIONS
+    // ========================================
 
-    const DEFAULT_JUDGES = [
-      "Judge 1", "Judge 2", "Judge 3", "Judge 4", "Judge 5"
-    ];
-
-    let globalClasses = DEFAULT_CLASSES;
-    let globalJudges = DEFAULT_JUDGES;
-
-    // **ENTER KEY FIX** - Prevent Enter from submitting form except when clicking Submit button
-    document.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter' && event.target.tagName !== 'BUTTON') {
-        event.preventDefault();
-        // Special case: if Enter pressed in numDays, trigger generateDays
-        if (event.target.id === 'numDays') {
-          generateDays();
-        }
-      }
-    });
-
-    async function loadJudgesFromEntries(trialId) {
-  console.log("🔍 Loading judge names from entries for trial:", trialId);
-  
-  try {
-    // Query all entries for this trial (same as running order)
-    const q = query(
-      collection(db, "entries"),
-      where("trialId", "==", trialId)
-    );
-    const snapshot = await getDocs(q);
-    
-    const judgesByClassAndDate = {};
-    
-    snapshot.forEach(doc => {
-      const entry = doc.data();
-      
-      // Extract judge info from entries (exactly like running order does)
-      const judgeName = entry.judgeName || entry.judge || 'TBD';
-      const className = entry.className || 'Unknown Class';
-      const date = entry.date || 'Unknown Date';
-      const roundNumber = entry.roundNumber || 1;
-      
-      // Create a unique key for this class/date/round combination
-      const key = `${date}_${className}_${roundNumber}`;
-      
-      if (!judgesByClassAndDate[key]) {
-        judgesByClassAndDate[key] = {
-          date: date,
-          className: className,
-          roundNumber: roundNumber,
-          judgeName: judgeName
-        };
-      }
-    });
-    
-    console.log("✅ Loaded judges from entries:", judgesByClassAndDate);
-    return judgesByClassAndDate;
-    
-  } catch (error) {
-    console.error("❌ Error loading judges from entries:", error);
-    return {};
-  }
-}
-
-    function populateJudgeData(judgeData) {
-  console.log("⚖️ Populating judge data into form...", judgeData);
-  
-  // Go through each day and class, and set the judge selects
-  const daysContainer = document.getElementById('daysContainer');
-  if (!daysContainer) return;
-  
-  const dayContainers = daysContainer.querySelectorAll('.day-container');
-  
-  dayContainers.forEach((dayContainer, dayIndex) => {
-    const day = currentTrialData.days[dayIndex];
-    if (!day) return;
-    
-    const dayDate = day.date;
-    const classesContainer = dayContainer.querySelector(`.classes-container-${dayIndex}`);
-    
-    if (classesContainer) {
-      const classContainers = classesContainer.querySelectorAll('.class-container');
-      
-      classContainers.forEach((classContainer, classIndex) => {
-        const classSelect = classContainer.querySelector('select');
-        if (!classSelect || !classSelect.value) return;
-        
-        const className = classSelect.value;
-        const roundsContainer = classContainer.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
-        
-        if (roundsContainer) {
-          const judgeSelects = roundsContainer.querySelectorAll('select');
-          
-          judgeSelects.forEach((judgeSelect, roundIndex) => {
-            // Look up the real judge for this class/date/round
-            const roundNumber = roundIndex + 1;
-            const judgeKey = `${dayDate}_${className}_${roundNumber}`;
-            
-            if (judgeData[judgeKey] && judgeData[judgeKey].judgeName !== 'TBD') {
-              const realJudgeName = judgeData[judgeKey].judgeName;
-              console.log(`✅ Setting judge for ${className} Round ${roundNumber}: ${realJudgeName}`);
-              
-              // First, add the judge to the dropdown if it's not already there
-              let optionExists = false;
-              for (let option of judgeSelect.options) {
-                if (option.value === realJudgeName) {
-                  optionExists = true;
-                  break;
-                }
-              }
-              
-              if (!optionExists) {
-                const newOption = document.createElement('option');
-                newOption.value = realJudgeName;
-                newOption.textContent = realJudgeName;
-                judgeSelect.appendChild(newOption);
-              }
-              
-              // Set the select value
-              judgeSelect.value = realJudgeName;
-            }
-          });
-        }
-      });
-    }
-  });
-  
-  console.log("✅ Judge data populated successfully");
-}
-    
-    // Load existing trial data if in edit mode
-    async function loadExistingTrialData() {
-      if (!editTrialId) return;
-
+    function generateDays() {
       try {
-        console.log("🔄 Loading existing trial for editing:", editTrialId);
-        
-        // Wait for auth
-        await new Promise((resolve) => {
-          if (auth.currentUser) {
-            resolve();
-          } else {
-            const unsubscribe = auth.onAuthStateChanged((user) => {
-              unsubscribe();
-              resolve();
-            });
-          }
-        });
-
-        if (!auth.currentUser) {
-          alert("You must be logged in to edit a trial");
-          window.location.href = "index.html";
+        const numDays = parseInt(document.getElementById('numDays').value);
+        if (!numDays || numDays < 1) {
+          alert("Please enter a valid number of days");
           return;
         }
-
-        // Load the specific trial
-        const trialDoc = await getDoc(doc(db, "trials", editTrialId));
         
-        if (trialDoc.exists()) {
-          currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
-          isEditMode = true;
+        const daysContainer = document.getElementById('daysContainer');
+        daysContainer.innerHTML = "";
+        
+        for (let d = 0; d < numDays; d++) {
+          const dayDiv = document.createElement("div");
+          dayDiv.className = "day-container";
+          dayDiv.innerHTML = `
+            <h3>Day ${d + 1}</h3>
+            <label>Date:</label>
+            <input type="date" name="date${d}" style="margin-left: 10px; margin-bottom: 10px;">
+            
+            <label style="display: block; margin: 10px 0;">How many classes for Day ${d + 1}?</label>
+            <input type="number" id="numClasses_${d}" min="1" max="20" style="width: 100px; padding: 5px;">
+            <button type="button" onclick="generateClasses(${d})">Create Classes</button>
+            
+            <div class="classes-container-${d}"></div>
+          `;
+          daysContainer.appendChild(dayDiv);
+        }
+        
+        console.log(`Generated ${numDays} days`);
+        
+      } catch (error) {
+        console.error("Error in generateDays:", error);
+        alert("Error creating days: " + error.message);
+      }
+    }
+
+    function generateClasses(dayIndex) {
+      try {
+        const numClasses = parseInt(document.getElementById(`numClasses_${dayIndex}`).value);
+        if (!numClasses || numClasses < 1) {
+          alert("Please enter a valid number of classes");
+          return;
+        }
+        
+        const classesContainer = document.querySelector(`.classes-container-${dayIndex}`);
+        classesContainer.innerHTML = "";
+        
+        for (let c = 0; c < numClasses; c++) {
+          const classDiv = document.createElement("div");
+          classDiv.className = "class-container";
+          classDiv.innerHTML = `
+            <h4>Class ${c + 1}</h4>
+            <label>Class Name:</label>
+            <input type="text" 
+                   style="margin-left: 10px; width: 200px; padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px;" 
+                   placeholder="Type class name..." 
+                   list="classes-datalist-${dayIndex}-${c}"
+                   class="class-autocomplete">
+            <datalist id="classes-datalist-${dayIndex}-${c}">
+              ${globalClasses.map(className => `<option value="${className}">${className}</option>`).join('')}
+            </datalist>
+            
+            <label style="display: block; margin: 10px 0;">How many rounds for Class ${c + 1}?</label>
+            <input type="number" id="numRounds_${dayIndex}_${c}" min="1" max="10" style="width: 100px; padding: 5px;">
+            <button type="button" onclick="generateRounds(${dayIndex}, ${c})">Create Rounds</button>
+            
+            <div class="rounds-container-${dayIndex}-${c}"></div>
+          `;
+          classesContainer.appendChild(classDiv);
+        }
+        
+        console.log(`Generated ${numClasses} classes for day ${dayIndex + 1}`);
+        
+      } catch (error) {
+        console.error("Error in generateClasses:", error);
+        alert("Error creating classes: " + error.message);
+      }
+    }
+
+    function generateRounds(dayIndex, classIndex) {
+      try {
+        const numRounds = parseInt(document.getElementById(`numRounds_${dayIndex}_${classIndex}`).value);
+        if (!numRounds || numRounds < 1) {
+          alert("Please enter a valid number of rounds");
+          return;
+        }
+        
+        const roundsContainer = document.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
+        roundsContainer.innerHTML = "";
+        
+        for (let r = 0; r < numRounds; r++) {
+          const roundDiv = document.createElement("div");
+          roundDiv.className = "round-container";
+          roundDiv.innerHTML = `
+            <div style="margin-bottom: 5px;">
+              <strong>Round ${r + 1}:</strong>
+              <label style="margin-left: 10px;">Judge:</label>
+              <input type="text" 
+                     style="margin-left: 5px; width: 150px; padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px;" 
+                     placeholder="Type judge name..." 
+                     list="judges-datalist-${dayIndex}-${classIndex}-${r}"
+                     class="judge-autocomplete">
+              <datalist id="judges-datalist-${dayIndex}-${classIndex}-${r}">
+                ${globalJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
+              </datalist>
+              <label style="margin-left: 10px;">
+                <input type="checkbox"> FEO
+              </label>
+            </div>
+          `;
+          roundsContainer.appendChild(roundDiv);
+        }
+        
+        console.log(`Generated ${numRounds} rounds for day ${dayIndex + 1}, class ${classIndex + 1}`);
+        
+      } catch (error) {
+        console.error("Error in generateRounds:", error);
+        alert("Error creating rounds: " + error.message);
+      }
+    }
+
+    // ========================================
+    // LOAD EXISTING TRIAL DATA FOR EDITING
+    // ========================================
+
+    async function loadExistingTrialData() {
+      const editTrialId = sessionStorage.getItem('editTrialId');
+      if (!editTrialId) return;
+      
+      try {
+        console.log("Loading existing trial data for editing:", editTrialId);
+        isEditMode = true;
+        
+        const docRef = doc(db, "trials", editTrialId);
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          currentTrialData = { id: editTrialId, ...docSnap.data() };
           
-          console.log("✅ Loaded trial for editing:", currentTrialData);
-          
-          // FIX: Process dates when loading from Firebase
-          if (currentTrialData.days && Array.isArray(currentTrialData.days)) {
+          // Convert Firebase timestamps back to date strings
+          if (currentTrialData.days) {
             currentTrialData.days = currentTrialData.days.map(day => ({
               ...day,
-              date: day.date ? getDateFromFirebase(day.date) : null
+              date: getDateFromFirebase(day.date) ? getDateFromFirebase(day.date) : null
             }));
           }
           
@@ -372,118 +373,92 @@
       }
     }
 
-   async function populateFormWithTrialData() {
-  if (!currentTrialData) return;
+    async function populateFormWithTrialData() {
+      if (!currentTrialData) return;
 
-  console.log("🎯 Populating form with existing trial data...");
+      console.log("🎯 Populating form with existing trial data...");
 
-  // Fill basic info
-  if (currentTrialData.clubName) {
-    document.querySelector('input[name="clubName"]').value = currentTrialData.clubName;
-  }
-  if (currentTrialData.secretary) {
-    document.querySelector('input[name="secretary"]').value = currentTrialData.secretary;
-  }
-  if (currentTrialData.numDays) {
-    document.getElementById('numDays').value = currentTrialData.numDays;
-    
-    // Auto-generate days
-    generateDays();
-    
-    // Wait a moment for DOM to update, then populate
-    setTimeout(async () => {
-      await populateExistingTrialData();
-      
-      // CRITICAL: Load judges from entries and populate them
-      console.log("🔍 Loading real judge assignments from entries...");
-      const realJudges = await loadJudgesFromEntries(currentTrialData.id);
-      
-      // Apply the real judge data to the form
-      populateJudgeData(realJudges);
-      
-    }, 500);
-  }
-}
-    // Populate days, classes, and rounds with existing data
-    function populateDaysData() {
+      // Fill basic info
+      if (currentTrialData.clubName) {
+        document.querySelector('input[name="clubName"]').value = currentTrialData.clubName;
+      }
+      if (currentTrialData.secretary) {
+        document.querySelector('input[name="secretary"]').value = currentTrialData.secretary;
+      }
+      if (currentTrialData.numDays) {
+        document.getElementById('numDays').value = currentTrialData.numDays;
+        
+        // Auto-generate days
+        generateDays();
+        
+        // Wait a moment for DOM to update, then populate
+        setTimeout(async () => {
+          await populateExistingTrialData();
+        }, 500);
+      }
+    }
+
+    async function populateExistingTrialData() {
       if (!currentTrialData || !currentTrialData.days) return;
-
-      console.log("📅 Populating days data...");
-
+      
+      console.log("Populating days and classes with existing data...");
+      
       currentTrialData.days.forEach((dayData, dayIndex) => {
-        // Set date - now timezone-safe
+        // Set date
         const dateInput = document.querySelector(`input[name="date${dayIndex}"]`);
         if (dateInput && dayData.date) {
-          dateInput.value = dayData.date; // Already processed by getDateFromFirebase
+          dateInput.value = dayData.date;
         }
-
+        
         // Set number of classes and generate them
         if (dayData.classes && dayData.classes.length > 0) {
-          const numClassesInput = document.querySelector(`input[data-day="${dayIndex}"]`);
+          const numClassesInput = document.getElementById(`numClasses_${dayIndex}`);
           if (numClassesInput) {
             numClassesInput.value = dayData.classes.length;
-            generateClasses(numClassesInput);
-
-            // Wait for classes to be generated, then populate them
+            generateClasses(dayIndex);
+            
+            // Wait and then populate classes
             setTimeout(() => {
-              populateClassesData(dayIndex, dayData.classes);
+              dayData.classes.forEach((classData, classIndex) => {
+                const classInput = document.querySelector(`.classes-container-${dayIndex} .class-container:nth-child(${classIndex + 1}) .class-autocomplete`);
+                if (classInput && classData[STANDARD_FIELDS.CLASS_NAME]) {
+                  classInput.value = classData[STANDARD_FIELDS.CLASS_NAME];
+                }
+                
+                // Set rounds
+                if (classData.rounds && classData.rounds.length > 0) {
+                  const numRoundsInput = document.getElementById(`numRounds_${dayIndex}_${classIndex}`);
+                  if (numRoundsInput) {
+                    numRoundsInput.value = classData.rounds.length;
+                    generateRounds(dayIndex, classIndex);
+                    
+                    // Wait and populate rounds
+                    setTimeout(() => {
+                      classData.rounds.forEach((roundData, roundIndex) => {
+                        const judgeInput = document.querySelector(`.rounds-container-${dayIndex}-${classIndex} .round-container:nth-child(${roundIndex + 1}) .judge-autocomplete`);
+                        if (judgeInput && roundData[STANDARD_FIELDS.JUDGE_NAME]) {
+                          judgeInput.value = roundData[STANDARD_FIELDS.JUDGE_NAME];
+                        }
+                        
+                        const feoCheckbox = document.querySelector(`.rounds-container-${dayIndex}-${classIndex} .round-container:nth-child(${roundIndex + 1}) input[type="checkbox"]`);
+                        if (feoCheckbox && roundData.feo) {
+                          feoCheckbox.checked = roundData.feo;
+                        }
+                      });
+                    }, 200);
+                  }
+                }
+              });
             }, 200);
           }
         }
       });
     }
 
-    // Populate classes and rounds data
-    function populateClassesData(dayIndex, classesData) {
-      console.log(`🎓 Populating classes for day ${dayIndex + 1}...`);
+    // ========================================
+    // INITIALIZATION
+    // ========================================
 
-      classesData.forEach((classData, classIndex) => {
-        // Set class name
-        const classSelect = document.querySelector(`select[data-day="${dayIndex}"][data-class="${classIndex}"]`);
-        if (classSelect && classData.className) {
-          classSelect.value = classData.className;
-        }
-
-        // Set number of rounds and generate them
-        if (classData.rounds && classData.rounds.length > 0) {
-          const numRoundsInput = document.querySelector(`input[data-day="${dayIndex}"][data-class="${classIndex}"]`);
-          if (numRoundsInput) {
-            numRoundsInput.value = classData.rounds.length;
-            generateRounds(numRoundsInput);
-
-            // Wait for rounds to be generated, then populate them
-            setTimeout(() => {
-              populateRoundsData(dayIndex, classIndex, classData.rounds);
-            }, 100);
-          }
-        }
-      });
-    }
-
-    // Populate rounds data (judges and FEO checkboxes)
-    function populateRoundsData(dayIndex, classIndex, roundsData) {
-      console.log(`⚖️ Populating rounds for day ${dayIndex + 1}, class ${classIndex + 1}...`);
-
-      const roundsContainer = document.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
-      if (!roundsContainer) return;
-
-      const judgeSelects = roundsContainer.querySelectorAll('select');
-      const feoCheckboxes = roundsContainer.querySelectorAll('input[type="checkbox"]');
-
-      roundsData.forEach((roundData, roundIndex) => {
-        // Set judge
-        if (judgeSelects[roundIndex] && roundData.judge) {
-          judgeSelects[roundIndex].value = roundData.judge;
-        }
-
-        // Set FEO checkbox
-        if (feoCheckboxes[roundIndex] && roundData.feo) {
-          feoCheckboxes[roundIndex].checked = roundData.feo;
-        }
-      });
-    }
-
-    // Initialize the page
     async function initializePage() {
       // Try to load extracted data from CSV first
       try {
@@ -520,6 +495,81 @@
 
       // Load existing trial data if in edit mode
       await loadExistingTrialData();
+    }
+
+    // ========================================
+    // FORM SUBMISSION
+    // ========================================
+
+    // Function to collect ALL trial data - WITH TIMEZONE-SAFE DATE HANDLING
+    function collectAllTrialData() {
+      const clubName = document.querySelector('input[name="clubName"]').value;
+      const secretary = document.querySelector('input[name="secretary"]').value;
+      const numDays = parseInt(document.getElementById('numDays').value) || 0;
+      
+      const days = [];
+      const daysContainer = document.getElementById('daysContainer');
+      
+      if (daysContainer) {
+        const dayContainers = daysContainer.querySelectorAll('.day-container');
+        
+        dayContainers.forEach((dayContainer, dayIndex) => {
+          const dateInput = dayContainer.querySelector(`input[name="date${dayIndex}"]`);
+          const classesContainer = dayContainer.querySelector(`.classes-container-${dayIndex}`);
+          
+          const dayData = {
+            dayNumber: dayIndex + 1,
+            // FIX: Use timezone-safe date preparation for Firebase
+            date: dateInput && dateInput.value ? prepareDateForFirebase(dateInput.value) : null,
+            classes: []
+          };
+          
+          if (classesContainer) {
+            const classContainers = classesContainer.querySelectorAll('.class-container');
+            
+            classContainers.forEach((classContainer, classIndex) => {
+              const classInput = classContainer.querySelector('.class-autocomplete');
+              const roundsContainer = classContainer.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
+              
+              const classData = {
+                [STANDARD_FIELDS.CLASS_NAME]: classInput ? classInput.value : '',
+                rounds: []
+              };
+              
+              if (roundsContainer) {
+                const roundContainers = roundsContainer.querySelectorAll('.round-container');
+                
+                roundContainers.forEach((roundContainer, roundIndex) => {
+                  const judgeInput = roundContainer.querySelector('.judge-autocomplete');
+                  const feoCheckbox = roundContainer.querySelector('input[type="checkbox"]');
+                  
+                  const roundData = {
+                    roundNumber: roundIndex + 1,
+                    [STANDARD_FIELDS.JUDGE_NAME]: judgeInput ? judgeInput.value : '',
+                    feo: feoCheckbox ? feoCheckbox.checked : false
+                  };
+                  
+                  classData.rounds.push(roundData);
+                });
+              }
+              
+              dayData.classes.push(classData);
+            });
+          }
+          
+          days.push(dayData);
+        });
+      }
+      
+      return {
+        clubName: clubName.trim(),
+        secretary: secretary.trim(),
+        numDays: numDays,
+        days: days,
+        createdBy: auth.currentUser.uid,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
     }
 
     // Start initialization
@@ -599,7 +649,7 @@
         
         // Go back to view trials if editing, dashboard if creating
         console.log("Redirecting...");
-        window.location.href = isEditMode ? "view-trials.html" : "dashboard.html";
+        window.location.href = isEditMode ? "view-trials.html" : "main-dashboard.html";
         
       } catch (error) {
         console.error("Error saving trial:", error);
@@ -614,228 +664,12 @@
       }
     });
 
-    // Function to collect ALL trial data - WITH TIMEZONE-SAFE DATE HANDLING
-    function collectAllTrialData() {
-      const clubName = document.querySelector('input[name="clubName"]').value;
-      const secretary = document.querySelector('input[name="secretary"]').value;
-      const numDays = parseInt(document.getElementById('numDays').value) || 0;
-      
-      const days = [];
-      const daysContainer = document.getElementById('daysContainer');
-      
-      if (daysContainer) {
-        const dayContainers = daysContainer.querySelectorAll('.day-container');
-        
-        dayContainers.forEach((dayContainer, dayIndex) => {
-          const dateInput = dayContainer.querySelector(`input[name="date${dayIndex}"]`);
-          const classesContainer = dayContainer.querySelector(`.classes-container-${dayIndex}`);
-          
-          const dayData = {
-            dayNumber: dayIndex + 1,
-            // FIX: Use timezone-safe date preparation for Firebase
-            date: dateInput && dateInput.value ? prepareDateForFirebase(dateInput.value) : null,
-            classes: []
-          };
-          
-          if (classesContainer) {
-            const classContainers = classesContainer.querySelectorAll('.class-container');
-            
-            classContainers.forEach((classContainer, classIndex) => {
-              const classSelect = classContainer.querySelector(`select[data-day="${dayIndex}"][data-class="${classIndex}"]`);
-              const roundsSelect = classContainer.querySelector(`select[data-day="${dayIndex}"][data-class="${classIndex}"]`);
-              const roundsContainer = classContainer.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
-              
-              const classData = {
-                classNumber: classIndex + 1,
-                className: classSelect ? classSelect.value : '',
-                rounds: []
-              };
-              
-              if (roundsContainer) {
-                const roundContainers = roundsContainer.querySelectorAll('.round-container');
-                
-                roundContainers.forEach((roundContainer, roundIndex) => {
-                  const judgeSelect = roundContainer.querySelector('select');
-                  const feoCheckbox = roundContainer.querySelector('input[type="checkbox"]');
-                  
-                  const roundData = {
-                    roundNumber: roundIndex + 1,
-                    judge: judgeSelect ? judgeSelect.value : '',
-                    feo: feoCheckbox ? feoCheckbox.checked : false
-                  };
-                  
-                  classData.rounds.push(roundData);
-                });
-              }
-              
-              dayData.classes.push(classData);
-            });
-          }
-          
-          days.push(dayData);
-        });
-      }
-      
-      console.log("🔧 Trial data with timezone-safe dates prepared:", {
-        clubName,
-        secretary,
-        numDays,
-        daysWithDates: days.map(d => ({ dayNumber: d.dayNumber, date: d.date }))
-      });
-      
-      return {
-        clubName: clubName,
-        secretary: secretary,
-        numDays: numDays,
-        days: days,
-        createdAt: new Date(),
-        createdBy: auth.currentUser.uid
-      };
-    }
-
-    // Define functions that will be called by onclick
-    function generateDays() {
-      try {
-        console.log("generateDays function called");
-        
-        const numDaysInput = document.getElementById("numDays");
-        const numDays = parseInt(numDaysInput.value);
-        
-        if (isNaN(numDays) || numDays < 1) {
-          alert("Please enter a valid number of days (1 or more)");
-          return;
-        }
-        
-        const container = document.getElementById("daysContainer");
-        container.innerHTML = "";
-
-        for (let d = 0; d < numDays; d++) {
-          const dayDiv = document.createElement("div");
-          dayDiv.className = "day-container";
-          dayDiv.innerHTML = `
-            <h3>Day ${d + 1}</h3>
-            <div style="margin-bottom: 10px;">
-              <label>Date:</label>
-              <input type="date" name="date${d}" style="margin-left: 10px;">
-            </div>
-            <div style="margin-bottom: 10px;">
-              <label>How many classes?</label>
-              <input type="number" min="1" max="20" data-day="${d}" onchange="generateClasses(this)" style="margin-left: 10px; width: 60px;">
-            </div>
-            <div class="classes-container-${d}"></div>
-          `;
-          container.appendChild(dayDiv);
-        }
-        
-        console.log(`Generated ${numDays} day containers successfully`);
-        
-      } catch (error) {
-        console.error("Error in generateDays:", error);
-        alert("Error creating days: " + error.message);
-      }
-    }
-
-    function generateClasses(input) {
-      try {
-        console.log("generateClasses function called");
-        
-        const dayIndex = parseInt(input.dataset.day);
-        const numClasses = parseInt(input.value);
-        
-        if (isNaN(numClasses) || numClasses < 1) {
-          return;
-        }
-        
-        const classesContainer = document.querySelector(`.classes-container-${dayIndex}`);
-        classesContainer.innerHTML = "";
-        
-        for (let c = 0; c < numClasses; c++) {
-          const classDiv = document.createElement("div");
-          classDiv.className = "class-container";
-          classDiv.innerHTML = `
-            <h4>Class ${c + 1}</h4>
-            <div style="margin-bottom: 10px;">
-              <label>Class:</label>
-              <select data-day="${dayIndex}" data-class="${c}" style="margin-left: 10px; width: 200px;">
-                <option value="">Select class...</option>
-                ${globalClasses.map(cls => `<option value="${cls}">${cls}</option>`).join('')}
-              </select>
-            </div>
-            <div style="margin-bottom: 10px;">
-              <label>How many rounds?</label>
-              <input type="number" min="1" max="5" data-day="${dayIndex}" data-class="${c}" onchange="generateRounds(this)" style="margin-left: 10px; width: 60px;" value="1">
-            </div>
-            <div class="rounds-container-${dayIndex}-${c}"></div>
-          `;
-          classesContainer.appendChild(classDiv);
-          
-          // Auto-generate 1 round
-          setTimeout(() => {
-            const roundInput = classDiv.querySelector('input[type="number"]');
-            generateRounds(roundInput);
-          }, 100);
-        }
-        
-        console.log(`Generated ${numClasses} classes for day ${dayIndex + 1}`);
-        
-      } catch (error) {
-        console.error("Error in generateClasses:", error);
-        alert("Error creating classes: " + error.message);
-      }
-    }
-
-    function generateRounds(input) {
-      try {
-        console.log("generateRounds function called");
-        
-        const dayIndex = parseInt(input.dataset.day);
-        const classIndex = parseInt(input.dataset.class);
-        const numRounds = parseInt(input.value);
-        
-        if (isNaN(numRounds) || numRounds < 1) {
-          return;
-        }
-        
-        const roundsContainer = document.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
-        roundsContainer.innerHTML = "";
-        
-        for (let r = 0; r < numRounds; r++) {
-          const roundDiv = document.createElement("div");
-          roundDiv.className = "round-container";
-          roundDiv.innerHTML = `
-  <div style="margin-bottom: 5px;">
-    <strong>Round ${r + 1}:</strong>
-    <label style="margin-left: 10px;">Judge:</label>
-    <input type="text" 
-           style="margin-left: 5px; width: 150px; padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px;" 
-           placeholder="Type judge name..." 
-           list="judges-datalist-${dayIndex}-${classIndex}-${r}"
-           class="judge-autocomplete">
-    <datalist id="judges-datalist-${dayIndex}-${classIndex}-${r}">
-      ${globalJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
-    </datalist>
-    <label style="margin-left: 10px;">
-      <input type="checkbox"> FEO
-    </label>
-  </div>
-`;
-          roundsContainer.appendChild(roundDiv);
-        }
-        
-        console.log(`Generated ${numRounds} rounds for day ${dayIndex + 1}, class ${classIndex + 1}`);
-        
-      } catch (error) {
-        console.error("Error in generateRounds:", error);
-        alert("Error creating rounds: " + error.message);
-      }
-    }
-
     // Make functions globally accessible
     window.generateDays = generateDays;
     window.generateClasses = generateClasses;
     window.generateRounds = generateRounds;
 
-    console.log("Create trial page script loaded successfully with timezone-safe date handling");
+    console.log("Create trial page script loaded successfully with timezone-safe date handling and standardized field names");
   </script>
 </body>
 </html>
