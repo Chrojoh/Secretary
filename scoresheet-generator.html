@@ -855,13 +855,22 @@
                                     
                                     const className = rawClassName.toLowerCase();
                                     
-                                    // Enhanced Scent Detective detection
+                                    // Enhanced Scent Detective detection for C-WAGS classes
                                     const isScentDetective = className.includes('scent detective') || 
                                                            className.includes('scentdetective') || 
                                                            className.includes('scent work') || 
                                                            className.includes('nosework') ||
                                                            className.includes('scent') ||
-                                                           className.includes('detective');
+                                                           className.includes('detective') ||
+                                                           // C-WAGS specific scent classes
+                                                           className.includes('super sleuth') ||
+                                                           className.includes('supersleuth') ||
+                                                           className.includes('sleuth') ||
+                                                           className.includes('patrol') ||
+                                                           className.includes('ranger') ||
+                                                           // Additional detection keywords
+                                                           className.includes('detection') ||
+                                                           className.includes('search');
 
                                     console.log('🔍 Entry analysis:', {
                                         entryIndex: index,
