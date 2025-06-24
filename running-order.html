@@ -780,12 +780,19 @@
                                     });
                                     
                                     // Filter by date if specified AND ensure it's a valid class
-                                    const dateMatches = !selectedDate || processedEntry.date === selectedDate;
+                                    // FIXED: Handle null dates by treating them as matching the selected date
+                                    const dateMatches = !selectedDate || 
+                                                       processedEntry.date === selectedDate || 
+                                                       processedEntry.date === null || 
+                                                       processedEntry.date === undefined;
                                     const classIsValid = isValidClass(processedEntry[STANDARD_FIELDS.CLASS_NAME]);
                                     
                                     console.log(`🔍 Entry ${index} decision:`, {
                                         dateMatches,
                                         classIsValid,
+                                        processedEntryDate: processedEntry.date,
+                                        selectedDate: selectedDate,
+                                        dateIsNull: processedEntry.date === null,
                                         finalDecision: dateMatches && classIsValid ? 'INCLUDE' : 'EXCLUDE'
                                     });
                                     
