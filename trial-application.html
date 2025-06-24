@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trial Application</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
@@ -100,6 +102,9 @@
     .info-section {
       background-color: #f9f9f9;
       border: 1px solid #ccc;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
     }
     
     .button-group {
@@ -118,115 +123,145 @@
       background-color: #4CAF50;
       color: white;
       border: none;
+      border-radius: 4px;
+    }
+    
+    .save-btn:hover {
+      background-color: #45a049;
     }
     
     .cancel-btn {
       background-color: #f44336;
       color: white;
       border: none;
+      border-radius: 4px;
+    }
+    
+    .cancel-btn:hover {
+      background-color: #da190b;
+    }
+    
+    .back-button {
+      background-color: #007cba;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .back-button:hover {
+      background-color: #005a8b;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    
+    /* Judges section styling */
+    .judges-section {
+      margin: 20px 0;
+    }
+    
+    .judges-section h3 {
+      margin-bottom: 10px;
+      color: #007cba;
+    }
+    
+    .judges-section textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      resize: vertical;
     }
   </style>
 </head>
 <body>
   <div class="application-form">
-    <button class="back-button" onclick="location.href='main-dashboard.html'" style="background-color: #007cba; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; margin-bottom: 20px;">← Back to Dashboard</button>
+    <button class="back-button" onclick="location.href='main-dashboard.html'">← Back to Dashboard</button>
     
     <div class="header">
       <h1>Scent Trial Application</h1>
+    </div>
+    
+    <div id="loadingIndicator" class="loading" style="display: none;">
+      <div>Loading trial data...</div>
     </div>
     
     <form id="applicationForm">
       <!-- Basic Information Section -->
       <div class="form-row">
         <div class="form-group">
-          <label>Trial Dates:</label>
+          <label for="trialDates">Trial Dates:</label>
           <input type="text" id="trialDates" placeholder="Enter trial dates">
         </div>
         <div class="form-group">
-          <label>Full Address of Venue:</label>
+          <label for="venueAddress">Full Address of Venue:</label>
           <input type="text" id="venueAddress" placeholder="Enter complete venue address">
         </div>
       </div>
       
       <div class="form-row">
         <div class="form-group full-width">
-          <label>Host Name:</label>
+          <label for="hostName">Host Name:</label>
           <input type="text" id="hostName" placeholder="Enter host name">
         </div>
       </div>
       
       <div class="form-row">
         <div class="form-group">
-          <label>Name of Trial Location:</label>
-          <input type="text" id="trialLocation" placeholder="Enter trial location">
+          <label for="trialLocationName">Name of Trial Location:</label>
+          <input type="text" id="trialLocationName" placeholder="Enter trial location">
         </div>
         <div class="form-group">
-          <label>Premium web site:</label>
+          <label for="premiumWebsite">Premium web site:</label>
           <input type="text" id="premiumWebsite" placeholder="Enter website URL">
         </div>
       </div>
       
       <div class="form-row">
         <div class="form-group">
-          <label>Trial Contact Name:</label>
+          <label for="contactName">Trial Contact Name:</label>
           <input type="text" id="contactName" placeholder="Enter contact name">
         </div>
         <div class="form-group">
-          <label>Email:</label>
-          <input type="email" id="contactEmail" placeholder="Enter email address">
+          <label for="contactPhone">Contact Phone:</label>
+          <input type="tel" id="contactPhone" placeholder="Enter phone number">
         </div>
       </div>
       
       <div class="form-row">
         <div class="form-group">
-          <label>Contact Phone:</label>
-          <input type="tel" id="contactPhone" placeholder="Enter phone number">
+          <label for="contactEmail">Contact Email:</label>
+          <input type="email" id="contactEmail" placeholder="Enter email address">
         </div>
         <div class="form-group">
-          <label>Submitted date:</label>
+          <label for="submittedDate">Submitted Date:</label>
           <input type="date" id="submittedDate">
         </div>
       </div>
       
       <!-- Judges Section -->
-      <div class="form-row">
-        <div class="form-group full-width">
-          <label>Judges:</label>
-          <textarea id="judges" rows="2" placeholder="List all judges"></textarea>
+      <div class="judges-section">
+        <h3>📋 Judges</h3>
+        <div class="form-group">
+          <label for="judges">Judge Names (one per line or comma separated):</label>
+          <textarea id="judges" placeholder="Enter judge names..."></textarea>
         </div>
       </div>
       
-      <div class="form-row">
-        <div class="form-group full-width">
-          <label>C-WAGS Advocate(s):</label>
-          <input type="text" id="advocates" placeholder="Enter C-WAGS advocate names">
-        </div>
-      </div>
-      
-      <!-- Schedule Table -->
-      <p><strong>On each class line, list judge (first name okay) under the day and round that they are judging</strong></p>
-      
-     <table class="schedule-table" id="scheduleTable">
-        <thead>
-          <tr>
-            <th>Class</th>
-            <th id="day1Header">Day 1<br>Judge</th>
-            <th id="day2Header">Day 2<br>Judge</th>
-            <th id="day3Header">Day 3<br>Judge</th>
-            <th id="day4Header">Day 4<br>Judge</th>
-            <th id="day5Header">Day 5<br>Judge</th>
-            <th id="day6Header">Day 6<br>Judge</th>
-          </tr>
-        </thead>
-        <tbody id="scheduleBody">
-          <!-- Schedule rows will be populated by JavaScript -->
-        </tbody>
-      </table>
-      
-      <!-- Additional Information -->
+      <!-- Trial Details Section -->
       <div class="form-row">
         <div class="form-group checkbox-group">
-          <label>Inside / Outside trial:</label>
+          <label>Trial Location Type:</label>
           <input type="checkbox" name="trialLocation" value="inside" id="inside">
           <label for="inside">Inside</label>
           <input type="checkbox" name="trialLocation" value="outside" id="outside">
@@ -236,7 +271,7 @@
           </small>
         </div>
         <div class="form-group">
-          <label>Ring Surface:</label>
+          <label for="ringSurface">Ring Surface:</label>
           <input type="text" id="ringSurface" placeholder="Enter ring surface">
         </div>
       </div>
@@ -253,18 +288,18 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label>Search Size exception request:</label>
+          <label for="searchException">Search Size exception request:</label>
           <input type="text" id="searchException" placeholder="Enter any exceptions">
         </div>
         <div class="form-group">
-          <label>Number of Search Areas:</label>
+          <label for="searchAreas">Number of Search Areas:</label>
           <input type="number" id="searchAreas" placeholder="Enter number">
         </div>
       </div>
       
       <div class="form-row">
         <div class="form-group">
-          <label>Insurance Expirations Date:</label>
+          <label for="insuranceDate">Insurance Expirations Date:</label>
           <input type="date" id="insuranceDate">
         </div>
         <div class="form-group checkbox-group">
@@ -276,8 +311,30 @@
         </div>
       </div>
       
+      <!-- Schedule Table -->
+      <div class="schedule-section">
+        <h3>📅 Trial Schedule</h3>
+        <table class="schedule-table" id="scheduleTable">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>Day 1</th>
+              <th>Day 2</th>
+              <th>Day 3</th>
+              <th>Day 4</th>
+              <th>Day 5</th>
+              <th>Day 6</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleBody">
+            <!-- Dynamic content will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+      
       <!-- Information Section -->
       <div class="info-section">
+        <h3>📋 Important Information</h3>
         <p><strong>Application fee due with application covers a trial on consecutive days (or one league trial maximum 6 dates within an 8-week period). $25 if received at least 25 days prior, $35 received less than 25 days</strong></p>
         <p><strong>Post-trial administrative fee of $ 1.50 per entered team runs payable with results.</strong></p>
         <p>Return completed application, certificate of insurance by Email to <strong>cwags.trials@gmail.com</strong>.</p>
@@ -285,11 +342,680 @@
       
       <!-- Submit Button -->
       <div class="button-group">
-        <button type="submit" class="save-btn">Save Application</button>
+        <button type="submit" class="save-btn">💾 Save Application</button>
       </div>
     </form>
   </div>
 
-  <script type="module" src="js/trial-application.js"></script>
+  <script type="module">
+    // Firebase imports
+    import { auth, db } from './js/firebase.js';
+    import { collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    // ===========================================
+    // STANDARD FIELD DEFINITIONS
+    // ===========================================
+    const STANDARD_FIELDS = {
+      HANDLER_NAME: 'handlerName',    // NOT 'Handler' or 'handler'
+      DOG_CALL_NAME: 'dogCallName',   // NOT 'Call Name' or 'dogName'
+      JUDGE_NAME: 'judgeName',        // NOT 'judge' or 'judgeAssigned'
+      CLASS_NAME: 'className',        // NOT 'Class' or 'class'
+      CWAGS_NUMBER: 'cwagsNumber'     // NOT 'Registration'
+    };
+
+    // ===========================================
+    // ENHANCED DATE UTILITIES WITH VALIDATION
+    // ===========================================
+    function createLocalDate(dateStr) {
+      if (!dateStr || dateStr === null || dateStr === undefined) return null;
+      
+      try {
+        if (typeof dateStr === 'string') {
+          const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+          const date = new Date(dateWithTime);
+          return isNaN(date.getTime()) ? null : date;
+        }
+        
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? null : date;
+      } catch (error) {
+        console.warn('Date creation error:', error, 'for input:', dateStr);
+        return null;
+      }
+    }
+
+    function formatLocalDate(date) {
+      if (!date || !(date instanceof Date) || isNaN(date.getTime())) return null;
+      
+      try {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      } catch (error) {
+        console.warn('Date formatting error:', error);
+        return null;
+      }
+    }
+
+    function getDateFromFirebase(timestamp) {
+      if (!timestamp) return null;
+      
+      try {
+        if (timestamp.toDate && typeof timestamp.toDate === 'function') {
+          return formatLocalDate(timestamp.toDate());
+        }
+        // Handle string dates from Firebase
+        if (typeof timestamp === 'string') {
+          return formatLocalDate(createLocalDate(timestamp));
+        }
+        return null;
+      } catch (error) {
+        console.warn('Firebase date conversion error:', error, 'for timestamp:', timestamp);
+        return null;
+      }
+    }
+
+    function prepareDateForFirebase(dateStr) {
+      if (!dateStr || dateStr === null || dateStr === undefined) return null;
+      
+      try {
+        const date = createLocalDate(dateStr);
+        if (!date || isNaN(date.getTime())) {
+          console.warn('Invalid date detected, skipping:', dateStr);
+          return null;
+        }
+        return Timestamp.fromDate(date);
+      } catch (error) {
+        console.error('Date conversion error:', error, 'for date:', dateStr);
+        return null;
+      }
+    }
+
+    // ===========================================
+    // GLOBAL VARIABLES
+    // ===========================================
+    let currentTrialData = null;
+    let applicationData = null;
+    let availableTrials = [];
+
+    // ===========================================
+    // REQUIRED FIELDS VALIDATION
+    // ===========================================
+    const requiredFields = [
+      'trialDates', 'hostName', 'contactName', 'contactEmail', 'submittedDate'
+    ];
+
+    function highlightMissingFields() {
+      let missingCount = 0;
+      
+      requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          const value = field.value.trim();
+          if (!value) {
+            field.classList.add('missing');
+            missingCount++;
+          } else {
+            field.classList.remove('missing');
+          }
+        }
+      });
+      
+      if (missingCount > 0) {
+        console.log(`${missingCount} required fields are missing`);
+      }
+      
+      return missingCount === 0;
+    }
+
+    // ===========================================
+    // TRIAL DATA LOADING WITH ENHANCED ERROR HANDLING
+    // ===========================================
+    async function loadTrialData() {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const trialId = urlParams.get('trial');
+        
+        if (!trialId) {
+          alert("No trial specified. Please create a trial first.");
+          window.location.href = 'main-dashboard.html';
+          return;
+        }
+        
+        console.log("🔍 Loading trial data for ID:", trialId);
+        
+        // Load specific trial
+        const trialDoc = await getDoc(doc(db, 'trials', trialId));
+        if (!trialDoc.exists()) {
+          alert('Trial not found');
+          window.location.href = 'main-dashboard.html';
+          return;
+        }
+
+        const trialData = trialDoc.data();
+        
+        // Enhanced date processing with better error handling
+        if (trialData.days && Array.isArray(trialData.days)) {
+          trialData.days = trialData.days.map(day => {
+            try {
+              return {
+                ...day,
+                date: day.date ? getDateFromFirebase(day.date) : null
+              };
+            } catch (error) {
+              console.warn('Skipping invalid day data:', error);
+              return null;
+            }
+          }).filter(day => day !== null); // Remove invalid days
+        }
+        
+        currentTrialData = { id: trialDoc.id, ...trialData };
+        console.log("✅ Loaded trial data:", currentTrialData);
+        
+        // Populate form with trial data
+        populateFormFromTrial();
+        
+        // Try to load existing application data
+        await loadExistingApplication();
+        
+      } catch (error) {
+        console.error("❌ Error loading trial data:", error);
+        alert("Error loading trial data: " + error.message);
+        window.location.href = 'main-dashboard.html';
+      }
+    }
+
+    function populateFormFromTrial() {
+      if (!currentTrialData) return;
+      
+      console.log("🎯 Populating form with trial data...");
+      
+      // Populate trial dates with enhanced error handling
+      if (currentTrialData.days && currentTrialData.days.length > 0) {
+        try {
+          const dates = currentTrialData.days
+            .filter(day => day.date && day.date !== null)
+            .map(day => day.date)
+            .join(', ');
+          
+          if (dates) {
+            document.getElementById('trialDates').value = dates;
+          }
+        } catch (error) {
+          console.warn('Error formatting trial dates:', error);
+        }
+      }
+      
+      // Populate host name from club name
+      if (currentTrialData.clubName) {
+        document.getElementById('hostName').value = currentTrialData.clubName;
+      }
+      
+      // Populate contact name from secretary
+      if (currentTrialData.secretary) {
+        document.getElementById('contactName').value = currentTrialData.secretary;
+      }
+      
+      // Extract and populate judges using standardized field names
+      const allJudges = new Set();
+      if (currentTrialData.days) {
+        currentTrialData.days.forEach(day => {
+          if (day.classes) {
+            day.classes.forEach(cls => {
+              if (cls.rounds) {
+                cls.rounds.forEach(round => {
+                  // Use standardized judge field name with fallbacks
+                  const judgeName = round[STANDARD_FIELDS.JUDGE_NAME] || 
+                                   round.judge || 
+                                   round.judgeAssigned;
+                  
+                  if (judgeName && judgeName.trim()) {
+                    allJudges.add(judgeName.trim());
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+      
+      if (allJudges.size > 0) {
+        document.getElementById('judges').value = Array.from(allJudges).join('\n');
+      }
+      
+      // Set submitted date to today
+      document.getElementById('submittedDate').value = new Date().toISOString().split('T')[0];
+      
+      // Populate schedule table with proper error handling
+      try {
+        populateScheduleTableWithRealJudges();
+      } catch (error) {
+        console.warn('Error populating schedule table:', error);
+      }
+      
+      console.log("✅ Form populated with trial data using standardized fields");
+    }
+
+    // ===========================================
+    // ENHANCED SCHEDULE TABLE POPULATION
+    // ===========================================
+    async function populateScheduleTableWithRealJudges() {
+      if (!currentTrialData || !currentTrialData.days) return;
+      
+      console.log("📋 Populating schedule table with real judge data...");
+      
+      try {
+        // First, load the actual judge assignments from entries
+        const judgeData = await loadJudgesFromEntries(currentTrialData.id);
+        
+        const scheduleBody = document.getElementById('scheduleBody');
+        scheduleBody.innerHTML = '';
+        
+        // Get all unique classes across all days using standardized field names
+        const allClasses = new Set();
+        currentTrialData.days.forEach(day => {
+          if (day.classes) {
+            day.classes.forEach(cls => {
+              // Use standardized class name field with fallbacks
+              const className = cls[STANDARD_FIELDS.CLASS_NAME] || 
+                               cls.className || 
+                               cls.Class || 
+                               cls.class;
+              
+              if (className && className.trim()) {
+                allClasses.add(className.trim());
+              }
+            });
+          }
+        });
+        
+        // Create rows for each class
+        Array.from(allClasses).forEach(className => {
+          const row = document.createElement('tr');
+          
+          // Class name cell
+          const classCell = document.createElement('td');
+          classCell.innerHTML = `<input type="text" value="${className}" readonly style="background: #f0f0f0;">`;
+          row.appendChild(classCell);
+          
+          // Judge cells for each day (up to 6 days)
+          for (let dayIndex = 0; dayIndex < 6; dayIndex++) {
+            const judgeCell = document.createElement('td');
+            
+            let judgeValue = '';
+            
+            // Look for judge in the entry data, not trial structure
+            if (dayIndex < currentTrialData.days.length) {
+              const day = currentTrialData.days[dayIndex];
+              const dayDate = day.date;
+              
+              // Look for this judge in the entry data using standardized key
+              const judgeKey = `${dayDate}_${className}_1`; // Assuming round 1 for now
+              if (judgeData[judgeKey]) {
+                judgeValue = judgeData[judgeKey][STANDARD_FIELDS.JUDGE_NAME] || 
+                            judgeData[judgeKey].judgeName || 
+                            judgeData[judgeKey].judge || '';
+              } else {
+                // Fallback: check trial structure as backup
+                if (day.classes) {
+                  const classMatch = day.classes.find(cls => {
+                    const clsName = cls[STANDARD_FIELDS.CLASS_NAME] || 
+                                   cls.className || 
+                                   cls.Class || 
+                                   cls.class;
+                    return clsName === className;
+                  });
+                  
+                  if (classMatch && classMatch.rounds && classMatch.rounds.length > 0) {
+                    judgeValue = classMatch.rounds[0][STANDARD_FIELDS.JUDGE_NAME] || 
+                                classMatch.rounds[0].judge || 
+                                classMatch.rounds[0].judgeAssigned || '';
+                  }
+                }
+              }
+            }
+            
+            judgeCell.innerHTML = `<input type="text" value="${judgeValue}" placeholder="">`;
+            row.appendChild(judgeCell);
+          }
+          
+          scheduleBody.appendChild(row);
+        });
+        
+        console.log("✅ Schedule table populated with real judge data using standardized fields");
+        
+      } catch (error) {
+        console.error("❌ Error populating schedule table:", error);
+        // Don't throw - just log the error and continue
+      }
+    }
+
+    // ===========================================
+    // MISSING FUNCTION IMPLEMENTATION (CRITICAL FIX)
+    // ===========================================
+    async function loadJudgesFromEntries(trialId) {
+      try {
+        console.log("🔍 Loading judges from entry data for trial:", trialId);
+        
+        const entriesQuery = query(
+          collection(db, "entries"),
+          where("trialId", "==", trialId)
+        );
+        
+        const entriesSnapshot = await getDocs(entriesQuery);
+        const judgeData = {};
+        
+        entriesSnapshot.forEach(doc => {
+          const entry = doc.data();
+          
+          // Process each selectedEntry using standardized field names
+          if (entry.selectedEntries && Array.isArray(entry.selectedEntries)) {
+            entry.selectedEntries.forEach((selectedEntry, index) => {
+              try {
+                // Get date with proper conversion
+                const entryDate = selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null;
+                
+                // Get standardized fields with fallbacks
+                const judgeName = selectedEntry[STANDARD_FIELDS.JUDGE_NAME] || 
+                                 selectedEntry.judge || 
+                                 selectedEntry.judgeAssigned || 
+                                 'Judge TBD';
+                
+                const className = selectedEntry[STANDARD_FIELDS.CLASS_NAME] || 
+                                 selectedEntry.className || 
+                                 selectedEntry.Class || 
+                                 selectedEntry.class;
+                
+                const handlerName = entry[STANDARD_FIELDS.HANDLER_NAME] || 
+                                   entry.handlerName || 
+                                   entry.handler;
+                
+                const dogCallName = entry[STANDARD_FIELDS.DOG_CALL_NAME] || 
+                                   entry.dogCallName || 
+                                   entry.callName;
+
+                if (judgeName && className && entryDate) {
+                  const dayClassKey = `${entryDate}_${className}_${selectedEntry.roundNumber || '1'}`;
+                  
+                  judgeData[dayClassKey] = {
+                    [STANDARD_FIELDS.JUDGE_NAME]: judgeName,
+                    [STANDARD_FIELDS.CLASS_NAME]: className,
+                    [STANDARD_FIELDS.HANDLER_NAME]: handlerName,
+                    [STANDARD_FIELDS.DOG_CALL_NAME]: dogCallName,
+                    date: entryDate,
+                    roundNumber: selectedEntry.roundNumber || '1'
+                  };
+                }
+              } catch (error) {
+                console.warn('Skipping invalid entry data:', error);
+              }
+            });
+          }
+        });
+        
+        console.log("✅ Loaded judge data with standardized fields:", Object.keys(judgeData).length, "assignments");
+        return judgeData;
+        
+      } catch (error) {
+        console.error("❌ Error loading judges from entries:", error);
+        return {};
+      }
+    }
+
+    // ===========================================
+    // FORM DATA COLLECTION AND NORMALIZATION
+    // ===========================================
+    function collectFormData() {
+      const formData = {};
+      
+      // Collect all input values
+      const inputs = document.querySelectorAll('input, textarea, select');
+      inputs.forEach(input => {
+        if (input.id) {
+          if (input.type === 'checkbox' || input.type === 'radio') {
+            if (input.checked) {
+              formData[input.id] = true;
+              if (input.name) {
+                formData[input.name] = input.value;
+              }
+            }
+          } else {
+            formData[input.id] = input.value;
+          }
+        }
+      });
+      
+      // Special handling for Inside/Outside trial checkboxes
+      const locationCheckboxes = document.querySelectorAll('input[name="trialLocation"]:checked');
+      const locationValues = Array.from(locationCheckboxes).map(checkbox => checkbox.value);
+      if (locationValues.length > 0) {
+        formData.trialLocationTypes = locationValues; // Store as array
+        formData.trialLocationType = locationValues.join(' & '); // Store as string for display
+      }
+      
+      // Collect schedule table data using standardized field names
+      const scheduleRows = document.querySelectorAll('#scheduleBody tr');
+      const scheduleData = [];
+      scheduleRows.forEach(row => {
+        const cells = row.querySelectorAll('td input');
+        if (cells.length > 0) {
+          const rowData = {
+            [STANDARD_FIELDS.CLASS_NAME]: cells[0].value,
+            judges: []
+          };
+          for (let i = 1; i < cells.length; i++) {
+            if (cells[i].value.trim()) {
+              rowData.judges.push({
+                [STANDARD_FIELDS.JUDGE_NAME]: cells[i].value.trim()
+              });
+            }
+          }
+          if (rowData[STANDARD_FIELDS.CLASS_NAME].trim()) {
+            scheduleData.push(rowData);
+          }
+        }
+      });
+      formData.schedule = scheduleData;
+      
+      return formData;
+    }
+
+    // ===========================================
+    // APPLICATION SAVE AND LOAD
+    // ===========================================
+    async function saveApplication(formData) {
+      try {
+        const applicationRecord = {
+          ...formData,
+          trialId: currentTrialData.id,
+          createdBy: auth.currentUser.uid,
+          updatedAt: Timestamp.now()
+        };
+        
+        if (applicationData && applicationData.id) {
+          // Update existing application
+          await updateDoc(doc(db, "applications", applicationData.id), applicationRecord);
+          console.log("✅ Application updated with standardized fields");
+        } else {
+          // Create new application
+          applicationRecord.createdAt = Timestamp.now();
+          const docRef = await setDoc(doc(db, "applications", `${currentTrialData.id}_application`), applicationRecord);
+          console.log("✅ Application saved with standardized fields");
+        }
+        
+        alert("Application saved successfully!");
+        
+        // Redirect back to dashboard
+        window.location.href = 'main-dashboard.html';
+        
+      } catch (error) {
+        console.error("❌ Error saving application:", error);
+        alert("Error saving application: " + error.message);
+      }
+    }
+
+    async function loadExistingApplication() {
+      try {
+        if (!currentTrialData) return;
+        
+        const appDoc = await getDoc(doc(db, "applications", `${currentTrialData.id}_application`));
+        
+        if (appDoc.exists()) {
+          applicationData = { id: appDoc.id, ...appDoc.data() };
+          populateFormWithApplicationData(applicationData);
+          console.log("✅ Loaded existing application with standardized fields");
+        }
+      } catch (error) {
+        console.error("❌ Error loading existing application:", error);
+        // Don't throw - application data is optional
+      }
+    }
+
+    function populateFormWithApplicationData(data) {
+      if (!data) return;
+      
+      console.log("📄 Populating form with application data...");
+      
+      // Populate form fields
+      Object.keys(data).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+          if (element.type === 'checkbox') {
+            element.checked = data[key];
+          } else if (element.type === 'radio') {
+            if (element.value === data[key]) {
+              element.checked = true;
+            }
+          } else {
+            element.value = data[key] || '';
+          }
+        }
+      });
+      
+      // Handle special cases for arrays and objects
+      if (data.trialLocationTypes && Array.isArray(data.trialLocationTypes)) {
+        data.trialLocationTypes.forEach(location => {
+          const checkbox = document.querySelector(`input[name="trialLocation"][value="${location}"]`);
+          if (checkbox) checkbox.checked = true;
+        });
+      }
+      
+      console.log("✅ Form populated with application data using standardized fields");
+    }
+
+    // ===========================================
+    // EVENT LISTENERS AND INITIALIZATION
+    // ===========================================
+    
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("📄 Page loaded, waiting for authentication...");
+      
+      // Add event listeners for real-time validation
+      requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+          field.addEventListener('input', highlightMissingFields);
+          field.addEventListener('change', highlightMissingFields);
+        }
+      });
+      
+      // League checkboxes - only one should be checked
+      const leagueYes = document.getElementById('leagueYes');
+      const leagueNo = document.getElementById('leagueNo');
+      
+      if (leagueYes && leagueNo) {
+        leagueYes.addEventListener('change', function() {
+          if (this.checked) leagueNo.checked = false;
+        });
+        
+        leagueNo.addEventListener('change', function() {
+          if (this.checked) leagueYes.checked = false;
+        });
+      }
+      
+      // Form submission
+      const form = document.getElementById('applicationForm');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const isValid = highlightMissingFields();
+          if (!isValid) {
+            alert("Please fill in all highlighted required fields before saving.");
+            return;
+          }
+          
+          const formData = collectFormData();
+          console.log("📋 Collected form data:", formData);
+          saveApplication(formData);
+        });
+      }
+      
+      // Initial highlighting check
+      setTimeout(highlightMissingFields, 1000);
+    });
+
+    // ===========================================
+    // AUTHENTICATION AND ERROR HANDLING
+    // ===========================================
+    
+    // Auth state listener with enhanced error handling
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        console.log("✅ User authenticated:", user.email);
+        
+        try {
+          document.getElementById('loadingIndicator').style.display = 'block';
+          await loadTrialData();
+        } catch (error) {
+          console.error("❌ Error in auth state change:", error);
+          alert("Error loading application. Please try again.");
+          window.location.href = 'main-dashboard.html';
+        } finally {
+          document.getElementById('loadingIndicator').style.display = 'none';
+        }
+      } else {
+        console.log("❌ No user authenticated, redirecting to login");
+        window.location.href = 'index.html';
+      }
+    });
+
+    // ===========================================
+    // GLOBAL ERROR HANDLERS
+    // ===========================================
+    
+    window.addEventListener('error', function(event) {
+      console.error('Global error caught:', event.error);
+    });
+
+    window.addEventListener('unhandledrejection', function(event) {
+      console.error('Unhandled promise rejection:', event.reason);
+    });
+
+    // ===========================================
+    // DEBUGGING HELPERS (REMOVE IN PRODUCTION)
+    // ===========================================
+    
+    window.debugTrialApplication = {
+      currentTrialData: () => currentTrialData,
+      applicationData: () => applicationData,
+      availableTrials: () => availableTrials,
+      STANDARD_FIELDS: STANDARD_FIELDS,
+      collectFormData: collectFormData,
+      testDateConversion: (dateStr) => ({
+        input: dateStr,
+        createLocalDate: createLocalDate(dateStr),
+        formatLocalDate: formatLocalDate(createLocalDate(dateStr)),
+        getDateFromFirebase: dateStr,
+        prepareDateForFirebase: prepareDateForFirebase(dateStr)
+      }),
+      loadJudgesFromEntries: loadJudgesFromEntries
+    };
+
+    console.log("✅ Trial Application loaded with enhanced error handling and standardized field names");
+    console.log("🔧 Debug tools available at window.debugTrialApplication");
+  </script>
 </body>
 </html>
