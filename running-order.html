@@ -586,18 +586,27 @@
         }
 
         function isValidClass(className) {
-            if (!className || typeof className !== 'string') return false;
-            
             // If no valid class names loaded, accept all classes (running orders need all entries)
-            if (validClassNames.length === 0) return true;
+            if (validClassNames.length === 0) {
+                console.log(`🔍 Class validation: "${className}" → ACCEPT (no restrictions loaded)`);
+                return true;
+            }
+            
+            if (!className || typeof className !== 'string') {
+                console.log(`🔍 Class validation: "${className}" → REJECT (invalid class name)`);
+                return false;
+            }
             
             const normalizedClassName = className.toLowerCase().trim();
             
             // Check against loaded valid class names
-            return validClassNames.some(validClass => 
+            const isValid = validClassNames.some(validClass => 
                 normalizedClassName.includes(validClass) || 
                 validClass.includes(normalizedClassName)
             );
+            
+            console.log(`🔍 Class validation: "${className}" → ${isValid ? 'ACCEPT' : 'REJECT'}`);
+            return isValid;
         }
 
         // ========================================
@@ -748,23 +757,33 @@
                                         submittedAt: entryData.submittedAt
                                     };
                                     
-                                    // Enhanced debugging for running order entries
+                                    // Enhanced debugging for running order entries with actual object details
                                     console.log(`📋 Processing entry ${index}:`, {
                                         entryDate: processedEntry.date,
                                         selectedDate: selectedDate,
-                                        handlerName: processedEntry[STANDARD_FIELDS.HANDLER_NAME],
-                                        dogName: processedEntry[STANDARD_FIELDS.DOG_CALL_NAME],
-                                        className: processedEntry[STANDARD_FIELDS.CLASS_NAME],
-                                        judgeName: processedEntry[STANDARD_FIELDS.JUDGE_NAME],
+                                        handlerName: `"${processedEntry[STANDARD_FIELDS.HANDLER_NAME]}"`,
+                                        dogName: `"${processedEntry[STANDARD_FIELDS.DOG_CALL_NAME]}"`,
+                                        className: `"${processedEntry[STANDARD_FIELDS.CLASS_NAME]}"`,
+                                        judgeName: `"${processedEntry[STANDARD_FIELDS.JUDGE_NAME]}"`,
                                         isValidClass: isValidClass(processedEntry[STANDARD_FIELDS.CLASS_NAME]),
                                         matchesDate: !selectedDate || processedEntry.date === selectedDate,
                                         willInclude: (!selectedDate || processedEntry.date === selectedDate) && isValidClass(processedEntry[STANDARD_FIELDS.CLASS_NAME]),
-                                        allFields: Object.keys(selectedEntry)
+                                        rawEntryFields: Object.keys(selectedEntry),
+                                        // Show the actual values from the raw entry
+                                        rawClassName: selectedEntry[STANDARD_FIELDS.CLASS_NAME] || selectedEntry.className || selectedEntry.class || 'UNDEFINED',
+                                        rawHandlerName: selectedEntry[STANDARD_FIELDS.HANDLER_NAME] || selectedEntry.handlerName || 'UNDEFINED',
+                                        rawDogName: selectedEntry[STANDARD_FIELDS.DOG_CALL_NAME] || selectedEntry.dogCallName || 'UNDEFINED'
                                     });
                                     
                                     // Filter by date if specified AND ensure it's a valid class
                                     const dateMatches = !selectedDate || processedEntry.date === selectedDate;
                                     const classIsValid = isValidClass(processedEntry[STANDARD_FIELDS.CLASS_NAME]);
+                                    
+                                    console.log(`🔍 Entry ${index} decision:`, {
+                                        dateMatches,
+                                        classIsValid,
+                                        finalDecision: dateMatches && classIsValid ? 'INCLUDE' : 'EXCLUDE'
+                                    });
                                     
                                     if (dateMatches && classIsValid) {
                                         entries.push(processedEntry);
