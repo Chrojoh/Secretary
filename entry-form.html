@@ -1519,23 +1519,43 @@
     }
 
     function handleRegistrationInput(e) {
-      const registrationNumber = e.target.value.trim();
-      
-      if (window.registrationTimeout) {
-        clearTimeout(window.registrationTimeout);
-      }
-      
-      if (registrationNumber.length >= 3) {
-        console.log("🔍 Setting up lookup for:", registrationNumber);
-        window.registrationTimeout = setTimeout(() => {
-          autoFillFromRegistration(registrationNumber);
-        }, 500);
-      } else {
-        hideLookupStatus();
-      }
-      
-      checkFormValidity();
+  const registrationNumber = e.target.value.trim();
+  
+  if (window.registrationTimeout) {
+    clearTimeout(window.registrationTimeout);
+  }
+  
+  // 🆕 CLEAR EXISTING NAMES when user starts typing new registration
+  if (registrationNumber.length >= 1) {
+    console.log("🧹 Clearing existing names for new registration entry");
+    
+    // Clear handler and dog name fields immediately
+    const handlerNameField = document.getElementById('handlerName');
+    const dogCallNameField = document.getElementById('dogCallName');
+    
+    if (handlerNameField) {
+      handlerNameField.value = '';
+      handlerNameField.classList.remove('auto-filled');
     }
+    
+    if (dogCallNameField) {
+      dogCallNameField.value = '';
+      dogCallNameField.classList.remove('auto-filled');
+    }
+    
+    // Hide any previous lookup status
+    hideLookupStatus();
+  }
+  
+  if (registrationNumber.length >= 3) {
+    console.log("🔍 Setting up lookup for:", registrationNumber);
+    window.registrationTimeout = setTimeout(() => {
+      autoFillFromRegistration(registrationNumber);
+    }, 750); // Slightly longer delay
+  }
+  
+  checkFormValidity();
+}
 
     // ========================================
     // TRIAL SETUP AND MANAGEMENT
