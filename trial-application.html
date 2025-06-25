@@ -27,6 +27,35 @@
       margin: 0;
     }
     
+    .trial-selection {
+      background-color: #f0f8ff;
+      border: 2px solid #007cba;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .trial-selection h3 {
+      color: #007cba;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    
+    .trial-selection select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #007cba;
+      border-radius: 4px;
+      background-color: white;
+    }
+    
+    .trial-selection select:focus {
+      outline: none;
+      border-color: #005a8b;
+      box-shadow: 0 0 5px rgba(0, 124, 186, 0.3);
+    }
+    
     .form-row {
       display: flex;
       gap: 20px;
@@ -130,6 +159,11 @@
       background-color: #45a049;
     }
     
+    .save-btn:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
     .cancel-btn {
       background-color: #f44336;
       color: white;
@@ -164,6 +198,17 @@
       color: #666;
     }
     
+    .form-content {
+      opacity: 0.3;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .form-content.enabled {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
     /* Judges section styling */
     .judges-section {
       margin: 20px 0;
@@ -196,155 +241,165 @@
       <div>Loading trial data...</div>
     </div>
     
-    <form id="applicationForm">
-      <!-- Basic Information Section -->
-      <div class="form-row">
-        <div class="form-group">
-          <label for="trialDates">Trial Dates:</label>
-          <input type="text" id="trialDates" placeholder="Enter trial dates">
+    <!-- Trial Selection Section -->
+    <div class="trial-selection">
+      <h3>🎯 Select Trial</h3>
+      <select id="trialSelect">
+        <option value="">Select a trial to create application for...</option>
+      </select>
+    </div>
+    
+    <div id="formContent" class="form-content">
+      <form id="applicationForm">
+        <!-- Basic Information Section -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="trialDates">Trial Dates:</label>
+            <input type="text" id="trialDates" placeholder="Enter trial dates">
+          </div>
+          <div class="form-group">
+            <label for="venueAddress">Full Address of Venue:</label>
+            <input type="text" id="venueAddress" placeholder="Enter complete venue address">
+          </div>
         </div>
-        <div class="form-group">
-          <label for="venueAddress">Full Address of Venue:</label>
-          <input type="text" id="venueAddress" placeholder="Enter complete venue address">
+        
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="hostName">Host Name:</label>
+            <input type="text" id="hostName" placeholder="Enter host name">
+          </div>
         </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group full-width">
-          <label for="hostName">Host Name:</label>
-          <input type="text" id="hostName" placeholder="Enter host name">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="trialLocationName">Name of Trial Location:</label>
+            <input type="text" id="trialLocationName" placeholder="Enter trial location">
+          </div>
+          <div class="form-group">
+            <label for="premiumWebsite">Premium web site:</label>
+            <input type="text" id="premiumWebsite" placeholder="Enter website URL">
+          </div>
         </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="trialLocationName">Name of Trial Location:</label>
-          <input type="text" id="trialLocationName" placeholder="Enter trial location">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contactName">Trial Contact Name:</label>
+            <input type="text" id="contactName" placeholder="Enter contact name">
+          </div>
+          <div class="form-group">
+            <label for="contactPhone">Contact Phone:</label>
+            <input type="tel" id="contactPhone" placeholder="Enter phone number">
+          </div>
         </div>
-        <div class="form-group">
-          <label for="premiumWebsite">Premium web site:</label>
-          <input type="text" id="premiumWebsite" placeholder="Enter website URL">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contactEmail">Contact Email:</label>
+            <input type="email" id="contactEmail" placeholder="Enter email address">
+          </div>
+          <div class="form-group">
+            <label for="submittedDate">Submitted Date:</label>
+            <input type="date" id="submittedDate">
+          </div>
         </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="contactName">Trial Contact Name:</label>
-          <input type="text" id="contactName" placeholder="Enter contact name">
+        
+        <!-- Judges Section -->
+        <div class="judges-section">
+          <h3>📋 Judges</h3>
+          <div class="form-group">
+            <label for="judges">Judge Names (one per line or comma separated):</label>
+            <textarea id="judges" placeholder="Enter judge names..."></textarea>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="contactPhone">Contact Phone:</label>
-          <input type="tel" id="contactPhone" placeholder="Enter phone number">
+        
+        <!-- Trial Details Section -->
+        <div class="form-row">
+          <div class="form-group checkbox-group">
+            <label>Trial Location Type:</label>
+            <input type="checkbox" name="trialLocation" value="inside" id="inside">
+            <label for="inside">Inside</label>
+            <input type="checkbox" name="trialLocation" value="outside" id="outside">
+            <label for="outside">Outside</label>
+            <small style="display: block; color: #666; margin-top: 5px;">
+              Select one or both if trial has mixed indoor/outdoor classes
+            </small>
+          </div>
+          <div class="form-group">
+            <label for="ringSurface">Ring Surface:</label>
+            <input type="text" id="ringSurface" placeholder="Enter ring surface">
+          </div>
         </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="contactEmail">Contact Email:</label>
-          <input type="email" id="contactEmail" placeholder="Enter email address">
+        
+        <div class="form-row">
+          <div class="form-group checkbox-group">
+            <label>League:</label>
+            <input type="checkbox" id="leagueYes">
+            <label for="leagueYes">YES</label>
+            <input type="checkbox" id="leagueNo">
+            <label for="leagueNo">NO</label>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="submittedDate">Submitted Date:</label>
-          <input type="date" id="submittedDate">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="searchException">Search Size exception request:</label>
+            <input type="text" id="searchException" placeholder="Enter any exceptions">
+          </div>
+          <div class="form-group">
+            <label for="searchAreas">Number of Search Areas:</label>
+            <input type="number" id="searchAreas" placeholder="Enter number">
+          </div>
         </div>
-      </div>
-      
-      <!-- Judges Section -->
-      <div class="judges-section">
-        <h3>📋 Judges</h3>
-        <div class="form-group">
-          <label for="judges">Judge Names (one per line or comma separated):</label>
-          <textarea id="judges" placeholder="Enter judge names..."></textarea>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="insuranceDate">Insurance Expirations Date:</label>
+            <input type="date" id="insuranceDate">
+          </div>
+          <div class="form-group checkbox-group">
+            <label>Scent – Resets Offered:</label>
+            <input type="radio" name="resets" value="yes" id="resetsYes">
+            <label for="resetsYes">Yes</label>
+            <input type="radio" name="resets" value="no" id="resetsNo">
+            <label for="resetsNo">No</label>
+          </div>
         </div>
-      </div>
-      
-      <!-- Trial Details Section -->
-      <div class="form-row">
-        <div class="form-group checkbox-group">
-          <label>Trial Location Type:</label>
-          <input type="checkbox" name="trialLocation" value="inside" id="inside">
-          <label for="inside">Inside</label>
-          <input type="checkbox" name="trialLocation" value="outside" id="outside">
-          <label for="outside">Outside</label>
-          <small style="display: block; color: #666; margin-top: 5px;">
-            Select one or both if trial has mixed indoor/outdoor classes
-          </small>
+        
+        <!-- Schedule Table -->
+        <div class="schedule-section">
+          <h3>📅 Trial Schedule</h3>
+          <table class="schedule-table" id="scheduleTable">
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Day 1</th>
+                <th>Day 2</th>
+                <th>Day 3</th>
+                <th>Day 4</th>
+                <th>Day 5</th>
+                <th>Day 6</th>
+              </tr>
+            </thead>
+            <tbody id="scheduleBody">
+              <!-- Dynamic content will be inserted here -->
+            </tbody>
+          </table>
         </div>
-        <div class="form-group">
-          <label for="ringSurface">Ring Surface:</label>
-          <input type="text" id="ringSurface" placeholder="Enter ring surface">
+        
+        <!-- Information Section -->
+        <div class="info-section">
+          <h3>📋 Important Information</h3>
+          <p><strong>Application fee due with application covers a trial on consecutive days (or one league trial maximum 6 dates within an 8-week period). $25 if received at least 25 days prior, $35 received less than 25 days</strong></p>
+          <p><strong>Post-trial administrative fee of $ 1.50 per entered team runs payable with results.</strong></p>
+          <p>Return completed application, certificate of insurance by Email to <strong>cwags.trials@gmail.com</strong>.</p>
         </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group checkbox-group">
-          <label>League:</label>
-          <input type="checkbox" id="leagueYes">
-          <label for="leagueYes">YES</label>
-          <input type="checkbox" id="leagueNo">
-          <label for="leagueNo">NO</label>
+        
+        <!-- Submit Button -->
+        <div class="button-group">
+          <button type="submit" class="save-btn" id="saveButton" disabled>💾 Save Application</button>
         </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="searchException">Search Size exception request:</label>
-          <input type="text" id="searchException" placeholder="Enter any exceptions">
-        </div>
-        <div class="form-group">
-          <label for="searchAreas">Number of Search Areas:</label>
-          <input type="number" id="searchAreas" placeholder="Enter number">
-        </div>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label for="insuranceDate">Insurance Expirations Date:</label>
-          <input type="date" id="insuranceDate">
-        </div>
-        <div class="form-group checkbox-group">
-          <label>Scent – Resets Offered:</label>
-          <input type="radio" name="resets" value="yes" id="resetsYes">
-          <label for="resetsYes">Yes</label>
-          <input type="radio" name="resets" value="no" id="resetsNo">
-          <label for="resetsNo">No</label>
-        </div>
-      </div>
-      
-      <!-- Schedule Table -->
-      <div class="schedule-section">
-        <h3>📅 Trial Schedule</h3>
-        <table class="schedule-table" id="scheduleTable">
-          <thead>
-            <tr>
-              <th>Class</th>
-              <th>Day 1</th>
-              <th>Day 2</th>
-              <th>Day 3</th>
-              <th>Day 4</th>
-              <th>Day 5</th>
-              <th>Day 6</th>
-            </tr>
-          </thead>
-          <tbody id="scheduleBody">
-            <!-- Dynamic content will be inserted here -->
-          </tbody>
-        </table>
-      </div>
-      
-      <!-- Information Section -->
-      <div class="info-section">
-        <h3>📋 Important Information</h3>
-        <p><strong>Application fee due with application covers a trial on consecutive days (or one league trial maximum 6 dates within an 8-week period). $25 if received at least 25 days prior, $35 received less than 25 days</strong></p>
-        <p><strong>Post-trial administrative fee of $ 1.50 per entered team runs payable with results.</strong></p>
-        <p>Return completed application, certificate of insurance by Email to <strong>cwags.trials@gmail.com</strong>.</p>
-      </div>
-      
-      <!-- Submit Button -->
-      <div class="button-group">
-        <button type="submit" class="save-btn">💾 Save Application</button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 
   <script type="module">
@@ -470,30 +525,147 @@
     }
 
     // ===========================================
+    // TRIAL LOADING AND SELECTION
+    // ===========================================
+    async function loadAvailableTrials() {
+      try {
+        console.log("🔍 Loading available trials...");
+        
+        const trialsQuery = query(
+          collection(db, 'trials'),
+          where('createdBy', '==', auth.currentUser.uid)
+        );
+        
+        const trialsSnapshot = await getDocs(trialsQuery);
+        availableTrials = [];
+        
+        trialsSnapshot.forEach(doc => {
+          const trialData = doc.data();
+          availableTrials.push({
+            id: doc.id,
+            ...trialData
+          });
+        });
+        
+        console.log("✅ Loaded trials:", availableTrials.length);
+        populateTrialDropdown();
+        
+      } catch (error) {
+        console.error("❌ Error loading trials:", error);
+        alert("Error loading trials: " + error.message);
+      }
+    }
+
+    function populateTrialDropdown() {
+      const trialSelect = document.getElementById('trialSelect');
+      
+      // Clear existing options except the first one
+      while (trialSelect.children.length > 1) {
+        trialSelect.removeChild(trialSelect.lastChild);
+      }
+      
+      if (availableTrials.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No trials found. Please create a trial first.';
+        trialSelect.appendChild(option);
+        return;
+      }
+      
+      availableTrials.forEach(trial => {
+        const option = document.createElement('option');
+        option.value = trial.id;
+        
+        // Create a descriptive label
+        let label = trial.clubName || 'Unnamed Trial';
+        if (trial.days && trial.days.length > 0) {
+          const firstDate = getDateFromFirebase(trial.days[0].date);
+          if (firstDate) {
+            label += ` - ${firstDate}`;
+          }
+        }
+        if (trial.location) {
+          label += ` (${trial.location})`;
+        }
+        
+        option.textContent = label;
+        trialSelect.appendChild(option);
+      });
+      
+      // Check URL parameters for pre-selected trial
+      const urlParams = new URLSearchParams(window.location.search);
+      const trialId = urlParams.get('trial');
+      if (trialId && availableTrials.find(t => t.id === trialId)) {
+        trialSelect.value = trialId;
+        await loadTrialData(trialId);
+      }
+    }
+
+    async function onTrialSelected() {
+      const trialSelect = document.getElementById('trialSelect');
+      const selectedTrialId = trialSelect.value;
+      
+      if (!selectedTrialId) {
+        currentTrialData = null;
+        clearForm();
+        disableForm();
+        return;
+      }
+      
+      await loadTrialData(selectedTrialId);
+    }
+
+    function enableForm() {
+      const formContent = document.getElementById('formContent');
+      const saveButton = document.getElementById('saveButton');
+      
+      formContent.classList.add('enabled');
+      saveButton.disabled = false;
+    }
+
+    function disableForm() {
+      const formContent = document.getElementById('formContent');
+      const saveButton = document.getElementById('saveButton');
+      
+      formContent.classList.remove('enabled');
+      saveButton.disabled = true;
+    }
+
+    function clearForm() {
+      const form = document.getElementById('applicationForm');
+      if (form) {
+        form.reset();
+      }
+      
+      const scheduleBody = document.getElementById('scheduleBody');
+      if (scheduleBody) {
+        scheduleBody.innerHTML = '';
+      }
+    }
+
+    // ===========================================
     // TRIAL DATA LOADING WITH ENHANCED ERROR HANDLING
     // ===========================================
-    async function loadTrialData() {
+    async function loadTrialData(trialId) {
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const trialId = urlParams.get('trial');
-        
         if (!trialId) {
-          alert("No trial specified. Please create a trial first.");
-          window.location.href = 'main-dashboard.html';
+          console.warn("No trial ID provided");
           return;
         }
         
         console.log("🔍 Loading trial data for ID:", trialId);
         
-        // Load specific trial
-        const trialDoc = await getDoc(doc(db, 'trials', trialId));
-        if (!trialDoc.exists()) {
-          alert('Trial not found');
-          window.location.href = 'main-dashboard.html';
-          return;
+        // Find trial in available trials or load from database
+        let trialData = availableTrials.find(t => t.id === trialId);
+        
+        if (!trialData) {
+          const trialDoc = await getDoc(doc(db, 'trials', trialId));
+          if (!trialDoc.exists()) {
+            alert('Trial not found');
+            return;
+          }
+          trialData = { id: trialDoc.id, ...trialDoc.data() };
         }
-
-        const trialData = trialDoc.data();
         
         // Enhanced date processing with better error handling
         if (trialData.days && Array.isArray(trialData.days)) {
@@ -510,7 +682,7 @@
           }).filter(day => day !== null); // Remove invalid days
         }
         
-        currentTrialData = { id: trialDoc.id, ...trialData };
+        currentTrialData = trialData;
         console.log("✅ Loaded trial data:", currentTrialData);
         
         // Populate form with trial data
@@ -519,10 +691,13 @@
         // Try to load existing application data
         await loadExistingApplication();
         
+        // Enable the form
+        enableForm();
+        
       } catch (error) {
         console.error("❌ Error loading trial data:", error);
         alert("Error loading trial data: " + error.message);
-        window.location.href = 'main-dashboard.html';
+        disableForm();
       }
     }
 
@@ -555,6 +730,12 @@
       // Populate contact name from secretary
       if (currentTrialData.secretary) {
         document.getElementById('contactName').value = currentTrialData.secretary;
+      }
+      
+      // Populate location fields
+      if (currentTrialData.location) {
+        document.getElementById('venueAddress').value = currentTrialData.location;
+        document.getElementById('trialLocationName').value = currentTrialData.location;
       }
       
       // Extract and populate judges using standardized field names
@@ -772,7 +953,7 @@
       // Collect all input values
       const inputs = document.querySelectorAll('input, textarea, select');
       inputs.forEach(input => {
-        if (input.id) {
+        if (input.id && input.id !== 'trialSelect') { // Exclude trial select
           if (input.type === 'checkbox' || input.type === 'radio') {
             if (input.checked) {
               formData[input.id] = true;
@@ -826,6 +1007,11 @@
     // ===========================================
     async function saveApplication(formData) {
       try {
+        if (!currentTrialData) {
+          alert("Please select a trial first.");
+          return;
+        }
+        
         const applicationRecord = {
           ...formData,
           trialId: currentTrialData.id,
@@ -865,6 +1051,8 @@
           applicationData = { id: appDoc.id, ...appDoc.data() };
           populateFormWithApplicationData(applicationData);
           console.log("✅ Loaded existing application with standardized fields");
+        } else {
+          applicationData = null;
         }
       } catch (error) {
         console.error("❌ Error loading existing application:", error);
@@ -912,6 +1100,12 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log("📄 Page loaded, waiting for authentication...");
       
+      // Add trial selection event listener
+      const trialSelect = document.getElementById('trialSelect');
+      if (trialSelect) {
+        trialSelect.addEventListener('change', onTrialSelected);
+      }
+      
       // Add event listeners for real-time validation
       requiredFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
@@ -941,6 +1135,11 @@
         form.addEventListener('submit', function(e) {
           e.preventDefault();
           
+          if (!currentTrialData) {
+            alert("Please select a trial first.");
+            return;
+          }
+          
           const isValid = highlightMissingFields();
           if (!isValid) {
             alert("Please fill in all highlighted required fields before saving.");
@@ -953,7 +1152,10 @@
         });
       }
       
-      // Initial highlighting check
+      // Initially disable form
+      disableForm();
+      
+      // Initial highlighting check after a delay
       setTimeout(highlightMissingFields, 1000);
     });
 
@@ -968,11 +1170,10 @@
         
         try {
           document.getElementById('loadingIndicator').style.display = 'block';
-          await loadTrialData();
+          await loadAvailableTrials();
         } catch (error) {
           console.error("❌ Error in auth state change:", error);
-          alert("Error loading application. Please try again.");
-          window.location.href = 'main-dashboard.html';
+          alert("Error loading trials. Please try again.");
         } finally {
           document.getElementById('loadingIndicator').style.display = 'none';
         }
@@ -1011,10 +1212,12 @@
         getDateFromFirebase: dateStr,
         prepareDateForFirebase: prepareDateForFirebase(dateStr)
       }),
-      loadJudgesFromEntries: loadJudgesFromEntries
+      loadJudgesFromEntries: loadJudgesFromEntries,
+      onTrialSelected: onTrialSelected,
+      loadTrialData: loadTrialData
     };
 
-    console.log("✅ Trial Application loaded with enhanced error handling and standardized field names");
+    console.log("✅ Trial Application loaded with trial selection dropdown");
     console.log("🔧 Debug tools available at window.debugTrialApplication");
   </script>
 </body>
