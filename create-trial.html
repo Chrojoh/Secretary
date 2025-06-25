@@ -118,6 +118,214 @@
       CWAGS_NUMBER: 'cwagsNumber'       // NOT 'Registration'
     };
 
+// ===========================================
+// CRITICAL FIX FOR CREATE-TRIAL.HTML JUDGE FIELD HANDLING
+// ===========================================
+
+// Add this to your create-trial.html script section:
+
+// STANDARDIZED FIELD NAMES (CRITICAL)
+const STANDARD_FIELDS = {
+  HANDLER_NAME: 'handlerName',      
+  DOG_CALL_NAME: 'dogCallName',     
+  JUDGE_NAME: 'judgeName',          // ← CRITICAL: Use 'judgeName' consistently
+  CLASS_NAME: 'className',          
+  CWAGS_NUMBER: 'cwagsNumber'       
+};
+
+// FIXED: Function to collect ALL trial data with proper judge field handling
+function collectAllTrialDataFixed() {
+  const clubName = document.querySelector('input[name="clubName"]').value;
+  const secretary = document.querySelector('input[name="secretary"]').value;
+  const numDays = parseInt(document.getElementById('numDays').value) || 0;
+  
+  const days = [];
+  const daysContainer = document.getElementById('daysContainer');
+  
+  if (daysContainer) {
+    const dayContainers = daysContainer.querySelectorAll('.day-container');
+    
+    dayContainers.forEach((dayContainer, dayIndex) => {
+      const dateInput = dayContainer.querySelector(`input[name="date${dayIndex}"]`);
+      const classesContainer = dayContainer.querySelector(`.classes-container-${dayIndex}`);
+      
+      const dayData = {
+        dayNumber: dayIndex + 1,
+        date: dateInput && dateInput.value ? prepareDateForFirebase(dateInput.value) : null,
+        classes: []
+      };
+      
+      if (classesContainer) {
+        const classContainers = classesContainer.querySelectorAll('.class-container');
+        
+        classContainers.forEach((classContainer, classIndex) => {
+          const classInput = classContainer.querySelector('.class-autocomplete');
+          const roundsContainer = classContainer.querySelector(`.rounds-container-${dayIndex}-${classIndex}`);
+          
+          const classData = {
+            [STANDARD_FIELDS.CLASS_NAME]: classInput ? classInput.value.trim() : '',
+            rounds: []
+          };
+          
+          if (roundsContainer) {
+            const roundContainers = roundsContainer.querySelectorAll('.round-container');
+            
+            roundContainers.forEach((roundContainer, roundIndex) => {
+              const judgeInput = roundContainer.querySelector('.judge-autocomplete');
+              const feoCheckbox = roundContainer.querySelector('input[type="checkbox"]');
+              
+              // CRITICAL FIX: Properly extract and clean judge name
+              let judgeName = '';
+              if (judgeInput && judgeInput.value) {
+                judgeName = judgeInput.value.trim();
+              }
+              
+              // Don't save empty or placeholder judge names
+              if (!judgeName || judgeName === '' || judgeName === 'Judge TBD' || judgeName === 'TBD') {
+                judgeName = 'Judge TBD';
+              }
+              
+              const roundData = {
+                roundNumber: roundIndex + 1,
+                [STANDARD_FIELDS.JUDGE_NAME]: judgeName,  // ← CRITICAL: Use standard field name
+                feo: feoCheckbox ? feoCheckbox.checked : false
+              };
+              
+              console.log(`📝 Saving round ${roundIndex + 1} with judge: "${judgeName}"`);
+              classData.rounds.push(roundData);
+            });
+          }
+          
+          // Only save classes that have a name
+          if (classData[STANDARD_FIELDS.CLASS_NAME]) {
+            dayData.classes.push(classData);
+          }
+        });
+      }
+      
+      days.push(dayData);
+    });
+  }
+  
+  const trialData = {
+    clubName: clubName.trim(),
+    secretary: secretary.trim(),
+    numDays: numDays,
+    days: days,
+    createdBy: auth.currentUser.uid,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+  
+  console.log("📊 Final trial data with fixed judge fields:", trialData);
+  return trialData;
+}
+
+// FIXED: Population function that handles judge fields correctly
+async function populateExistingTrialDataFixed() {
+  if (!currentTrialData || !currentTrialData.days) return;
+  
+  console.log("🔄 Populating form with existing trial data using fixed judge handling...");
+  
+  currentTrialData.days.forEach((dayData, dayIndex) => {
+    // Set date
+    const dateInput = document.querySelector(`input[name="date${dayIndex}"]`);
+    if (dateInput && dayData.date) {
+      dateInput.value = dayData.date;
+    }
+    
+    // Set number of classes and generate them
+    if (dayData.classes && dayData.classes.length > 0) {
+      const numClassesInput = document.getElementById(`numClasses_${dayIndex}`);
+      if (numClassesInput) {
+        numClassesInput.value = dayData.classes.length;
+        generateClasses(dayIndex);
+        
+        // Wait and then populate classes
+        setTimeout(() => {
+          dayData.classes.forEach((classData, classIndex) => {
+            const classInput = document.querySelector(`.classes-container-${dayIndex} .class-container:nth-child(${classIndex + 1}) .class-autocomplete`);
+            if (classInput && classData[STANDARD_FIELDS.CLASS_NAME]) {
+              classInput.value = classData[STANDARD_FIELDS.CLASS_NAME];
+            }
+            
+            // Set rounds with FIXED judge handling
+            if (classData.rounds && classData.rounds.length > 0) {
+              const numRoundsInput = document.getElementById(`numRounds_${dayIndex}_${classIndex}`);
+              if (numRoundsInput) {
+                numRoundsInput.value = classData.rounds.length;
+                generateRounds(dayIndex, classIndex);
+                
+                // Wait and populate rounds with proper judge field extraction
+                setTimeout(() => {
+                  classData.rounds.forEach((roundData, roundIndex) => {
+                    const judgeInput = document.querySelector(`.rounds-container-${dayIndex}-${classIndex} .round-container:nth-child(${roundIndex + 1}) .judge-autocomplete`);
+                    
+                    if (judgeInput && roundData) {
+                      // CRITICAL FIX: Extract judge name using standard field with fallbacks
+                      let judgeName = roundData[STANDARD_FIELDS.JUDGE_NAME] || 
+                                     roundData.judgeName ||
+                                     roundData.judge || 
+                                     roundData.judgeAssigned || 
+                                     'Judge TBD';
+                      
+                      console.log(`📝 Populating judge for Day ${dayIndex + 1}, Class ${classIndex + 1}, Round ${roundIndex + 1}: "${judgeName}"`);
+                      judgeInput.value = judgeName;
+                    }
+                    
+                    const feoCheckbox = document.querySelector(`.rounds-container-${dayIndex}-${classIndex} .round-container:nth-child(${roundIndex + 1}) input[type="checkbox"]`);
+                    if (feoCheckbox && roundData.feo) {
+                      feoCheckbox.checked = roundData.feo;
+                    }
+                  });
+                }, 300); // Increased timeout for reliability
+              }
+            }
+          });
+        }, 300); // Increased timeout for reliability
+      }
+    }
+  });
+}
+
+// INSTRUCTIONS FOR IMPLEMENTATION:
+// 1. Replace the existing collectAllTrialData() function in create-trial.html with collectAllTrialDataFixed()
+// 2. Replace the existing populateExistingTrialData() function with populateExistingTrialDataFixed()
+// 3. Update the form submission event listener to use the fixed function:
+
+/*
+document.getElementById('trialForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  try {
+    // ... existing validation code ...
+    
+    // Use the FIXED function
+    const trialData = collectAllTrialDataFixed();
+    
+    console.log("💾 Saving trial with properly handled judge fields:", trialData);
+    
+    if (isEditMode && currentTrialData) {
+      await updateDoc(doc(db, "trials", currentTrialData.id), {
+        ...trialData,
+        updatedAt: new Date()
+      });
+      console.log("✅ Trial updated with fixed judge fields");
+    } else {
+      const docRef = await addDoc(collection(db, "trials"), trialData);
+      console.log("✅ Trial saved with fixed judge fields:", docRef.id);
+    }
+    
+    // ... rest of success handling ...
+    
+  } catch (error) {
+    console.error("❌ Error saving trial:", error);
+    // ... error handling ...
+  }
+});
+*/
+
+    
     // ========================================
     // TIMEZONE-SAFE DATE UTILITIES - CRITICAL FIX
     // ========================================
