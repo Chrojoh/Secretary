@@ -644,7 +644,7 @@
     }
 
     // ===========================================
-    // TRIAL DATA LOADING WITH ENHANCED ERROR HANDLING
+    // IMPROVED TRIAL DATA LOADING
     // ===========================================
     async function loadTrialData(trialId) {
       try {
@@ -738,7 +738,7 @@
         document.getElementById('trialLocationName').value = currentTrialData.location;
       }
       
-      // Extract and populate judges using standardized field names
+      // IMPROVED: Extract and populate judges using standardized field names from trial structure
       const allJudges = new Set();
       if (currentTrialData.days) {
         currentTrialData.days.forEach(day => {
@@ -748,10 +748,11 @@
                 cls.rounds.forEach(round => {
                   // Use standardized judge field name with fallbacks
                   const judgeName = round[STANDARD_FIELDS.JUDGE_NAME] || 
+                                   round.judgeName ||
                                    round.judge || 
                                    round.judgeAssigned;
                   
-                  if (judgeName && judgeName.trim()) {
+                  if (judgeName && judgeName.trim() && judgeName !== 'Judge TBD' && judgeName !== 'TBD') {
                     allJudges.add(judgeName.trim());
                   }
                 });
@@ -762,15 +763,18 @@
       }
       
       if (allJudges.size > 0) {
+        console.log("✅ Found judges in trial structure:", Array.from(allJudges));
         document.getElementById('judges').value = Array.from(allJudges).join('\n');
+      } else {
+        console.log("⚠️ No judges found in trial structure");
       }
       
       // Set submitted date to today
       document.getElementById('submittedDate').value = new Date().toISOString().split('T')[0];
       
-      // Populate schedule table with proper error handling
+      // Populate schedule table using trial structure data
       try {
-        populateScheduleTableWithRealJudges();
+        populateScheduleTableFromTrialStructure();
       } catch (error) {
         console.warn('Error populating schedule table:', error);
       }
@@ -779,17 +783,14 @@
     }
 
     // ===========================================
-    // ENHANCED SCHEDULE TABLE POPULATION
+    // IMPROVED SCHEDULE TABLE POPULATION - DIRECTLY FROM TRIAL STRUCTURE
     // ===========================================
-    async function populateScheduleTableWithRealJudges() {
+    function populateScheduleTableFromTrialStructure() {
       if (!currentTrialData || !currentTrialData.days) return;
       
-      console.log("📋 Populating schedule table with real judge data...");
+      console.log("📋 Populating schedule table directly from trial structure...");
       
       try {
-        // First, load the actual judge assignments from entries
-        const judgeData = await loadJudgesFromEntries(currentTrialData.id);
-        
         const scheduleBody = document.getElementById('scheduleBody');
         scheduleBody.innerHTML = '';
         
@@ -812,7 +813,7 @@
         });
         
         // Create rows for each class
-        Array.from(allClasses).forEach(className => {
+        Array.from(allClasses).sort().forEach(className => {
           const row = document.createElement('tr');
           
           // Class name cell
@@ -826,32 +827,29 @@
             
             let judgeValue = '';
             
-            // Look for judge in the entry data, not trial structure
+            // Look for judge directly in trial structure
             if (dayIndex < currentTrialData.days.length) {
               const day = currentTrialData.days[dayIndex];
-              const dayDate = day.date;
               
-              // Look for this judge in the entry data using standardized key
-              const judgeKey = `${dayDate}_${className}_1`; // Assuming round 1 for now
-              if (judgeData[judgeKey]) {
-                judgeValue = judgeData[judgeKey][STANDARD_FIELDS.JUDGE_NAME] || 
-                            judgeData[judgeKey].judgeName || 
-                            judgeData[judgeKey].judge || '';
-              } else {
-                // Fallback: check trial structure as backup
-                if (day.classes) {
-                  const classMatch = day.classes.find(cls => {
-                    const clsName = cls[STANDARD_FIELDS.CLASS_NAME] || 
-                                   cls.className || 
-                                   cls.Class || 
-                                   cls.class;
-                    return clsName === className;
-                  });
-                  
-                  if (classMatch && classMatch.rounds && classMatch.rounds.length > 0) {
-                    judgeValue = classMatch.rounds[0][STANDARD_FIELDS.JUDGE_NAME] || 
-                                classMatch.rounds[0].judge || 
-                                classMatch.rounds[0].judgeAssigned || '';
+              if (day.classes) {
+                const classMatch = day.classes.find(cls => {
+                  const clsName = cls[STANDARD_FIELDS.CLASS_NAME] || 
+                                 cls.className || 
+                                 cls.Class || 
+                                 cls.class;
+                  return clsName === className;
+                });
+                
+                if (classMatch && classMatch.rounds && classMatch.rounds.length > 0) {
+                  // Get judge from first round
+                  const firstRound = classMatch.rounds[0];
+                  const judgeName = firstRound[STANDARD_FIELDS.JUDGE_NAME] || 
+                                   firstRound.judgeName ||
+                                   firstRound.judge || 
+                                   firstRound.judgeAssigned || '';
+                                   
+                  if (judgeName && judgeName.trim() && judgeName !== 'Judge TBD' && judgeName !== 'TBD') {
+                    judgeValue = judgeName.trim();
                   }
                 }
               }
@@ -864,83 +862,11 @@
           scheduleBody.appendChild(row);
         });
         
-        console.log("✅ Schedule table populated with real judge data using standardized fields");
+        console.log("✅ Schedule table populated directly from trial structure using standardized fields");
         
       } catch (error) {
         console.error("❌ Error populating schedule table:", error);
         // Don't throw - just log the error and continue
-      }
-    }
-
-    // ===========================================
-    // MISSING FUNCTION IMPLEMENTATION (CRITICAL FIX)
-    // ===========================================
-    async function loadJudgesFromEntries(trialId) {
-      try {
-        console.log("🔍 Loading judges from entry data for trial:", trialId);
-        
-        const entriesQuery = query(
-          collection(db, "entries"),
-          where("trialId", "==", trialId)
-        );
-        
-        const entriesSnapshot = await getDocs(entriesQuery);
-        const judgeData = {};
-        
-        entriesSnapshot.forEach(doc => {
-          const entry = doc.data();
-          
-          // Process each selectedEntry using standardized field names
-          if (entry.selectedEntries && Array.isArray(entry.selectedEntries)) {
-            entry.selectedEntries.forEach((selectedEntry, index) => {
-              try {
-                // Get date with proper conversion
-                const entryDate = selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null;
-                
-                // Get standardized fields with fallbacks
-                const judgeName = selectedEntry[STANDARD_FIELDS.JUDGE_NAME] || 
-                                 selectedEntry.judge || 
-                                 selectedEntry.judgeAssigned || 
-                                 'Judge TBD';
-                
-                const className = selectedEntry[STANDARD_FIELDS.CLASS_NAME] || 
-                                 selectedEntry.className || 
-                                 selectedEntry.Class || 
-                                 selectedEntry.class;
-                
-                const handlerName = entry[STANDARD_FIELDS.HANDLER_NAME] || 
-                                   entry.handlerName || 
-                                   entry.handler;
-                
-                const dogCallName = entry[STANDARD_FIELDS.DOG_CALL_NAME] || 
-                                   entry.dogCallName || 
-                                   entry.callName;
-
-                if (judgeName && className && entryDate) {
-                  const dayClassKey = `${entryDate}_${className}_${selectedEntry.roundNumber || '1'}`;
-                  
-                  judgeData[dayClassKey] = {
-                    [STANDARD_FIELDS.JUDGE_NAME]: judgeName,
-                    [STANDARD_FIELDS.CLASS_NAME]: className,
-                    [STANDARD_FIELDS.HANDLER_NAME]: handlerName,
-                    [STANDARD_FIELDS.DOG_CALL_NAME]: dogCallName,
-                    date: entryDate,
-                    roundNumber: selectedEntry.roundNumber || '1'
-                  };
-                }
-              } catch (error) {
-                console.warn('Skipping invalid entry data:', error);
-              }
-            });
-          }
-        });
-        
-        console.log("✅ Loaded judge data with standardized fields:", Object.keys(judgeData).length, "assignments");
-        return judgeData;
-        
-      } catch (error) {
-        console.error("❌ Error loading judges from entries:", error);
-        return {};
       }
     }
 
@@ -1196,7 +1122,7 @@
     });
 
     // ===========================================
-    // DEBUGGING HELPERS (REMOVE IN PRODUCTION)
+    // DEBUGGING HELPERS
     // ===========================================
     
     window.debugTrialApplication = {
@@ -1212,12 +1138,12 @@
         getDateFromFirebase: dateStr,
         prepareDateForFirebase: prepareDateForFirebase(dateStr)
       }),
-      loadJudgesFromEntries: loadJudgesFromEntries,
       onTrialSelected: onTrialSelected,
-      loadTrialData: loadTrialData
+      loadTrialData: loadTrialData,
+      populateScheduleTableFromTrialStructure: populateScheduleTableFromTrialStructure
     };
 
-    console.log("✅ Trial Application loaded with trial selection dropdown");
+    console.log("✅ Improved Trial Application loaded with enhanced judge population");
     console.log("🔧 Debug tools available at window.debugTrialApplication");
   </script>
 </body>
