@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Migration Tool - Fix Judge Fields</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .migration-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #007cba;
+    }
+    
+    .header h1 {
+      color: #007cba;
+      margin: 0;
+    }
+    
+    .warning-section {
+      background-color: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .warning-section h3 {
+      color: #856404;
+      margin-top: 0;
+    }
+    
+    .info-section {
+      background-color: #d1ecf1;
+      border: 2px solid #17a2b8;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .info-section h3 {
+      color: #0c5460;
+      margin-top: 0;
+    }
+    
+    .controls-section {
+      background-color: #f0f8ff;
+      border: 2px solid #007cba;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      transition: background-color 0.3s;
+      margin: 5px;
+    }
+    
+    .btn-primary {
+      background-color: #007cba;
+      color: white;
+    }
+    
+    .btn-success {
+      background-color: #28a745;
+      color: white;
+    }
+    
+    .btn-warning {
+      background-color: #ffc107;
+      color: #212529;
+    }
+    
+    .btn-danger {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .btn-secondary {
+      background-color: #6c757d;
+      color: white;
+    }
+    
+    .btn:hover {
+      opacity: 0.8;
+    }
+    
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .analysis-section {
+      margin-bottom: 30px;
+    }
+    
+    .trial-card {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .trial-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .trial-name {
+      font-weight: bold;
+      color: #007cba;
+    }
+    
+    .trial-status {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .status-needs-fix {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    .status-ok {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .judge-issues {
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    
+    .progress-section {
+      margin-bottom: 30px;
+      display: none;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #e9ecef;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background-color: #28a745;
+      transition: width 0.3s ease;
+    }
+    
+    .log-section {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 30px;
+      display: none;
+    }
+    
+    .log-content {
+      background-color: #000;
+      color: #00ff00;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    
+    .backup-section {
+      background-color: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="migration-container">
+    <div class="header">
+      <h1>🔧 Data Migration Tool</h1>
+      <p>Fix Judge Field Names in Saved Trial Data</p>
+    </div>
+
+    <!-- Warning Section -->
+    <div class="warning-section">
+      <h3>⚠️ Important Notice</h3>
+      <p><strong>This tool will modify your trial data to fix judge field name inconsistencies.</strong></p>
+      <ul>
+        <li>This process will standardize all judge field names to use "judgeName"</li>
+        <li>Old field names like "judge", "judgeAssigned", etc. will be converted</li>
+        <li>A backup will be created before any changes are made</li>
+        <li>This operation cannot be undone without the backup</li>
+      </ul>
+    </div>
+
+    <!-- Info Section -->
+    <div class="info-section">
+      <h3>ℹ️ What This Tool Does</h3>
+      <p>This migration tool will:</p>
+      <ul>
+        <li><strong>Analyze</strong> all your trial data to identify judge field inconsistencies</li>
+        <li><strong>Standardize</strong> judge field names to use "judgeName" consistently</li>
+        <li><strong>Preserve</strong> all existing judge data while fixing the field names</li>
+        <li><strong>Update</strong> both trial structures and entry data</li>
+        <li><strong>Create</strong> a backup before making any changes</li>
+      </ul>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="controls-section">
+      <h3>🎯 Migration Controls</h3>
+      <div style="margin-bottom: 20px;">
+        <button class="btn btn-primary" onclick="analyzeData()" id="analyzeBtn">
+          🔍 Analyze Trial Data
+        </button>
+        <button class="btn btn-warning" onclick="createBackup()" id="backupBtn" disabled>
+          💾 Create Backup
+        </button>
+        <button class="btn btn-success" onclick="runMigration()" id="migrateBtn" disabled>
+          🚀 Run Migration
+        </button>
+        <button class="btn btn-secondary" onclick="showLog()" id="logBtn">
+          📋 Show Log
+        </button>
+        <a href="main-dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+      </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div id="statsSection" class="stats-grid" style="display: none;">
+      <!-- Stats will be populated here -->
+    </div>
+
+    <!-- Progress Section -->
+    <div id="progressSection" class="progress-section">
+      <h3>Migration Progress</h3>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+      </div>
+      <div id="progressText" style="text-align: center; margin-top: 10px;">Ready to start...</div>
+    </div>
+
+    <!-- Analysis Results -->
+    <div id="analysisSection" class="analysis-section" style="display: none;">
+      <h3>📊 Analysis Results</h3>
+      <div id="analysisResults">
+        <!-- Analysis results will be populated here -->
+      </div>
+    </div>
+
+    <!-- Backup Section -->
+    <div id="backupSection" class="backup-section" style="display: none;">
+      <h3>💾 Backup Created</h3>
+      <p>Backup created successfully at: <span id="backupTime"></span></p>
+      <p>Backup ID: <code id="backupId"></code></p>
+    </div>
+
+    <!-- Log Section -->
+    <div id="logSection" class="log-section">
+      <h3>📋 Migration Log</h3>
+      <div id="logContent" class="log-content">
+        Migration tool initialized. Ready to analyze data...
+      </div>
+    </div>
+
+    <!-- Loading/Error/Success Messages -->
+    <div id="loadingMessage" class="loading" style="display: none;">
+      <div>Processing...</div>
+    </div>
+
+    <div id="errorMessage" class="error" style="display: none;"></div>
+    <div id="successMessage" class="success" style="display: none;"></div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './js/firebase.js';
+    import { collection, query, where, getDocs, doc, getDoc, updateDoc, addDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    // ===========================================
+    // STANDARD FIELD DEFINITIONS
+    // ===========================================
+    const STANDARD_FIELDS = {
+      HANDLER_NAME: 'handlerName',
+      DOG_CALL_NAME: 'dogCallName',
+      JUDGE_NAME: 'judgeName',        // TARGET field name
+      CLASS_NAME: 'className',
+      CWAGS_NUMBER: 'cwagsNumber'
+    };
+
+    // Old field names that need to be migrated
+    const JUDGE_FIELD_VARIANTS = [
+      'judge',
+      'judgeAssigned', 
+      'selectedJudge',
+      'judgeNameAssigned',
+      'assignedJudge'
+    ];
+
+    // ===========================================
+    // GLOBAL VARIABLES
+    // ===========================================
+    let analysisResults = null;
+    let backupData = null;
+    let migrationLog = [];
+
+    // ===========================================
+    // LOGGING FUNCTIONS
+    // ===========================================
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+      migrationLog.push(logEntry);
+      
+      const logContent = document.getElementById('logContent');
+      logContent.textContent = migrationLog.join('\n');
+      logContent.scrollTop = logContent.scrollHeight;
+      
+      console.log(logEntry);
+    }
+
+    function showLog() {
+      const logSection = document.getElementById('logSection');
+      logSection.style.display = logSection.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // ===========================================
+    // UTILITY FUNCTIONS
+    // ===========================================
+    function showLoading(show) {
+      document.getElementById('loadingMessage').style.display = show ? 'block' : 'none';
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      setTimeout(() => errorDiv.style.display = 'none', 5000);
+      log(message, 'error');
+    }
+
+    function showSuccess(message) {
+      const successDiv = document.getElementById('successMessage');
+      successDiv.textContent = message;
+      successDiv.style.display = 'block';
+      setTimeout(() => successDiv.style.display = 'none', 5000);
+      log(message, 'success');
+    }
+
+    function updateProgress(percentage, text) {
+      document.getElementById('progressFill').style.width = percentage + '%';
+      document.getElementById('progressText').textContent = text;
+      document.getElementById('progressSection').style.display = 'block';
+    }
+
+    // ===========================================
+    // DATA ANALYSIS FUNCTIONS
+    // ===========================================
+    async function analyzeData() {
+      try {
+        showLoading(true);
+        log('Starting data analysis...');
+        
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        analyzeBtn.disabled = true;
+        
+        // Load all trials
+        const trialsQuery = query(
+          collection(db, 'trials'),
+          where('createdBy', '==', auth.currentUser.uid)
+        );
+        
+        const trialsSnapshot = await getDocs(trialsQuery);
+        const trials = [];
+        
+        trialsSnapshot.forEach(doc => {
+          trials.push({ id: doc.id, ...doc.data() });
+        });
+        
+        log(`Found ${trials.length} trials to analyze`);
+        
+        // Analyze each trial
+        const analysis = {
+          totalTrials: trials.length,
+          trialsNeedingFix: 0,
+          totalRounds: 0,
+          roundsNeedingFix: 0,
+          judgeFieldIssues: {},
+          trialDetails: []
+        };
+        
+        for (const trial of trials) {
+          const trialAnalysis = analyzeTrialData(trial);
+          analysis.trialDetails.push(trialAnalysis);
+          
+          if (trialAnalysis.needsFix) {
+            analysis.trialsNeedingFix++;
+          }
+          
+          analysis.totalRounds += trialAnalysis.totalRounds;
+          analysis.roundsNeedingFix += trialAnalysis.roundsNeedingFix;
+          
+          // Merge judge field issues
+          Object.keys(trialAnalysis.judgeFields).forEach(field => {
+            analysis.judgeFieldIssues[field] = (analysis.judgeFieldIssues[field] || 0) + trialAnalysis.judgeFields[field];
+          });
+        }
+        
+        analysisResults = analysis;
+        log(`Analysis complete: ${analysis.trialsNeedingFix}/${analysis.totalTrials} trials need fixing`);
+        
+        displayAnalysisResults();
+        updateStatistics();
+        
+        // Enable backup button if fixes are needed
+        if (analysis.trialsNeedingFix > 0) {
+          document.getElementById('backupBtn').disabled = false;
+        }
+        
+        showSuccess(`Analysis complete! Found ${analysis.roundsNeedingFix} rounds needing judge field fixes.`);
+        
+      } catch (error) {
+        log(`Error during analysis: ${error.message}`, 'error');
+        showError('Error analyzing data: ' + error.message);
+      } finally {
+        showLoading(false);
+        document.getElementById('analyzeBtn').disabled = false;
+      }
+    }
+
+    function analyzeTrialData(trial) {
+      const analysis = {
+        id: trial.id,
+        name: trial.clubName || 'Unnamed Trial',
+        needsFix: false,
+        totalRounds: 0,
+        roundsNeedingFix: 0,
+        judgeFields: {},
+        issues: []
+      };
+      
+      if (trial.days && Array.isArray(trial.days)) {
+        trial.days.forEach((day, dayIndex) => {
+          if (day.classes && Array.isArray(day.classes)) {
+            day.classes.forEach((cls, classIndex) => {
+              if (cls.rounds && Array.isArray(cls.rounds)) {
+                cls.rounds.forEach((round, roundIndex) => {
+                  analysis.totalRounds++;
+                  
+                  // Check which judge fields are present
+                  let hasStandardField = false;
+                  let hasOldFields = false;
+                  
+                  if (round[STANDARD_FIELDS.JUDGE_NAME]) {
+                    hasStandardField = true;
+                    analysis.judgeFields[STANDARD_FIELDS.JUDGE_NAME] = (analysis.judgeFields[STANDARD_FIELDS.JUDGE_NAME] || 0) + 1;
+                  }
+                  
+                  JUDGE_FIELD_VARIANTS.forEach(field => {
+                    if (round[field]) {
+                      hasOldFields = true;
+                      analysis.judgeFields[field] = (analysis.judgeFields[field] || 0) + 1;
+                    }
+                  });
+                  
+                  // If only old fields or missing standard field, needs fix
+                  if (hasOldFields || !hasStandardField) {
+                    analysis.roundsNeedingFix++;
+                    analysis.needsFix = true;
+                    
+                    const issueDesc = `Day ${dayIndex + 1}, Class ${classIndex + 1}, Round ${roundIndex + 1}: ${hasOldFields ? 'has old fields' : 'missing standard field'}`;
+                    analysis.issues.push(issueDesc);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+      
+      return analysis;
+    }
+
+    function displayAnalysisResults() {
+      if (!analysisResults) return;
+      
+      let html = '';
+      
+      analysisResults.trialDetails.forEach(trial => {
+        const statusClass = trial.needsFix ? 'status-needs-fix' : 'status-ok';
+        const statusText = trial.needsFix ? 'NEEDS FIX' : 'OK';
+        
+        html += `
+          <div class="trial-card">
+            <div class="trial-header">
+              <span class="trial-name">${trial.name}</span>
+              <span class="trial-status ${statusClass}">${statusText}</span>
+            </div>
+            <div>
+              <strong>Rounds:</strong> ${trial.roundsNeedingFix}/${trial.totalRounds} need fixing
+            </div>
+            ${trial.issues.length > 0 ? `
+              <div class="judge-issues">
+                <strong>Judge Field Issues:</strong><br>
+                ${Object.entries(trial.judgeFields).map(([field, count]) => 
+                  `${field}: ${count} occurrences`
+                ).join('<br>')}
+                ${trial.issues.length > 5 ? `<br>...and ${trial.issues.length - 5} more issues` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+      
+      document.getElementById('analysisResults').innerHTML = html;
+      document.getElementById('analysisSection').style.display = 'block';
+    }
+
+    function updateStatistics() {
+      if (!analysisResults) return;
+      
+      const statsHTML = `
+        <div class="stat-card">
+          <div class="stat-number">${analysisResults.totalTrials}</div>
+          <div class="stat-label">Total Trials</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${analysisResults.trialsNeedingFix}</div>
+          <div class="stat-label">Trials Needing Fix</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${analysisResults.totalRounds}</div>
+          <div class="stat-label">Total Rounds</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">${analysisResults.roundsNeedingFix}</div>
+          <div class="stat-label">Rounds Needing Fix</div>
+        </div>
+      `;
+      
+      document.getElementById('statsSection').innerHTML = statsHTML;
+      document.getElementById('statsSection').style.display = 'grid';
+    }
+
+    // ===========================================
+    // BACKUP FUNCTIONS
+    // ===========================================
+    async function createBackup() {
+      try {
+        showLoading(true);
+        log('Creating backup...');
+        
+        const backupBtn = document.getElementById('backupBtn');
+        backupBtn.disabled = true;
+        
+        // Get all user's trial data
+        const trialsQuery = query(
+          collection(db, 'trials'),
+          where('createdBy', '==', auth.currentUser.uid)
+        );
+        
+        const trialsSnapshot = await getDocs(trialsQuery);
+        const trialsData = [];
+        
+        trialsSnapshot.forEach(doc => {
+          trialsData.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Create backup document
+        const backupDoc = {
+          userId: auth.currentUser.uid,
+          createdAt: Timestamp.now(),
+          type: 'judge_field_migration_backup',
+          trialsData: trialsData,
+          analysisResults: analysisResults
+        };
+        
+        const backupRef = await addDoc(collection(db, 'backups'), backupDoc);
+        
+        backupData = {
+          id: backupRef.id,
+          createdAt: new Date().toLocaleString()
+        };
+        
+        log(`Backup created with ID: ${backupRef.id}`);
+        
+        // Show backup info
+        document.getElementById('backupTime').textContent = backupData.createdAt;
+        document.getElementById('backupId').textContent = backupData.id;
+        document.getElementById('backupSection').style.display = 'block';
+        
+        // Enable migration button
+        document.getElementById('migrateBtn').disabled = false;
+        
+        showSuccess(`Backup created successfully! ID: ${backupRef.id}`);
+        
+      } catch (error) {
+        log(`Error creating backup: ${error.message}`, 'error');
+        showError('Error creating backup: ' + error.message);
+      } finally {
+        showLoading(false);
+        document.getElementById('backupBtn').disabled = false;
+      }
+    }
+
+    // ===========================================
+    // MIGRATION FUNCTIONS
+    // ===========================================
+    async function runMigration() {
+      if (!backupData) {
+        showError('Please create a backup before running migration');
+        return;
+      }
+      
+      try {
+        showLoading(true);
+        log('Starting migration...');
+        
+        const migrateBtn = document.getElementById('migrateBtn');
+        migrateBtn.disabled = true;
+        
+        let processed = 0;
+        const total = analysisResults.trialsNeedingFix;
+        
+        for (const trialAnalysis of analysisResults.trialDetails) {
+          if (trialAnalysis.needsFix) {
+            await migrateTrialData(trialAnalysis.id);
+            processed++;
+            
+            const percentage = Math.round((processed / total) * 100);
+            updateProgress(percentage, `Migrating trial ${processed} of ${total}...`);
+            
+            log(`Migrated trial: ${trialAnalysis.name}`);
+          }
+        }
+        
+        updateProgress(100, 'Migration complete!');
+        log('Migration completed successfully');
+        
+        showSuccess(`Migration completed! Fixed ${analysisResults.roundsNeedingFix} rounds across ${total} trials.`);
+        
+        // Refresh analysis
+        setTimeout(() => {
+          analyzeData();
+        }, 2000);
+        
+      } catch (error) {
+        log(`Error during migration: ${error.message}`, 'error');
+        showError('Error during migration: ' + error.message);
+      } finally {
+        showLoading(false);
+        document.getElementById('migrateBtn').disabled = false;
+      }
+    }
+
+    async function migrateTrialData(trialId) {
+      try {
+        // Get current trial data
+        const trialDoc = await getDoc(doc(db, 'trials', trialId));
+        if (!trialDoc.exists()) {
+          throw new Error(`Trial ${trialId} not found`);
+        }
+        
+        const trialData = trialDoc.data();
+        let updated = false;
+        
+        // Migrate judge fields in trial structure
+        if (trialData.days && Array.isArray(trialData.days)) {
+          trialData.days.forEach(day => {
+            if (day.classes && Array.isArray(day.classes)) {
+              day.classes.forEach(cls => {
+                if (cls.rounds && Array.isArray(cls.rounds)) {
+                  cls.rounds.forEach(round => {
+                    const migratedJudge = migrateJudgeFields(round);
+                    if (migratedJudge.updated) {
+                      updated = true;
+                    }
+                  });
+                }
+              });
+            }
+          });
+        }
+        
+        // Update the trial document if changes were made
+        if (updated) {
+          await updateDoc(doc(db, 'trials', trialId), {
+            ...trialData,
+            migratedAt: Timestamp.now(),
+            migrationVersion: '1.0'
+          });
+          
+          log(`Updated trial ${trialId} with standardized judge fields`);
+        }
+        
+      } catch (error) {
+        log(`Error migrating trial ${trialId}: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+
+    function migrateJudgeFields(round) {
+      let updated = false;
+      let judgeValue = null;
+      
+      // First, try to get judge from standard field
+      if (round[STANDARD_FIELDS.JUDGE_NAME]) {
+        judgeValue = round[STANDARD_FIELDS.JUDGE_NAME];
+      } else {
+        // Look for judge in old field names
+        for (const oldField of JUDGE_FIELD_VARIANTS) {
+          if (round[oldField] && round[oldField].trim()) {
+            judgeValue = round[oldField].trim();
+            // Remove old field
+            delete round[oldField];
+            updated = true;
+            break;
+          }
+        }
+      }
+      
+      // Set the standardized field
+      if (judgeValue && judgeValue.trim()) {
+        round[STANDARD_FIELDS.JUDGE_NAME] = judgeValue.trim();
+        updated = true;
+      } else if (!round[STANDARD_FIELDS.JUDGE_NAME]) {
+        // Set default if no judge found
+        round[STANDARD_FIELDS.JUDGE_NAME] = 'Judge TBD';
+        updated = true;
+      }
+      
+      return { updated };
+    }
+
+    // ===========================================
+    // GLOBAL FUNCTIONS
+    // ===========================================
+    window.analyzeData = analyzeData;
+    window.createBackup = createBackup;
+    window.runMigration = runMigration;
+    window.showLog = showLog;
+
+    // ===========================================
+    // INITIALIZATION
+    // ===========================================
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        log(`User authenticated: ${user.email}`);
+        log('Data migration tool ready');
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    // Initialize log display
+    document.addEventListener('DOMContentLoaded', function() {
+      showLog(); // Show log by default
+    });
+
+    console.log("✅ Data Migration Tool loaded");
+  </script>
+</body>
+</html>
