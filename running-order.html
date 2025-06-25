@@ -399,6 +399,87 @@
   </div>
 
   <script type="module">
+    <script>
+// ===========================================
+// UNIVERSAL FIELD MAPPER - ADD THIS BEFORE YOUR EXISTING SCRIPT
+// ===========================================
+
+// Field aliases mapping
+const FIELD_ALIASES = {
+  'judge': ['judge', 'judgeName', 'judgeAssigned', 'selectedJudge', 'Judge', 'Judges Name'],
+  'handler': ['handler', 'handlerName', 'Handler', 'Handler Name', 'participantName'],
+  'dog': ['dog', 'dogCallName', 'dogName', 'callName', 'Call Name', 'Dog Name'],
+  'class': ['class', 'className', 'Class', 'Class Name', 'classType'],
+  'registration': ['registration', 'cwagsNumber', 'Registration', 'regNumber', 'registrationNumber']
+};
+
+// Smart object creator
+function createSmartObject(originalObject) {
+  if (!originalObject || typeof originalObject !== 'object') {
+    return originalObject;
+  }
+  
+  return new Proxy(originalObject, {
+    get(target, prop) {
+      const propStr = String(prop).toLowerCase();
+      
+      if (FIELD_ALIASES[propStr]) {
+        for (const variation of FIELD_ALIASES[propStr]) {
+          if (target.hasOwnProperty(variation) && target[variation] != null && target[variation] !== '') {
+            return target[variation];
+          }
+        }
+        return propStr === 'judge' ? 'Judge TBD' : 
+               propStr === 'handler' ? 'Unknown Handler' :
+               propStr === 'dog' ? 'Unknown Dog' :
+               propStr === 'registration' ? 'No Reg' : '';
+      }
+      
+      return target[prop];
+    }
+  });
+}
+
+// Universal entry processor
+function processEntriesUniversally(entries) {
+  console.log("🔄 Processing entries with universal field mapping...");
+  
+  const processedEntries = [];
+  
+  entries.forEach(entryDoc => {
+    if (entryDoc.selectedEntries && Array.isArray(entryDoc.selectedEntries)) {
+      entryDoc.selectedEntries.forEach((selectedEntry, index) => {
+        const smartSelected = createSmartObject(selectedEntry);
+        const smartEntry = createSmartObject(entryDoc);
+        
+        const combinedEntry = createSmartObject({
+          ...entryDoc,
+          ...selectedEntry,
+          
+          // Use the smart mapping for canonical access
+          judgeName: smartSelected.judge || smartEntry.judge || 'Judge TBD',
+          handlerName: smartSelected.handler || smartEntry.handler || 'Unknown Handler', 
+          dogCallName: smartSelected.dog || smartEntry.dog || 'Unknown Dog',
+          className: smartSelected.class || 'Unknown Class',
+          cwagsNumber: smartSelected.registration || smartEntry.registration || 'No Reg',
+          
+          entryId: entryDoc.id || `entry_${index}`,
+          entryIndex: index,
+          type: selectedEntry.type || 'regular'
+        });
+        
+        processedEntries.push(combinedEntry);
+      });
+    }
+  });
+  
+  console.log(`✅ Processed ${processedEntries.length} entries with universal mapping`);
+  return processedEntries;
+}
+
+// Override the global window functions to use smart processing
+window.originalProcessEntriesUniversally = processEntriesUniversally;
+</script>
     import { auth, db } from './js/firebase.js';
     import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
