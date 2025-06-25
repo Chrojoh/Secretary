@@ -395,7 +395,98 @@
   </div>
 
   <!-- UNIVERSAL FIELD MAPPER -->
+  
+  
   <script>
+   console.log("🔧 Applying running order fix patch...");
+
+// Override the existing normalizeEntryData function
+function fixedNormalizeEntryData(entry) {
+  // Extract handler name with multiple fallbacks
+  let handlerName = entry.handlerName || entry.Handler || entry.handler || '';
+  
+  // Extract dog name with multiple fallbacks  
+  let dogCallName = entry.dogCallName || entry['Call Name'] || entry.dogName || entry.callName || '';
+  
+  // Extract judge name with multiple fallbacks
+  let judgeName = entry.judgeName || entry.judge || entry.judgeAssigned || entry.selectedJudge || 'Judge TBD';
+  
+  // Extract class name with multiple fallbacks
+  let className = entry.className || entry.Class || entry.class || '';
+  
+  // Extract registration with multiple fallbacks
+  let cwagsNumber = entry.cwagsNumber || entry.Registration || entry.registration || 'No Reg';
+  
+  // CRITICAL FIX: Handle empty strings by creating meaningful placeholders
+  if (!handlerName || handlerName.trim() === '') {
+    handlerName = `Handler ${entry.entryId ? entry.entryId.slice(-6) : 'Unknown'}`;
+  }
+  
+  if (!dogCallName || dogCallName.trim() === '') {
+    dogCallName = `Dog ${entry.entryIndex + 1 || 'Unknown'}`;
+  }
+  
+  if (!className || className.trim() === '') {
+    className = 'Unknown Class';
+  }
+  
+  // Clean up judge name
+  if (!judgeName || judgeName.trim() === '' || judgeName === 'TBD') {
+    judgeName = 'Judge TBD';
+  }
+  
+  return {
+    ...entry,
+    handlerName: handlerName.trim(),
+    dogCallName: dogCallName.trim(),
+    className: className.trim(),
+    judgeName: judgeName.trim(),
+    cwagsNumber: cwagsNumber
+  };
+}
+
+// Override the window function if it exists
+if (typeof window.normalizeEntryData !== 'undefined') {
+  window.normalizeEntryData = fixedNormalizeEntryData;
+}
+
+// Also create a global function to fix existing data
+window.fixRunningOrderData = function() {
+  console.log("🔧 Fixing existing running order data...");
+  
+  // Fix allEntries if it exists
+  if (typeof allEntries !== 'undefined' && Array.isArray(allEntries)) {
+    allEntries = allEntries.map((entry, index) => {
+      const fixed = fixedNormalizeEntryData({
+        ...entry,
+        entryIndex: index
+      });
+      console.log(`Fixed entry ${index}:`, {
+        handler: fixed.handlerName,
+        dog: fixed.dogCallName,
+        class: fixed.className
+      });
+      return fixed;
+    });
+    
+    console.log(`✅ Fixed ${allEntries.length} entries`);
+    
+    // Regenerate rounds if the function exists
+    if (typeof processRoundsData === 'function') {
+      processRoundsData();
+    }
+    
+    // Regenerate running order if the function exists
+    if (typeof generateRunningOrder === 'function') {
+      generateRunningOrder();
+    }
+  }
+};
+
+console.log("✅ Running order fix patch applied!");
+console.log("💡 Call window.fixRunningOrderData() to fix existing data, or reload trial data");
+
+    
     console.log("🚀 Starting NEW Running Order Generator...");
 
     // ===========================================
