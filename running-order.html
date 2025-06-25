@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Running Order Generator - Fixed</title>
+  <title>Running Order Generator - FINAL FIX</title>
   <link rel="stylesheet" href="css/style.css">
   <style>
     .generator-container {
@@ -325,8 +325,8 @@
 <body>
   <div class="generator-container">
     <div class="header">
-      <h1>🏃‍♂️ Running Order Generator</h1>
-      <p>Generate running orders for trial rounds - Fixed Date Handling</p>
+      <h1>🏃‍♂️ Running Order Generator - FINAL FIX</h1>
+      <p>Generate running orders for trial rounds with proper field mapping</p>
     </div>
 
     <!-- Controls Section -->
@@ -403,26 +403,58 @@
     import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     // ===========================================
-    // STANDARD FIELD DEFINITIONS
-    // ===========================================
-    const STANDARD_FIELDS = {
-      HANDLER_NAME: 'handlerName',
-      DOG_CALL_NAME: 'dogCallName',
-      JUDGE_NAME: 'judgeName',
-      CLASS_NAME: 'className',
-      CWAGS_NUMBER: 'cwagsNumber'
-    };
-
-    // ===========================================
-    // ENHANCED DATE UTILITIES - CRITICAL FIX
+    // COMPREHENSIVE FIELD MAPPING - FINAL FIX
     // ===========================================
     
+    // CRITICAL: Complete field mapping for all variations
+    const FIELD_MAPPINGS = {
+      // Handler name variations
+      handlerName: ['handlerName', 'Handler', 'handler', 'Handler Name', 'participantName'],
+      
+      // Dog name variations  
+      dogCallName: ['dogCallName', 'Call Name', 'dogName', 'callName', 'Dog Name', 'dog'],
+      
+      // Judge name variations
+      judgeName: ['judgeName', 'judge', 'judgeAssigned', 'selectedJudge', 'Judge', 'judgeName'],
+      
+      // Class name variations
+      className: ['className', 'Class', 'class', 'Class Name', 'classType'],
+      
+      // Registration variations
+      cwagsNumber: ['cwagsNumber', 'Registration', 'registration', 'regNumber', 'registrationNumber']
+    };
+
     /**
-     * Creates a date object from various input formats - ENHANCED
+     * COMPREHENSIVE field value extractor with ALL possible field variations
      */
+    function getFieldValue(obj, standardFieldName) {
+      if (!obj || typeof obj !== 'object') {
+        console.warn('getFieldValue: invalid object input');
+        return '';
+      }
+      
+      const possibleFields = FIELD_MAPPINGS[standardFieldName] || [standardFieldName];
+      
+      for (const field of possibleFields) {
+        if (obj.hasOwnProperty(field) && obj[field] !== null && obj[field] !== undefined) {
+          const value = String(obj[field]).trim();
+          if (value && value !== 'undefined' && value !== 'null' && value !== '') {
+            console.log(`✅ Found ${standardFieldName} in field '${field}': "${value}"`);
+            return value;
+          }
+        }
+      }
+      
+      console.warn(`❌ No valid value found for ${standardFieldName} in:`, Object.keys(obj));
+      return '';
+    }
+
+    // ===========================================
+    // ENHANCED DATE UTILITIES
+    // ===========================================
+    
     function createLocalDate(dateInput) {
       if (!dateInput || dateInput === null || dateInput === undefined) {
-        console.warn('createLocalDate: null/undefined input');
         return null;
       }
       
@@ -439,14 +471,10 @@
         
         // Handle string inputs
         if (typeof dateInput === 'string') {
-          // Handle various string formats
           let dateStr = dateInput.trim();
-          
-          // If no time component, add noon to avoid timezone issues
           if (!dateStr.includes('T') && !dateStr.includes(' ')) {
             dateStr += 'T12:00:00';
           }
-          
           const date = new Date(dateStr);
           return isNaN(date.getTime()) ? null : date;
         }
@@ -457,24 +485,17 @@
           return isNaN(date.getTime()) ? null : date;
         }
         
-        console.warn('createLocalDate: unsupported input type:', typeof dateInput, dateInput);
         return null;
         
       } catch (error) {
-        console.error('createLocalDate error:', error, 'for input:', dateInput);
+        console.error('createLocalDate error:', error);
         return null;
       }
     }
 
-    /**
-     * Formats a date to a readable string - ENHANCED
-     */
     function formatDateForDisplay(dateInput) {
       const date = createLocalDate(dateInput);
-      if (!date) {
-        console.warn('formatDateForDisplay: invalid date input:', dateInput);
-        return 'Invalid Date';
-      }
+      if (!date) return 'Invalid Date';
       
       try {
         return date.toLocaleDateString('en-US', { 
@@ -485,14 +506,10 @@
           timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
         });
       } catch (error) {
-        console.error('formatDateForDisplay error:', error);
         return date.toLocaleDateString();
       }
     }
 
-    /**
-     * Formats date for comparison/sorting - YYYY-MM-DD format
-     */
     function formatDateForComparison(dateInput) {
       const date = createLocalDate(dateInput);
       if (!date) return null;
@@ -503,29 +520,22 @@
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
       } catch (error) {
-        console.error('formatDateForComparison error:', error);
         return null;
       }
     }
 
-    /**
-     * Gets date from Firebase data with fallbacks
-     */
     function getDateFromFirebaseEntry(entry) {
-      // Try multiple possible date fields
       const dateFields = ['date', 'entryDate', 'trialDate', 'selectedDate'];
       
       for (const field of dateFields) {
         if (entry[field]) {
           const formattedDate = formatDateForComparison(entry[field]);
           if (formattedDate) {
-            console.log(`Found valid date in field '${field}':`, formattedDate);
             return formattedDate;
           }
         }
       }
       
-      console.warn('No valid date found in entry:', entry);
       return null;
     }
 
@@ -538,17 +548,36 @@
     let roundsData = [];
 
     // ===========================================
-    // DATA NORMALIZATION
+    // COMPREHENSIVE DATA NORMALIZATION
     // ===========================================
+    
     function normalizeEntryData(entry) {
-      return {
-        handlerName: entry.handlerName || entry.Handler || entry.handler || '',
-        dogCallName: entry.dogCallName || entry['Call Name'] || entry.dogName || '',
-        className: entry.className || entry.Class || entry.class || '',
-        judgeName: entry.judgeName || entry.judge || entry.judgeAssigned || 'TBD',
-        cwagsNumber: entry.cwagsNumber || entry.Registration || entry.registration || '',
+      const normalized = {
+        // Extract using comprehensive field mapping
+        handlerName: getFieldValue(entry, 'handlerName'),
+        dogCallName: getFieldValue(entry, 'dogCallName'),
+        className: getFieldValue(entry, 'className'),
+        judgeName: getFieldValue(entry, 'judgeName'),
+        cwagsNumber: getFieldValue(entry, 'cwagsNumber'),
+        
+        // Preserve all original fields
         ...entry
       };
+      
+      // Fallback for judge names that might be "TBD" or empty
+      if (!normalized.judgeName || normalized.judgeName === 'TBD' || normalized.judgeName === 'Judge TBD') {
+        normalized.judgeName = 'Judge TBD';
+      }
+      
+      console.log('📝 Normalized entry:', {
+        handler: normalized.handlerName,
+        dog: normalized.dogCallName,
+        class: normalized.className,
+        judge: normalized.judgeName,
+        reg: normalized.cwagsNumber
+      });
+      
+      return normalized;
     }
 
     // ===========================================
@@ -650,8 +679,8 @@
         // Load entries
         await loadTrialEntries(trialId);
         
-        // Process rounds
-        processRoundsData();
+        // Process rounds with COMPREHENSIVE deduplication
+        processRoundsDataWithDeduplication();
         
         // Update UI
         populateDateDropdown();
@@ -669,6 +698,8 @@
 
     async function loadTrialEntries(trialId) {
       try {
+        console.log("📊 Loading entries for trial:", trialId);
+        
         const entriesQuery = query(
           collection(db, 'entries'),
           where('trialId', '==', trialId)
@@ -678,13 +709,28 @@
         allEntries = [];
         
         entriesSnapshot.forEach(doc => {
-          const entryData = normalizeEntryData(doc.data());
+          const entryDoc = doc.data();
+          console.log("📄 Processing entry document:", doc.id);
           
-          if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-            entryData.selectedEntries.forEach((selectedEntry, index) => {
-              const normalizedEntry = {
-                ...entryData,
-                ...normalizeEntryData(selectedEntry),
+          if (entryDoc.selectedEntries && Array.isArray(entryDoc.selectedEntries)) {
+            entryDoc.selectedEntries.forEach((selectedEntry, index) => {
+              // COMPREHENSIVE normalization of BOTH document AND selected entry
+              const baseEntry = normalizeEntryData(entryDoc);
+              const selectedNormalized = normalizeEntryData(selectedEntry);
+              
+              const combinedEntry = {
+                // Merge base entry data with selected entry data
+                ...baseEntry,
+                ...selectedNormalized,
+                
+                // Ensure we have all critical fields with fallbacks
+                handlerName: selectedNormalized.handlerName || baseEntry.handlerName || 'Unknown Handler',
+                dogCallName: selectedNormalized.dogCallName || baseEntry.dogCallName || 'Unknown Dog',
+                className: selectedNormalized.className || 'Unknown Class',
+                judgeName: selectedNormalized.judgeName || 'Judge TBD',
+                cwagsNumber: selectedNormalized.cwagsNumber || baseEntry.cwagsNumber || 'No Reg',
+                
+                // Entry metadata
                 entryId: doc.id,
                 entryIndex: index,
                 date: getDateFromFirebaseEntry(selectedEntry),
@@ -692,17 +738,24 @@
                 type: selectedEntry.type || 'regular'
               };
               
-              // Only add entries with valid dates
-              if (normalizedEntry.date) {
-                allEntries.push(normalizedEntry);
+              // Only add entries with valid dates and essential data
+              if (combinedEntry.date && combinedEntry.className && combinedEntry.handlerName) {
+                allEntries.push(combinedEntry);
+                console.log("✅ Added entry:", {
+                  handler: combinedEntry.handlerName,
+                  dog: combinedEntry.dogCallName,
+                  class: combinedEntry.className,
+                  judge: combinedEntry.judgeName,
+                  date: combinedEntry.date
+                });
               } else {
-                console.warn('Skipping entry with invalid date:', selectedEntry);
+                console.warn("❌ Skipping incomplete entry:", combinedEntry);
               }
             });
           }
         });
         
-        console.log("✅ Loaded entries with valid dates:", allEntries.length);
+        console.log("✅ Loaded valid entries:", allEntries.length);
         
       } catch (error) {
         console.error("❌ Error loading entries:", error);
@@ -710,25 +763,46 @@
       }
     }
 
-    function processRoundsData() {
+    // ===========================================
+    // ENHANCED ROUNDS PROCESSING WITH DEDUPLICATION
+    // ===========================================
+    
+    function processRoundsDataWithDeduplication() {
+      console.log("🔄 Processing rounds with comprehensive deduplication...");
+      
       roundsData = [];
       const roundsMap = new Map();
 
       allEntries.forEach(entry => {
-        const roundKey = `${entry.date}_${entry.className}_${entry.roundNumber}_${entry.judgeName}`;
+        // Create SMARTER round key that avoids TBD duplicates
+        const cleanJudgeName = (entry.judgeName && entry.judgeName !== 'Judge TBD' && entry.judgeName !== 'TBD') 
+          ? entry.judgeName 
+          : 'Judge TBD';
+          
+        const roundKey = `${entry.date}_${entry.className}_${entry.roundNumber}_${cleanJudgeName}`;
         
-        if (!roundsMap.has(roundKey)) {
+        // Skip if we already have this round with a proper judge name
+        if (roundsMap.has(roundKey)) {
+          const existingRound = roundsMap.get(roundKey);
+          
+          // If existing round has TBD judge and new entry has real judge, replace
+          if (existingRound.judgeName === 'Judge TBD' && cleanJudgeName !== 'Judge TBD') {
+            console.log("🔄 Replacing TBD judge with real judge:", cleanJudgeName);
+            existingRound.judgeName = cleanJudgeName;
+          }
+          
+          existingRound.entries.push(entry);
+        } else {
+          // Create new round
           roundsMap.set(roundKey, {
             date: entry.date,
             dateDisplay: formatDateForDisplay(entry.date),
             className: entry.className,
             roundNumber: entry.roundNumber,
-            judgeName: entry.judgeName,
-            entries: []
+            judgeName: cleanJudgeName,
+            entries: [entry]
           });
         }
-        
-        roundsMap.get(roundKey).entries.push(entry);
       });
 
       // Convert to array and sort
@@ -751,7 +825,8 @@
         });
       });
 
-      console.log("✅ Processed rounds with valid dates:", roundsData.length);
+      console.log("✅ Processed unique rounds:", roundsData.length);
+      console.log("📊 Sample round data:", roundsData.slice(0, 2));
     }
 
     function populateDateDropdown() {
@@ -774,7 +849,7 @@
       const totalEntries = allEntries.length;
       const uniqueHandlers = new Set(allEntries.map(e => e.handlerName)).size;
       const uniqueClasses = new Set(allEntries.map(e => e.className)).size;
-      const uniqueJudges = new Set(allEntries.map(e => e.judgeName)).size;
+      const uniqueJudges = new Set(allEntries.map(e => e.judgeName).filter(j => j !== 'Judge TBD')).size;
 
       const statsHTML = `
         <div class="stat-card">
@@ -810,26 +885,39 @@
         ? roundsData.filter(round => round.date === selectedDate)
         : roundsData;
 
+      console.log("🏃‍♂️ Generating running order for", filteredRounds.length, "rounds");
+
       let runningOrderHTML = '';
       
       filteredRounds.forEach((round, roundIndex) => {
-        const entriesHTML = round.entries.map((entry, entryIndex) => `
-          <tr>
-            <td style="text-align: center; width: 60px;">
-              <div class="entry-number">${entryIndex + 1}</div>
-            </td>
-            <td>
-              <div class="handler-name">${entry.handlerName}</div>
-              <div class="dog-name">${entry.dogCallName}</div>
-            </td>
-            <td style="text-align: center; width: 80px;">
-              <span class="entry-type ${entry.type}">${entry.type === 'feo' ? 'FEO' : 'REG'}</span>
-            </td>
-            <td style="width: 120px;">${entry.cwagsNumber || 'No Reg'}</td>
-            <td style="width: 100px; border-right: 2px solid #000;"></td>
-            <td style="width: 100px;"></td>
-          </tr>
-        `).join('');
+        console.log(`Round ${roundIndex + 1}:`, round.className, "Judge:", round.judgeName, "Entries:", round.entries.length);
+        
+        const entriesHTML = round.entries.map((entry, entryIndex) => {
+          console.log(`  Entry ${entryIndex + 1}:`, {
+            handler: entry.handlerName,
+            dog: entry.dogCallName,
+            reg: entry.cwagsNumber,
+            type: entry.type
+          });
+          
+          return `
+            <tr>
+              <td style="text-align: center; width: 60px;">
+                <div class="entry-number">${entryIndex + 1}</div>
+              </td>
+              <td>
+                <div class="handler-name">${entry.handlerName || 'Unknown Handler'}</div>
+                <div class="dog-name">${entry.dogCallName || 'Unknown Dog'}</div>
+              </td>
+              <td style="text-align: center; width: 80px;">
+                <span class="entry-type ${entry.type || 'regular'}">${entry.type === 'feo' ? 'FEO' : 'REG'}</span>
+              </td>
+              <td style="width: 120px;">${entry.cwagsNumber || 'No Reg'}</td>
+              <td style="width: 100px; border-right: 2px solid #000;"></td>
+              <td style="width: 100px;"></td>
+            </tr>
+          `;
+        }).join('');
 
         runningOrderHTML += `
           <div class="round-group">
@@ -863,7 +951,7 @@
       document.getElementById('runningOrderSection').innerHTML = runningOrderHTML;
       document.getElementById('runningOrderSection').style.display = 'block';
 
-      showSuccess(`Generated running order for ${filteredRounds.length} rounds`);
+      showSuccess(`Generated running order for ${filteredRounds.length} rounds with complete handler/dog information`);
     }
 
     // ===========================================
@@ -896,15 +984,20 @@
         totalTrials: availableTrials.length,
         totalEntries: allEntries.length,
         totalRounds: roundsData.length,
-        standardFields: STANDARD_FIELDS,
-        roundsSample: roundsData.slice(0, 3),
-        entriesSample: allEntries.slice(0, 5).map(entry => ({
-          ...entry,
-          dateProcessing: {
-            original: entry.date,
-            formatted: formatDateForDisplay(entry.date),
-            comparison: formatDateForComparison(entry.date)
-          }
+        fieldMappings: FIELD_MAPPINGS,
+        sampleEntries: allEntries.slice(0, 3).map(entry => ({
+          handlerName: entry.handlerName,
+          dogCallName: entry.dogCallName,
+          className: entry.className,
+          judgeName: entry.judgeName,
+          cwagsNumber: entry.cwagsNumber,
+          date: entry.date,
+          type: entry.type,
+          originalFields: Object.keys(entry).filter(key => !['handlerName', 'dogCallName', 'className', 'judgeName', 'cwagsNumber'].includes(key))
+        })),
+        sampleRounds: roundsData.slice(0, 3).map(round => ({
+          ...round,
+          entries: round.entries.slice(0, 2)
         }))
       };
       
@@ -943,7 +1036,7 @@
 
       document.getElementById('sortBy').addEventListener('change', function() {
         if (roundsData.length > 0) {
-          processRoundsData();
+          processRoundsDataWithDeduplication();
           generateRunningOrder();
         }
       });
@@ -979,7 +1072,30 @@
       }
     });
 
-    console.log("✅ Fixed Running Order Generator loaded with enhanced date handling");
+    // ===========================================
+    // DEBUG HELPERS
+    // ===========================================
+    window.debugRunningOrder = {
+      allEntries: () => allEntries,
+      roundsData: () => roundsData,
+      currentTrialData: () => currentTrialData,
+      FIELD_MAPPINGS: FIELD_MAPPINGS,
+      getFieldValue: getFieldValue,
+      normalizeEntryData: normalizeEntryData,
+      testFieldExtraction: (entry) => {
+        console.log("Testing field extraction for entry:", entry);
+        return {
+          handlerName: getFieldValue(entry, 'handlerName'),
+          dogCallName: getFieldValue(entry, 'dogCallName'),
+          className: getFieldValue(entry, 'className'),
+          judgeName: getFieldValue(entry, 'judgeName'),
+          cwagsNumber: getFieldValue(entry, 'cwagsNumber')
+        };
+      }
+    };
+
+    console.log("✅ FINAL FIX Running Order Generator loaded with comprehensive field mapping");
+    console.log("🔧 Debug tools available at window.debugRunningOrder");
   </script>
 </body>
 </html>
