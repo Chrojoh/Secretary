@@ -1,62 +1,143 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My Trials</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .trial-list {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
+import { auth, db } from './firebase.js';
+import { collection, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+const trialList = document.getElementById("trialList");
+
+async function deleteTrial(trialId, trialName) {
+  if (confirm(`Are you sure you want to delete "${trialName}"? This cannot be undone.`)) {
+    try {
+      await deleteDoc(doc(db, "trials", trialId));
+      console.log("Trial deleted:", trialId);
+      alert("Trial deleted successfully!");
+      // Reload the trials list
+      location.reload();
+    } catch (error) {
+      console.error("Error deleting trial:", error);
+      alert("Error deleting trial: " + error.message);
+    }
+  }
+}
+
+// UPDATED: Use new edit-trial.html page instead of create-trial.html
+function editTrial(trialId) {
+  // Navigate to the new edit trial page with the trial ID
+  window.location.href = `edit-trial.html?id=${trialId}&mode=edit`;
+}
+
+// NEW: Add view trial function for read-only viewing
+function viewTrial(trialId) {
+  window.location.href = `edit-trial.html?id=${trialId}&mode=view`;
+}
+
+async function loadTrials(user) {
+  try {
+    console.log("Loading trials for user:", user.email);
+    
+    // Simplified query without orderBy to avoid index requirement
+    const q = query(
+      collection(db, "trials"), 
+      where("createdBy", "==", user.uid)
+    );
+    
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+      trialList.innerHTML = '<div class="no-trials">No trials found. <a href="create-trial.html">Create your first trial</a></div>';
+      return;
     }
     
-    .trial-item {
-      border: 1px solid #ccc;
-      margin-bottom: 15px;
-      padding: 15px;
-      border-radius: 5px;
-      background-color: #f9f9f9;
-    }
+    trialList.innerHTML = ''; // Clear loading message
     
-    .trial-item h3 {
-      margin: 0 0 10px 0;
-      color: #333;
-    }
+    // Convert to array and sort manually
+    const trials = [];
+    snapshot.forEach(doc => {
+      const trialData = doc.data();
+      trials.push({ id: doc.id, ...trialData });
+    });
     
-    .trial-details {
-      color: #666;
-      font-size: 14px;
-    }
+    // Sort by creation date (most recent first) - do this in JavaScript instead of Firestore
+    trials.sort((a, b) => {
+      const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+      const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+      return dateB - dateA; // Most recent first
+    });
     
-    .no-trials {
-      text-align: center;
-      color: #666;
-      font-style: italic;
-      margin: 50px 0;
-    }
+    // Display trials
+    trials.forEach(trialData => {
+      console.log("Trial data:", trialData);
+      
+      const trialItem = document.createElement("div");
+      trialItem.className = "trial-item";
+      
+      // Format the creation date
+      let createdDate = "Unknown date";
+      if (trialData.createdAt) {
+        createdDate = trialData.createdAt.toDate().toLocaleDateString();
+      }
+      
+      // Get trial dates
+      let trialDates = "No dates specified";
+      if (trialData.days && trialData.days.length > 0) {
+        const dates = trialData.days
+          .filter(day => day.date)
+          .map(day => day.date)
+          .join(', ');
+        if (dates) {
+          trialDates = dates;
+        }
+      }
+      
+      // Count classes
+      let totalClasses = 0;
+      if (trialData.days) {
+        trialData.days.forEach(day => {
+          if (day.classes) {
+            totalClasses += day.classes.length;
+          }
+        });
+      }
+      
+      // UPDATED: Add both View and Edit buttons with better styling
+      trialItem.innerHTML = `
+        <div class="trial-actions">
+          <button class="view-btn" onclick="viewTrial('${trialData.id}')" style="background: #17a2b8; color: white; padding: 5px 10px; border: none; border-radius: 3px; margin-right: 5px;">👁️ View</button>
+          <button class="edit-btn" onclick="editTrial('${trialData.id}')" style="background: #28a745; color: white; padding: 5px 10px; border: none; border-radius: 3px; margin-right: 5px;">✏️ Edit</button>
+          <button class="delete-btn" onclick="deleteTrial('${trialData.id}', '${trialData.clubName || 'Unnamed Trial'}')" style="background: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 3px;">🗑️ Delete</button>
+        </div>
+        <h3>${trialData.clubName || 'Unnamed Trial'}</h3>
+        <div class="trial-details">
+          <strong>Secretary:</strong> ${trialData.secretary || 'Not specified'}<br>
+          <strong>Trial Dates:</strong> ${trialDates}<br>
+          <strong>Number of Days:</strong> ${trialData.numDays || 0}<br>
+          <strong>Total Classes:</strong> ${totalClasses}<br>
+          <strong>Created:</strong> ${createdDate}
+        </div>
+      `;
+      
+      trialList.appendChild(trialItem);
+    });
     
-    .back-button {
-      background-color: #007cba;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-bottom: 20px;
-    }
+    console.log(`Loaded ${trials.length} trials`);
     
-    .back-button:hover {
-      background-color: #005a8b;
-    }
-  </style>
-</head>
-<body>
-  <div class="trial-list">
-    <button class="back-button" onclick="location.href='main-dashboard.html'">← Back to Dashboard</button>
-    <h1>My Trials</h1>
-    <div id="trialList"></div>
-  </div>
-  <script type="module" src="js/view-trials.js"></script>
-</body>
-</html>
+  } catch (error) {
+    console.error("Error loading trials:", error);
+    trialList.innerHTML = '<div class="no-trials">Error loading trials: ' + error.message + '</div>';
+  }
+}
+
+// Make functions globally accessible
+window.deleteTrial = deleteTrial;
+window.editTrial = editTrial;
+window.viewTrial = viewTrial;
+
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+  
+  // Show loading message
+  trialList.innerHTML = '<div class="no-trials">Loading trials...</div>';
+  
+  await loadTrials(user);
+});
