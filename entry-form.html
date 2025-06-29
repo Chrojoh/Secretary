@@ -98,6 +98,44 @@
       color: #495057;
     }
     
+    /* Fee Configuration Section */
+    .fee-config-section {
+      background: #fff8e1;
+      border: 2px solid #ffc107;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .fee-config-section h3 {
+      color: #856404;
+      margin-bottom: 1rem;
+    }
+    
+    .fee-config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .fee-input-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .fee-input-group label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #856404;
+    }
+    
+    .fee-input-group input {
+      padding: 0.75rem;
+      border: 2px solid #e1e5e9;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    
     /* Shareable Link Section */
     .shareable-link-section {
       background: #e7f3ff;
@@ -292,10 +330,89 @@
       margin-top: 0.2rem;
       width: auto;
     }
+
+    /* Day Tabs Styling */
+    .day-tabs-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 0.5rem;
+    }
     
+    .submit-entry-container {
+      margin-right: auto;
+    }
+    
+    .submit-entry-btn {
+      background: linear-gradient(45deg, #28a745, #20c997);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .submit-entry-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+    
+    .submit-entry-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+    
+    .day-tabs {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .day-tab {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      color: #495057;
+      padding: 0.75rem 1rem;
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    
+    .day-tab:hover {
+      background: #e9ecef;
+    }
+    
+    .day-tab.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    
+    .classes-scroll-container {
+      max-height: 60vh;
+      overflow-y: auto;
+      border: 2px solid #e9ecef;
+      border-radius: 0 8px 8px 8px;
+      background: #f8f9fa;
+      padding: 1rem;
+    }
+
     /* Class Selection - Match the screenshot style */
     .day-section {
       margin-bottom: 2rem;
+      display: none;
+    }
+    
+    .day-section.active {
+      display: block;
     }
     
     .day-header {
@@ -550,6 +667,26 @@
       </div>
     </div>
 
+    <!-- Fee Configuration (Secretary Only) -->
+    <div class="fee-config-section" id="feeConfigSection" style="display: none;">
+      <h3>💰 Fee Configuration</h3>
+      <p style="margin-bottom: 1rem; color: #666;">Set the entry fees for this trial:</p>
+      <div class="fee-config-grid">
+        <div class="fee-input-group">
+          <label for="regularFee">Regular Entry Fee ($)</label>
+          <input type="number" id="regularFee" step="0.01" min="0" value="21.00" placeholder="21.00">
+        </div>
+        <div class="fee-input-group">
+          <label for="feoFee">FEO Entry Fee ($)</label>
+          <input type="number" id="feoFee" step="0.01" min="0" value="15.00" placeholder="15.00">
+        </div>
+        <div class="fee-input-group">
+          <label for="juniorHandlerFee">Junior Handler Fee ($)</label>
+          <input type="number" id="juniorHandlerFee" step="0.01" min="0" value="20.00" placeholder="20.00">
+        </div>
+      </div>
+    </div>
+
     <!-- Shareable Link Section (Secretary Only) -->
     <div class="shareable-link-section" id="shareableLinkSection">
       <h3>🔗 Shareable Entry Link</h3>
@@ -724,7 +861,30 @@
         <div class="form-section">
           <h3>🎯 Class Entries</h3>
           <p style="margin-bottom: 1rem; color: #666;">Select the specific class/judge combinations you wish to enter:</p>
-          <div id="classSelection">
+          
+          <!-- Day Tabs with Submit Button -->
+          <div class="day-tabs-container" id="dayTabsContainer" style="display: none;">
+            <div class="submit-entry-container">
+              <button type="submit" class="submit-entry-btn" id="submitBtnTop" disabled>
+                Submit Entry
+              </button>
+            </div>
+            <div class="day-tabs" id="dayTabs">
+              <!-- Day tabs will be populated here -->
+            </div>
+          </div>
+          
+          <!-- Classes Scroll Container -->
+          <div class="classes-scroll-container" id="classesScrollContainer" style="display: none;">
+            <div id="classSelection">
+              <div style="text-align: center; padding: 2rem; color: #666;">
+                Loading available classes by day and judge...
+              </div>
+            </div>
+          </div>
+          
+          <!-- Fallback for no tabs -->
+          <div id="classSelectionFallback">
             <div style="text-align: center; padding: 2rem; color: #666;">
               Loading available classes by day and judge...
             </div>
@@ -896,10 +1056,11 @@
     let isRegistrationDataLoaded = false;
     let formInitialized = false;
 
-    // Fee structure
-    const fees = {
-      firstClass: 35.00,
-      additionalClass: 25.00,
+    // Fee structure - now configurable
+    let fees = {
+      firstClass: 21.00,
+      additionalClass: 21.00,
+      feoFee: 15.00,
       juniorHandler: 20.00
     };
 
@@ -950,6 +1111,38 @@
       }
     }
 
+    // Setup fee configuration listeners
+    function setupFeeConfigListeners() {
+      const regularFeeInput = document.getElementById('regularFee');
+      const feoFeeInput = document.getElementById('feoFee');
+      const juniorHandlerFeeInput = document.getElementById('juniorHandlerFee');
+      
+      [regularFeeInput, feoFeeInput, juniorHandlerFeeInput].forEach(input => {
+        if (input) {
+          input.addEventListener('input', updateFeeStructure);
+        }
+      });
+    }
+
+    // Update fee structure from inputs
+    function updateFeeStructure() {
+      const regularFee = parseFloat(document.getElementById('regularFee').value) || 21.00;
+      const feoFee = parseFloat(document.getElementById('feoFee').value) || 15.00;
+      const juniorHandlerFee = parseFloat(document.getElementById('juniorHandlerFee').value) || 20.00;
+      
+      fees = {
+        firstClass: regularFee,
+        additionalClass: regularFee,
+        feoFee: feoFee,
+        juniorHandler: juniorHandlerFee
+      };
+      
+      // Recalculate entry summary if classes are selected
+      if (selectedClasses.size > 0) {
+        updateEntrySummary();
+      }
+    }
+
     // Setup form event listeners - CRITICAL FIX
     function setupFormEventListeners() {
       console.log("🔧 Setting up form event listeners...");
@@ -994,8 +1187,40 @@
         entryForm.addEventListener('submit', handleFormSubmit);
       }
 
+      // Top submit button (duplicate functionality)
+      const submitBtnTop = document.getElementById('submitBtnTop');
+      if (submitBtnTop) {
+        submitBtnTop.removeEventListener('click', handleTopSubmitClick);
+        submitBtnTop.addEventListener('click', handleTopSubmitClick);
+      }
+
       formInitialized = true;
       console.log("✅ Form event listeners setup complete");
+    }
+
+    // Handle top submit button click
+    function handleTopSubmitClick(event) {
+      event.preventDefault();
+      
+      // Trigger form validation
+      const entryForm = document.getElementById('entryForm');
+      if (entryForm) {
+        // Check form validity manually
+        const waiverAccepted = document.getElementById('waiverAccepted').checked;
+        const handlerName = document.getElementById('handlerName').value.trim();
+        const handlerEmail = document.getElementById('handlerEmail').value.trim();
+        const handlerPhone = document.getElementById('handlerPhone').value.trim();
+        const dogCallName = document.getElementById('dogCallName').value.trim();
+        const hasClasses = selectedClasses.size > 0;
+        
+        if (waiverAccepted && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses) {
+          // Create a synthetic submit event
+          const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+          handleFormSubmit(submitEvent);
+        } else {
+          alert('Please fill in all required fields and select at least one class entry.');
+        }
+      }
     }
 
     // Registration input handler - extracted for better management
@@ -1039,6 +1264,10 @@
           window.location.href = 'index.html';
           return;
         }
+
+        // Show fee configuration section for secretary
+        document.getElementById('feeConfigSection').style.display = 'block';
+        setupFeeConfigListeners();
 
         // Load trials for secretary - using timezone-safe date handling
         const trialsQuery = query(
@@ -1379,25 +1608,66 @@
       populateClasses();
     }
 
-    // Populate classes with the exact style from screenshot and timezone-safe dates
+    // Populate classes with tabbed interface and timezone-safe dates
     function populateClasses() {
       const classSelection = document.getElementById('classSelection');
-      let html = '';
-
+      const dayTabsContainer = document.getElementById('dayTabsContainer');
+      const classesScrollContainer = document.getElementById('classesScrollContainer');
+      const classSelectionFallback = document.getElementById('classSelectionFallback');
+      const dayTabs = document.getElementById('dayTabs');
+      
       if (!currentTrialData.days || currentTrialData.days.length === 0) {
-        html = '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
-        classSelection.innerHTML = html;
+        classSelection.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
+        classSelectionFallback.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
         return;
       }
 
+      // Show tabs if more than one day, otherwise show regular layout
+      if (currentTrialData.days.length > 1) {
+        dayTabsContainer.style.display = 'flex';
+        classesScrollContainer.style.display = 'block';
+        classSelectionFallback.style.display = 'none';
+        
+        // Create tabs
+        let tabsHtml = '';
+        currentTrialData.days.forEach((day, dayIndex) => {
+          const dayDate = day.date ? formatDateDisplay(day.date, { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric' 
+          }) : `Day ${dayIndex + 1}`;
+          
+          tabsHtml += `
+            <div class="day-tab ${dayIndex === 0 ? 'active' : ''}" data-day-index="${dayIndex}">
+              ${dayDate}
+            </div>
+          `;
+        });
+        dayTabs.innerHTML = tabsHtml;
+        
+        // Setup tab click listeners
+        document.querySelectorAll('.day-tab').forEach(tab => {
+          tab.addEventListener('click', function() {
+            const dayIndex = parseInt(this.dataset.dayIndex);
+            switchToDay(dayIndex);
+          });
+        });
+      } else {
+        dayTabsContainer.style.display = 'none';
+        classesScrollContainer.style.display = 'none';
+        classSelectionFallback.style.display = 'block';
+        classSelection = classSelectionFallback;
+      }
+
+      // Generate classes HTML
+      let html = '';
       currentTrialData.days.forEach((day, dayIndex) => {
         if (!day.classes || day.classes.length === 0) return;
 
-        // Use timezone-safe date formatting
         const dayDate = day.date ? formatDateDisplay(day.date) : `Day ${dayIndex + 1}`;
 
         html += `
-          <div class="day-section">
+          <div class="day-section ${dayIndex === 0 ? 'active' : ''}" data-day-index="${dayIndex}">
             <div class="day-header">📅 ${dayDate}</div>
         `;
 
@@ -1438,7 +1708,7 @@
                   className,
                   judge: judgeName,
                   roundNumber,
-                  date: prepareDateForFirebase(day.date) || `Day ${dayIndex + 1}` // Use timezone-safe date preparation
+                  date: prepareDateForFirebase(day.date) || `Day ${dayIndex + 1}`
                 };
                 
                 const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
@@ -1478,6 +1748,21 @@
       setupClassEventListeners();
     }
 
+    // Switch to specific day tab
+    function switchToDay(dayIndex) {
+      // Update tab active state
+      document.querySelectorAll('.day-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelector(`[data-day-index="${dayIndex}"]`).classList.add('active');
+      
+      // Update day sections
+      document.querySelectorAll('.day-section').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.querySelector(`.day-section[data-day-index="${dayIndex}"]`).classList.add('active');
+    }
+
     // Setup class selection event listeners - SEPARATED FOR CLARITY
     function setupClassEventListeners() {
       console.log("🎯 Setting up class selection event listeners");
@@ -1513,7 +1798,7 @@
       checkFormValidity();
     }
 
-    // Update entry summary
+    // Update entry summary with new fee structure
     function updateEntrySummary() {
       const entryCount = selectedClasses.size;
       const isJunior = document.getElementById('juniorHandler').value === 'Yes';
@@ -1536,9 +1821,9 @@
       });
       
       if (isJunior) {
-        totalFee = fees.juniorHandler * regularEntries;
-      } else if (regularEntries > 0) {
-        totalFee = fees.firstClass + (fees.additionalClass * Math.max(0, regularEntries - 1));
+        totalFee = fees.juniorHandler * regularEntries + fees.feoFee * feoEntries;
+      } else {
+        totalFee = fees.firstClass * regularEntries + fees.feoFee * feoEntries;
       }
       
       const uniqueClasses = new Set();
@@ -1559,7 +1844,7 @@
       document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
     }
 
-    // Check form validity
+    // Check form validity - updated to sync both submit buttons
     function checkFormValidity() {
       const waiverAccepted = document.getElementById('waiverAccepted').checked;
       const handlerName = document.getElementById('handlerName').value.trim();
@@ -1571,6 +1856,10 @@
       const isValid = waiverAccepted && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
       
       document.getElementById('submitBtn').disabled = !isValid;
+      const submitBtnTop = document.getElementById('submitBtnTop');
+      if (submitBtnTop) {
+        submitBtnTop.disabled = !isValid;
+      }
     }
 
     // Handle form submission with timezone-safe date handling
@@ -1578,8 +1867,14 @@
       event.preventDefault();
       
       const submitBtn = document.getElementById('submitBtn');
+      const submitBtnTop = document.getElementById('submitBtnTop');
+      
       submitBtn.disabled = true;
       submitBtn.textContent = 'Submitting...';
+      if (submitBtnTop) {
+        submitBtnTop.disabled = true;
+        submitBtnTop.textContent = 'Submitting...';
+      }
       
       try {
         const selectedEntries = Array.from(selectedClasses).map(entryJson => {
@@ -1633,6 +1928,10 @@
         alert('Error submitting entry: ' + error.message);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Submit Entry';
+        if (submitBtnTop) {
+          submitBtnTop.disabled = false;
+          submitBtnTop.textContent = 'Submit Entry';
+        }
       }
     }
 
