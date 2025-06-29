@@ -1,953 +1,2682 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enhanced Score Sheet Generator</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .generator-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #007cba;
-    }
-    
-    .header h1 {
-      color: #007cba;
-      margin: 0;
-    }
-    
-    .controls-section {
-      background-color: #f0f8ff;
-      border: 2px solid #007cba;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .control-row {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 15px;
-      align-items: end;
-    }
-    
-    .control-group {
-      flex: 1;
-    }
-    
-    .control-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #333;
-    }
-    
-    .control-group select,
-    .control-group input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      text-decoration: none;
-      display: inline-block;
-      text-align: center;
-      transition: background-color 0.3s;
-    }
-    
-    .btn-primary {
-      background-color: #007cba;
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background-color: #005a8b;
-    }
-    
-    .btn-success {
-      background-color: #28a745;
-      color: white;
-    }
-    
-    .btn-success:hover {
-      background-color: #218838;
-    }
-    
-    .btn-warning {
-      background-color: #ffc107;
-      color: #212529;
-    }
-    
-    .btn-warning:hover {
-      background-color: #e0a800;
-    }
-    
-    .btn-info {
-      background-color: #17a2b8;
-      color: white;
-    }
-    
-    .btn-info:hover {
-      background-color: #138496;
-    }
-    
-    .btn-secondary {
-      background-color: #6c757d;
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background-color: #5a6268;
-    }
-    
-    .stats-section {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    
-    .stat-number {
-      font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    
-    .stat-label {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-    
-    .rounds-section {
-      margin-bottom: 30px;
-    }
-    
-    .round-group {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-    
-    .round-header {
-      background-color: #007cba;
-      color: white;
-      padding: 15px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .round-info {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-    }
-    
-    .round-actions {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .round-content {
-      padding: 15px;
-      display: none;
-    }
-    
-    .round-content.expanded {
-      display: block;
-    }
-    
-    .entries-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    
-    .entry-item {
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 10px;
-      font-size: 14px;
-    }
-    
-    .entry-item .handler {
-      font-weight: bold;
-      color: #007cba;
-    }
-    
-    .entry-item .dog {
-      color: #666;
-    }
-    
-    .entry-item .details {
-      font-size: 12px;
-      color: #888;
-      margin-top: 5px;
-    }
-    
-    .actions-section {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .actions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-    
-    .debug-section {
-      background-color: #f1f3f4;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 20px;
-    }
-    
-    .debug-content {
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 15px;
-      font-family: monospace;
-      font-size: 12px;
-      max-height: 400px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-    
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-    }
-    
-    .error {
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-      padding: 15px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-    
-    .success {
-      background-color: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-      padding: 15px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-    
-    @media print {
-      .controls-section,
-      .actions-section,
-      .debug-section,
-      .btn {
-        display: none !important;
-      }
-      
-      .round-content {
-        display: block !important;
-        page-break-after: always;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Sheets Generator & Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .score-sheets-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .score-sheet-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-sheet-info {
+            flex: 1;
+        }
+
+        .score-sheet-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .score-sheet-details {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .score-sheet-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-generated {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-printed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-completed {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Score Sheet Styles */
+        .score-sheet {
+            width: 8.5in;
+            min-height: 11in;
+            background: white;
+            padding: 0.5in;
+            margin: 0 auto 1in auto;
+            border: 1px solid #000;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            page-break-after: always;
+        }
+
+        .score-sheet:last-child {
+            page-break-after: auto;
+        }
+
+        .score-sheet-header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .cwags-logo {
+            position: absolute;
+            right: 0;
+            top: 20px;
+            width: 80px;
+            height: 80px;
+        }
+
+        .cwags-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .score-sheet-title-text {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-sheet-date {
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .score-sheet-class {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .score-sheet-rounds {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .score-sheet-rounds label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .round-checkbox {
+            margin-right: 5px;
+        }
+
+        .scent-info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .scent-info-table th,
+        .scent-info-table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .scent-info-table th {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .faults-section {
+            margin-bottom: 15px;
+            font-size: 9px;
+        }
+
+        .scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .scoring-table th,
+        .scoring-table td {
+            border: 1px solid #000;
+            padding: 4px;
+            text-align: center;
+            font-size: 9px;
+        }
+
+        .scoring-table th {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .team-name-cell {
+            text-align: left;
+            font-weight: bold;
+            background: #f8f8f8;
+        }
+
+        .scent-cell {
+            font-size: 8px;
+            padding: 2px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* PDF Editor Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 2% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+
+        .score-entry-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .scent-locations {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .scent-location-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+
+        .scent-location-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .scent-location-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .entrants-scoring {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .entrant-row {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .entrant-header {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .entrant-scoring-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) 2fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .scent-result-group {
+            text-align: center;
+        }
+
+        .scent-result-group label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #6c757d;
+        }
+
+        .scent-checkboxes {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        .checkbox-option span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .fault-input, .time-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .pass-fail-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .pass-fail-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pass-fail-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        /* League Summary CSS */
+        .league-summaries-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+
+        .summaries-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-header h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .summary-meta {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .summary-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .league-summary-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .league-summary-table th, 
+        .league-summary-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .league-summary-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container > *:not(#scoreSheetsContainer) {
+                display: none !important;
+            }
+
+            #scoreSheetsContainer {
+                display: block !important;
+            }
+
+            .score-sheet {
+                margin: 0;
+                border: none;
+                box-shadow: none;
+            }
+
+            .modal {
+                display: none !important;
+            }
+        }
+    </style>
+    <!-- Add PDF-lib for PDF generation -->
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 </head>
 <body>
-  <div class="generator-container">
-    <div class="header">
-      <h1>📊 Enhanced Score Sheet Generator</h1>
-      <p>Generate individual score sheets for each round</p>
-    </div>
+    <div class="container">
+        <h1>📋 Score Sheets Generator & Manager</h1>
 
-    <!-- Controls Section -->
-    <div class="controls-section">
-      <h3>🎯 Trial Selection & Settings</h3>
-      
-      <div class="control-row">
-        <div class="control-group">
-          <label for="trialSelect">Select Trial:</label>
-          <select id="trialSelect">
-            <option value="">Select a trial...</option>
-          </select>
+        <div class="controls">
+            <div class="control-group">
+                <label for="trialSelect">Select Trial:</label>
+                <select id="trialSelect">
+                    <option value="">Loading trials...</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="dateSelect">Select Date:</label>
+                <select id="dateSelect">
+                    <option value="">Select trial first...</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="judgeSelect">Select Judge (Optional):</label>
+                <select id="judgeSelect">
+                    <option value="">All Judges</option>
+                </select>
+            </div>
         </div>
-        
-        <div class="control-group">
-          <label for="dateSelect">Select Date (Optional):</label>
-          <select id="dateSelect">
-            <option value="">All dates</option>
-          </select>
+
+        <div class="button-group">
+            <button class="btn" onclick="loadTrialData()" id="loadBtn">Load Trial Data</button>
+            <button class="btn btn-success" onclick="generateAllScoreSheets()" id="generateBtn" style="display: none;">Generate Score Sheets</button>
+            <button class="btn btn-warning" onclick="printScoreSheets()" id="printBtn" style="display: none;">Print Selected Sheets</button>
+            <button class="btn btn-secondary" onclick="viewStoredSheets()" id="storedBtn">View Stored Sheets</button>
+            <button class="btn btn-secondary" onclick="location.href='main-dashboard.html'">← Back to Dashboard</button>
+            <button class="btn btn-primary" onclick="generateLeagueSummaries()" id="leagueBtn" style="display: none;">📊 Generate League Summaries</button>
         </div>
-        
-        <div class="control-group">
-          <label for="sortBy">Sort Entries By:</label>
-          <select id="sortBy">
-            <option value="entry">Entry Order</option>
-            <option value="handler">Handler Name</option>
-            <option value="dog">Dog Name</option>
-            <option value="class">Class Name</option>
-          </select>
+
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div>Loading trial data...</div>
         </div>
-      </div>
+
+        <div id="stats" class="stats" style="display: none;"></div>
+
+        <div id="scoreSheetsSection" class="score-sheets-list" style="display: none;">
+            <h3>📄 Generated Score Sheets</h3>
+            <div id="scoreSheetsList"></div>
+        </div>
+
+        <!-- Score Sheets Print Container -->
+        <div id="scoreSheetsContainer" style="display: none;"></div>
     </div>
 
-    <!-- Actions Section -->
-    <div class="actions-section">
-      <h3>⚡ Quick Actions</h3>
-      <div class="actions-grid">
-        <button class="btn btn-primary" onclick="loadTrialData()">📥 Load Trial Data</button>
-        <button class="btn btn-success" onclick="generateAllScoreSheets()">📋 Generate All Score Sheets</button>
-        <button class="btn btn-warning" onclick="exportToCSV()">📊 Export to CSV</button>
-        <button class="btn btn-info" onclick="printAllSheets()">🖨️ Print All Sheets</button>
-        <button class="btn btn-secondary" onclick="showDebugInfo()">🔧 Debug Info</button>
-        <a href="main-dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
-      </div>
+    <!-- Score Entry Modal -->
+    <div id="scoreEntryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Score Sheet</h2>
+                <span class="close" onclick="closeScoreModal()">&times;</span>
+            </div>
+            
+            <div id="scoreEntryForm" class="score-entry-form">
+                <!-- Scent Locations Section -->
+                <div>
+                    <h3>🎯 Scent Locations</h3>
+                    <div class="scent-locations">
+                        <div class="scent-location-group">
+                            <label for="scent1Location">Scent 1 Located in/on:</label>
+                            <input type="text" id="scent1Location" placeholder="Enter location...">
+                        </div>
+                        <div class="scent-location-group">
+                            <label for="scent2Location">Scent 2 Located in/on:</label>
+                            <input type="text" id="scent2Location" placeholder="Enter location...">
+                        </div>
+                        <div class="scent-location-group">
+                            <label for="scent3Location">Scent 3 Located in/on:</label>
+                            <input type="text" id="scent3Location" placeholder="Enter location...">
+                        </div>
+                        <div class="scent-location-group">
+                            <label for="scent4Location">Scent 4 Located in/on:</label>
+                            <input type="text" id="scent4Location" placeholder="Enter location...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entrants Scoring Section -->
+                <div>
+                    <h3>📊 Team Scoring</h3>
+                    <div id="entrantsScoring" class="entrants-scoring">
+                        <!-- Dynamic entrant rows will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeScoreModal()">Cancel</button>
+                    <div>
+                        <button class="btn btn-warning" onclick="saveScores()">💾 Save Scores</button>
+                        <button class="btn btn-success" onclick="generateFilledPDF()">📄 Download Filled PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Statistics Section -->
-    <div id="statsSection" class="stats-section" style="display: none;">
-      <!-- Stats will be populated here -->
-    </div>
+    <script type="module">
+        // Firebase imports
+        import { auth, db } from './js/firebase.js';
+        import { collection, query, where, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-    <!-- Rounds Section -->
-    <div id="roundsSection" class="rounds-section" style="display: none;">
-      <!-- Round data will be populated here -->
-    </div>
+        // ========================================
+        // GLOBAL DATE HANDLING FIX
+        // ========================================
 
-    <!-- Debug Section -->
-    <div id="debugSection" class="debug-section" style="display: none;">
-      <h3>🔧 Debug Information</h3>
-      <div id="debugContent" class="debug-content"></div>
-    </div>
-
-    <!-- Loading/Error Messages -->
-    <div id="loadingMessage" class="loading" style="display: none;">
-      <div>Loading trial data...</div>
-    </div>
-
-    <div id="errorMessage" class="error" style="display: none;"></div>
-    <div id="successMessage" class="success" style="display: none;"></div>
-  </div>
-
-  <script type="module">
-    import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-    // ===========================================
-    // STANDARD FIELD DEFINITIONS
-    // ===========================================
-    const STANDARD_FIELDS = {
-      HANDLER_NAME: 'handlerName',
-      DOG_CALL_NAME: 'dogCallName',
-      JUDGE_NAME: 'judgeName',
-      CLASS_NAME: 'className',
-      CWAGS_NUMBER: 'cwagsNumber'
-    };
-
-    // ===========================================
-    // GLOBAL VARIABLES
-    // ===========================================
-    let currentTrialData = null;
-    let availableTrials = [];
-    let allEntries = [];
-    let roundsData = [];
-
-    // ===========================================
-    // DATE UTILITIES
-    // ===========================================
-    function createLocalDate(dateStr) {
-      if (!dateStr) return null;
-      const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
-      return new Date(dateWithTime);
-    }
-
-    function formatLocalDate(date) {
-      if (!date || !(date instanceof Date)) return null;
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: '2-digit', 
-        day: '2-digit' 
-      });
-    }
-
-    function getDateFromFirebase(timestamp) {
-      if (!timestamp) return null;
-      if (timestamp.toDate) return formatLocalDate(timestamp.toDate());
-      if (typeof timestamp === 'string') return formatLocalDate(createLocalDate(timestamp));
-      return null;
-    }
-
-    // ===========================================
-    // DATA NORMALIZATION
-    // ===========================================
-    function normalizeEntryData(entry) {
-      return {
-        handlerName: entry.handlerName || entry.Handler || entry.handler || '',
-        dogCallName: entry.dogCallName || entry['Call Name'] || entry.dogName || '',
-        className: entry.className || entry.Class || entry.class || '',
-        judgeName: entry.judgeName || entry.judge || entry.judgeAssigned || 'TBD',
-        cwagsNumber: entry.cwagsNumber || entry.Registration || entry.registration || '',
-        ...entry
-      };
-    }
-
-    // ===========================================
-    // TRIAL DATA LOADING
-    // ===========================================
-    async function loadAvailableTrials() {
-      try {
-        console.log("🔍 Loading available trials...");
-        
-        const trialsQuery = query(
-          collection(db, 'trials'),
-          where('createdBy', '==', auth.currentUser.uid)
-        );
-        
-        const trialsSnapshot = await getDocs(trialsQuery);
-        availableTrials = [];
-        
-        trialsSnapshot.forEach(doc => {
-          const trialData = doc.data();
-          availableTrials.push({
-            id: doc.id,
-            ...trialData
-          });
-        });
-        
-        populateTrialDropdown();
-        console.log("✅ Loaded trials:", availableTrials.length);
-        
-      } catch (error) {
-        console.error("❌ Error loading trials:", error);
-        showError("Error loading trials: " + error.message);
-      }
-    }
-
-    function populateTrialDropdown() {
-      const trialSelect = document.getElementById('trialSelect');
-      trialSelect.innerHTML = '<option value="">Select a trial...</option>';
-
-      availableTrials.forEach(trial => {
-        const option = document.createElement('option');
-        option.value = trial.id;
-        
-        let label = trial.clubName || 'Unnamed Trial';
-        if (trial.days && trial.days.length > 0) {
-          const firstDate = getDateFromFirebase(trial.days[0].date);
-          if (firstDate) label += ` - ${firstDate}`;
-        }
-        
-        option.textContent = label;
-        trialSelect.appendChild(option);
-      });
-
-      // Auto-select if only one trial
-      if (availableTrials.length === 1) {
-        trialSelect.value = availableTrials[0].id;
-      }
-    }
-
-    async function loadTrialData() {
-      const trialId = document.getElementById('trialSelect').value;
-      if (!trialId) {
-        showError("Please select a trial first.");
-        return;
-      }
-
-      try {
-        showLoading(true);
-        console.log("📥 Loading trial data for:", trialId);
-
-        // Load trial structure
-        currentTrialData = availableTrials.find(t => t.id === trialId);
-        if (!currentTrialData) {
-          const trialDoc = await getDoc(doc(db, 'trials', trialId));
-          if (!trialDoc.exists()) {
-            throw new Error('Trial not found');
-          }
-          currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
+        // Creates a date object that stays in local timezone
+        function createLocalDate(dateStr) {
+            if (!dateStr) return null;
+            
+            // Always add noon time to prevent timezone shifts
+            if (typeof dateStr === 'string') {
+                const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+                return new Date(dateWithTime);
+            }
+            
+            return new Date(dateStr);
         }
 
-        // Process dates
-        if (currentTrialData.days) {
-          currentTrialData.days = currentTrialData.days.map(day => ({
-            ...day,
-            date: getDateFromFirebase(day.date)
-          }));
+        // Formats a date to YYYY-MM-DD string in local timezone
+        function formatLocalDate(date) {
+            if (!date || !(date instanceof Date)) return '';
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}`;
         }
 
-        // Load entries
-        await loadTrialEntries(trialId);
-        
-        // Process rounds
-        processRoundsData();
-        
-        // Update UI
-        populateDateDropdown();
-        updateStatistics();
-        displayRounds();
-        
-        showSuccess(`Loaded ${allEntries.length} entries from ${currentTrialData.clubName}`);
-        
-      } catch (error) {
-        console.error("❌ Error loading trial data:", error);
-        showError("Error loading trial data: " + error.message);
-      } finally {
-        showLoading(false);
-      }
-    }
+        // Formats date for display with timezone consideration
+        function formatDateDisplay(dateInput, options = {}) {
+            let date;
+            
+            if (typeof dateInput === 'string') {
+                date = createLocalDate(dateInput);
+            } else if (dateInput instanceof Date) {
+                date = new Date(dateInput);
+            } else {
+                return 'Invalid Date';
+            }
+            
+            if (!date || isNaN(date.getTime())) return 'Invalid Date';
+            
+            const defaultOptions = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            
+            const formatOptions = { ...defaultOptions, ...options };
+            return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+        }
 
-    async function loadTrialEntries(trialId) {
-      try {
-        const entriesQuery = query(
-          collection(db, 'entries'),
-          where('trialId', '==', trialId)
-        );
-        
-        const entriesSnapshot = await getDocs(entriesQuery);
-        allEntries = [];
-        
-        entriesSnapshot.forEach(doc => {
-          const entryData = normalizeEntryData(doc.data());
-          
-          if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-            entryData.selectedEntries.forEach((selectedEntry, index) => {
-              const normalizedEntry = {
-                ...entryData,
-                ...normalizeEntryData(selectedEntry),
-                entryId: doc.id,
-                entryIndex: index,
-                date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null,
-                roundNumber: selectedEntry.roundNumber || 1,
-                type: selectedEntry.type || 'regular'
-              };
-              
-              allEntries.push(normalizedEntry);
+        // Prepares date data for Firebase storage (prevents timezone conversion)
+        function prepareDateForFirebase(dateStr) {
+            if (!dateStr) return null;
+            const localDate = createLocalDate(dateStr);
+            return localDate;
+        }
+
+        // Retrieves date data from Firebase (converts back to local date string)
+        function getDateFromFirebase(firebaseDate) {
+            if (!firebaseDate) return '';
+            
+            let date;
+            
+            // Handle Firestore Timestamps
+            if (firebaseDate.toDate) {
+                date = firebaseDate.toDate();
+            } else if (firebaseDate instanceof Date) {
+                date = firebaseDate;
+            } else if (typeof firebaseDate === 'string') {
+                date = createLocalDate(firebaseDate);
+            } else {
+                return '';
+            }
+            
+            return formatLocalDate(date);
+        }
+
+        // Global variables
+        let trials = [];
+        let currentTrial = null;
+        let entries = [];
+        let runningOrderData = {};
+        let generatedSheets = [];
+        let currentEditingSheet = null;
+        let currentScoreData = {};
+        let leagueSummaries = [];
+
+        // Initialize the application
+        async function init() {
+            try {
+                await loadTrials();
+            } catch (error) {
+                console.error('Error initializing:', error);
+                showError('Error loading trials: ' + error.message);
+            }
+        }
+
+        // Load available trials
+        async function loadTrials() {
+            try {
+                if (!auth.currentUser) {
+                    showError('Please log in to access trials');
+                    return;
+                }
+
+                const q = query(
+                    collection(db, "trials"),
+                    where("createdBy", "==", auth.currentUser.uid)
+                );
+                
+                const snapshot = await getDocs(q);
+                trials = [];
+                
+                snapshot.forEach(doc => {
+                    const trialData = doc.data();
+                    
+                    // Fix date handling for trial days
+                    if (trialData.days && Array.isArray(trialData.days)) {
+                        trialData.days = trialData.days.map(day => ({
+                            ...day,
+                            date: day.date ? getDateFromFirebase(day.date) : null
+                        }));
+                    }
+                    
+                    trials.push({ id: doc.id, ...trialData });
+                });
+
+                // Sort by creation date (most recent first)
+                trials.sort((a, b) => {
+                    const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+                    const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+                    return dateB - dateA;
+                });
+
+                populateTrialSelector();
+            } catch (error) {
+                console.error('Error loading trials:', error);
+                showError('Error loading trials: ' + error.message);
+            }
+        }
+
+        // Populate trial selector dropdown
+        function populateTrialSelector() {
+            const trialSelect = document.getElementById('trialSelect');
+            trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+
+            trials.forEach(trial => {
+                const option = document.createElement('option');
+                option.value = trial.id;
+                
+                let trialLabel = trial.clubName || 'Unnamed Trial';
+                
+                if (trial.days && trial.days.length > 0) {
+                    const dates = trial.days
+                        .filter(day => day.date)
+                        .map(day => {
+                            const date = createLocalDate(day.date);
+                            return date.toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                        })
+                        .join(', ');
+                    if (dates) {
+                        trialLabel += ` (${dates})`;
+                    }
+                }
+                
+                option.textContent = trialLabel;
+                trialSelect.appendChild(option);
             });
-          }
-        });
-        
-        console.log("✅ Loaded entries:", allEntries.length);
-        
-      } catch (error) {
-        console.error("❌ Error loading entries:", error);
-        throw error;
-      }
-    }
 
-    function processRoundsData() {
-      roundsData = [];
-      const roundsMap = new Map();
-
-      allEntries.forEach(entry => {
-        const roundKey = `${entry.date}_${entry.className}_${entry.roundNumber}_${entry.judgeName}`;
-        
-        if (!roundsMap.has(roundKey)) {
-          roundsMap.set(roundKey, {
-            date: entry.date,
-            className: entry.className,
-            roundNumber: entry.roundNumber,
-            judgeName: entry.judgeName,
-            entries: []
-          });
+            // Handle trial selection change
+            trialSelect.addEventListener('change', function() {
+                const trialId = this.value;
+                if (trialId) {
+                    currentTrial = trials.find(t => t.id === trialId);
+                    populateDateSelector();
+                    populateJudgeSelector();
+                } else {
+                    currentTrial = null;
+                    document.getElementById('dateSelect').innerHTML = '<option value="">Select trial first...</option>';
+                    document.getElementById('judgeSelect').innerHTML = '<option value="">All Judges</option>';
+                }
+            });
         }
-        
-        roundsMap.get(roundKey).entries.push(entry);
-      });
 
-      // Convert to array and sort
-      roundsData = Array.from(roundsMap.values()).sort((a, b) => {
-        if (a.date !== b.date) return new Date(a.date) - new Date(b.date);
-        if (a.className !== b.className) return a.className.localeCompare(b.className);
-        return a.roundNumber - b.roundNumber;
-      });
+        // Populate date selector based on selected trial
+        function populateDateSelector() {
+            const dateSelect = document.getElementById('dateSelect');
+            dateSelect.innerHTML = '<option value="">Select a date...</option>';
 
-      // Sort entries within each round
-      roundsData.forEach(round => {
-        const sortBy = document.getElementById('sortBy').value;
-        round.entries.sort((a, b) => {
-          switch (sortBy) {
-            case 'handler': return a.handlerName.localeCompare(b.handlerName);
-            case 'dog': return a.dogCallName.localeCompare(b.dogCallName);
-            case 'class': return a.className.localeCompare(b.className);
-            default: return 0; // entry order
-          }
-        });
-      });
-
-      console.log("✅ Processed rounds:", roundsData.length);
-    }
-
-    function populateDateDropdown() {
-      const dateSelect = document.getElementById('dateSelect');
-      dateSelect.innerHTML = '<option value="">All dates</option>';
-
-      if (currentTrialData && currentTrialData.days) {
-        currentTrialData.days.forEach(day => {
-          if (day.date) {
-            const option = document.createElement('option');
-            option.value = day.date;
-            option.textContent = day.date;
-            dateSelect.appendChild(option);
-          }
-        });
-      }
-    }
-
-    function updateStatistics() {
-      const totalEntries = allEntries.length;
-      const uniqueHandlers = new Set(allEntries.map(e => e.handlerName)).size;
-      const uniqueClasses = new Set(allEntries.map(e => e.className)).size;
-      const uniqueJudges = new Set(allEntries.map(e => e.judgeName)).size;
-      const totalRounds = roundsData.length;
-
-      const statsHTML = `
-        <div class="stat-card">
-          <div class="stat-number">${totalEntries}</div>
-          <div class="stat-label">Total Entries</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${uniqueHandlers}</div>
-          <div class="stat-label">Handlers</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${uniqueClasses}</div>
-          <div class="stat-label">Classes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${uniqueJudges}</div>
-          <div class="stat-label">Judges</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${totalRounds}</div>
-          <div class="stat-label">Total Rounds</div>
-        </div>
-      `;
-
-      document.getElementById('statsSection').innerHTML = statsHTML;
-      document.getElementById('statsSection').style.display = 'grid';
-    }
-
-    function displayRounds() {
-      const selectedDate = document.getElementById('dateSelect').value;
-      const filteredRounds = selectedDate 
-        ? roundsData.filter(round => round.date === selectedDate)
-        : roundsData;
-
-      let roundsHTML = '';
-      
-      filteredRounds.forEach((round, index) => {
-        const entriesHTML = round.entries.map(entry => `
-          <div class="entry-item">
-            <div class="handler">${entry.handlerName}</div>
-            <div class="dog">${entry.dogCallName}</div>
-            <div class="details">
-              ${entry.type === 'feo' ? 'FEO' : 'Regular'} | 
-              ${entry.cwagsNumber || 'No Registration'}
-            </div>
-          </div>
-        `).join('');
-
-        roundsHTML += `
-          <div class="round-group">
-            <div class="round-header">
-              <div class="round-info">
-                <span>${round.className} - Round ${round.roundNumber}</span>
-                <span>Judge: ${round.judgeName}</span>
-                <span>Date: ${round.date}</span>
-                <span>${round.entries.length} entries</span>
-              </div>
-              <div class="round-actions">
-                <button class="btn btn-success btn-sm" onclick="generateScoreSheet(${index})">
-                  📋 Generate Sheet
-                </button>
-                <button class="btn btn-info btn-sm" onclick="toggleRound(${index})">
-                  👁️ View
-                </button>
-              </div>
-            </div>
-            <div class="round-content" id="round-${index}">
-              <div class="entries-grid">
-                ${entriesHTML}
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      document.getElementById('roundsSection').innerHTML = roundsHTML;
-      document.getElementById('roundsSection').style.display = 'block';
-    }
-
-    // ===========================================
-    // SCORE SHEET GENERATION
-    // ===========================================
-    function generateScoreSheet(roundIndex) {
-      const round = roundsData[roundIndex];
-      const scoreSheetHTML = createScoreSheetHTML(round);
-      
-      // Open in new window for printing
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(scoreSheetHTML);
-      printWindow.document.close();
-      printWindow.focus();
-    }
-
-    function generateAllScoreSheets() {
-      if (roundsData.length === 0) {
-        showError("No rounds data available. Please load trial data first.");
-        return;
-      }
-
-      let allSheetsHTML = '';
-      
-      roundsData.forEach(round => {
-        allSheetsHTML += createScoreSheetHTML(round, true);
-      });
-
-      // Open in new window
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>All Score Sheets - ${currentTrialData.clubName}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-            .page-break { page-break-after: always; }
-            @media print { .page-break:last-child { page-break-after: avoid; } }
-          </style>
-        </head>
-        <body>
-          ${allSheetsHTML}
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-
-      showSuccess(`Generated ${roundsData.length} score sheets`);
-    }
-
-    function createScoreSheetHTML(round, addPageBreak = false) {
-      const pageBreakClass = addPageBreak ? 'page-break' : '';
-      
-      return `
-        <div class="${pageBreakClass}" style="margin-bottom: 40px;">
-          <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 20px;">
-            <h1 style="margin: 0; color: #000;">C-WAGS SCORE SHEET</h1>
-            <h2 style="margin: 10px 0 0 0; color: #666;">${currentTrialData.clubName}</h2>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
-            <div>
-              <p><strong>Class:</strong> ${round.className}</p>
-              <p><strong>Round:</strong> ${round.roundNumber}</p>
-              <p><strong>Date:</strong> ${round.date}</p>
-            </div>
-            <div>
-              <p><strong>Judge:</strong> ${round.judgeName}</p>
-              <p><strong>Total Entries:</strong> ${round.entries.length}</p>
-              <p><strong>Start Time:</strong> _____________</p>
-            </div>
-          </div>
-
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-            <thead>
-              <tr style="background-color: #f0f0f0;">
-                <th style="border: 1px solid #000; padding: 8px; text-align: left; width: 50px;">#</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: left;">Handler Name</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: left;">Dog Name</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: left; width: 80px;">Type</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 100px;">Score</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: center; width: 80px;">Place</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: left; width: 150px;">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${round.entries.map((entry, index) => `
-                <tr>
-                  <td style="border: 1px solid #000; padding: 8px; text-align: center;">${index + 1}</td>
-                  <td style="border: 1px solid #000; padding: 8px;">${entry.handlerName}</td>
-                  <td style="border: 1px solid #000; padding: 8px;">${entry.dogCallName}</td>
-                  <td style="border: 1px solid #000; padding: 8px; text-align: center;">${entry.type === 'feo' ? 'FEO' : 'REG'}</td>
-                  <td style="border: 1px solid #000; padding: 8px; height: 40px;"></td>
-                  <td style="border: 1px solid #000; padding: 8px; height: 40px;"></td>
-                  <td style="border: 1px solid #000; padding: 8px; height: 40px;"></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-
-          <div style="margin-top: 40px;">
-            <p><strong>Judge Signature:</strong> ___________________________________ <strong>Date:</strong> _______________</p>
-          </div>
-        </div>
-      `;
-    }
-
-    // ===========================================
-    // UTILITY FUNCTIONS
-    // ===========================================
-    function toggleRound(roundIndex) {
-      const roundContent = document.getElementById(`round-${roundIndex}`);
-      roundContent.classList.toggle('expanded');
-    }
-
-    function exportToCSV() {
-      if (roundsData.length === 0) {
-        showError("No data to export. Please load trial data first.");
-        return;
-      }
-
-      let csvContent = "Date,Class,Round,Judge,Handler,Dog,Type,Registration\n";
-      
-      roundsData.forEach(round => {
-        round.entries.forEach(entry => {
-          csvContent += `"${round.date}","${round.className}",${round.roundNumber},"${round.judgeName}","${entry.handlerName}","${entry.dogCallName}","${entry.type}","${entry.cwagsNumber}"\n`;
-        });
-      });
-
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `score-sheets-${currentTrialData.clubName}-${new Date().toISOString().split('T')[0]}.csv`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-
-      showSuccess("CSV exported successfully");
-    }
-
-    function printAllSheets() {
-      generateAllScoreSheets();
-    }
-
-    function showDebugInfo() {
-      const debugContent = document.getElementById('debugContent');
-      const debugSection = document.getElementById('debugSection');
-      
-      const debugInfo = {
-        currentTrialData: currentTrialData,
-        totalTrials: availableTrials.length,
-        totalEntries: allEntries.length,
-        totalRounds: roundsData.length,
-        standardFields: STANDARD_FIELDS,
-        roundsSample: roundsData.slice(0, 3),
-        entriesSample: allEntries.slice(0, 5)
-      };
-      
-      debugContent.textContent = JSON.stringify(debugInfo, null, 2);
-      debugSection.style.display = debugSection.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function showLoading(show) {
-      document.getElementById('loadingMessage').style.display = show ? 'block' : 'none';
-    }
-
-    function showError(message) {
-      const errorDiv = document.getElementById('errorMessage');
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
-      setTimeout(() => errorDiv.style.display = 'none', 5000);
-    }
-
-    function showSuccess(message) {
-      const successDiv = document.getElementById('successMessage');
-      successDiv.textContent = message;
-      successDiv.style.display = 'block';
-      setTimeout(() => successDiv.style.display = 'none', 3000);
-    }
-
-    // ===========================================
-    // EVENT LISTENERS
-    // ===========================================
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add event listeners for dropdowns
-      document.getElementById('dateSelect').addEventListener('change', function() {
-        if (roundsData.length > 0) {
-          displayRounds();
+            if (currentTrial && currentTrial.days) {
+                currentTrial.days.forEach(day => {
+                    if (day.date) {
+                        const option = document.createElement('option');
+                        option.value = day.date;
+                        option.textContent = formatDateDisplay(day.date);
+                        dateSelect.appendChild(option);
+                    }
+                });
+            }
         }
-      });
 
-      document.getElementById('sortBy').addEventListener('change', function() {
-        if (roundsData.length > 0) {
-          processRoundsData();
-          displayRounds();
+        // Populate judge selector based on selected trial
+        function populateJudgeSelector() {
+            const judgeSelect = document.getElementById('judgeSelect');
+            judgeSelect.innerHTML = '<option value="">All Judges</option>';
+
+            if (currentTrial && currentTrial.days) {
+                const judges = new Set();
+                currentTrial.days.forEach(day => {
+                    if (day.classes) {
+                        day.classes.forEach(cls => {
+                            if (cls.rounds) {
+                                cls.rounds.forEach(round => {
+                                    if (round.judge && round.judge.trim()) {
+                                        judges.add(round.judge.trim());
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+
+                Array.from(judges).sort().forEach(judge => {
+                    const option = document.createElement('option');
+                    option.value = judge;
+                    option.textContent = judge;
+                    judgeSelect.appendChild(option);
+                });
+            }
         }
-      });
 
-      // Initial setup
-      document.getElementById('debugSection').style.display = 'none';
-    });
+        // Load trial data and entries - FIXED VERSION WITH ENHANCED DEBUGGING
+        async function loadTrialData() {
+            const trialId = document.getElementById('trialSelect').value;
+            const selectedDate = document.getElementById('dateSelect').value;
 
-    // ===========================================
-    // GLOBAL FUNCTIONS
-    // ===========================================
-    window.loadTrialData = loadTrialData;
-    window.generateAllScoreSheets = generateAllScoreSheets;
-    window.generateScoreSheet = generateScoreSheet;
-    window.toggleRound = toggleRound;
-    window.exportToCSV = exportToCSV;
-    window.printAllSheets = printAllSheets;
-    window.showDebugInfo = showDebugInfo;
+            if (!trialId) {
+                alert('Please select a trial');
+                return;
+            }
 
-    // ===========================================
-    // AUTHENTICATION AND INITIALIZATION
-    // ===========================================
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        console.log("✅ User authenticated:", user.email);
-        try {
-          await loadAvailableTrials();
-        } catch (error) {
-          console.error("❌ Error during initialization:", error);
-          showError("Error loading initial data: " + error.message);
+            if (!selectedDate) {
+                alert('Please select a date');
+                return;
+            }
+
+            console.log('🚀 STARTING loadTrialData - Trial:', trialId, 'Date:', selectedDate);
+
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('loadBtn').disabled = true;
+
+            try {
+                // Load ALL entries for this trial (not just selected date)
+                const q = query(
+                    collection(db, "entries"),
+                    where("trialId", "==", trialId)
+                );
+                
+                console.log('🔍 Querying Firebase for entries...');
+                const snapshot = await getDocs(q);
+                entries = [];
+                
+                console.log('📊 Found', snapshot.size, 'entry documents');
+                
+                snapshot.forEach(doc => {
+                    const entryData = doc.data();
+                    console.log('📄 Processing entry document:', doc.id, entryData);
+                    
+                    // Fix selected entries dates
+                    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                        console.log('🎯 Found selectedEntries array with', entryData.selectedEntries.length, 'items');
+                        
+                        entryData.selectedEntries.forEach((selectedEntry, index) => {
+                            const processedEntry = {
+                                ...selectedEntry,
+                                date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
+                            };
+                            
+                            // ENHANCED DEBUG: Log entry data to understand structure
+                            console.log(`📋 Entry ${index + 1}:`, {
+                                className: processedEntry.className,
+                                roundNumber: processedEntry.roundNumber,
+                                roundName: processedEntry.roundName,
+                                judge: processedEntry.judge,
+                                judgeName: processedEntry.judgeName,
+                                judgeAssigned: processedEntry.judgeAssigned,
+                                handler: entryData.handlerName,
+                                dog: entryData.dogCallName,
+                                fee: processedEntry.fee,
+                                entryType: processedEntry.entryType || processedEntry.type,
+                                date: processedEntry.date
+                            });
+                            
+                            entries.push({
+                                id: doc.id,
+                                ...processedEntry,
+                                handlerName: entryData.handlerName,
+                                dogCallName: entryData.dogCallName,
+                                cwagsNumber: entryData.cwagsNumber,
+                                submittedAt: entryData.submittedAt
+                            });
+                        });
+                    } else {
+                        console.warn('⚠️ Entry document has no selectedEntries array:', doc.id);
+                    }
+                });
+
+                console.log('✅ Loaded ALL entries for trial:', entries.length);
+                console.log('📋 First few entries:', entries.slice(0, 3));
+
+                if (entries.length === 0) {
+                    showError('No entries found for this trial');
+                    return;
+                }
+
+                // Group entries and load any existing running order for ALL dates
+                await loadRunningOrderForAllDates();
+                
+                // Generate statistics for all entries
+                generateStats();
+
+                // Show controls
+                document.getElementById('generateBtn').style.display = 'inline-block';
+                document.getElementById('printBtn').style.display = 'inline-block';
+                
+                // Add the league summary button
+                showLeagueButton();
+
+            } catch (error) {
+                console.error('💥 Error loading trial data:', error);
+                showError('Error loading trial data: ' + error.message);
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('loadBtn').disabled = false;
+            }
         }
-      } else {
-        console.log("❌ No user authenticated, redirecting to login");
-        window.location.href = 'index.html';
-      }
-    });
 
-    console.log("✅ Enhanced Score Sheet Generator loaded");
-  </script>
+        // NEW function to load running order for all dates
+        async function loadRunningOrderForAllDates() {
+            try {
+                // Get all unique dates from entries
+                const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
+                console.log('Found dates in trial:', allDates);
+                
+                runningOrderData = {};
+                
+                for (const date of allDates) {
+                    await loadRunningOrderForDate(date);
+                }
+                
+                console.log('Loaded running order for all dates:', Object.keys(runningOrderData));
+                
+            } catch (error) {
+                console.error('Error loading running orders:', error);
+                // Continue with default grouping
+                createDefaultRunningOrderForAllDates();
+            }
+        }
+
+        // Load running order for a specific date
+        async function loadRunningOrderForDate(date) {
+            try {
+                // Try to load confirmed running order for this date
+                const q = query(
+                    collection(db, "runningOrders"),
+                    where("trialId", "==", currentTrial.id),
+                    where("date", "==", date)
+                );
+                
+                const snapshot = await getDocs(q);
+                
+                if (!snapshot.empty) {
+                    // Use confirmed running order
+                    snapshot.forEach(doc => {
+                        const orderData = doc.data();
+                        runningOrderData[date] = orderData.runningOrder;
+                    });
+                    console.log(`Loaded confirmed running order for ${date}`);
+                } else {
+                    // Create default grouping for this date
+                    createDefaultRunningOrderForDate(date);
+                }
+                
+            } catch (error) {
+                console.error(`Error loading running order for ${date}:`, error);
+                createDefaultRunningOrderForDate(date);
+            }
+        }
+
+        // Create default running order for a specific date
+        function createDefaultRunningOrderForDate(date) {
+            console.log('🏗️ Creating running order for date:', date);
+            
+            if (!runningOrderData[date]) {
+                runningOrderData[date] = {};
+            }
+            
+            // Filter entries for this specific date
+            const dateEntries = entries.filter(entry => {
+                const entryDate = getDateFromFirebase(entry.date);
+                const filterDate = formatLocalDate(createLocalDate(date));
+                const matches = entryDate === filterDate;
+                if (matches) {
+                    console.log('📅 Entry matches date:', entry.className, 'Round', entry.roundNumber);
+                }
+                return matches;
+            });
+            
+            console.log('📊 Found', dateEntries.length, 'entries for date:', date);
+            
+            dateEntries.forEach((entry, index) => {
+                // FIX: Try multiple judge field names in correct priority order
+                const judge = entry.judgeName || entry.judge || entry.judgeAssigned || 'Judge TBD';
+                
+                // FIX: Better round number extraction and class round naming
+                let roundNumber = entry.roundNumber || 1;
+                
+                // Try to extract round number from roundName if available
+                if (entry.roundName && typeof entry.roundName === 'string') {
+                    const roundMatch = entry.roundName.match(/Round\s*(\d+)/i);
+                    if (roundMatch) {
+                        roundNumber = parseInt(roundMatch[1]);
+                        console.log('🔍 Extracted round number from roundName:', roundNumber);
+                    }
+                }
+                
+                const classRound = `${entry.className || 'Unknown Class'} - Round ${roundNumber}`;
+
+                if (!runningOrderData[date][judge]) {
+                    runningOrderData[date][judge] = {};
+                }
+                
+                if (!runningOrderData[date][judge][classRound]) {
+                    runningOrderData[date][judge][classRound] = [];
+                }
+
+                const entrantName = `${entry.handlerName || 'Unknown Handler'} - ${entry.dogCallName || 'Unknown Dog'}`;
+                runningOrderData[date][judge][classRound].push({
+                    id: `${entry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
+                    name: entrantName,
+                    entryType: entry.type || entry.entryType || 'regular',
+                    handler: entry.handlerName || 'Unknown Handler',
+                    dog: entry.dogCallName || 'Unknown Dog',
+                    cwagsNumber: entry.cwagsNumber || '',
+                    originalEntry: entry
+                });
+                
+                // ENHANCED DEBUG: Log judge assignment for troubleshooting
+                console.log(`🎯 Entry ${index + 1}: ${entry.className} Round ${roundNumber} - Judge: "${judge}"`, {
+                    'entry.judgeName': entry.judgeName,
+                    'entry.judge': entry.judge,
+                    'entry.judgeAssigned': entry.judgeAssigned,
+                    'selectedJudge': judge,
+                    'handlerDog': `${entry.handlerName} - ${entry.dogCallName}`
+                });
+            });
+            
+            console.log(`✅ Created running order for ${date}:`, Object.keys(runningOrderData[date] || {}));
+            console.log('📋 Full running order data for date:', runningOrderData[date]);
+        }
+
+        // Create default running order for all dates
+        function createDefaultRunningOrderForAllDates() {
+            const allDates = [...new Set(entries.map(entry => entry.date).filter(date => date))];
+            
+            allDates.forEach(date => {
+                createDefaultRunningOrderForDate(date);
+            });
+        }
+
+        // FIXED: Generate all score sheets for ALL dates
+        async function generateAllScoreSheets() {
+            const selectedJudge = document.getElementById('judgeSelect').value;
+
+            if (!runningOrderData || Object.keys(runningOrderData).length === 0) {
+                alert('No data available. Please load trial data first.');
+                return;
+            }
+
+            generatedSheets = [];
+
+            // Process ALL dates in the running order
+            Object.keys(runningOrderData).forEach(date => {
+                const judgeData = runningOrderData[date];
+
+                // Filter by judge if selected
+                const judgesToProcess = selectedJudge ? 
+                    { [selectedJudge]: judgeData[selectedJudge] } : 
+                    judgeData;
+
+                Object.keys(judgesToProcess).forEach(judge => {
+                    Object.keys(judgesToProcess[judge]).forEach(classRound => {
+                        const entrants = judgesToProcess[judge][classRound];
+                        
+                        const sheetData = {
+                            id: `${currentTrial.id}_${date}_${judge}_${classRound}`.replace(/[^a-zA-Z0-9]/g, '_'),
+                            trialId: currentTrial.id,
+                            trialName: currentTrial.clubName || 'Unnamed Trial',
+                            date: prepareDateForFirebase(date),
+                            judge: judge,
+                            classRound: classRound,
+                            className: classRound.split(' - Round')[0],
+                            roundNumber: classRound.split('Round ')[1] || '1',
+                            entrants: entrants,
+                            status: 'generated',
+                            createdAt: new Date(),
+                            createdBy: auth.currentUser.uid
+                        };
+
+                        generatedSheets.push(sheetData);
+                    });
+                });
+            });
+
+            console.log(`Generated ${generatedSheets.length} score sheets across all dates`);
+
+            // Save to database
+            await saveScoreSheetsToDatabase();
+
+            // Display generated sheets
+            displayGeneratedSheets();
+
+            alert(`Generated ${generatedSheets.length} score sheets across all trial dates!`);
+        }
+
+        // Save score sheets to database
+        async function saveScoreSheetsToDatabase() {
+            try {
+                for (const sheet of generatedSheets) {
+                    await setDoc(doc(db, 'scoreSheets', sheet.id), sheet);
+                }
+                console.log('Score sheets saved to database');
+            } catch (error) {
+                console.error('Error saving score sheets:', error);
+                alert('Error saving score sheets: ' + error.message);
+            }
+        }
+
+        // Display generated sheets list
+        function displayGeneratedSheets() {
+            const section = document.getElementById('scoreSheetsSection');
+            const list = document.getElementById('scoreSheetsList');
+            
+            let html = '';
+            
+            generatedSheets.forEach(sheet => {
+                const displayDate = getDateFromFirebase(sheet.date);
+                html += `
+                    <div class="score-sheet-item">
+                        <div class="score-sheet-info">
+                            <div class="score-sheet-title">${sheet.judge} - ${sheet.classRound}</div>
+                            <div class="score-sheet-details">
+                                ${sheet.entrants.length} entrants • ${formatDateDisplay(displayDate)}
+                                <span class="status-badge status-${sheet.status}">${sheet.status.toUpperCase()}</span>
+                            </div>
+                        </div>
+                        <div class="score-sheet-actions">
+                            <button class="btn btn-secondary" onclick="previewSheet('${sheet.id}')">Preview</button>
+                            <button class="btn btn-success" onclick="printSingleSheet('${sheet.id}')">Print</button>
+                            <button class="btn btn-warning" onclick="markCompleted('${sheet.id}')">Mark Complete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+            section.style.display = 'block';
+        }
+
+        // Print score sheets
+        function printScoreSheets() {
+            if (generatedSheets.length === 0) {
+                alert('No score sheets generated. Please generate sheets first.');
+                return;
+            }
+
+            const container = document.getElementById('scoreSheetsContainer');
+            let html = '';
+
+            generatedSheets.forEach(sheet => {
+                html += generateScoreSheetHTML(sheet);
+            });
+
+            container.innerHTML = html;
+            
+            // Print
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        }
+
+        // Generate score sheet HTML with dynamic sizing
+        function generateScoreSheetHTML(sheetData) {
+            const entrantCount = sheetData.entrants.length;
+            
+            // Calculate optimal font sizes and spacing based on entrant count
+            let scoringTableFontSize = '9px';
+            let cellPadding = '4px';
+            let rowHeight = '40px';
+            
+            if (entrantCount > 12) {
+                scoringTableFontSize = '7px';
+                cellPadding = '2px';
+                rowHeight = '30px';
+            } else if (entrantCount > 8) {
+                scoringTableFontSize = '8px';
+                cellPadding = '3px';
+                rowHeight = '35px';
+            }
+
+            const displayDate = formatDateDisplay(getDateFromFirebase(sheetData.date));
+
+            let html = `
+                <div class="score-sheet">
+                    <div class="score-sheet-header">
+                        <div style="text-align: right; font-size: 8px;">Copyright © by Canine-Work And Games, LLC, 2024</div>
+                        <div class="cwags-logo">
+                            <img src="./images/cwags-logo.png" alt="C-WAGS Logo" />
+                        </div>
+                        <div class="score-sheet-title-text">${sheetData.className} Score Sheet</div>
+                        <div class="score-sheet-date">Date: ${displayDate}</div>
+                        <div class="score-sheet-class">CLASS: ${sheetData.className}</div>
+                        <div class="score-sheet-class">JUDGE: ${sheetData.judge}</div>
+                        
+                        <div class="score-sheet-rounds">
+                            <label>Round</label>
+                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '1' ? 'checked' : ''}> 1
+                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '2' ? 'checked' : ''}> 2
+                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '3' ? 'checked' : ''}> 3
+                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '4' ? 'checked' : ''}> 4
+                        </div>
+                    </div>
+
+                    <table class="scent-info-table">
+                        <tr>
+                            <th>Scent 1</th>
+                            <th>Scent 2</th>
+                            <th>Scent 3</th>
+                            <th>Scent 4</th>
+                        </tr>
+                        <tr>
+                            <td>Located in/on:</td>
+                            <td>Located in/on:</td>
+                            <td>Located in/on:</td>
+                            <td>Located in/on:</td>
+                        </tr>
+                        <tr>
+                            <td style="height: 30px;"></td>
+                            <td style="height: 30px;"></td>
+                            <td style="height: 30px;"></td>
+                            <td style="height: 30px;"></td>
+                        </tr>
+                    </table>
+
+                    <div class="faults-section">
+                        <strong>Faults:</strong> Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior; 
+                        Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert"; 
+                        SR crossing line less than half.
+                    </div>
+
+                    <table class="scoring-table" style="font-size: ${scoringTableFontSize};">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Team</th>
+                                <th rowspan="2">Dog - Handler</th>
+                                <th colspan="4">Scent Results</th>
+                                <th rowspan="2">Fault</th>
+                                <th rowspan="2">Fault</th>
+                                <th rowspan="2">Time</th>
+                                <th rowspan="2">Pass/Fail</th>
+                            </tr>
+                            <tr>
+                                <th>Scent 1</th>
+                                <th>Scent 2</th>
+                                <th>Scent 3</th>
+                                <th>Scent 4</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            // Add entrant rows - use actual count or minimum 8, whichever is larger
+            const minRows = Math.max(8, entrantCount);
+            for (let i = 0; i < minRows; i++) {
+                const entrant = sheetData.entrants[i];
+                const teamName = entrant ? `${entrant.handler} - ${entrant.dog}` : '';
+                
+                html += `
+                    <tr>
+                        <td class="team-name-cell" style="padding: ${cellPadding};">${i + 1}</td>
+                        <td class="team-name-cell" style="padding: ${cellPadding};">${teamName}</td>
+                        <td class="scent-cell" style="padding: ${cellPadding};">
+                            <div>Scent 1</div>
+                            <div style="height: 12px;"></div>
+                        </td>
+                        <td class="scent-cell" style="padding: ${cellPadding};">
+                            <div>Scent 2</div>
+                            <div style="height: 12px;"></div>
+                        </td>
+                        <td class="scent-cell" style="padding: ${cellPadding};">
+                            <div>Scent 3</div>
+                            <div style="height: 12px;"></div>
+                        </td>
+                        <td class="scent-cell" style="padding: ${cellPadding};">
+                            <div>Scent 4</div>
+                            <div style="height: 12px;"></div>
+                        </td>
+                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
+                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
+                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
+                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
+                    </tr>
+                `;
+            }
+
+            html += `
+                        </tbody>
+                    </table>
+                    
+                    <div style="margin-top: 20px; text-align: center; font-size: 8px;">
+                        Copyright © by Canine-Work And Games, LLC, 2024
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        // Generate statistics
+        function generateStats() {
+            const totalEntries = entries.length;
+            const uniqueHandlers = new Set(entries.map(e => e.handlerName)).size;
+            const uniqueDogs = new Set(entries.map(e => e.dogCallName)).size;
+            const regularEntries = entries.filter(e => e.entryType === 'regular').length;
+            const feoEntries = entries.filter(e => e.entryType === 'feo').length;
+
+            const statsContainer = document.getElementById('stats');
+            statsContainer.style.display = 'grid';
+            statsContainer.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-number">${totalEntries}</span>
+                    <span class="stat-label">Total Entries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueHandlers}</span>
+                    <span class="stat-label">Handlers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueDogs}</span>
+                    <span class="stat-label">Dogs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${regularEntries}</span>
+                    <span class="stat-label">Regular</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${feoEntries}</span>
+                    <span class="stat-label">FEO</span>
+                </div>
+            `;
+        }
+
+        // Show error message
+        function showError(message) {
+            const container = document.getElementById('scoreSheetsSection');
+            container.innerHTML = `
+                <div class="no-data">
+                    ❌ ${message}
+                </div>
+            `;
+            container.style.display = 'block';
+            document.getElementById('stats').style.display = 'none';
+        }
+
+        // Show the league button when trial data is loaded
+        function showLeagueButton() {
+            const leagueBtn = document.getElementById('leagueBtn');
+            if (leagueBtn) {
+                leagueBtn.style.display = 'inline-block';
+            }
+        }
+
+        // Preview single sheet
+        window.previewSheet = function(sheetId) {
+            const sheet = generatedSheets.find(s => s.id === sheetId);
+            if (!sheet) return;
+
+            const container = document.getElementById('scoreSheetsContainer');
+            container.innerHTML = generateScoreSheetHTML(sheet);
+            container.style.display = 'block';
+            
+            // Scroll to preview
+            container.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // Print single sheet
+        window.printSingleSheet = function(sheetId) {
+            const sheet = generatedSheets.find(s => s.id === sheetId);
+            if (!sheet) return;
+
+            const container = document.getElementById('scoreSheetsContainer');
+            container.innerHTML = generateScoreSheetHTML(sheet);
+            
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        };
+
+        // Mark sheet as completed
+        window.markCompleted = async function(sheetId) {
+            try {
+                const sheet = generatedSheets.find(s => s.id === sheetId);
+                if (!sheet) return;
+
+                // Update status in memory
+                sheet.status = 'completed';
+                sheet.completedAt = new Date();
+
+                // Update in database
+                await updateDoc(doc(db, 'scoreSheets', sheetId), {
+                    status: 'completed',
+                    completedAt: new Date()
+                });
+
+                // Refresh display
+                displayGeneratedSheets();
+                
+                alert('Score sheet marked as completed!');
+            } catch (error) {
+                console.error('Error updating sheet status:', error);
+                alert('Error updating sheet status: ' + error.message);
+            }
+        };
+
+        // View stored sheets
+        window.viewStoredSheets = async function() {
+            try {
+                if (!auth.currentUser) {
+                    alert('Please log in first');
+                    return;
+                }
+
+                document.getElementById('loadingIndicator').style.display = 'block';
+
+                // Load all stored score sheets for this user
+                const q = query(
+                    collection(db, "scoreSheets"),
+                    where("createdBy", "==", auth.currentUser.uid)
+                );
+                
+                const snapshot = await getDocs(q);
+                const storedSheets = [];
+                
+                snapshot.forEach(doc => {
+                    const sheetData = doc.data();
+                    
+                    // Fix date handling when loading
+                    const processedSheet = {
+                        ...sheetData,
+                        date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                    };
+                    
+                    storedSheets.push({ id: doc.id, ...processedSheet });
+                });
+
+                // Sort by creation date (most recent first)
+                storedSheets.sort((a, b) => {
+                    const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+                    const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+                    return dateB - dateA;
+                });
+
+                // Display stored sheets
+                displayStoredSheets(storedSheets);
+
+            } catch (error) {
+                console.error('Error loading stored sheets:', error);
+                showError('Error loading stored sheets: ' + error.message);
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        };
+
+        // Display stored sheets
+        function displayStoredSheets(sheets) {
+            const section = document.getElementById('scoreSheetsSection');
+            const list = document.getElementById('scoreSheetsList');
+            
+            let html = '';
+            
+            if (sheets.length === 0) {
+                html = '<div class="no-data">No stored score sheets found.</div>';
+            } else {
+                sheets.forEach(sheet => {
+                    const createdDate = sheet.createdAt ? sheet.createdAt.toDate().toLocaleDateString() : 'Unknown';
+                    const displayDate = formatDateDisplay(sheet.date);
+                    const hasScores = sheet.scoreData && Object.keys(sheet.scoreData).length > 0;
+                    const statusClass = hasScores ? 'status-completed' : sheet.status;
+                    const statusText = hasScores ? 'SCORED' : sheet.status.toUpperCase();
+                    
+                    html += `
+                        <div class="score-sheet-item">
+                            <div class="score-sheet-info">
+                                <div class="score-sheet-title">${sheet.trialName} - ${sheet.judge} - ${sheet.classRound}</div>
+                                <div class="score-sheet-details">
+                                    ${sheet.entrants.length} entrants • ${displayDate} • Created: ${createdDate}
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                                </div>
+                            </div>
+                            <div class="score-sheet-actions">
+                                <button class="btn btn-secondary" onclick="previewStoredSheet('${sheet.id}')">Preview</button>
+                                <button class="btn btn-success" onclick="printStoredSheet('${sheet.id}')">Print</button>
+                                <button class="btn btn-warning" onclick="editScores('${sheet.id}')">✏️ Edit Scores</button>
+                                <button class="btn btn-danger" onclick="deleteSheet('${sheet.id}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            list.innerHTML = html;
+            section.style.display = 'block';
+        }
+
+        // Preview stored sheet
+        window.previewStoredSheet = async function(sheetId) {
+            try {
+                const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
+                if (!sheetDoc.exists()) {
+                    alert('Score sheet not found');
+                    return;
+                }
+
+                const sheetData = sheetDoc.data();
+                const sheet = { 
+                    id: sheetDoc.id, 
+                    ...sheetData,
+                    date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                };
+                
+                const container = document.getElementById('scoreSheetsContainer');
+                container.innerHTML = generateScoreSheetHTML(sheet);
+                container.style.display = 'block';
+                
+                // Scroll to preview
+                container.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error loading sheet:', error);
+                alert('Error loading sheet: ' + error.message);
+            }
+        };
+
+        // Print stored sheet
+        window.printStoredSheet = async function(sheetId) {
+            try {
+                const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
+                if (!sheetDoc.exists()) {
+                    alert('Score sheet not found');
+                    return;
+                }
+
+                const sheetData = sheetDoc.data();
+                const sheet = { 
+                    id: sheetDoc.id, 
+                    ...sheetData,
+                    date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                };
+                
+                const container = document.getElementById('scoreSheetsContainer');
+                container.innerHTML = generateScoreSheetHTML(sheet);
+                
+                setTimeout(() => {
+                    window.print();
+                }, 100);
+            } catch (error) {
+                console.error('Error printing sheet:', error);
+                alert('Error printing sheet: ' + error.message);
+            }
+        };
+
+        // Edit scores - Open the scoring modal
+        window.editScores = async function(sheetId) {
+            try {
+                const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
+                if (!sheetDoc.exists()) {
+                    alert('Score sheet not found');
+                    return;
+                }
+
+                const sheetData = sheetDoc.data();
+                currentEditingSheet = { 
+                    id: sheetDoc.id, 
+                    ...sheetData,
+                    date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                };
+                
+                // Load existing score data if available
+                currentScoreData = currentEditingSheet.scoreData || {};
+                
+                // Populate the scoring form
+                populateScoringForm();
+                
+                // Show the modal
+                document.getElementById('scoreEntryModal').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading sheet for editing:', error);
+                alert('Error loading sheet: ' + error.message);
+            }
+        };
+
+        // Populate the scoring form with sheet data
+        function populateScoringForm() {
+            if (!currentEditingSheet) return;
+
+            // Set scent locations
+            document.getElementById('scent1Location').value = currentScoreData.scent1Location || '';
+            document.getElementById('scent2Location').value = currentScoreData.scent2Location || '';
+            document.getElementById('scent3Location').value = currentScoreData.scent3Location || '';
+            document.getElementById('scent4Location').value = currentScoreData.scent4Location || '';
+
+            // Generate entrant scoring rows
+            const entrantsContainer = document.getElementById('entrantsScoring');
+            let html = '';
+
+            currentEditingSheet.entrants.forEach((entrant, index) => {
+                const entrantKey = `entrant_${index}`;
+                const entrantScores = currentScoreData[entrantKey] || {};
+                
+                html += `
+                    <div class="entrant-row">
+                        <div class="entrant-header">
+                            ${index + 1}. ${entrant.handler} - ${entrant.dog}
+                        </div>
+                        <div class="entrant-scoring-grid">
+                            <!-- Scent 1 -->
+                            <div class="scent-result-group">
+                                <label>Scent 1</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent1_found" ${entrantScores.scent1Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent1_not_found" ${entrantScores.scent1NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scent 2 -->
+                            <div class="scent-result-group">
+                                <label>Scent 2</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent2_found" ${entrantScores.scent2Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent2_not_found" ${entrantScores.scent2NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scent 3 -->
+                            <div class="scent-result-group">
+                                <label>Scent 3</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent3_found" ${entrantScores.scent3Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent3_not_found" ${entrantScores.scent3NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scent 4 -->
+                            <div class="scent-result-group">
+                                <label>Scent 4</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent4_found" ${entrantScores.scent4Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent4_not_found" ${entrantScores.scent4NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Faults -->
+                            <div>
+                                <label>Faults</label>
+                                <input type="text" class="fault-input" id="${entrantKey}_faults" 
+                                       value="${entrantScores.faults || ''}" placeholder="Enter faults...">
+                            </div>
+                            
+                            <!-- Time -->
+                            <div>
+                                <label>Time</label>
+                                <input type="text" class="time-input" id="${entrantKey}_time" 
+                                       value="${entrantScores.time || ''}" placeholder="MM:SS">
+                            </div>
+                            
+                            <!-- Pass/Fail -->
+                            <div class="pass-fail-group">
+                                <div class="pass-fail-option">
+                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_pass" 
+                                           value="pass" ${entrantScores.result === 'pass' ? 'checked' : ''}>
+                                    <label for="${entrantKey}_pass">Pass</label>
+                                </div>
+                                <div class="pass-fail-option">
+                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_fail" 
+                                           value="fail" ${entrantScores.result === 'fail' ? 'checked' : ''}>
+                                    <label for="${entrantKey}_fail">Fail</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            entrantsContainer.innerHTML = html;
+
+            // Add event listeners for mutual exclusivity of checkboxes
+            currentEditingSheet.entrants.forEach((entrant, index) => {
+                const entrantKey = `entrant_${index}`;
+                
+                // For each scent, make found/not found mutually exclusive
+                for (let scent = 1; scent <= 4; scent++) {
+                    const foundCheckbox = document.getElementById(`${entrantKey}_scent${scent}_found`);
+                    const notFoundCheckbox = document.getElementById(`${entrantKey}_scent${scent}_not_found`);
+                    
+                    if (foundCheckbox && notFoundCheckbox) {
+                        foundCheckbox.addEventListener('change', function() {
+                            if (this.checked) {
+                                notFoundCheckbox.checked = false;
+                            }
+                        });
+                        
+                        notFoundCheckbox.addEventListener('change', function() {
+                            if (this.checked) {
+                                foundCheckbox.checked = false;
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        // Close score modal
+        window.closeScoreModal = function() {
+            document.getElementById('scoreEntryModal').style.display = 'none';
+            currentEditingSheet = null;
+            currentScoreData = {};
+        };
+
+        // Save scores to database
+        window.saveScores = async function() {
+            if (!currentEditingSheet) {
+                alert('No sheet selected for editing');
+                return;
+            }
+
+            try {
+                // Collect all score data
+                const scoreData = {
+                    scent1Location: document.getElementById('scent1Location').value,
+                    scent2Location: document.getElementById('scent2Location').value,
+                    scent3Location: document.getElementById('scent3Location').value,
+                    scent4Location: document.getElementById('scent4Location').value
+                };
+
+                // Collect entrant scores
+                currentEditingSheet.entrants.forEach((entrant, index) => {
+                    const entrantKey = `entrant_${index}`;
+                    
+                    scoreData[entrantKey] = {
+                        handler: entrant.handler,
+                        dog: entrant.dog,
+                        scent1Found: document.getElementById(`${entrantKey}_scent1_found`)?.checked || false,
+                        scent1NotFound: document.getElementById(`${entrantKey}_scent1_not_found`)?.checked || false,
+                        scent2Found: document.getElementById(`${entrantKey}_scent2_found`)?.checked || false,
+                        scent2NotFound: document.getElementById(`${entrantKey}_scent2_not_found`)?.checked || false,
+                        scent3Found: document.getElementById(`${entrantKey}_scent3_found`)?.checked || false,
+                        scent3NotFound: document.getElementById(`${entrantKey}_scent3_not_found`)?.checked || false,
+                        scent4Found: document.getElementById(`${entrantKey}_scent4_found`)?.checked || false,
+                        scent4NotFound: document.getElementById(`${entrantKey}_scent4_not_found`)?.checked || false,
+                        faults: document.getElementById(`${entrantKey}_faults`)?.value || '',
+                        time: document.getElementById(`${entrantKey}_time`)?.value || '',
+                        result: document.querySelector(`input[name="${entrantKey}_result"]:checked`)?.value || ''
+                    };
+                });
+
+                // Update the sheet in Firebase
+                await updateDoc(doc(db, 'scoreSheets', currentEditingSheet.id), {
+                    scoreData: scoreData,
+                    status: 'scored',
+                    scoredAt: new Date(),
+                    lastModified: new Date()
+                });
+
+                alert('Scores saved successfully!');
+                closeScoreModal();
+                
+                // Refresh the stored sheets view
+                viewStoredSheets();
+
+            } catch (error) {
+                console.error('Error saving scores:', error);
+                alert('Error saving scores: ' + error.message);
+            }
+        };
+
+        // Generate filled PDF that matches the printed score sheet exactly
+        window.generateFilledPDF = async function() {
+            if (!currentEditingSheet) {
+                alert('No sheet selected');
+                return;
+            }
+
+            try {
+                // Create a new PDF document (8.5 x 11 inches)
+                const pdfDoc = await PDFLib.PDFDocument.create();
+                const page = pdfDoc.addPage([612, 792]);
+                
+                // Get fonts
+                const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+                const boldFont = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+                const { width, height } = page.getSize();
+                let yPos = height - 40;
+
+                // Draw border around entire page
+                page.drawRectangle({
+                    x: 30,
+                    y: 30,
+                    width: width - 60,
+                    height: height - 60,
+                    borderColor: PDFLib.rgb(0, 0, 0),
+                    borderWidth: 1,
+                });
+
+                // Header section
+                page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
+                    x: width - 280,
+                    y: yPos,
+                    size: 8,
+                    font: font,
+                });
+                yPos -= 25;
+
+                // Title
+                page.drawText(`${currentEditingSheet.className} Score Sheet`, {
+                    x: width / 2 - 100,
+                    y: yPos,
+                    size: 16,
+                    font: boldFont,
+                });
+                yPos -= 25;
+
+                // Date
+                const displayDate = formatDateDisplay(currentEditingSheet.date);
+                page.drawText(`Date: ${displayDate}`, {
+                    x: width / 2 - 80,
+                    y: yPos,
+                    size: 12,
+                    font: font,
+                });
+                yPos -= 20;
+
+                // Class
+                page.drawText(`CLASS: ${currentEditingSheet.className}`, {
+                    x: width / 2 - 60,
+                    y: yPos,
+                    size: 14,
+                    font: boldFont,
+                });
+                yPos -= 20;
+
+                // Judge
+                page.drawText(`JUDGE: ${currentEditingSheet.judge}`, {
+                    x: width / 2 - 60,
+                    y: yPos,
+                    size: 14,
+                    font: boldFont,
+                });
+                yPos -= 30;
+
+                // Round checkboxes
+                page.drawText('Round', {
+                    x: 50,
+                    y: yPos,
+                    size: 10,
+                    font: boldFont,
+                });
+
+                const rounds = ['1', '2', '3', '4'];
+                let roundX = 100;
+                rounds.forEach((round, index) => {
+                    // Draw checkbox
+                    page.drawRectangle({
+                        x: roundX,
+                        y: yPos - 3,
+                        width: 12,
+                        height: 12,
+                        borderColor: PDFLib.rgb(0, 0, 0),
+                        borderWidth: 1,
+                    });
+                    
+                    // Check the appropriate round
+                    if (round === currentEditingSheet.roundNumber) {
+                        page.drawText('X', {
+                            x: roundX + 3,
+                            y: yPos - 1,
+                            size: 9,
+                            font: boldFont,
+                        });
+                    }
+                    
+                    page.drawText(round, {
+                        x: roundX + 20,
+                        y: yPos,
+                        size: 10,
+                        font: font,
+                    });
+                    roundX += 60;
+                });
+                yPos -= 35;
+
+                // Scent information table
+                const scentTableY = yPos;
+                const scentTableHeight = 60;
+                const colWidth = (width - 100) / 4;
+
+                // Draw scent table border
+                page.drawRectangle({
+                    x: 50,
+                    y: scentTableY - scentTableHeight,
+                    width: width - 100,
+                    height: scentTableHeight,
+                    borderColor: PDFLib.rgb(0, 0, 0),
+                    borderWidth: 1,
+                });
+
+                // Scent table headers
+                const scentHeaders = ['Scent 1', 'Scent 2', 'Scent 3', 'Scent 4'];
+                scentHeaders.forEach((header, index) => {
+                    const x = 50 + (index * colWidth);
+                    
+                    if (index > 0) {
+                        page.drawLine({
+                            start: { x: x, y: scentTableY },
+                            end: { x: x, y: scentTableY - scentTableHeight },
+                            thickness: 1,
+                            color: PDFLib.rgb(0, 0, 0),
+                        });
+                    }
+                    
+                    page.drawRectangle({
+                        x: x,
+                        y: scentTableY - 20,
+                        width: colWidth,
+                        height: 20,
+                        color: PDFLib.rgb(0.94, 0.94, 0.94),
+                    });
+                    
+                    page.drawText(header, {
+                        x: x + colWidth/2 - 20,
+                        y: scentTableY - 15,
+                        size: 10,
+                        font: boldFont,
+                    });
+                });
+
+                // Fill in scent locations
+                const scentLocations = [
+                    document.getElementById('scent1Location').value,
+                    document.getElementById('scent2Location').value,
+                    document.getElementById('scent3Location').value,
+                    document.getElementById('scent4Location').value
+                ];
+
+                page.drawLine({
+                    start: { x: 50, y: scentTableY - 20 },
+                    end: { x: width - 50, y: scentTableY - 20 },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
+                scentHeaders.forEach((header, index) => {
+                    const x = 50 + (index * colWidth);
+                    page.drawText('Located in/on:', {
+                        x: x + 5,
+                        y: scentTableY - 35,
+                        size: 9,
+                        font: font,
+                    });
+                });
+
+                page.drawLine({
+                    start: { x: 50, y: scentTableY - 40 },
+                    end: { x: width - 50, y: scentTableY - 40 },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
+                scentLocations.forEach((location, index) => {
+                    const x = 50 + (index * colWidth);
+                    const text = location || '';
+                    page.drawText(text.length > 12 ? text.substring(0, 12) + '...' : text, {
+                        x: x + 5,
+                        y: scentTableY - 55,
+                        size: 8,
+                        font: font,
+                    });
+                });
+
+                yPos = scentTableY - scentTableHeight - 20;
+
+                // Faults section
+                page.drawText('Faults: Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior;', {
+                    x: 50,
+                    y: yPos,
+                    size: 9,
+                    font: boldFont,
+                });
+                yPos -= 12;
+                page.drawText('Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert";', {
+                    x: 50,
+                    y: yPos,
+                    size: 9,
+                    font: boldFont,
+                });
+                yPos -= 12;
+                page.drawText('SR crossing line less than half.', {
+                    x: 50,
+                    y: yPos,
+                    size: 9,
+                    font: boldFont,
+                });
+                yPos -= 25;
+
+                // Generate PDF bytes
+                const pdfBytes = await pdfDoc.save();
+                
+                // Create download link
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${currentEditingSheet.trialName}_${currentEditingSheet.judge}_${currentEditingSheet.classRound}_Scored.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                alert('Filled PDF generated and downloaded successfully!');
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF: ' + error.message);
+            }
+        };
+
+        // Delete sheet
+        window.deleteSheet = async function(sheetId) {
+            if (!confirm('Are you sure you want to delete this score sheet? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                await deleteDoc(doc(db, 'scoreSheets', sheetId));
+                alert('Score sheet deleted successfully');
+                
+                // Refresh the stored sheets view
+                viewStoredSheets();
+            } catch (error) {
+                console.error('Error deleting sheet:', error);
+                alert('Error deleting sheet: ' + error.message);
+            }
+        };
+
+        // ========================================
+        // LEAGUE SUMMARY FUNCTIONALITY
+        // ========================================
+
+        // Main function to generate league summaries
+        async function generateLeagueSummaries() {
+            if (!currentTrial) {
+                alert('Please select a trial first');
+                return;
+            }
+
+            try {
+                // Show loading
+                document.getElementById('loadingIndicator').style.display = 'block';
+                document.getElementById('loadingIndicator').innerHTML = '<div>Generating league summaries...</div>';
+
+                // Get all classes from the trial
+                const allClasses = getAllClassesFromTrial();
+                console.log('Found classes:', allClasses);
+
+                // Get all score sheets for this trial
+                const allScoreSheets = await getAllScoreSheetsForTrial(currentTrial.id);
+                console.log('Found score sheets:', allScoreSheets.length);
+
+                // Generate summary for each class
+                leagueSummaries = [];
+                for (const className of allClasses) {
+                    const summary = await createLeagueSummaryForClass(className, allScoreSheets);
+                    if (summary && summary.participants.length > 0) {
+                        leagueSummaries.push(summary);
+                    }
+                }
+
+                console.log('Generated summaries:', leagueSummaries.length);
+
+                // Display the summaries
+                displayLeagueSummaries();
+
+                // Hide loading
+                document.getElementById('loadingIndicator').style.display = 'none';
+
+                alert(`Generated ${leagueSummaries.length} league summary sheets!`);
+
+            } catch (error) {
+                console.error('Error generating league summaries:', error);
+                alert('Error generating league summaries: ' + error.message);
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        }
+
+        // Get all unique classes from the trial
+        function getAllClassesFromTrial() {
+            const classes = new Set();
+            
+            if (currentTrial && currentTrial.days) {
+                currentTrial.days.forEach(day => {
+                    if (day.classes) {
+                        day.classes.forEach(cls => {
+                            if (cls.className) {
+                                classes.add(cls.className);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            return Array.from(classes);
+        }
+
+        // Get all score sheets for a trial from Firebase
+        async function getAllScoreSheetsForTrial(trialId) {
+            try {
+                const scoreSheetsQuery = query(
+                    collection(db, 'scoreSheets'),
+                    where('trialId', '==', trialId)
+                );
+                
+                const snapshot = await getDocs(scoreSheetsQuery);
+                const sheets = [];
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    sheets.push({
+                        id: doc.id,
+                        ...data,
+                        date: data.date ? getDateFromFirebase(data.date) : null
+                    });
+                });
+                
+                return sheets;
+            } catch (error) {
+                console.error('Error loading score sheets:', error);
+                return [];
+            }
+        }
+
+        // Create league summary for a specific class
+        async function createLeagueSummaryForClass(className, allScoreSheets) {
+            try {
+                // Get score sheets for this class
+                const classSheets = allScoreSheets.filter(sheet => 
+                    sheet.className === className
+                );
+
+                if (classSheets.length === 0) {
+                    console.log(`No score sheets found for class: ${className}`);
+                    return null;
+                }
+
+                // Get all participants who entered this class
+                const participants = await getParticipantsForClass(className);
+                
+                if (participants.length === 0) {
+                    console.log(`No participants found for class: ${className}`);
+                    return null;
+                }
+
+                // Get all rounds/dates for this class
+                const rounds = getRoundsForClass(className, classSheets);
+
+                // Build the summary structure
+                const summary = {
+                    className: className,
+                    trialName: currentTrial.clubName || 'Unnamed Trial',
+                    dateRange: getTrialDateRange(),
+                    participants: participants,
+                    rounds: rounds,
+                    scores: extractScoresFromSheets(classSheets, participants, rounds)
+                };
+
+                console.log(`Created summary for ${className}:`, summary);
+                return summary;
+
+            } catch (error) {
+                console.error(`Error creating summary for ${className}:`, error);
+                return null;
+            }
+        }
+
+        // Get participants for a specific class from entries
+        async function getParticipantsForClass(className) {
+            try {
+                // Get all entries for this trial
+                const entriesQuery = query(
+                    collection(db, 'entries'),
+                    where('trialId', '==', currentTrial.id)
+                );
+                
+                const snapshot = await getDocs(entriesQuery);
+                const participants = [];
+                const seen = new Set();
+
+                snapshot.forEach(doc => {
+                    const entryData = doc.data();
+                    
+                    if (entryData.selectedEntries) {
+                        entryData.selectedEntries.forEach(selectedEntry => {
+                            if (selectedEntry.className === className) {
+                                const key = `${entryData.cwagsNumber || 'unknown'}_${entryData.dogCallName}`;
+                                
+                                if (!seen.has(key)) {
+                                    seen.add(key);
+                                    participants.push({
+                                        registrationNumber: entryData.cwagsNumber || '',
+                                        callName: entryData.dogCallName || '',
+                                        handlerName: entryData.handlerName || '',
+                                        handler: entryData.handlerName || '',
+                                        dog: entryData.dogCallName || ''
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+
+                return participants.sort((a, b) => 
+                    (a.handlerName || '').localeCompare(b.handlerName || '')
+                );
+
+            } catch (error) {
+                console.error('Error getting participants:', error);
+                return [];
+            }
+        }
+
+        // Get all rounds/dates for a class
+        function getRoundsForClass(className, classSheets) {
+            const roundsMap = new Map();
+            
+            classSheets.forEach(sheet => {
+                if (sheet.className === className) {
+                    const roundKey = `${sheet.date}_${sheet.roundNumber || 1}`;
+                    const displayDate = formatDateDisplay(sheet.date, { month: 'short', day: 'numeric' });
+                    const roundNum = sheet.roundNumber || 1;
+                    
+                    roundsMap.set(roundKey, {
+                        date: sheet.date,
+                        displayDate: displayDate,
+                        roundNumber: roundNum,
+                        judge: sheet.judge || 'Judge TBD',
+                        sheetId: sheet.id,
+                        columnHeader: roundNum > 1 ? `${displayDate} R${roundNum}` : displayDate
+                    });
+                }
+            });
+            
+            return Array.from(roundsMap.values()).sort((a, b) => {
+                const dateCompare = new Date(a.date) - new Date(b.date);
+                if (dateCompare !== 0) return dateCompare;
+                return a.roundNumber - b.roundNumber;
+            });
+        }
+
+        // Extract scores from score sheets
+        function extractScoresFromSheets(classSheets, participants, rounds) {
+            const scores = {};
+            
+            participants.forEach(participant => {
+                const key = getParticipantKey(participant);
+                scores[key] = {};
+                rounds.forEach(round => {
+                    scores[key][round.sheetId] = null;
+                });
+            });
+            
+            classSheets.forEach(sheet => {
+                if (sheet.scoreData) {
+                    Object.keys(sheet.scoreData).forEach(entrantKey => {
+                        if (entrantKey.startsWith('entrant_')) {
+                            const entrantData = sheet.scoreData[entrantKey];
+                            
+                            const participant = findMatchingParticipant(entrantData, participants);
+                            if (participant) {
+                                const participantKey = getParticipantKey(participant);
+                                
+                                let score = entrantData.result || '';
+                                if (entrantData.time && !entrantData.result) {
+                                    score = entrantData.time;
+                                }
+                                
+                                scores[participantKey][sheet.id] = score;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            return scores;
+        }
+
+        // Helper function to get participant key
+        function getParticipantKey(participant) {
+            return `${participant.registrationNumber || 'unknown'}_${participant.callName || participant.dog}`;
+        }
+
+        // Helper function to find matching participant
+        function findMatchingParticipant(entrantData, participants) {
+            return participants.find(p => 
+                (p.handler || p.handlerName) === entrantData.handler && 
+                (p.dog || p.callName) === entrantData.dog
+            );
+        }
+
+        // Get trial date range for display
+        function getTrialDateRange() {
+            if (!currentTrial || !currentTrial.days || currentTrial.days.length === 0) {
+                return 'Date range not available';
+            }
+            
+            const dates = currentTrial.days
+                .map(day => day.date)
+                .filter(date => date)
+                .sort();
+            
+            if (dates.length === 0) return 'Date range not available';
+            if (dates.length === 1) return formatDateDisplay(dates[0]);
+            
+            const firstDate = formatDateDisplay(dates[0], { month: 'short', day: 'numeric' });
+            const lastDate = formatDateDisplay(dates[dates.length - 1], { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            return `${firstDate} - ${lastDate}`;
+        }
+
+        // Display league summaries
+        function displayLeagueSummaries() {
+            let summariesSection = document.getElementById('leagueSummariesSection');
+            if (!summariesSection) {
+                summariesSection = document.createElement('div');
+                summariesSection.id = 'leagueSummariesSection';
+                summariesSection.className = 'league-summaries-section';
+                
+                const scoreSheetsSection = document.getElementById('scoreSheetsSection');
+                scoreSheetsSection.parentNode.insertBefore(summariesSection, scoreSheetsSection.nextSibling);
+            }
+            
+            let html = '<h3>📊 League Summary Sheets</h3>';
+            
+            if (leagueSummaries.length === 0) {
+                html += '<p>No league summaries generated yet.</p>';
+            } else {
+                html += '<div class="summaries-list">';
+                
+                leagueSummaries.forEach((summary, index) => {
+                    html += `
+                        <div class="summary-item">
+                            <div class="summary-header">
+                                <h4>${summary.className} - League Summary</h4>
+                                <div class="summary-meta">
+                                    ${summary.participants.length} participants • ${summary.rounds.length} rounds • ${summary.dateRange}
+                                </div>
+                            </div>
+                            <div class="summary-actions">
+                                <button class="btn btn-secondary" onclick="previewLeagueSummary(${index})">Preview</button>
+                                <button class="btn btn-success" onclick="printLeagueSummary(${index})">Print</button>
+                                <button class="btn btn-warning" onclick="exportLeagueSummary(${index})">Export CSV</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            }
+            
+            summariesSection.innerHTML = html;
+            summariesSection.style.display = 'block';
+        }
+
+        // Preview league summary
+        window.previewLeagueSummary = function(index) {
+            const summary = leagueSummaries[index];
+            if (!summary) return;
+            
+            let html = `
+                <div class="league-summary-preview">
+                    <h2>${summary.className} - League Summary</h2>
+                    <p><strong>Trial:</strong> ${summary.trialName}</p>
+                    <p><strong>Dates:</strong> ${summary.dateRange}</p>
+                    
+                    <table class="league-summary-table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Registration #</th>
+                                <th rowspan="2">Call Name</th>
+                                <th rowspan="2">Handler Name</th>
+            `;
+            
+            summary.rounds.forEach(round => {
+                html += `<th>${round.judge}</th>`;
+            });
+            html += '</tr><tr>';
+            
+            summary.rounds.forEach(round => {
+                html += `<th>${round.columnHeader}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            summary.participants.forEach(participant => {
+                const participantKey = getParticipantKey(participant);
+                html += `
+                    <tr>
+                        <td>${participant.registrationNumber}</td>
+                        <td>${participant.callName}</td>
+                        <td>${participant.handlerName}</td>
+                `;
+                
+                summary.rounds.forEach(round => {
+                    const score = summary.scores[participantKey] && summary.scores[participantKey][round.sheetId];
+                    html += `<td>${score || '-'}</td>`;
+                });
+                
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${summary.className} League Summary</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .league-summary-table { border-collapse: collapse; width: 100%; }
+                        .league-summary-table th, .league-summary-table td { 
+                            border: 1px solid #ddd; 
+                            padding: 8px; 
+                            text-align: center; 
+                        }
+                        .league-summary-table th { background-color: #f2f2f2; }
+                        h2 { text-align: center; }
+                        p { text-align: center; margin: 10px 0; }
+                    </style>
+                </head>
+                <body>
+                    ${html}
+                </body>
+                </html>
+            `);
+            previewWindow.document.close();
+        };
+
+        // Print league summary
+        window.printLeagueSummary = function(index) {
+            const summary = leagueSummaries[index];
+            if (!summary) return;
+            
+            previewLeagueSummary(index);
+            
+            setTimeout(() => {
+                const windows = window.open('', '_blank');
+                if (windows) {
+                    windows.print();
+                }
+            }, 1000);
+        };
+
+        // Export league summary to CSV
+        window.exportLeagueSummary = function(index) {
+            const summary = leagueSummaries[index];
+            if (!summary) return;
+            
+            const headers = ['Registration #', 'Call Name', 'Handler Name'];
+            headers.push(...summary.rounds.map(round => round.columnHeader));
+            
+            const csvRows = [headers.join(',')];
+            
+            summary.participants.forEach(participant => {
+                const participantKey = getParticipantKey(participant);
+                const row = [
+                    `"${participant.registrationNumber}"`,
+                    `"${participant.callName}"`,
+                    `"${participant.handlerName}"`
+                ];
+                
+                summary.rounds.forEach(round => {
+                    const score = summary.scores[participantKey] && summary.scores[participantKey][round.sheetId];
+                    row.push(`"${score || ''}"`);
+                });
+                
+                csvRows.push(row.join(','));
+            });
+            
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${summary.className.replace(/[^a-zA-Z0-9]/g, '_')}_League_Summary.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        };
+
+        // Make main functions available globally
+        window.loadTrialData = loadTrialData;
+        window.generateAllScoreSheets = generateAllScoreSheets;
+        window.printScoreSheets = printScoreSheets;
+        window.generateLeagueSummaries = generateLeagueSummaries;
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('scoreEntryModal');
+            if (event.target === modal) {
+                closeScoreModal();
+            }
+        };
+
+        // Initialize when auth is ready
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                await init();
+            } else {
+                showError('Please log in to access score sheets');
+            }
+        });
+
+        console.log('Score sheet generator loaded successfully');
+    </script>
 </body>
 </html>

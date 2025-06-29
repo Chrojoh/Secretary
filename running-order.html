@@ -1,1008 +1,1225 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Running Order Generator - New Version</title>
-  <link rel="stylesheet" href="css/style.css">
-  <style>
-    .generator-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #007cba;
-    }
-    
-    .header h1 {
-      color: #007cba;
-      margin: 0;
-    }
-    
-    .controls-section {
-      background-color: #f0f8ff;
-      border: 2px solid #007cba;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .control-row {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 15px;
-      align-items: end;
-    }
-    
-    .control-group {
-      flex: 1;
-    }
-    
-    .control-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #333;
-    }
-    
-    .control-group select,
-    .control-group input {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      text-decoration: none;
-      display: inline-block;
-      text-align: center;
-      transition: background-color 0.3s;
-      margin: 5px;
-    }
-    
-    .btn-primary {
-      background-color: #007cba;
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background-color: #005a8b;
-    }
-    
-    .btn-success {
-      background-color: #28a745;
-      color: white;
-    }
-    
-    .btn-success:hover {
-      background-color: #218838;
-    }
-    
-    .btn-warning {
-      background-color: #ffc107;
-      color: #212529;
-    }
-    
-    .btn-warning:hover {
-      background-color: #e0a800;
-    }
-    
-    .btn-info {
-      background-color: #17a2b8;
-      color: white;
-    }
-    
-    .btn-info:hover {
-      background-color: #138496;
-    }
-    
-    .btn-secondary {
-      background-color: #6c757d;
-      color: white;
-    }
-    
-    .btn-secondary:hover {
-      background-color: #5a6268;
-    }
-    
-    .stats-section {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .stat-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 8px;
-      text-align: center;
-    }
-    
-    .stat-number {
-      font-size: 2rem;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    
-    .stat-label {
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-    
-    .running-order-section {
-      margin-bottom: 30px;
-    }
-    
-    .round-group {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      overflow: hidden;
-      page-break-inside: avoid;
-    }
-    
-    .round-header {
-      background-color: #007cba;
-      color: white;
-      padding: 15px;
-      font-weight: bold;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .round-info {
-      display: flex;
-      gap: 20px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    
-    .entries-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .entries-table th {
-      background-color: #f8f9fa;
-      padding: 12px 8px;
-      border: 1px solid #dee2e6;
-      font-weight: bold;
-      text-align: left;
-    }
-    
-    .entries-table td {
-      padding: 10px 8px;
-      border: 1px solid #dee2e6;
-      vertical-align: top;
-    }
-    
-    .entries-table tr:nth-child(even) {
-      background-color: #f8f9fa;
-    }
-    
-    .entry-number {
-      background-color: #007cba;
-      color: white;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin: 0 auto;
-    }
-    
-    .handler-name {
-      font-weight: bold;
-      color: #007cba;
-    }
-    
-    .dog-name {
-      color: #333;
-      margin-top: 2px;
-    }
-    
-    .entry-type {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: bold;
-    }
-    
-    .entry-type.regular {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    
-    .entry-type.feo {
-      background-color: #fff3cd;
-      color: #856404;
-    }
-    
-    .actions-section {
-      background-color: #f8f9fa;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 30px;
-    }
-    
-    .actions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-    
-    .debug-section {
-      background-color: #f1f3f4;
-      border: 1px solid #dadce0;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 20px;
-    }
-    
-    .debug-content {
-      background-color: white;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 15px;
-      font-family: monospace;
-      font-size: 12px;
-      max-height: 400px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-    }
-    
-    .loading {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-    }
-    
-    .error {
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-      padding: 15px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-    
-    .success {
-      background-color: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-      padding: 15px;
-      border-radius: 4px;
-      margin-bottom: 20px;
-    }
-    
-    @media print {
-      .controls-section,
-      .actions-section,
-      .debug-section,
-      .btn {
-        display: none !important;
-      }
-      
-      .round-group {
-        page-break-inside: avoid;
-        margin-bottom: 30px;
-      }
-      
-      .round-header {
-        -webkit-print-color-adjust: exact;
-        color-adjust: exact;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Running Order Sheet Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #444;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            color: #212529;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .running-order-table-container {
+            overflow-x: auto;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .running-order-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .running-order-table th,
+        .running-order-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+            text-align: center;
+            vertical-align: top;
+            min-width: 150px;
+        }
+
+        .date-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .judge-header {
+            background: #e9ecef;
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .class-header {
+            background: #f8f9fa;
+            color: #495057;
+            font-weight: 500;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .entrant-cell {
+            padding: 4px;
+            height: 60px;
+            position: relative;
+        }
+
+        .entrant-cell.empty {
+            background: #f8f9fa;
+        }
+
+        .entrant-cell.regular {
+            background: #d1ecf1;
+        }
+
+        .entrant-cell.feo {
+            background: #fff3cd;
+        }
+
+        .drop-zone {
+            width: 100%;
+            height: 100%;
+            border: 2px dashed transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .entrant-item {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: move;
+            user-select: none;
+            transition: all 0.2s ease;
+            height: 100%;
+            min-height: 50px;
+        }
+
+        .entrant-item:hover {
+            border-color: #495057;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .entrant-item.dragging {
+            opacity: 0.5;
+            transform: rotate(3deg);
+        }
+
+        .entrant-number {
+            background: #495057;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 6px;
+            flex-shrink: 0;
+        }
+
+        .entrant-name {
+            flex: 1;
+            font-size: 12px;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .move-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .entrant-item:hover .move-controls {
+            opacity: 1;
+        }
+
+        .move-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .move-btn:hover {
+            background: #495057;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .confirm-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 2px solid #dee2e6;
+        }
+
+        .confirm-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .date-selector {
+            margin-bottom: 15px;
+        }
+
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                border: none;
+                max-width: none;
+                padding: 20px;
+            }
+            
+            .controls, .btn, .confirm-section, .button-group {
+                display: none;
+            }
+            
+            .move-controls {
+                display: none !important;
+            }
+            
+            .running-order-table-container {
+                overflow: visible;
+            }
+            
+            .running-order-table {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .running-order-table th,
+            .running-order-table td {
+                font-size: 10px;
+                padding: 4px;
+                min-width: auto;
+            }
+            
+            .entrant-item {
+                font-size: 10px;
+                min-height: auto;
+                height: auto;
+                padding: 2px 4px;
+            }
+            
+            .entrant-number {
+                width: 16px;
+                height: 16px;
+                font-size: 9px;
+                margin-right: 4px;
+            }
+            
+            .entrant-name {
+                font-size: 9px;
+            }
+            
+            .date-header {
+                background: #333 !important;
+                -webkit-print-color-adjust: exact;
+                color: white !important;
+            }
+            
+            .judge-header {
+                background: #666 !important;
+                -webkit-print-color-adjust: exact;
+                color: white !important;
+            }
+            
+            .class-header {
+                background: #999 !important;
+                -webkit-print-color-adjust: exact;
+                color: white !important;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="generator-container">
-    <div class="header">
-      <h1>🏃‍♂️ Running Order Generator - NEW</h1>
-      <p>Clean, simplified running order generation</p>
-    </div>
+    <div class="container">
+        <h1>🏆 Running Order Sheet Generator</h1>
 
-    <!-- Controls Section -->
-    <div class="controls-section">
-      <h3>🎯 Trial Selection & Settings</h3>
-      
-      <div class="control-row">
-        <div class="control-group">
-          <label for="trialSelect">Select Trial:</label>
-          <select id="trialSelect">
-            <option value="">Select a trial...</option>
-          </select>
-        </div>
-        
-        <div class="control-group">
-          <label for="dateSelect">Select Date (Optional):</label>
-          <select id="dateSelect">
-            <option value="">All dates</option>
-          </select>
-        </div>
-        
-        <div class="control-group">
-          <label for="sortBy">Sort Entrants By:</label>
-          <select id="sortBy">
-            <option value="entry">Entry Order</option>
-            <option value="handler">Handler Name</option>
-            <option value="dog">Dog Name</option>
-            <option value="class">Class Name</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actions Section -->
-    <div class="actions-section">
-      <h3>⚡ Quick Actions</h3>
-      <div class="actions-grid">
-        <button class="btn btn-primary" onclick="loadTrialData()">📥 Load Trial Data</button>
-        <button class="btn btn-success" onclick="generateRunningOrder()">🏃‍♂️ Generate Running Order</button>
-        <button class="btn btn-warning" onclick="resetOrder()">🔄 Reset Order</button>
-        <button class="btn btn-info" onclick="printRunningOrder()">🖨️ Print Running Order</button>
-        <button class="btn btn-secondary" onclick="showDebugInfo()">🔧 Debug Info</button>
-        <a href="main-dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
-      </div>
-    </div>
-
-    <!-- Statistics Section -->
-    <div id="statsSection" class="stats-section" style="display: none;">
-      <!-- Stats will be populated here -->
-    </div>
-
-    <!-- Running Order Section -->
-    <div id="runningOrderSection" class="running-order-section" style="display: none;">
-      <!-- Running order will be populated here -->
-    </div>
-
-    <!-- Debug Section -->
-    <div id="debugSection" class="debug-section" style="display: none;">
-      <h3>🔧 Debug Information</h3>
-      <div id="debugContent" class="debug-content"></div>
-    </div>
-
-    <!-- Loading/Error Messages -->
-    <div id="loadingMessage" class="loading" style="display: none;">
-      <div>Loading trial data...</div>
-    </div>
-
-    <div id="errorMessage" class="error" style="display: none;"></div>
-    <div id="successMessage" class="success" style="display: none;"></div>
-  </div>
-
-  <!-- UNIVERSAL FIELD MAPPER -->
-  
-  
-  <script>
-   console.log("🔧 Applying running order fix patch...");
-
-// Override the existing normalizeEntryData function
-function fixedNormalizeEntryData(entry) {
-  // Extract handler name with multiple fallbacks
-  let handlerName = entry.handlerName || entry.Handler || entry.handler || '';
-  
-  // Extract dog name with multiple fallbacks  
-  let dogCallName = entry.dogCallName || entry['Call Name'] || entry.dogName || entry.callName || '';
-  
-  // Extract judge name with multiple fallbacks
-  let judgeName = entry.judgeName || entry.judge || entry.judgeAssigned || entry.selectedJudge || 'Judge TBD';
-  
-  // Extract class name with multiple fallbacks
-  let className = entry.className || entry.Class || entry.class || '';
-  
-  // Extract registration with multiple fallbacks
-  let cwagsNumber = entry.cwagsNumber || entry.Registration || entry.registration || 'No Reg';
-  
-  // CRITICAL FIX: Handle empty strings by creating meaningful placeholders
-  if (!handlerName || handlerName.trim() === '') {
-    handlerName = `Handler ${entry.entryId ? entry.entryId.slice(-6) : 'Unknown'}`;
-  }
-  
-  if (!dogCallName || dogCallName.trim() === '') {
-    dogCallName = `Dog ${entry.entryIndex + 1 || 'Unknown'}`;
-  }
-  
-  if (!className || className.trim() === '') {
-    className = 'Unknown Class';
-  }
-  
-  // Clean up judge name
-  if (!judgeName || judgeName.trim() === '' || judgeName === 'TBD') {
-    judgeName = 'Judge TBD';
-  }
-  
-  return {
-    ...entry,
-    handlerName: handlerName.trim(),
-    dogCallName: dogCallName.trim(),
-    className: className.trim(),
-    judgeName: judgeName.trim(),
-    cwagsNumber: cwagsNumber
-  };
-}
-
-// Override the window function if it exists
-if (typeof window.normalizeEntryData !== 'undefined') {
-  window.normalizeEntryData = fixedNormalizeEntryData;
-}
-
-// Also create a global function to fix existing data
-window.fixRunningOrderData = function() {
-  console.log("🔧 Fixing existing running order data...");
-  
-  // Fix allEntries if it exists
-  if (typeof allEntries !== 'undefined' && Array.isArray(allEntries)) {
-    allEntries = allEntries.map((entry, index) => {
-      const fixed = fixedNormalizeEntryData({
-        ...entry,
-        entryIndex: index
-      });
-      console.log(`Fixed entry ${index}:`, {
-        handler: fixed.handlerName,
-        dog: fixed.dogCallName,
-        class: fixed.className
-      });
-      return fixed;
-    });
-    
-    console.log(`✅ Fixed ${allEntries.length} entries`);
-    
-    // Regenerate rounds if the function exists
-    if (typeof processRoundsData === 'function') {
-      processRoundsData();
-    }
-    
-    // Regenerate running order if the function exists
-    if (typeof generateRunningOrder === 'function') {
-      generateRunningOrder();
-    }
-  }
-};
-
-console.log("✅ Running order fix patch applied!");
-console.log("💡 Call window.fixRunningOrderData() to fix existing data, or reload trial data");
-
-    
-    console.log("🚀 Starting NEW Running Order Generator...");
-
-    // ===========================================
-    // UNIVERSAL FIELD EXTRACTION FUNCTIONS
-    // ===========================================
-    
-    function getFieldValue(obj, ...possibleFields) {
-      if (!obj) return '';
-      
-      for (const field of possibleFields) {
-        if (obj[field] && obj[field] !== null && obj[field] !== undefined && String(obj[field]).trim() !== '') {
-          const value = String(obj[field]).trim();
-          if (value !== 'undefined' && value !== 'null') {
-            return value;
-          }
-        }
-      }
-      return '';
-    }
-    
-    function getHandlerName(obj) {
-      return getFieldValue(obj, 'handlerName', 'Handler', 'handler', 'Handler Name', 'participantName') || 'Unknown Handler';
-    }
-    
-    function getDogName(obj) {
-      return getFieldValue(obj, 'dogCallName', 'dogName', 'Call Name', 'callName', 'Dog Name', 'dog') || 'Unknown Dog';
-    }
-    
-    function getJudgeName(obj) {
-      const judge = getFieldValue(obj, 'judgeName', 'judge', 'judgeAssigned', 'selectedJudge', 'Judge', 'Judges Name');
-      return (judge && judge !== 'TBD' && judge !== 'Judge TBD') ? judge : 'Judge TBD';
-    }
-    
-    function getClassName(obj) {
-      return getFieldValue(obj, 'className', 'Class', 'class', 'Class Name', 'classType') || 'Unknown Class';
-    }
-    
-    function getRegistrationNumber(obj) {
-      return getFieldValue(obj, 'cwagsNumber', 'Registration', 'registration', 'regNumber', 'registrationNumber') || 'No Reg';
-    }
-
-    // ===========================================
-    // DATE HANDLING
-    // ===========================================
-    
-    function createDate(dateInput) {
-      if (!dateInput) return null;
-      
-      try {
-        if (dateInput.toDate && typeof dateInput.toDate === 'function') {
-          return dateInput.toDate();
-        }
-        
-        if (dateInput instanceof Date) {
-          return isNaN(dateInput.getTime()) ? null : dateInput;
-        }
-        
-        if (typeof dateInput === 'string') {
-          let dateStr = dateInput.trim();
-          if (!dateStr.includes('T') && !dateStr.includes(' ')) {
-            dateStr += 'T12:00:00';
-          }
-          const date = new Date(dateStr);
-          return isNaN(date.getTime()) ? null : date;
-        }
-        
-        return null;
-      } catch (error) {
-        console.warn('Date creation error:', error);
-        return null;
-      }
-    }
-    
-    function formatDateDisplay(dateInput) {
-      const date = createDate(dateInput);
-      if (!date) return 'Invalid Date';
-      
-      return date.toLocaleDateString('en-US', { 
-        weekday: 'long',
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric'
-      });
-    }
-    
-    function formatDateComparison(dateInput) {
-      const date = createDate(dateInput);
-      if (!date) return null;
-      
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-
-    // ===========================================
-    // GLOBAL VARIABLES
-    // ===========================================
-    let currentTrialData = null;
-    let availableTrials = [];
-    let allEntries = [];
-    let roundsData = [];
-  </script>
-
-  <script type="module">
-    import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-    console.log("📦 Firebase modules loaded");
-
-    // ===========================================
-    // TRIAL LOADING
-    // ===========================================
-    
-    async function loadAvailableTrials() {
-      try {
-        console.log("🔍 Loading available trials...");
-        
-        const trialsQuery = query(
-          collection(db, 'trials'),
-          where('createdBy', '==', auth.currentUser.uid)
-        );
-        
-        const trialsSnapshot = await getDocs(trialsQuery);
-        availableTrials = [];
-        
-        trialsSnapshot.forEach(doc => {
-          const trialData = doc.data();
-          
-          // Process trial dates
-          if (trialData.days && Array.isArray(trialData.days)) {
-            trialData.days = trialData.days.map(day => ({
-              ...day,
-              date: formatDateComparison(day.date)
-            })).filter(day => day.date !== null);
-          }
-          
-          availableTrials.push({
-            id: doc.id,
-            ...trialData
-          });
-        });
-        
-        populateTrialDropdown();
-        console.log("✅ Loaded trials:", availableTrials.length);
-        
-      } catch (error) {
-        console.error("❌ Error loading trials:", error);
-        showError("Error loading trials: " + error.message);
-      }
-    }
-
-    function populateTrialDropdown() {
-      const trialSelect = document.getElementById('trialSelect');
-      trialSelect.innerHTML = '<option value="">Select a trial...</option>';
-
-      availableTrials.forEach(trial => {
-        const option = document.createElement('option');
-        option.value = trial.id;
-        
-        let label = trial.clubName || 'Unnamed Trial';
-        if (trial.days && trial.days.length > 0) {
-          const firstDate = trial.days[0].date;
-          if (firstDate) {
-            label += ` - ${firstDate}`;
-          }
-        }
-        
-        option.textContent = label;
-        trialSelect.appendChild(option);
-      });
-
-      // Auto-select if only one trial
-      if (availableTrials.length === 1) {
-        trialSelect.value = availableTrials[0].id;
-      }
-    }
-
-    // ===========================================
-    // ENTRY LOADING WITH CLEAN FIELD EXTRACTION
-    // ===========================================
-    
-    async function loadTrialData() {
-      const trialId = document.getElementById('trialSelect').value;
-      if (!trialId) {
-        showError("Please select a trial first.");
-        return;
-      }
-
-      try {
-        showLoading(true);
-        console.log("📥 Loading trial data for:", trialId);
-
-        // Load trial structure
-        currentTrialData = availableTrials.find(t => t.id === trialId);
-        if (!currentTrialData) {
-          const trialDoc = await getDoc(doc(db, 'trials', trialId));
-          if (!trialDoc.exists()) {
-            throw new Error('Trial not found');
-          }
-          currentTrialData = { id: trialDoc.id, ...trialDoc.data() };
-          
-          if (currentTrialData.days) {
-            currentTrialData.days = currentTrialData.days.map(day => ({
-              ...day,
-              date: formatDateComparison(day.date)
-            })).filter(day => day.date !== null);
-          }
-        }
-
-        // Load and process entries
-        await loadTrialEntries(trialId);
-        
-        // Process rounds
-        processRounds();
-        
-        // Update UI
-        populateDateDropdown();
-        updateStatistics();
-        
-        showSuccess(`Loaded ${allEntries.length} entries from ${currentTrialData.clubName}`);
-        
-      } catch (error) {
-        console.error("❌ Error loading trial data:", error);
-        showError("Error loading trial data: " + error.message);
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    async function loadTrialEntries(trialId) {
-      try {
-        console.log("📊 Loading entries for trial:", trialId);
-        
-        const entriesQuery = query(
-          collection(db, 'entries'),
-          where('trialId', '==', trialId)
-        );
-        
-        const entriesSnapshot = await getDocs(entriesQuery);
-        allEntries = [];
-        
-        entriesSnapshot.forEach(doc => {
-          const entryDoc = doc.data();
-          console.log("📄 Processing entry document:", doc.id);
-          
-          if (entryDoc.selectedEntries && Array.isArray(entryDoc.selectedEntries)) {
-            entryDoc.selectedEntries.forEach((selectedEntry, index) => {
-              
-              // Extract date
-              const entryDate = getFieldValue(selectedEntry, 'date', 'entryDate', 'trialDate');
-              const formattedDate = formatDateComparison(entryDate);
-              
-              if (!formattedDate) {
-                console.warn("❌ Skipping entry with no valid date:", selectedEntry);
-                return;
-              }
-              
-              // CRITICAL FIX: Better handler/dog name extraction with multiple fallbacks
-              let handlerName = getHandlerName(selectedEntry) || getHandlerName(entryDoc);
-              let dogCallName = getDogName(selectedEntry) || getDogName(entryDoc);
-              
-              // If still empty, create meaningful placeholders
-              if (!handlerName || handlerName === 'Unknown Handler') {
-                handlerName = `Entry ${doc.id.slice(-6)}`;  // Use last 6 chars of entry ID
-              }
-              
-              if (!dogCallName || dogCallName === 'Unknown Dog') {
-                dogCallName = `Dog ${index + 1}`;  // Use entry index
-              }
-              
-              // Create clean entry with extracted fields
-              const cleanEntry = {
-                // Essential identification
-                entryId: doc.id,
-                entryIndex: index,
-                
-                // Extracted participant data using universal functions
-                handlerName: handlerName,
-                dogCallName: dogCallName,
-                cwagsNumber: getRegistrationNumber(selectedEntry) || getRegistrationNumber(entryDoc),
-                
-                // Class and round info
-                className: getClassName(selectedEntry),
-                judgeName: getJudgeName(selectedEntry),
-                roundNumber: selectedEntry.roundNumber || 1,
-                
-                // Entry metadata
-                type: selectedEntry.type || 'regular',
-                date: formattedDate,
-                fee: selectedEntry.fee || 0,
-                
-                // Original data for reference
-                _originalSelected: selectedEntry,
-                _originalDoc: entryDoc
-              };
-              
-              // Always add entries with valid dates and class names
-              if (cleanEntry.className && cleanEntry.className !== 'Unknown Class') {
-                allEntries.push(cleanEntry);
-                console.log("✅ Added clean entry:", {
-                  handler: cleanEntry.handlerName,
-                  dog: cleanEntry.dogCallName,
-                  class: cleanEntry.className,
-                  judge: cleanEntry.judgeName,
-                  date: cleanEntry.date
-                });
-              } else {
-                console.warn("❌ Skipping entry with missing class name:", cleanEntry);
-              }
-            });
-          }
-        });
-        
-        console.log("✅ Loaded clean entries:", allEntries.length);
-        
-      } catch (error) {
-        console.error("❌ Error loading entries:", error);
-        throw error;
-      }
-    }
-
-    // ===========================================
-    // ROUNDS PROCESSING WITH DEDUPLICATION
-    // ===========================================
-    
-    function processRounds() {
-      console.log("🔄 Processing rounds with deduplication...");
-      
-      roundsData = [];
-      const roundsMap = new Map();
-
-      allEntries.forEach(entry => {
-        // Create round key for grouping
-        const roundKey = `${entry.date}_${entry.className}_${entry.roundNumber}`;
-        
-        if (!roundsMap.has(roundKey)) {
-          roundsMap.set(roundKey, {
-            date: entry.date,
-            dateDisplay: formatDateDisplay(entry.date),
-            className: entry.className,
-            roundNumber: entry.roundNumber,
-            judgeName: entry.judgeName,
-            entries: []
-          });
-        }
-        
-        const round = roundsMap.get(roundKey);
-        
-        // Update judge if we have a better one
-        if (round.judgeName === 'Judge TBD' && entry.judgeName !== 'Judge TBD') {
-          round.judgeName = entry.judgeName;
-        }
-        
-        round.entries.push(entry);
-      });
-
-      // Convert to array and sort
-      roundsData = Array.from(roundsMap.values()).sort((a, b) => {
-        if (a.date !== b.date) return new Date(a.date) - new Date(b.date);
-        if (a.className !== b.className) return a.className.localeCompare(b.className);
-        return a.roundNumber - b.roundNumber;
-      });
-
-      // Sort entries within each round
-      roundsData.forEach(round => {
-        const sortBy = document.getElementById('sortBy').value;
-        round.entries.sort((a, b) => {
-          switch (sortBy) {
-            case 'handler': return a.handlerName.localeCompare(b.handlerName);
-            case 'dog': return a.dogCallName.localeCompare(b.dogCallName);
-            case 'class': return a.className.localeCompare(b.className);
-            default: return 0;
-          }
-        });
-      });
-
-      console.log("✅ Processed unique rounds:", roundsData.length);
-    }
-
-    function populateDateDropdown() {
-      const dateSelect = document.getElementById('dateSelect');
-      dateSelect.innerHTML = '<option value="">All dates</option>';
-
-      if (currentTrialData && currentTrialData.days) {
-        currentTrialData.days.forEach(day => {
-          if (day.date) {
-            const option = document.createElement('option');
-            option.value = day.date;
-            option.textContent = formatDateDisplay(day.date);
-            dateSelect.appendChild(option);
-          }
-        });
-      }
-    }
-
-    function updateStatistics() {
-      const totalEntries = allEntries.length;
-      const uniqueHandlers = new Set(allEntries.map(e => e.handlerName)).size;
-      const uniqueClasses = new Set(allEntries.map(e => e.className)).size;
-      const uniqueJudges = new Set(allEntries.map(e => e.judgeName).filter(j => j !== 'Judge TBD')).size;
-
-      const statsHTML = `
-        <div class="stat-card">
-          <div class="stat-number">${totalEntries}</div>
-          <div class="stat-label">Total Entries</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${uniqueHandlers}</div>
-          <div class="stat-label">Handlers</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${uniqueClasses}</div>
-          <div class="stat-label">Classes</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number">${uniqueJudges}</div>
-          <div class="stat-label">Judges</div>
-        </div>
-      `;
-
-      document.getElementById('statsSection').innerHTML = statsHTML;
-      document.getElementById('statsSection').style.display = 'grid';
-    }
-
-    // ===========================================
-    // RUNNING ORDER GENERATION
-    // ===========================================
-    
-    function generateRunningOrder() {
-      if (roundsData.length === 0) {
-        showError("No rounds data available. Please load trial data first.");
-        return;
-      }
-
-      const selectedDate = document.getElementById('dateSelect').value;
-      const filteredRounds = selectedDate 
-        ? roundsData.filter(round => round.date === selectedDate)
-        : roundsData;
-
-      console.log("🏃‍♂️ Generating running order for", filteredRounds.length, "rounds");
-
-      let runningOrderHTML = '';
-      
-      filteredRounds.forEach((round, roundIndex) => {
-        console.log(`Round ${roundIndex + 1}:`, round.className, "Judge:", round.judgeName, "Entries:", round.entries.length);
-        
-        const entriesHTML = round.entries.map((entry, entryIndex) => {
-          console.log(`  Entry ${entryIndex + 1}:`, {
-            handler: entry.handlerName,
-            dog: entry.dogCallName,
-            reg: entry.cwagsNumber,
-            type: entry.type
-          });
-          
-          return `
-            <tr>
-              <td style="text-align: center; width: 60px;">
-                <div class="entry-number">${entryIndex + 1}</div>
-              </td>
-              <td>
-                <div class="handler-name">${entry.handlerName}</div>
-                <div class="dog-name">${entry.dogCallName}</div>
-              </td>
-              <td style="text-align: center; width: 80px;">
-                <span class="entry-type ${entry.type}">${entry.type === 'feo' ? 'FEO' : 'REG'}</span>
-              </td>
-              <td style="width: 120px;">${entry.cwagsNumber}</td>
-              <td style="width: 100px; border-right: 2px solid #000;"></td>
-              <td style="width: 100px;"></td>
-            </tr>
-          `;
-        }).join('');
-
-        runningOrderHTML += `
-          <div class="round-group">
-            <div class="round-header">
-              <div class="round-info">
-                <span><strong>${round.className} - Round ${round.roundNumber}</strong></span>
-                <span>Judge: ${round.judgeName}</span>
-                <span>${round.dateDisplay}</span>
-                <span>${round.entries.length} entries</span>
-              </div>
+        <div class="controls">
+            <div class="control-group">
+                <label for="trialSelect">Select Trial:</label>
+                <select id="trialSelect">
+                    <option value="">Loading trials...</option>
+                </select>
             </div>
-            <table class="entries-table">
-              <thead>
-                <tr>
-                  <th style="width: 60px; text-align: center;">#</th>
-                  <th>Handler & Dog</th>
-                  <th style="width: 80px; text-align: center;">Type</th>
-                  <th style="width: 120px;">Registration</th>
-                  <th style="width: 100px; border-right: 2px solid #000;">Time</th>
-                  <th style="width: 100px;">Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${entriesHTML}
-              </tbody>
-            </table>
-          </div>
-        `;
-      });
+            <div class="control-group">
+                <label for="sortBy">Sort Entrants By:</label>
+                <select id="sortBy">
+                    <option value="handler">Handler Name</option>
+                    <option value="dog">Dog Call Name</option>
+                    <option value="entry">Entry Order</option>
+                </select>
+            </div>
+        </div>
 
-      document.getElementById('runningOrderSection').innerHTML = runningOrderHTML;
-      document.getElementById('runningOrderSection').style.display = 'block';
+        <div class="button-group">
+            <button class="btn" onclick="loadTrialEntries()" id="loadBtn">Load Trial Entries</button>
+            <button class="btn btn-secondary" onclick="window.print()">Print</button>
+            <button class="btn btn-warning" onclick="resetOrder()">Reset Order</button>
+            <button class="btn btn-secondary" onclick="location.href='main-dashboard.html'">← Back to Dashboard</button>
+        </div>
 
-      showSuccess(`Generated running order for ${filteredRounds.length} rounds with ${filteredRounds.reduce((sum, r) => sum + r.entries.length, 0)} total entries`);
-    }
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div>Loading trial entries...</div>
+        </div>
 
-    // ===========================================
-    // UTILITY FUNCTIONS
-    // ===========================================
-    
-    function resetOrder() {
-      document.getElementById('runningOrderSection').style.display = 'none';
-      document.getElementById('statsSection').style.display = 'none';
-      allEntries = [];
-      roundsData = [];
-      showSuccess
+        <div id="stats" class="stats" style="display: none;"></div>
+        <div id="runningOrder" class="running-order-grid"></div>
+
+        <div id="confirmSection" class="confirm-section" style="display: none;">
+            <h3>📋 Confirm Running Order</h3>
+            <div id="dateSelector" class="date-selector" style="display: none;">
+                <label for="confirmDateSelect">Select Date to Confirm:</label>
+                <select id="confirmDateSelect">
+                    <option value="">Select a date...</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-success" onclick="confirmRunningOrder()" id="confirmBtn">
+                    Confirm Running Order
+                </button>
+                <button class="btn btn-secondary" onclick="saveRunningOrder()">
+                    Save Draft
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase imports
+        import { auth, db } from './js/firebase.js';
+        import { collection, query, where, getDocs, doc, getDoc, setDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+        // ========================================
+        // TIMEZONE-SAFE DATE UTILITIES - CRITICAL FIX
+        // ========================================
+
+        /**
+         * Creates a date object that stays in local timezone
+         */
+        function createLocalDate(dateStr) {
+            if (!dateStr) return null;
+            const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+            return new Date(dateWithTime);
+        }
+
+        /**
+         * Formats a date to YYYY-MM-DD string in local timezone
+         */
+        function formatLocalDate(date) {
+            if (!date || !(date instanceof Date)) return '';
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        /**
+         * Prepares date data for Firebase storage (prevents timezone conversion)
+         */
+        function prepareDateForFirebase(dateStr) {
+            if (!dateStr) return null;
+            const localDate = createLocalDate(dateStr);
+            return localDate;
+        }
+
+        /**
+         * Retrieves date data from Firebase (converts back to local date string)
+         */
+        function getDateFromFirebase(firebaseDate) {
+            if (!firebaseDate) return '';
+            
+            let date;
+            if (firebaseDate.toDate) {
+                date = firebaseDate.toDate();
+            } else if (firebaseDate instanceof Date) {
+                date = firebaseDate;
+            } else if (typeof firebaseDate === 'string') {
+                date = createLocalDate(firebaseDate);
+            } else {
+                return '';
+            }
+            
+            return formatLocalDate(date);
+        }
+
+        /**
+         * Formats date for display with timezone consideration
+         */
+        function formatDateDisplay(dateInput, options = {}) {
+            let date;
+            
+            if (typeof dateInput === 'string') {
+                date = createLocalDate(dateInput);
+            } else if (dateInput instanceof Date) {
+                date = new Date(dateInput);
+            } else {
+                return 'Invalid Date';
+            }
+            
+            if (!date || isNaN(date.getTime())) return 'Invalid Date';
+            
+            const defaultOptions = {
+                month: 'short',
+                day: 'numeric',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            
+            const formatOptions = { ...defaultOptions, ...options };
+            return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+        }
+
+        // Global variables
+        let trials = [];
+        let currentTrial = null;
+        let entries = [];
+        let originalOrder = {};
+        let runningOrderData = {};
+
+        // Initialize the application
+        async function init() {
+            try {
+                await loadTrials();
+            } catch (error) {
+                console.error('Error initializing:', error);
+                showError('Error loading trials: ' + error.message);
+            }
+        }
+
+        // Load available trials
+        async function loadTrials() {
+            try {
+                if (!auth.currentUser) {
+                    showError('Please log in to access trials');
+                    return;
+                }
+
+                const q = query(
+                    collection(db, "trials"),
+                    where("createdBy", "==", auth.currentUser.uid)
+                );
+                
+                const snapshot = await getDocs(q);
+                trials = [];
+                
+                snapshot.forEach(doc => {
+                    const trialData = doc.data();
+                    
+                    // FIX: Process dates when loading trials from Firebase
+                    if (trialData.days && Array.isArray(trialData.days)) {
+                        trialData.days = trialData.days.map(day => ({
+                            ...day,
+                            date: day.date ? getDateFromFirebase(day.date) : null
+                        }));
+                    }
+                    
+                    trials.push({ id: doc.id, ...trialData });
+                });
+
+                // Sort by creation date (most recent first)
+                trials.sort((a, b) => {
+                    const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+                    const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+                    return dateB - dateA;
+                });
+
+                populateTrialSelector();
+            } catch (error) {
+                console.error('Error loading trials:', error);
+                showError('Error loading trials: ' + error.message);
+            }
+        }
+
+        // Populate trial selector dropdown
+        function populateTrialSelector() {
+            const trialSelect = document.getElementById('trialSelect');
+            trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+
+            trials.forEach(trial => {
+                const option = document.createElement('option');
+                option.value = trial.id;
+                
+                let trialLabel = trial.clubName || 'Unnamed Trial';
+                
+                if (trial.days && trial.days.length > 0) {
+                    const dates = trial.days
+                        .filter(day => day.date)
+                        .map(day => formatDateDisplay(day.date, { 
+                            month: 'short', 
+                            day: 'numeric' 
+                        }))
+                        .join(', ');
+                    if (dates) {
+                        trialLabel += ` (${dates})`;
+                    }
+                }
+                
+                option.textContent = trialLabel;
+                trialSelect.appendChild(option);
+            });
+
+            // Auto-select the most recent trial
+            if (trials.length > 0) {
+                trialSelect.value = trials[0].id;
+                currentTrial = trials[0];
+            }
+        }
+
+        // Load trial entries
+        async function loadTrialEntries() {
+            const trialId = document.getElementById('trialSelect').value;
+            if (!trialId) {
+                showError('Please select a trial');
+                return;
+            }
+
+            currentTrial = trials.find(t => t.id === trialId);
+            if (!currentTrial) {
+                showError('Trial not found');
+                return;
+            }
+
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('loadBtn').disabled = true;
+
+            try {
+                // Load entries for this trial
+                const q = query(
+                    collection(db, "entries"),
+                    where("trialId", "==", trialId)
+                );
+                
+                const snapshot = await getDocs(q);
+                entries = [];
+                
+                snapshot.forEach(doc => {
+                    const entryData = doc.data();
+                    // Process selectedEntries if available
+                    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                        entryData.selectedEntries.forEach(selectedEntry => {
+                            // FIX: Process entry dates when loading from Firebase
+                            const processedEntry = {
+                                id: doc.id,
+                                ...selectedEntry,
+                                handlerName: entryData.handlerName,
+                                dogCallName: entryData.dogCallName,
+                                cwagsNumber: entryData.cwagsNumber,
+                                submittedAt: entryData.submittedAt,
+                                date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : selectedEntry.date
+                            };
+                            entries.push(processedEntry);
+                        });
+                    }
+                });
+
+                console.log('Loaded entries:', entries);
+
+                if (entries.length === 0) {
+                    showError('No entries found for this trial');
+                    return;
+                }
+
+                // Generate running order
+                generateRunningOrder();
+                setupConfirmSection();
+
+            } catch (error) {
+                console.error('Error loading entries:', error);
+                showError('Error loading entries: ' + error.message);
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('loadBtn').disabled = false;
+            }
+        }
+
+        // Generate running order
+        function generateRunningOrder() {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            // Group entries by date -> judge -> class/round
+            const groupedEntries = groupEntries(entries, sortBy);
+            
+            // Store original order
+            originalOrder = JSON.parse(JSON.stringify(groupedEntries));
+            runningOrderData = groupedEntries;
+
+            // Generate statistics
+            generateStats();
+
+            // Display the running order
+            displayRunningOrder(groupedEntries);
+        }
+
+        // Group entries
+        function groupEntries(entries, sortBy) {
+            const grouped = {};
+
+            entries.forEach(entry => {
+                const date = entry.date || 'Unknown Date';
+                const judge = entry.judgeName || 'Judge TBD';
+                const classRound = `${entry.className || 'Unknown Class'} - Round ${entry.roundNumber || 1}`;
+
+                // Initialize nested structure
+                if (!grouped[date]) grouped[date] = {};
+                if (!grouped[date][judge]) grouped[date][judge] = {};
+                if (!grouped[date][judge][classRound]) grouped[date][judge][classRound] = [];
+
+                // Add entrant info
+                const entrantName = getEntrantName(entry);
+                grouped[date][judge][classRound].push({
+                    id: `${entry.id || 'unknown'}_${Date.now()}_${Math.random()}`,
+                    name: entrantName,
+                    entryType: entry.entryType || 'regular',
+                    handler: entry.handlerName || 'Unknown Handler',
+                    dog: entry.dogCallName || 'Unknown Dog',
+                    cwagsNumber: entry.cwagsNumber || '',
+                    originalEntry: entry
+                });
+            });
+
+            // Sort entrants within each class/round
+            Object.keys(grouped).forEach(date => {
+                Object.keys(grouped[date]).forEach(judge => {
+                    Object.keys(grouped[date][judge]).forEach(classRound => {
+                        grouped[date][judge][classRound].sort((a, b) => {
+                            if (sortBy === 'handler') {
+                                return a.handler.localeCompare(b.handler);
+                            } else if (sortBy === 'dog') {
+                                return a.dog.localeCompare(b.dog);
+                            }
+                            return 0; // Keep original order for 'entry'
+                        });
+                    });
+                });
+            });
+
+            return grouped;
+        }
+
+        function getEntrantName(entry) {
+    const fullHandler = entry.handlerName || 'Unknown Handler';
+    // Extract first name only
+    const handler = fullHandler.split(' ')[0];
+    const dog = entry.dogCallName || 'Unknown Dog';
+    return `${handler} - ${dog}`;
+        }
+
+        // Display running order with drag & drop in column format
+        function displayRunningOrder(groupedEntries) {
+            const container = document.getElementById('runningOrder');
+            
+            // Create a flat array of all class/round combinations
+            const columns = [];
+            
+            Object.keys(groupedEntries).forEach(date => {
+                Object.keys(groupedEntries[date]).forEach(judge => {
+                    Object.keys(groupedEntries[date][judge]).forEach(classRound => {
+                        columns.push({
+                            date: date,
+                            judge: judge,
+                            classRound: classRound,
+                            entrants: groupedEntries[date][judge][classRound]
+                        });
+                    });
+                });
+            });
+
+            if (columns.length === 0) {
+                container.innerHTML = '<div class="no-data">No entries to display</div>';
+                return;
+            }
+
+            // Create table structure
+            let html = `
+                <div class="running-order-table-container">
+                    <table class="running-order-table">
+                        <thead>
+                            <tr class="date-row">
+            `;
+
+            // Date headers
+            columns.forEach(col => {
+                html += `<th class="date-header">${col.date}</th>`;
+            });
+
+            html += `
+                            </tr>
+                            <tr class="judge-row">
+            `;
+
+            // Judge headers
+            columns.forEach(col => {
+                html += `<th class="judge-header">${col.judge}</th>`;
+            });
+
+            html += `
+                            </tr>
+                            <tr class="class-row">
+            `;
+
+            // Class/Round headers
+            columns.forEach(col => {
+                html += `<th class="class-header">${col.classRound}</th>`;
+            });
+
+            html += `
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            // Find the maximum number of entrants in any column
+            const maxEntrants = Math.max(...columns.map(col => col.entrants.length));
+
+            // Create rows for entrants
+            for (let rowIndex = 0; rowIndex < maxEntrants; rowIndex++) {
+                html += `<tr class="entrant-row">`;
+                
+                columns.forEach((col, colIndex) => {
+                    if (rowIndex < col.entrants.length) {
+                        const entrant = col.entrants[rowIndex];
+                        const entrantName = getEntrantName(entrant.originalEntry || entrant);
+                        
+                        html += `
+                            <td class="entrant-cell ${entrant.entryType}" 
+                                data-date="${col.date}" 
+                                data-judge="${col.judge}" 
+                                data-class-round="${col.classRound}"
+                                data-row-index="${rowIndex}">
+                                <div class="entrant-item" draggable="true" data-entrant-id="${entrant.id}">
+                                    <div class="entrant-number">${rowIndex + 1}</div>
+                                    <div class="entrant-name">${entrantName}</div>
+                                    <div class="move-controls">
+                                        <button class="move-btn" onclick="moveEntrant('${entrant.id}', 'up')" title="Move Up">↑</button>
+                                        <button class="move-btn" onclick="moveEntrant('${entrant.id}', 'down')" title="Move Down">↓</button>
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+                    } else {
+                        // Empty cell
+                        html += `
+                            <td class="entrant-cell empty" 
+                                data-date="${col.date}" 
+                                data-judge="${col.judge}" 
+                                data-class-round="${col.classRound}"
+                                data-row-index="${rowIndex}">
+                                <div class="drop-zone"></div>
+                            </td>
+                        `;
+                    }
+                });
+                
+                html += `</tr>`;
+            }
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            setupDragAndDrop();
+        }
+
+        // Setup drag and drop functionality for table layout
+        function setupDragAndDrop() {
+            const entrantItems = document.querySelectorAll('.entrant-item');
+            const entrantCells = document.querySelectorAll('.entrant-cell');
+
+            entrantItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+
+            entrantCells.forEach(cell => {
+                cell.addEventListener('dragover', handleDragOver);
+                cell.addEventListener('drop', handleDrop);
+                cell.addEventListener('dragenter', handleDragEnter);
+                cell.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        let draggedElement = null;
+        let draggedData = null;
+
+        function handleDragStart(e) {
+            draggedElement = e.target.closest('.entrant-item');
+            const cell = draggedElement.closest('.entrant-cell');
+            draggedData = {
+                id: draggedElement.dataset.entrantId,
+                sourceDate: cell.dataset.date,
+                sourceJudge: cell.dataset.judge,
+                sourceClassRound: cell.dataset.classRound,
+                sourceRowIndex: parseInt(cell.dataset.rowIndex)
+            };
+            draggedElement.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+            }
+            draggedElement = null;
+            draggedData = null;
+            
+            // Remove all drag-over classes
+            document.querySelectorAll('.drop-zone').forEach(zone => {
+                zone.classList.remove('drag-over');
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            const dropZone = e.target.closest('.entrant-cell')?.querySelector('.drop-zone');
+            if (dropZone) {
+                dropZone.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            const dropZone = e.target.closest('.entrant-cell')?.querySelector('.drop-zone');
+            if (dropZone && !e.target.closest('.entrant-cell').contains(e.relatedTarget)) {
+                dropZone.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            
+            if (!draggedElement || !draggedData) return;
+
+            const targetCell = e.target.closest('.entrant-cell');
+            if (!targetCell) return;
+
+            const targetDate = targetCell.dataset.date;
+            const targetJudge = targetCell.dataset.judge;
+            const targetClassRound = targetCell.dataset.classRound;
+            const targetRowIndex = parseInt(targetCell.dataset.rowIndex);
+
+            // Find and remove the entrant from source
+            const sourceEntrants = runningOrderData[draggedData.sourceDate][draggedData.sourceJudge][draggedData.sourceClassRound];
+            const entrantIndex = sourceEntrants.findIndex(e => e.id === draggedData.id);
+            
+            if (entrantIndex === -1) return;
+
+            const entrant = sourceEntrants.splice(entrantIndex, 1)[0];
+
+            // Add to target location
+            if (!runningOrderData[targetDate]) runningOrderData[targetDate] = {};
+            if (!runningOrderData[targetDate][targetJudge]) runningOrderData[targetDate][targetJudge] = {};
+            if (!runningOrderData[targetDate][targetJudge][targetClassRound]) runningOrderData[targetDate][targetJudge][targetClassRound] = [];
+
+            const targetEntrants = runningOrderData[targetDate][targetJudge][targetClassRound];
+
+            // If dropping on an empty cell, add at that position
+            if (targetRowIndex >= targetEntrants.length) {
+                targetEntrants.push(entrant);
+            } else {
+                // Insert at the target position
+                targetEntrants.splice(targetRowIndex, 0, entrant);
+            }
+
+            // Refresh display
+            displayRunningOrder(runningOrderData);
+        }
+
+        // Move entrant up/down within their column
+        window.moveEntrant = function(entrantId, direction) {
+            // Find the entrant in our data structure
+            let found = false;
+            Object.keys(runningOrderData).forEach(date => {
+                Object.keys(runningOrderData[date]).forEach(judge => {
+                    Object.keys(runningOrderData[date][judge]).forEach(classRound => {
+                        const entrants = runningOrderData[date][judge][classRound];
+                        const index = entrants.findIndex(e => e.id === entrantId);
+                        
+                        if (index !== -1) {
+                            found = true;
+                            if (direction === 'up' && index > 0) {
+                                [entrants[index], entrants[index - 1]] = [entrants[index - 1], entrants[index]];
+                            } else if (direction === 'down' && index < entrants.length - 1) {
+                                [entrants[index], entrants[index + 1]] = [entrants[index + 1], entrants[index]];
+                            }
+                        }
+                    });
+                });
+            });
+
+            if (found) {
+                displayRunningOrder(runningOrderData);
+            }
+        };
+
+        // Reset order to original
+        window.resetOrder = function() {
+            if (confirm('Reset to original entry order?')) {
+                runningOrderData = JSON.parse(JSON.stringify(originalOrder));
+                displayRunningOrder(runningOrderData);
+            }
+        };
+
+        // Setup confirm section
+        function setupConfirmSection() {
+            const confirmSection = document.getElementById('confirmSection');
+            const dateSelector = document.getElementById('dateSelector');
+            const confirmDateSelect = document.getElementById('confirmDateSelect');
+
+            // Check if this is a multi-day trial (league)
+            const dates = Object.keys(runningOrderData);
+            
+            if (dates.length > 1) {
+                // Multi-day trial - show date selector
+                dateSelector.style.display = 'block';
+                confirmDateSelect.innerHTML = '<option value="">Select a date...</option>';
+                
+                dates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    confirmDateSelect.appendChild(option);
+                });
+            } else {
+                // Single day trial - hide date selector
+                dateSelector.style.display = 'none';
+            }
+
+            confirmSection.style.display = 'block';
+        }
+
+        // Confirm running order with TIMEZONE-SAFE date handling
+        window.confirmRunningOrder = async function() {
+            const dates = Object.keys(runningOrderData);
+            let dateToConfirm = null;
+
+            if (dates.length > 1) {
+                dateToConfirm = document.getElementById('confirmDateSelect').value;
+                if (!dateToConfirm) {
+                    alert('Please select a date to confirm');
+                    return;
+                }
+            } else {
+                dateToConfirm = dates[0];
+            }
+
+            if (!dateToConfirm || !runningOrderData[dateToConfirm]) {
+                alert('Invalid date selection');
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmBtn');
+            const originalText = confirmBtn.textContent;
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Confirming...';
+
+            try {
+                // Save the confirmed running order with timezone-safe date
+                const runningOrderDoc = {
+                    trialId: currentTrial.id,
+                    trialName: currentTrial.clubName || 'Unnamed Trial',
+                    date: prepareDateForFirebase(dateToConfirm), // FIX: Use timezone-safe date preparation
+                    runningOrder: runningOrderData[dateToConfirm],
+                    confirmedAt: new Date(),
+                    confirmedBy: auth.currentUser.uid,
+                    status: 'confirmed'
+                };
+
+                await addDoc(collection(db, 'runningOrders'), runningOrderDoc);
+                
+                alert(`Running order confirmed for ${dateToConfirm}!`);
+                
+                // If multi-day, remove confirmed date from selector
+                if (dates.length > 1) {
+                    const confirmDateSelect = document.getElementById('confirmDateSelect');
+                    const option = confirmDateSelect.querySelector(`option[value="${dateToConfirm}"]`);
+                    if (option) {
+                        option.remove();
+                    }
+                    confirmDateSelect.value = '';
+                }
+
+            } catch (error) {
+                console.error('Error confirming running order:', error);
+                alert('Error confirming running order: ' + error.message);
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = originalText;
+            }
+        };
+
+        // Save running order as draft
+        window.saveRunningOrder = async function() {
+            if (!currentTrial) {
+                alert('No trial selected');
+                return;
+            }
+
+            try {
+                const draftDoc = {
+                    trialId: currentTrial.id,
+                    trialName: currentTrial.clubName || 'Unnamed Trial',
+                    runningOrder: runningOrderData,
+                    savedAt: new Date(),
+                    savedBy: auth.currentUser.uid,
+                    status: 'draft'
+                };
+
+                await addDoc(collection(db, 'runningOrderDrafts'), draftDoc);
+                alert('Running order saved as draft!');
+
+            } catch (error) {
+                console.error('Error saving draft:', error);
+                alert('Error saving draft: ' + error.message);
+            }
+        };
+
+        // Generate statistics
+        function generateStats() {
+            const totalEntries = entries.length;
+            const uniqueHandlers = new Set(entries.map(e => e.handlerName)).size;
+            const uniqueDogs = new Set(entries.map(e => e.dogCallName)).size;
+            const regularEntries = entries.filter(e => e.entryType === 'regular').length;
+            const feoEntries = entries.filter(e => e.entryType === 'feo').length;
+
+            const statsContainer = document.getElementById('stats');
+            statsContainer.style.display = 'grid';
+            statsContainer.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-number">${totalEntries}</span>
+                    <span class="stat-label">Total Entries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueHandlers}</span>
+                    <span class="stat-label">Handlers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueDogs}</span>
+                    <span class="stat-label">Dogs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${regularEntries}</span>
+                    <span class="stat-label">Regular</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${feoEntries}</span>
+                    <span class="stat-label">FEO</span>
+                </div>
+            `;
+        }
+
+        // Show error message
+        function showError(message) {
+            const container = document.getElementById('runningOrder');
+            container.innerHTML = `
+                <div class="no-data">
+                    ❌ ${message}
+                </div>
+            `;
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('confirmSection').style.display = 'none';
+        }
+
+        // Handle trial selection change
+        document.getElementById('trialSelect').addEventListener('change', function() {
+            const trialId = this.value;
+            if (trialId) {
+                currentTrial = trials.find(t => t.id === trialId);
+                // Clear previous data
+                document.getElementById('runningOrder').innerHTML = '';
+                document.getElementById('stats').style.display = 'none';
+                document.getElementById('confirmSection').style.display = 'none';
+            }
+        });
+
+        // Handle sort change
+        document.getElementById('sortBy').addEventListener('change', function() {
+            if (entries.length > 0) {
+                generateRunningOrder();
+            }
+        });
+
+        // Initialize when auth is ready
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                await init();
+            } else {
+                showError('Please log in to access running orders');
+            }
+        });
+
+        // Make functions available globally
+        window.loadTrialEntries = loadTrialEntries;
+    </script>
+</body>
+</html>

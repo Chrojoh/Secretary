@@ -101,24 +101,8 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
-    }
-    
-    .class-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
-    }
-    
-    .dates-section {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 6px;
-      margin-bottom: 15px;
-    }
-    
-    .date-row {
-      border-radius: 4px;
-      margin: 10px 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
     }
     
     .btn {
@@ -127,64 +111,145 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
-      text-decoration: none;
-      display: inline-block;
-      margin: 2px;
+      font-weight: bold;
+      transition: background-color 0.3s;
     }
     
-    .btn-primary { background: #007bff; color: white; }
-    .btn-success { background: #28a745; color: white; }
-    .btn-danger { background: #dc3545; color: white; }
-    .btn-purple { background: #6f42c1; color: white; }
-    .btn-sm { padding: 4px 8px; font-size: 12px; }
-    
-    .action-buttons {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 20px 0;
+    .btn-primary {
+      background: #007bff;
+      color: white;
     }
     
-    .preview-section {
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 30px;
+    .btn-primary:hover {
+      background: #0056b3;
     }
     
-    .preview-class {
-      background: white;
-      padding: 15px;
-      margin: 15px 0;
-      border-radius: 6px;
-      border-left: 4px solid #4CAF50;
+    .btn-success {
+      background: #28a745;
+      color: white;
     }
     
-    .loading, .error, .success {
+    .btn-success:hover {
+      background: #1e7e34;
+    }
+    
+    .btn-purple {
+      background: #6f42c1;
+      color: white;
+    }
+    
+    .btn-purple:hover {
+      background: #5a2d91;
+    }
+    
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #c82333;
+    }
+    
+    .dates-section {
+      margin-bottom: 20px;
+    }
+    
+    .date-item {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 10px;
       padding: 10px;
-      margin: 10px 0;
+      background: #f8f9fa;
       border-radius: 4px;
     }
     
-    .loading { background: #e3f2fd; color: #1976d2; }
-    .error { background: #ffebee; color: #c62828; }
-    .success { background: #e8f5e8; color: #2e7d32; }
-    
-    table {
+    .entries-table {
       width: 100%;
       border-collapse: collapse;
-      margin: 15px 0;
+      margin-top: 15px;
     }
     
-    th, td {
+    .entries-table th,
+    .entries-table td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
     }
     
-    th {
-      background: #f5f5f5;
+    .entries-table th {
+      background: #f8f9fa;
       font-weight: bold;
+    }
+    
+    .entries-table tbody tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+    
+    .result-select {
+      width: 100%;
+      padding: 4px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin: 30px 0;
+      padding-top: 20px;
+      border-top: 2px solid #eee;
+    }
+    
+    .preview-section {
+      background: #f8f9fa;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+    
+    .preview-section h2 {
+      margin-top: 0;
+      color: #333;
+      text-align: center;
+    }
+    
+    .preview-class {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    
+    .preview-class h3 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    .loading {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
+    
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    
+    .success {
+      background: #d4edda;
+      color: #155724;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
     }
   </style>
 </head>
@@ -235,219 +300,109 @@
     <div class="preview-section">
       <h2>📋 Report Preview</h2>
       <div id="previewContainer">
-        <p class="loading">Add classes to see preview...</p>
+        <p class="loading">Add trial information and classes to see preview...</p>
       </div>
     </div>
   </div>
 
   <script type="module">
-    // Firebase imports
     import { auth, db } from './js/firebase.js';
-    import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+    import { 
+      saveSummary as saveToFirebase, 
+      updateSummary, 
+      loadSummary, 
+      validateSummaryData,
+      calculateSummaryStatistics 
+    } from './js/summary-firebase.js';
 
-    // ========================================
-    // STANDARDIZED FIELD NAMES (CRITICAL FIX)
-    // ========================================
-
-    // Use these EXACT field names everywhere:
-    const STANDARD_FIELDS = {
-      HANDLER_NAME: 'handlerName',      // NOT 'Handler' or 'handler'
-      DOG_CALL_NAME: 'dogCallName',     // NOT 'Call Name' or 'dogName'
-      JUDGE_NAME: 'judgeName',          // NOT 'judge' or 'judgeAssigned'
-      CLASS_NAME: 'className',          // NOT 'Class' or 'class'
-      CWAGS_NUMBER: 'cwagsNumber'       // NOT 'Registration'
-    };
-
-    // ========================================
-    // GLOBAL STATE
-    // ========================================
-
+    // Global state
+    let currentSummaryId = null;
     let summaryData = {
       hostName: '',
       dateRange: '',
       classes: []
     };
 
-    // ========================================
-    // INITIALIZATION
-    // ========================================
-
+    // Initialize the form
     document.addEventListener('DOMContentLoaded', function() {
-      console.log("Class Summary Generator initializing with standardized fields...");
+      // Check if we're editing an existing summary
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
       
-      // Bind event listeners
-      document.getElementById('hostName').addEventListener('input', (e) => {
-        summaryData.hostName = e.target.value;
-        updatePreview();
-      });
-      
-      document.getElementById('dateRange').addEventListener('input', (e) => {
-        summaryData.dateRange = e.target.value;
-        updatePreview();
-      });
-      
-      // Initialize with one empty class
-      addClass();
+      if (editId) {
+        loadExistingSummary(editId);
+      } else {
+        // Start with one empty class
+        addClass();
+      }
+
+      // Bind form change events
+      document.getElementById('hostName').addEventListener('input', updateTrialInfo);
+      document.getElementById('dateRange').addEventListener('input', updateTrialInfo);
     });
 
     // ========================================
-    // FIELD NORMALIZATION FUNCTIONS
+    // SUMMARY MANAGEMENT
     // ========================================
 
-    function normalizeEntry(entry) {
-      const normalized = {};
-      
-      // Handle different possible field names and normalize to standard
-      normalized[STANDARD_FIELDS.HANDLER_NAME] = entry[STANDARD_FIELDS.HANDLER_NAME] || 
-                                                  entry.Handler || 
-                                                  entry.handler || 
-                                                  entry.handlerName || '';
-      
-      normalized[STANDARD_FIELDS.DOG_CALL_NAME] = entry[STANDARD_FIELDS.DOG_CALL_NAME] || 
-                                                   entry['Call Name'] || 
-                                                   entry.callName || 
-                                                   entry.dogName || 
-                                                   entry.dogCallName || '';
-      
-      normalized[STANDARD_FIELDS.JUDGE_NAME] = entry[STANDARD_FIELDS.JUDGE_NAME] || 
-                                               entry.judge || 
-                                               entry.judgeAssigned || 
-                                               entry.judgeName || '';
-      
-      normalized[STANDARD_FIELDS.CWAGS_NUMBER] = entry[STANDARD_FIELDS.CWAGS_NUMBER] || 
-                                                 entry.Registration || 
-                                                 entry.registration || 
-                                                 entry.cwagsNumber || '';
-      
-      // Preserve other fields
-      normalized.results = entry.results || [];
-      
-      return normalized;
-    }
-
-    // ========================================
-    // CLASS RENDERING WITH STANDARDIZED FIELDS
-    // ========================================
-
-    function renderClasses() {
-      const container = document.getElementById('classesContainer');
-      
-      container.innerHTML = summaryData.classes.map((classItem, classIndex) => `
-        <div class="class-container">
-          <div class="class-header">
-            <div class="class-title">Class ${classItem.id}</div>
-            <button onclick="removeClass(${classIndex})" class="btn btn-danger btn-sm">Remove Class</button>
-          </div>
-          
-          <div class="form-group">
-            <label for="className_${classIndex}">Class Name:</label>
-            <input type="text" id="className_${classIndex}" value="${classItem.name || ''}" 
-                   onchange="updateClassName(${classIndex}, this.value)"
-                   placeholder="e.g., Level 1 Container Search">
-          </div>
-          
-          ${renderDatesSection(classItem, classIndex)}
-          ${renderEntriesSection(classItem, classIndex)}
-        </div>
-      `).join('');
-    }
-
-    function renderDatesSection(classItem, classIndex) {
-      return `
-        <div class="dates-section">
-          <h4>Trial Dates & Judges</h4>
-          ${(classItem.dates || []).map((dateItem, dateIndex) => `
-            <div class="date-row">
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Date:</label>
-                  <input type="date" value="${dateItem.date || ''}" 
-                         onchange="updateDate(${classIndex}, ${dateIndex}, 'date', this.value)">
-                </div>
-                <div class="form-group">
-                  <label>Judge:</label>
-                  <input type="text" value="${dateItem[STANDARD_FIELDS.JUDGE_NAME] || dateItem.judge || ''}" 
-                         onchange="updateDate(${classIndex}, ${dateIndex}, '${STANDARD_FIELDS.JUDGE_NAME}', this.value)"
-                         placeholder="Judge name">
-                </div>
-              </div>
-              <button onclick="removeDate(${classIndex}, ${dateIndex})" class="btn btn-danger btn-sm">Remove Date</button>
-            </div>
-          `).join('')}
-          <button onclick="addDate(${classIndex})" class="btn btn-primary btn-sm">+ Add Date</button>
-        </div>
-      `;
-    }
-
-    function renderEntriesSection(classItem, classIndex) {
-      if (!classItem.dates || classItem.dates.length === 0) {
-        return `
-          <div class="entries-section">
-            <h4>Entries</h4>
-            <p>Add at least one date to manage entries.</p>
-          </div>
-        `;
+    async function loadExistingSummary(summaryId) {
+      try {
+        showLoading('Loading summary data...');
+        const summary = await loadSummary(summaryId);
+        
+        currentSummaryId = summaryId;
+        summaryData = summary;
+        
+        // Populate form
+        document.getElementById('hostName').value = summary.hostName || '';
+        document.getElementById('dateRange').value = summary.dateRange || '';
+        
+        // Render classes
+        renderClasses();
+        updatePreview();
+        
+        hideLoading();
+        showSuccess('Summary loaded successfully!');
+        
+      } catch (error) {
+        console.error('Error loading summary:', error);
+        showError('Failed to load summary: ' + error.message);
+        hideLoading();
       }
-
-      return `
-        <div class="entries-section">
-          <h4>Entries</h4>
-          <button onclick="addEntry(${classIndex})" class="btn btn-primary btn-sm">+ Add Entry</button>
-          
-          <table>
-            <thead>
-              <tr>
-                <th>Handler</th>
-                <th>Dog Call Name</th>
-                <th>C-WAGS #</th>
-                ${(classItem.dates || []).map(dateItem => `
-                  <th>${dateItem.date || 'Date'}<br><small>${dateItem[STANDARD_FIELDS.JUDGE_NAME] || dateItem.judge || 'Judge'}</small></th>
-                `).join('')}
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${(classItem.entries || []).map((entry, entryIndex) => {
-                const normalizedEntry = normalizeEntry(entry);
-                return `
-                  <tr>
-                    <td>
-                      <input type="text" value="${normalizedEntry[STANDARD_FIELDS.HANDLER_NAME]}" 
-                             onchange="updateEntry(${classIndex}, ${entryIndex}, '${STANDARD_FIELDS.HANDLER_NAME}', this.value)"
-                             placeholder="Handler name">
-                    </td>
-                    <td>
-                      <input type="text" value="${normalizedEntry[STANDARD_FIELDS.DOG_CALL_NAME]}" 
-                             onchange="updateEntry(${classIndex}, ${entryIndex}, '${STANDARD_FIELDS.DOG_CALL_NAME}', this.value)"
-                             placeholder="Dog call name">
-                    </td>
-                    <td>
-                      <input type="text" value="${normalizedEntry[STANDARD_FIELDS.CWAGS_NUMBER]}" 
-                             onchange="updateEntry(${classIndex}, ${entryIndex}, '${STANDARD_FIELDS.CWAGS_NUMBER}', this.value)"
-                             placeholder="C-WAGS #">
-                    </td>
-                    ${(classItem.dates || []).map((dateItem, dateIndex) => `
-                      <td>
-                        <select onchange="updateResult(${classIndex}, ${entryIndex}, ${dateIndex}, this.value)"
-                                value="${normalizedEntry.results && normalizedEntry.results[dateIndex] ? normalizedEntry.results[dateIndex] : ''}">
-                          <option value="">-</option>
-                          <option value="Pass" ${normalizedEntry.results && normalizedEntry.results[dateIndex] === 'Pass' ? 'selected' : ''}>Pass</option>
-                          <option value="Fail" ${normalizedEntry.results && normalizedEntry.results[dateIndex] === 'Fail' ? 'selected' : ''}>Fail</option>
-                          <option value="XX" ${normalizedEntry.results && normalizedEntry.results[dateIndex] === 'XX' ? 'selected' : ''}>XX</option>
-                        </select>
-                      </td>
-                    `).join('')}
-                    <td>
-                      <button onclick="removeEntry(${classIndex}, ${entryIndex})" class="btn btn-danger btn-sm">Remove</button>
-                    </td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
     }
+
+    window.saveSummary = async function() {
+      try {
+        // Validate data
+        const validation = validateSummaryData(summaryData);
+        if (!validation.isValid) {
+          showError('Please fix the following errors: ' + validation.errors.join(', '));
+          return;
+        }
+
+        showLoading('Saving summary...');
+
+        let savedId;
+        if (currentSummaryId) {
+          // Update existing summary
+          await updateSummary(currentSummaryId, summaryData);
+          savedId = currentSummaryId;
+          showSuccess('Summary updated successfully!');
+        } else {
+          // Save new summary
+          savedId = await saveToFirebase(summaryData);
+          currentSummaryId = savedId;
+          showSuccess('Summary saved successfully!');
+        }
+
+        hideLoading();
+        
+      } catch (error) {
+        console.error('Error saving summary:', error);
+        showError('Failed to save summary: ' + error.message);
+        hideLoading();
+      }
+    };
 
     // ========================================
     // CLASS MANAGEMENT
@@ -466,7 +421,7 @@
       updatePreview();
     };
 
-    window.removeClass = function(classIndex) {
+    function removeClass(classIndex) {
       summaryData.classes.splice(classIndex, 1);
       // Re-number classes
       summaryData.classes.forEach((cls, index) => {
@@ -474,25 +429,25 @@
       });
       renderClasses();
       updatePreview();
-    };
+    }
 
-    window.updateClassName = function(classIndex, name) {
+    function updateClassName(classIndex, name) {
       summaryData.classes[classIndex].name = name;
       updatePreview();
-    };
+    }
 
     // ========================================
     // DATE MANAGEMENT
     // ========================================
 
-    window.addDate = function(classIndex) {
+    function addDate(classIndex) {
       if (!summaryData.classes[classIndex].dates) {
         summaryData.classes[classIndex].dates = [];
       }
       
       summaryData.classes[classIndex].dates.push({
         date: '',
-        [STANDARD_FIELDS.JUDGE_NAME]: ''
+        judge: ''
       });
       
       // Update all existing entries to have results for the new date
@@ -503,9 +458,9 @@
       
       renderClasses();
       updatePreview();
-    };
+    }
 
-    window.removeDate = function(classIndex, dateIndex) {
+    function removeDate(classIndex, dateIndex) {
       summaryData.classes[classIndex].dates.splice(dateIndex, 1);
       
       // Remove results for this date from all entries
@@ -517,58 +472,178 @@
       
       renderClasses();
       updatePreview();
-    };
+    }
 
-    window.updateDate = function(classIndex, dateIndex, field, value) {
+    function updateDate(classIndex, dateIndex, field, value) {
       summaryData.classes[classIndex].dates[dateIndex][field] = value;
       updatePreview();
-    };
+    }
 
     // ========================================
-    // ENTRY MANAGEMENT WITH STANDARDIZED FIELDS
+    // ENTRY MANAGEMENT
     // ========================================
 
-    window.addEntry = function(classIndex) {
+    function addEntry(classIndex) {
       if (!summaryData.classes[classIndex].entries) {
         summaryData.classes[classIndex].entries = [];
       }
       
       const numDates = summaryData.classes[classIndex].dates ? summaryData.classes[classIndex].dates.length : 0;
       
-      const newEntry = {
-        [STANDARD_FIELDS.HANDLER_NAME]: '',
-        [STANDARD_FIELDS.DOG_CALL_NAME]: '',
-        [STANDARD_FIELDS.CWAGS_NUMBER]: '',
+      summaryData.classes[classIndex].entries.push({
+        registrationNumber: '',
+        dogName: '',
+        handlerName: '',
         results: new Array(numDates).fill('')
-      };
+      });
       
-      summaryData.classes[classIndex].entries.push(newEntry);
       renderClasses();
       updatePreview();
-    };
+    }
 
-    window.removeEntry = function(classIndex, entryIndex) {
+    function removeEntry(classIndex, entryIndex) {
       summaryData.classes[classIndex].entries.splice(entryIndex, 1);
       renderClasses();
       updatePreview();
-    };
+    }
 
-    window.updateEntry = function(classIndex, entryIndex, field, value) {
+    function updateEntry(classIndex, entryIndex, field, value) {
       summaryData.classes[classIndex].entries[entryIndex][field] = value;
       updatePreview();
-    };
+    }
 
-    window.updateResult = function(classIndex, entryIndex, dateIndex, value) {
+    function updateResult(classIndex, entryIndex, dateIndex, value) {
       if (!summaryData.classes[classIndex].entries[entryIndex].results) {
         summaryData.classes[classIndex].entries[entryIndex].results = [];
       }
       summaryData.classes[classIndex].entries[entryIndex].results[dateIndex] = value;
       updatePreview();
-    };
+    }
 
     // ========================================
-    // PREVIEW GENERATION WITH STANDARDIZED FIELDS
+    // RENDERING FUNCTIONS
     // ========================================
+
+    function renderClasses() {
+      const container = document.getElementById('classesContainer');
+      
+      container.innerHTML = summaryData.classes.map((classItem, classIndex) => `
+        <div class="class-container">
+          <div class="class-header">
+            <h2>Class ${classItem.id}</h2>
+            <button class="btn btn-danger" onclick="removeClass(${classIndex})">Remove Class</button>
+          </div>
+          
+          <div class="form-group">
+            <label>Class Name:</label>
+            <input type="text" value="${classItem.name}" 
+                   onchange="updateClassName(${classIndex}, this.value)"
+                   placeholder="e.g., Patrol Level 1">
+          </div>
+          
+          <div class="dates-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3>Dates & Judges</h3>
+              <button class="btn btn-primary" onclick="addDate(${classIndex})">+ Add Date</button>
+            </div>
+            
+            ${classItem.dates ? classItem.dates.map((date, dateIndex) => `
+              <div class="date-item">
+                <div class="form-group" style="margin: 0;">
+                  <label>Date:</label>
+                  <input type="date" value="${date.date || ''}" 
+                         onchange="updateDate(${classIndex}, ${dateIndex}, 'date', this.value)">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                  <label>Judge:</label>
+                  <input type="text" value="${date.judge || ''}" 
+                         onchange="updateDate(${classIndex}, ${dateIndex}, 'judge', this.value)"
+                         placeholder="Judge Name">
+                </div>
+                <button class="btn btn-danger" onclick="removeDate(${classIndex}, ${dateIndex})">Remove</button>
+              </div>
+            `).join('') : ''}
+          </div>
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3>Entries</h3>
+            <button class="btn btn-success" onclick="addEntry(${classIndex})">+ Add Dog</button>
+          </div>
+          
+          ${renderEntriesTable(classItem, classIndex)}
+          
+          <div style="text-align: right; margin-top: 10px; color: #666; font-weight: bold;">
+            Total Entries: ${classItem.entries ? classItem.entries.length : 0}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderEntriesTable(classItem, classIndex) {
+      if (!classItem.entries || classItem.entries.length === 0 || !classItem.dates || classItem.dates.length === 0) {
+        return '<p style="color: #666; font-style: italic;">Add dates and dogs to start building your class report.</p>';
+      }
+      
+      return `
+        <table class="entries-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Registration Number</th>
+              <th>Dog's Call Name</th>
+              <th>Handler</th>
+              ${classItem.dates.map((date, dateIndex) => `
+                <th>${date.date}<br>${date.judge}</th>
+              `).join('')}
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${classItem.entries.map((entry, entryIndex) => `
+              <tr>
+                <td>${entryIndex + 1}</td>
+                <td>
+                  <input type="text" value="${entry.registrationNumber || ''}" 
+                         onchange="updateEntry(${classIndex}, ${entryIndex}, 'registrationNumber', this.value)"
+                         placeholder="Reg #">
+                </td>
+                <td>
+                  <input type="text" value="${entry.dogName || ''}" 
+                         onchange="updateEntry(${classIndex}, ${entryIndex}, 'dogName', this.value)"
+                         placeholder="Dog Name">
+                </td>
+                <td>
+                  <input type="text" value="${entry.handlerName || ''}" 
+                         onchange="updateEntry(${classIndex}, ${entryIndex}, 'handlerName', this.value)"
+                         placeholder="Handler Name">
+                </td>
+                ${classItem.dates.map((date, dateIndex) => `
+                  <td>
+                    <select class="result-select" 
+                            onchange="updateResult(${classIndex}, ${entryIndex}, ${dateIndex}, this.value)"
+                            value="${entry.results && entry.results[dateIndex] ? entry.results[dateIndex] : ''}">
+                      <option value="">-</option>
+                      <option value="Pass" ${entry.results && entry.results[dateIndex] === 'Pass' ? 'selected' : ''}>Pass</option>
+                      <option value="Fail" ${entry.results && entry.results[dateIndex] === 'Fail' ? 'selected' : ''}>Fail</option>
+                      <option value="XX" ${entry.results && entry.results[dateIndex] === 'XX' ? 'selected' : ''}>XX</option>
+                    </select>
+                  </td>
+                `).join('')}
+                <td>
+                  <button class="btn btn-danger" onclick="removeEntry(${classIndex}, ${entryIndex})">Remove</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function updateTrialInfo() {
+      summaryData.hostName = document.getElementById('hostName').value;
+      summaryData.dateRange = document.getElementById('dateRange').value;
+      updatePreview();
+    }
 
     function updatePreview() {
       const container = document.getElementById('previewContainer');
@@ -578,85 +653,90 @@
         return;
       }
       
-      const previewHTML = `
-        <div class="preview-header" style="text-align: center; margin-bottom: 30px;">
-          <h2>C-WAGS Class Results</h2>
-          <h3>${summaryData.hostName || '[Host Name]'}</h3>
-          <p><strong>Trial Dates:</strong> ${summaryData.dateRange || '[Date Range]'}</p>
-        </div>
+      const previewHTML = summaryData.classes.map((classItem, classIndex) => {
+        if (!classItem.name) return '';
         
-        ${summaryData.classes.map(classItem => `
+        return `
           <div class="preview-class">
-            <h3>${classItem.name || '[Class Name]'}</h3>
-            <p><strong>Total Entries:</strong> ${classItem.entries ? classItem.entries.length : 0}</p>
-            
-            ${classItem.entries && classItem.entries.length > 0 && classItem.dates && classItem.dates.length > 0 ? `
-              <table>
-                <thead>
-                  <tr>
-                    <th>Handler</th>
-                    <th>Dog</th>
-                    <th>C-WAGS #</th>
-                    ${classItem.dates.map(dateItem => `
-                      <th>${dateItem.date || 'Date'}<br><small>${dateItem[STANDARD_FIELDS.JUDGE_NAME] || 'Judge'}</small></th>
-                    `).join('')}
-                  </tr>
-                </thead>
-                <tbody>
-                  ${classItem.entries.map(entry => {
-                    const normalizedEntry = normalizeEntry(entry);
-                    return `
+            <h3>C-WAGS CLASS RESULTS REPORT</h3>
+            <div style="border: 1px solid #ddd; padding: 15px; background: white;">
+              <p><strong>Host:</strong> ${summaryData.hostName}</p>
+              <p><strong>Dates - From - To:</strong> ${summaryData.dateRange}</p>
+              <p><strong>Class:</strong> ${classItem.name}</p>
+              <p><strong>Total # of Entries:</strong> ${classItem.entries ? classItem.entries.length : 0}</p>
+              
+              ${classItem.entries && classItem.entries.length > 0 && classItem.dates && classItem.dates.length > 0 ? `
+                <table class="entries-table" style="margin-top: 15px;">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Registration Number</th>
+                      <th>Dog's Call Name</th>
+                      <th>Handler</th>
+                      ${classItem.dates.map(date => `
+                        <th style="text-align: center;">
+                          ${date.date}<br/>${date.judge}
+                        </th>
+                      `).join('')}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${classItem.entries.map((entry, entryIndex) => `
                       <tr>
-                        <td>${normalizedEntry[STANDARD_FIELDS.HANDLER_NAME] || ''}</td>
-                        <td>${normalizedEntry[STANDARD_FIELDS.DOG_CALL_NAME] || ''}</td>
-                        <td>${normalizedEntry[STANDARD_FIELDS.CWAGS_NUMBER] || ''}</td>
-                        ${(normalizedEntry.results || []).map(result => `
-                          <td>${result || '-'}</td>
+                        <td style="text-align: center;">${entryIndex + 1}</td>
+                        <td>${entry.registrationNumber || ''}</td>
+                        <td>${entry.dogName || ''}</td>
+                        <td>${entry.handlerName || ''}</td>
+                        ${classItem.dates.map((date, dateIndex) => `
+                          <td style="text-align: center;">
+                            ${entry.results && entry.results[dateIndex] ? entry.results[dateIndex] : ''}
+                          </td>
                         `).join('')}
                       </tr>
-                    `;
-                  }).join('')}
-                </tbody>
-              </table>
-            ` : '<p>No entries added yet.</p>'}
+                    `).join('')}
+                  </tbody>
+                </table>
+              ` : `
+                <p style="color: #666; font-style: italic; margin-top: 15px;">
+                  Add dates and entries to see the complete report preview.
+                </p>
+              `}
+            </div>
           </div>
-        `).join('')}
-      `;
+        `;
+      }).join('');
       
-      container.innerHTML = previewHTML;
+      container.innerHTML = previewHTML || '<p class="loading">Add classes to see preview...</p>';
     }
 
     // ========================================
-    // SAVE/LOAD FUNCTIONALITY
+    // REPORT GENERATION
     // ========================================
 
-    window.saveSummary = async function() {
-      try {
-        showLoading('Saving summary...');
-        
-        // Normalize all entries before saving
-        const normalizedData = {
-          ...summaryData,
-          classes: summaryData.classes.map(classItem => ({
-            ...classItem,
-            entries: (classItem.entries || []).map(entry => normalizeEntry(entry))
-          }))
-        };
-        
-        // Save to Firebase (implement this function)
-        // const docRef = await addDoc(collection(db, 'summaries'), normalizedData);
-        
-        showSuccess('Summary saved successfully!');
-        hideLoading();
-      } catch (error) {
-        console.error('Error saving summary:', error);
-        showError('Failed to save summary: ' + error.message);
-        hideLoading();
-      }
-    };
-
     window.generateReport = function() {
-      window.print();
+      // Validate data first
+      const validation = validateSummaryData(summaryData);
+      if (!validation.isValid) {
+        showError('Please fix the following errors before generating report: ' + validation.errors.join(', '));
+        return;
+      }
+
+      // For now, we'll show an alert. In a real implementation, this would generate a PDF
+      const stats = calculateSummaryStatistics(summaryData);
+      
+      alert(`Report would be generated with the following data:
+      
+Host: ${summaryData.hostName}
+Date Range: ${summaryData.dateRange}
+Total Classes: ${stats.totalClasses}
+Total Entries: ${stats.totalEntries}
+Total Runs: ${stats.totalRuns}
+Qualifying Runs: ${stats.qualifyingRuns}
+
+This would integrate with your existing PDF generation system.`);
+      
+      // Here you would call your existing PDF generation functions
+      // generateClassResultsPDF(summaryData);
     };
 
     // ========================================
@@ -691,7 +771,18 @@
       }, 3000);
     }
 
-    console.log("Class Summary Generator loaded successfully with standardized field names");
+    // Make functions globally available
+    window.removeClass = removeClass;
+    window.updateClassName = updateClassName;
+    window.addDate = addDate;
+    window.removeDate = removeDate;
+    window.updateDate = updateDate;
+    window.addEntry = addEntry;
+    window.removeEntry = removeEntry;
+    window.updateEntry = updateEntry;
+    window.updateResult = updateResult;
+
+    console.log("Class Summary Generator loaded successfully");
   </script>
 </body>
 </html>
