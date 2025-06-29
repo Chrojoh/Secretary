@@ -7,3 +7,83 @@ input, select, button {
   margin: 10px 0;
   padding: 8px;
 }
+/* Enhanced Trial Actions Styling */
+.trial-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.trial-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 70px;
+  justify-content: center;
+}
+
+.trial-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.view-btn {
+  background: #17a2b8 !important;
+  color: white !important;
+}
+
+.view-btn:hover {
+  background: #138496 !important;
+}
+
+.edit-btn {
+  background: #28a745 !important;
+  color: white !important;
+}
+
+.edit-btn:hover {
+  background: #218838 !important;
+}
+
+.delete-btn {
+  background: #dc3545 !important;
+  color: white !important;
+}
+
+.delete-btn:hover {
+  background: #c82333 !important;
+}
+
+/* Ensure trial items look good */
+.trial-item {
+  border: 1px solid #ddd;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  transition: box-shadow 0.2s ease;
+}
+
+.trial-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.trial-item h3 {
+  margin: 10px 0 10px 0;
+  color: #333;
+  font-size: 1.1em;
+}
+
+.trial-details {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
