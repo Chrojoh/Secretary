@@ -16,19 +16,8 @@ import {
   Timestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-// ===========================================
-// STANDARD FIELD DEFINITIONS
-// ===========================================
-const STANDARD_FIELDS = {
-  HANDLER_NAME: 'handlerName',    // NOT 'Handler' or 'handler'
-  DOG_CALL_NAME: 'dogCallName',   // NOT 'Call Name' or 'dogName'
-  JUDGE_NAME: 'judgeName',        // NOT 'judge' or 'judgeAssigned'
-  CLASS_NAME: 'className',        // NOT 'Class' or 'class'
-  CWAGS_NUMBER: 'cwagsNumber'     // NOT 'Registration'
-};
-
 // ========================================
-// TIMEZONE-SAFE DATE UTILITIES
+// TIMEZONE-SAFE DATE UTILITIES (from your existing code)
 // ========================================
 
 function createLocalDate(dateStr) {
@@ -60,122 +49,6 @@ function getDateFromFirebase(timestamp) {
 }
 
 // ========================================
-// DATA NORMALIZATION FUNCTIONS
-// ========================================
-
-/**
- * Normalize entry data to use standardized field names
- * @param {Object} entry - Entry data to normalize
- * @returns {Object} - Normalized entry data
- */
-function normalizeEntry(entry) {
-  if (!entry) return entry;
-  
-  const normalized = { ...entry };
-  
-  // Handler name normalization
-  if (entry.handler || entry.Handler) {
-    normalized[STANDARD_FIELDS.HANDLER_NAME] = entry.handler || entry.Handler;
-    delete normalized.handler;
-    delete normalized.Handler;
-  }
-  
-  // Dog call name normalization
-  if (entry.dogName || entry['Call Name'] || entry.callName) {
-    normalized[STANDARD_FIELDS.DOG_CALL_NAME] = entry.dogName || entry['Call Name'] || entry.callName;
-    delete normalized.dogName;
-    delete normalized['Call Name'];
-    delete normalized.callName;
-  }
-  
-  // Judge name normalization
-  if (entry.judge || entry.judgeAssigned) {
-    normalized[STANDARD_FIELDS.JUDGE_NAME] = entry.judge || entry.judgeAssigned;
-    delete normalized.judge;
-    delete normalized.judgeAssigned;
-  }
-  
-  // Class name normalization
-  if (entry.Class || entry.class) {
-    normalized[STANDARD_FIELDS.CLASS_NAME] = entry.Class || entry.class;
-    delete normalized.Class;
-    delete normalized.class;
-  }
-  
-  // CWAGS number normalization
-  if (entry.Registration || entry.registration || entry.registrationNumber) {
-    normalized[STANDARD_FIELDS.CWAGS_NUMBER] = entry.Registration || entry.registration || entry.registrationNumber;
-    delete normalized.Registration;
-    delete normalized.registration;
-    delete normalized.registrationNumber;
-  }
-  
-  return normalized;
-}
-
-/**
- * Normalize class data to use standardized field names
- * @param {Object} classItem - Class data to normalize
- * @returns {Object} - Normalized class data
- */
-function normalizeClassData(classItem) {
-  if (!classItem) return classItem;
-  
-  const normalized = { ...classItem };
-  
-  // Class name normalization
-  if (classItem.name && !normalized[STANDARD_FIELDS.CLASS_NAME]) {
-    normalized[STANDARD_FIELDS.CLASS_NAME] = classItem.name;
-  }
-  if (classItem.Class || classItem.class) {
-    normalized[STANDARD_FIELDS.CLASS_NAME] = classItem.Class || classItem.class;
-    delete normalized.Class;
-    delete normalized.class;
-  }
-  
-  // Normalize entries within the class
-  if (normalized.entries && Array.isArray(normalized.entries)) {
-    normalized.entries = normalized.entries.map(entry => normalizeEntry(entry));
-  }
-  
-  // Normalize dates with judge information
-  if (normalized.dates && Array.isArray(normalized.dates)) {
-    normalized.dates = normalized.dates.map(dateItem => {
-      const normalizedDate = { ...dateItem };
-      
-      // Judge name normalization in date items
-      if (dateItem.judge || dateItem.judgeAssigned) {
-        normalizedDate[STANDARD_FIELDS.JUDGE_NAME] = dateItem.judge || dateItem.judgeAssigned;
-        delete normalizedDate.judge;
-        delete normalizedDate.judgeAssigned;
-      }
-      
-      return normalizedDate;
-    });
-  }
-  
-  return normalized;
-}
-
-/**
- * Normalize summary data to use standardized field names
- * @param {Object} summaryData - Summary data to normalize
- * @returns {Object} - Normalized summary data
- */
-function normalizeSummaryData(summaryData) {
-  if (!summaryData) return summaryData;
-  
-  const normalized = { ...summaryData };
-  
-  // Normalize classes array
-  if (normalized.classes && Array.isArray(normalized.classes)) {
-    normalized.classes = normalized.classes.map(classItem => normalizeClassData(classItem));
-  }
-  
-  return normalized;
-}
-
-// ========================================
 // SUMMARY DATA MANAGEMENT
 // ========================================
 
@@ -190,17 +63,14 @@ export async function saveSummary(summaryData) {
   }
 
   try {
-    // Normalize data before saving
-    const normalizedData = normalizeSummaryData(summaryData);
-    
     // Prepare data for Firebase storage
     const firebaseData = {
-      ...normalizedData,
+      ...summaryData,
       createdBy: auth.currentUser.uid,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       // Process classes to handle dates properly
-      classes: normalizedData.classes ? normalizedData.classes.map(classItem => ({
+      classes: summaryData.classes ? summaryData.classes.map(classItem => ({
         ...classItem,
         dates: classItem.dates ? classItem.dates.map(dateItem => ({
           ...dateItem,
@@ -210,7 +80,7 @@ export async function saveSummary(summaryData) {
     };
 
     const docRef = await addDoc(collection(db, "classSummaries"), firebaseData);
-    console.log("Summary saved with ID (standardized fields):", docRef.id);
+    console.log("Summary saved with ID:", docRef.id);
     return docRef.id;
     
   } catch (error) {
@@ -231,15 +101,12 @@ export async function updateSummary(summaryId, summaryData) {
   }
 
   try {
-    // Normalize data before updating
-    const normalizedData = normalizeSummaryData(summaryData);
-    
     // Prepare data for Firebase storage
     const firebaseData = {
-      ...normalizedData,
+      ...summaryData,
       updatedAt: Timestamp.now(),
       // Process classes to handle dates properly
-      classes: normalizedData.classes ? normalizedData.classes.map(classItem => ({
+      classes: summaryData.classes ? summaryData.classes.map(classItem => ({
         ...classItem,
         dates: classItem.dates ? classItem.dates.map(dateItem => ({
           ...dateItem,
@@ -249,7 +116,7 @@ export async function updateSummary(summaryId, summaryData) {
     };
 
     await updateDoc(doc(db, "classSummaries", summaryId), firebaseData);
-    console.log("Summary updated (standardized fields):", summaryId);
+    console.log("Summary updated:", summaryId);
     
   } catch (error) {
     console.error("Error updating summary:", error);
@@ -264,47 +131,6 @@ export async function updateSummary(summaryId, summaryData) {
  */
 export async function loadSummary(summaryId) {
   try {
-    const docSnap = await getDoc(doc(db, "classSummaries", summaryId));
-    
-    if (!docSnap.exists()) {
-      throw new Error("Summary not found");
-    }
-
-    const data = docSnap.data();
-    
-    // Process dates back from Firebase and normalize
-    const processedData = {
-      ...data,
-      classes: data.classes ? data.classes.map(classItem => normalizeClassData({
-        ...classItem,
-        dates: classItem.dates ? classItem.dates.map(dateItem => ({
-          ...dateItem,
-          date: getDateFromFirebase(dateItem.date)
-        })) : []
-      })) : []
-    };
-
-    return {
-      id: docSnap.id,
-      ...processedData
-    };
-    
-  } catch (error) {
-    console.error("Error loading summary:", error);
-    throw new Error("Failed to load summary: " + error.message);
-  }
-}
-
-/**
- * Load all summaries for current user
- * @returns {Promise<Array>} - Array of summary objects
- */
-export async function loadUserSummaries() {
-  if (!auth.currentUser) {
-    return [];
-  }
-
-  try {
     const summariesQuery = query(
       collection(db, "classSummaries"),
       where("createdBy", "==", auth.currentUser.uid),
@@ -316,10 +142,10 @@ export async function loadUserSummaries() {
     const summaries = querySnapshot.docs.map(doc => {
       const data = doc.data();
       
-      // Process dates back from Firebase and normalize
+      // Process dates back from Firebase
       const processedData = {
         ...data,
-        classes: data.classes ? data.classes.map(classItem => normalizeClassData({
+        classes: data.classes ? data.classes.map(classItem => ({
           ...classItem,
           dates: classItem.dates ? classItem.dates.map(dateItem => ({
             ...dateItem,
@@ -389,17 +215,14 @@ export async function saveGeneratedReport(reportData) {
   }
 
   try {
-    // Normalize report data
-    const normalizedData = normalizeSummaryData(reportData);
-    
     const firebaseData = {
-      ...normalizedData,
+      ...reportData,
       createdBy: auth.currentUser.uid,
       createdAt: Timestamp.now()
     };
 
     const docRef = await addDoc(collection(db, "generatedReports"), firebaseData);
-    console.log("Report saved with ID (standardized fields):", docRef.id);
+    console.log("Report saved with ID:", docRef.id);
     return docRef.id;
     
   } catch (error) {
@@ -426,13 +249,10 @@ export async function loadUserReports() {
     
     const querySnapshot = await getDocs(reportsQuery);
     
-    const reports = querySnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...normalizeSummaryData(data)
-      };
-    });
+    const reports = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
     return reports;
     
@@ -484,9 +304,7 @@ export async function deleteGeneratedReport(reportId) {
  * @returns {Object} - Statistics object
  */
 export function calculateSummaryStatistics(summaryData) {
-  const normalizedData = normalizeSummaryData(summaryData);
-  
-  if (!normalizedData.classes) {
+  if (!summaryData.classes) {
     return {
       totalClasses: 0,
       totalEntries: 0,
@@ -499,7 +317,7 @@ export function calculateSummaryStatistics(summaryData) {
   let totalRuns = 0;
   let qualifyingRuns = 0;
 
-  normalizedData.classes.forEach(classItem => {
+  summaryData.classes.forEach(classItem => {
     if (classItem.entries) {
       totalEntries += classItem.entries.length;
       
@@ -519,7 +337,7 @@ export function calculateSummaryStatistics(summaryData) {
   });
 
   return {
-    totalClasses: normalizedData.classes.length,
+    totalClasses: summaryData.classes.length,
     totalEntries,
     totalRuns,
     qualifyingRuns
@@ -532,24 +350,21 @@ export function calculateSummaryStatistics(summaryData) {
  * @returns {Object} - Validation result
  */
 export function validateSummaryData(summaryData) {
-  const normalizedData = normalizeSummaryData(summaryData);
   const errors = [];
   
-  if (!normalizedData.hostName || normalizedData.hostName.trim() === '') {
+  if (!summaryData.hostName || summaryData.hostName.trim() === '') {
     errors.push("Host name is required");
   }
   
-  if (!normalizedData.dateRange || normalizedData.dateRange.trim() === '') {
+  if (!summaryData.dateRange || summaryData.dateRange.trim() === '') {
     errors.push("Date range is required");
   }
   
-  if (!normalizedData.classes || normalizedData.classes.length === 0) {
+  if (!summaryData.classes || summaryData.classes.length === 0) {
     errors.push("At least one class is required");
   } else {
-    normalizedData.classes.forEach((classItem, index) => {
-      // Check for class name using standardized field
-      const className = classItem[STANDARD_FIELDS.CLASS_NAME] || classItem.name;
-      if (!className || className.trim() === '') {
+    summaryData.classes.forEach((classItem, index) => {
+      if (!classItem.name || classItem.name.trim() === '') {
         errors.push(`Class ${index + 1} name is required`);
       }
     });
@@ -566,7 +381,7 @@ export function validateSummaryData(summaryData) {
 // ========================================
 
 /**
- * Create a summary from trial data using standardized field names
+ * Create a summary from trial data
  * @param {Object} trialData - Trial data from your existing system
  * @returns {Object} - Summary data structure
  */
@@ -584,29 +399,23 @@ export function createSummaryFromTrial(trialData) {
     trialData.days.forEach(day => {
       if (day.classes) {
         day.classes.forEach(classItem => {
-          // Use standardized class name field
-          const className = classItem[STANDARD_FIELDS.CLASS_NAME] || classItem.className || classItem.Class || classItem.class;
-          
-          if (!classMap.has(className)) {
-            classMap.set(className, {
+          if (!classMap.has(classItem.className)) {
+            classMap.set(classItem.className, {
               id: classMap.size + 1,
-              [STANDARD_FIELDS.CLASS_NAME]: className,
-              name: className, // Keep for backward compatibility
+              name: classItem.className,
               dates: [],
               entries: []
             });
           }
           
-          const summaryClass = classMap.get(className);
+          const summaryClass = classMap.get(classItem.className);
           
-          // Add date/judge information using standardized fields
+          // Add date/judge information
           if (classItem.rounds) {
             classItem.rounds.forEach(round => {
-              const judgeName = round[STANDARD_FIELDS.JUDGE_NAME] || round.judge || round.judgeAssigned || '';
               summaryClass.dates.push({
                 date: day.date,
-                [STANDARD_FIELDS.JUDGE_NAME]: judgeName,
-                judge: judgeName // Keep for backward compatibility
+                judge: round.judge || ''
               });
             });
           }
@@ -618,23 +427,6 @@ export function createSummaryFromTrial(trialData) {
   }
 
   return summary;
-}
-
-/**
- * Create entry data using standardized field names
- * @param {Object} entryData - Raw entry data
- * @returns {Object} - Standardized entry data
- */
-export function createStandardizedEntry(entryData) {
-  const normalized = normalizeEntry(entryData);
-  
-  return {
-    id: normalized.id || Date.now(),
-    [STANDARD_FIELDS.HANDLER_NAME]: normalized[STANDARD_FIELDS.HANDLER_NAME] || '',
-    [STANDARD_FIELDS.DOG_CALL_NAME]: normalized[STANDARD_FIELDS.DOG_CALL_NAME] || '',
-    [STANDARD_FIELDS.CWAGS_NUMBER]: normalized[STANDARD_FIELDS.CWAGS_NUMBER] || '',
-    results: normalized.results || []
-  };
 }
 
 /**
@@ -654,11 +446,45 @@ function formatDateRange(days) {
   if (dates.length === 1) return dates[0];
   
   return `${dates[0]} - ${dates[dates.length - 1]}`;
+} docSnap = await getDoc(doc(db, "classSummaries", summaryId));
+    
+    if (!docSnap.exists()) {
+      throw new Error("Summary not found");
+    }
+
+    const data = docSnap.data();
+    
+    // Process dates back from Firebase
+    const processedData = {
+      ...data,
+      classes: data.classes ? data.classes.map(classItem => ({
+        ...classItem,
+        dates: classItem.dates ? classItem.dates.map(dateItem => ({
+          ...dateItem,
+          date: getDateFromFirebase(dateItem.date)
+        })) : []
+      })) : []
+    };
+
+    return {
+      id: docSnap.id,
+      ...processedData
+    };
+    
+  } catch (error) {
+    console.error("Error loading summary:", error);
+    throw new Error("Failed to load summary: " + error.message);
+  }
 }
 
-// ========================================
-// EXPORT FOR BACKWARD COMPATIBILITY
-// ========================================
+/**
+ * Load all summaries for current user
+ * @returns {Promise<Array>} - Array of summary objects
+ */
+export async function loadUserSummaries() {
+  if (!auth.currentUser) {
+    return [];
+  }
 
-// Export standard fields for use in other modules
-export { STANDARD_FIELDS };
+  try {
+    const
