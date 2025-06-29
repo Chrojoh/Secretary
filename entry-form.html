@@ -44,6 +44,33 @@
       font-size: 1.1rem;
       opacity: 0.9;
     }
+
+    /* Back to Dashboard Button */
+    .back-to-dashboard {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      padding: 15px 20px;
+    }
+    
+    .back-button {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s ease;
+    }
+    
+    .back-button:hover {
+      background: #5a6268;
+    }
     
     .trial-info {
       background: #f8f9fa;
@@ -503,11 +530,11 @@
       <p id="trialSubtitle">Complete your entry for this C-WAGS trial</p>
     </div>
 
-    <!-- Back to Dashboard Button (Secretary Only) - MOVED BEFORE TRIAL SELECTION -->
-    <div id="backToDashboardSection" style="padding: 1rem; background: #f8f9fa; border-bottom: 1px solid #e9ecef; display: none;">
-      <button onclick="location.href='main-dashboard.html'" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+    <!-- Back to Dashboard Button -->
+    <div class="back-to-dashboard" id="backToDashboardSection">
+      <a href="main-dashboard.html" class="back-button">
         ← Back to Dashboard
-      </button>
+      </a>
     </div>
 
     <!-- Trial Selection (Secretary Only) -->
@@ -719,173 +746,126 @@
 
   <script type="module">
     import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs, addDoc, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-
-    console.log("🎯 Entry form loaded");
+    import { collection, query, where, getDocs, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
     // ========================================
     // GLOBAL DATE HANDLING FIX
     // ========================================
-
-    /**
-     * CORE TIMEZONE-SAFE DATE UTILITIES
-     */
-
+    
     // Creates a date object that stays in local timezone
     function createLocalDate(dateStr) {
-        if (!dateStr) return null;
-        
-        // Always add noon time to prevent timezone shifts
-        if (typeof dateStr === 'string') {
-            const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
-            return new Date(dateWithTime);
-        }
-        
-        return new Date(dateStr);
+      if (!dateStr) return null;
+      
+      // Always add noon time to prevent timezone shifts
+      if (typeof dateStr === 'string') {
+        const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+        return new Date(dateWithTime);
+      }
+      
+      return new Date(dateStr);
     }
 
     // Formats a date to YYYY-MM-DD string in local timezone
     function formatLocalDate(date) {
-        if (!date || !(date instanceof Date)) return '';
-        
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        
-        return `${year}-${month}-${day}`;
+      if (!date || !(date instanceof Date)) return '';
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
     }
 
     // Gets today's date in local timezone as YYYY-MM-DD string
     function getTodayLocal() {
-        const now = new Date();
-        return formatLocalDate(now);
+      const now = new Date();
+      return formatLocalDate(now);
     }
 
     // Formats date for display with timezone consideration
     function formatDateDisplay(dateInput, options = {}) {
-        let date;
-        
-        if (typeof dateInput === 'string') {
-            date = createLocalDate(dateInput);
-        } else if (dateInput instanceof Date) {
-            date = new Date(dateInput);
-        } else {
-            return 'Invalid Date';
-        }
-        
-        if (!date || isNaN(date.getTime())) return 'Invalid Date';
-        
-        const defaultOptions = {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-        };
-        
-        const formatOptions = { ...defaultOptions, ...options };
-        return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+      let date;
+      
+      if (typeof dateInput === 'string') {
+        date = createLocalDate(dateInput);
+      } else if (dateInput instanceof Date) {
+        date = new Date(dateInput);
+      } else {
+        return 'Invalid Date';
+      }
+      
+      if (!date || isNaN(date.getTime())) return 'Invalid Date';
+      
+      const defaultOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+      
+      const formatOptions = { ...defaultOptions, ...options };
+      return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
     }
 
-    /**
-     * Prepares date data for Firebase storage (prevents timezone conversion)
-     */
+    // Prepares date data for Firebase storage (prevents timezone conversion)
     function prepareDateForFirebase(dateStr) {
-        if (!dateStr) return null;
-        
-        // Create a date that represents the exact local date at noon
-        const localDate = createLocalDate(dateStr);
-        
-        // Store as a Firestore Timestamp to maintain precision
-        return localDate;
+      if (!dateStr) return null;
+      
+      // Create a date that represents the exact local date at noon
+      const localDate = createLocalDate(dateStr);
+      
+      // Store as a Firestore Timestamp to maintain precision
+      return localDate;
     }
 
-    /**
-     * Retrieves date data from Firebase (converts back to local date string)
-     */
+    // Retrieves date data from Firebase (converts back to local date string)
     function getDateFromFirebase(firebaseDate) {
-        if (!firebaseDate) return '';
-        
-        let date;
-        
-        // Handle Firestore Timestamps
-        if (firebaseDate.toDate) {
-            date = firebaseDate.toDate();
-        } else if (firebaseDate instanceof Date) {
-            date = firebaseDate;
-        } else if (typeof firebaseDate === 'string') {
-            date = createLocalDate(firebaseDate);
-        } else {
-            return '';
-        }
-        
-        return formatLocalDate(date);
+      if (!firebaseDate) return '';
+      
+      let date;
+      
+      // Handle Firestore Timestamps
+      if (firebaseDate.toDate) {
+        date = firebaseDate.toDate();
+      } else if (firebaseDate instanceof Date) {
+        date = firebaseDate;
+      } else if (typeof firebaseDate === 'string') {
+        date = createLocalDate(firebaseDate);
+      } else {
+        return '';
+      }
+      
+      return formatLocalDate(date);
     }
 
-    /**
-     * ENTRY FORM FIXES
-     * Apply these changes to your entry forms
-     */
-
-    // When saving entry data:
-    function saveEntryData(entryData) {
-        // Fix selected entries dates
-        if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
-                ...entry,
-                date: entry.date ? prepareDateForFirebase(entry.date) : null
-            }));
-        }
-        
-        // Save to Firebase...
-        return addDoc(collection(db, 'entries'), entryData);
-    }
-
-    // When loading entry data:
-    function loadEntryData(entryDoc) {
-        const entryData = entryDoc.data();
-        
-        // Fix selected entries dates
-        if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-            entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
-                ...entry,
-                date: entry.date ? getDateFromFirebase(entry.date) : null
-            }));
-        }
-        
-        return entryData;
-    }
-
-    /**
-     * Test function to verify dates work correctly
-     */
+    // Test date handling function
     function testDateHandling() {
-        console.log('=== Entry Form Date Handling Test ===');
-        
-        const testDate = '2024-03-15';
-        console.log('1. Original date string:', testDate);
-        
-        const forFirebase = prepareDateForFirebase(testDate);
-        console.log('2. Prepared for Firebase:', forFirebase);
-        
-        const fromFirebase = getDateFromFirebase(forFirebase);
-        console.log('3. Retrieved from Firebase:', fromFirebase);
-        
-        const display = formatDateDisplay(fromFirebase);
-        console.log('4. Formatted for display:', display);
-        
-        const matches = fromFirebase === testDate;
-        console.log('5. Round-trip successful:', matches);
-        
-        if (!matches) {
-            console.error('❌ Date handling is still broken!');
-        } else {
-            console.log('✅ Date handling is working correctly!');
-        }
+      console.log('=== Date Handling Test ===');
+      
+      const testDate = '2024-03-15';
+      console.log('1. Original date string:', testDate);
+      
+      const forFirebase = prepareDateForFirebase(testDate);
+      console.log('2. Prepared for Firebase:', forFirebase);
+      
+      const fromFirebase = getDateFromFirebase(forFirebase);
+      console.log('3. Retrieved from Firebase:', fromFirebase);
+      
+      const display = formatDateDisplay(fromFirebase);
+      console.log('4. Formatted for display:', display);
+      
+      const matches = fromFirebase === testDate;
+      console.log('5. Round-trip successful:', matches);
+      
+      if (!matches) {
+        console.error('❌ Date handling is still broken!');
+      } else {
+        console.log('✅ Date handling is working correctly!');
+      }
     }
 
-    // Test the date handling on page load
-    testDateHandling();
+    console.log("🎯 Entry form loaded");
 
     // Global variables
     let currentTrialData = null;
@@ -922,6 +902,9 @@
         isSecretary = true;
         setupSecretaryView();
       }
+
+      // Test date handling (remove in production)
+      testDateHandling();
     }
 
     // Load registration data from data.json
@@ -938,7 +921,7 @@
       }
     }
 
-    // Setup secretary view with TIMEZONE-SAFE date handling
+    // Setup secretary view
     async function setupSecretaryView() {
       try {
         // Wait for auth
@@ -959,10 +942,7 @@
           return;
         }
 
-        // Show back to dashboard button for secretaries FIRST
-        document.getElementById('backToDashboardSection').style.display = 'block';
-
-        // Load trials for secretary
+        // Load trials for secretary - using timezone-safe date handling
         const trialsQuery = query(
           collection(db, "trials"),
           where("createdBy", "==", auth.currentUser.uid)
@@ -975,7 +955,7 @@
           trialsSnapshot.forEach(doc => {
             const trialData = doc.data();
             
-            // FIX: Process dates when loading trials from Firebase
+            // Fix date handling for trial days using global date fix
             if (trialData.days && Array.isArray(trialData.days)) {
               trialData.days = trialData.days.map(day => ({
                 ...day,
@@ -999,19 +979,18 @@
       }
     }
 
-    // Load specific trial for public entry link
+    // Load specific trial for public entry
     async function loadSpecificTrial(trialId) {
       try {
-        const trialDoc = await getDoc(doc(db, "trials", trialId));
-        
+        const trialDoc = await getDoc(doc(db, 'trials', trialId));
         if (!trialDoc.exists()) {
-          alert("Trial not found");
+          alert('Trial not found');
           return;
         }
 
         const trialData = trialDoc.data();
         
-        // FIX: Process dates when loading specific trial
+        // Fix date handling for trial days using global date fix
         if (trialData.days && Array.isArray(trialData.days)) {
           trialData.days = trialData.days.map(day => ({
             ...day,
@@ -1020,45 +999,45 @@
         }
 
         currentTrialData = { id: trialDoc.id, ...trialData };
-        
-        // Hide secretary-only sections
         document.getElementById('trialSelectionSection').style.display = 'none';
-        document.getElementById('shareableLinkSection').style.display = 'none';
-        document.getElementById('backToDashboardSection').style.display = 'none'; // Hide back button for public users
-        
-        // Show trial info and form
-        displayTrialInfo();
-        setupClassSelection();
-        document.getElementById('entryFormContainer').style.display = 'block';
-        
+        document.getElementById('backToDashboardSection').style.display = 'none'; // Hide back button for public entries
+        populateTrialInfo();
+        showEntryForm();
       } catch (error) {
-        console.error("❌ Error loading trial:", error);
-        alert("Error loading trial: " + error.message);
+        console.error('Error loading specific trial:', error);
+        alert('Error loading trial: ' + error.message);
       }
     }
 
     // Load existing entry for editing
     async function loadExistingEntry(entryId) {
       try {
-        const entryDoc = await getDoc(doc(db, "entries", entryId));
-        
+        const entryDoc = await getDoc(doc(db, 'entries', entryId));
         if (!entryDoc.exists()) {
-          alert("Entry not found");
+          alert('Entry not found');
           return;
         }
 
-        const entryData = loadEntryData(entryDoc); // Use the fixed loading function
+        const entryData = entryDoc.data();
         
-        // Load the trial data
-        const trialDoc = await getDoc(doc(db, "trials", entryData.trialId));
+        // Fix selected entries dates using global date fix
+        if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+          entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+            ...entry,
+            date: entry.date ? getDateFromFirebase(entry.date) : null
+          }));
+        }
+        
+        // Load the trial
+        const trialDoc = await getDoc(doc(db, 'trials', entryData.trialId));
         if (!trialDoc.exists()) {
-          alert("Trial not found");
+          alert('Associated trial not found');
           return;
         }
 
         const trialData = trialDoc.data();
         
-        // FIX: Process dates when loading trial for editing
+        // Fix date handling for trial days
         if (trialData.days && Array.isArray(trialData.days)) {
           trialData.days = trialData.days.map(day => ({
             ...day,
@@ -1067,31 +1046,29 @@
         }
 
         currentTrialData = { id: trialDoc.id, ...trialData };
-        
-        // Hide secretary sections
         document.getElementById('trialSelectionSection').style.display = 'none';
-        document.getElementById('shareableLinkSection').style.display = 'none';
-        document.getElementById('backToDashboardSection').style.display = 'none'; // Hide back button for editors
+        document.getElementById('backToDashboardSection').style.display = 'none'; // Hide back button for editing entries
         
-        // Populate form with existing data
-        populateFormWithEntryData(entryData);
+        // Populate trial info and form
+        populateTrialInfo();
+        showEntryForm();
         
-        // Show trial info and form
-        displayTrialInfo();
-        setupClassSelection();
-        document.getElementById('entryFormContainer').style.display = 'block';
-        
+        // Fill form with existing data
+        setTimeout(() => {
+          populateFormWithEntryData(entryData);
+        }, 500);
+
       } catch (error) {
-        console.error("❌ Error loading entry:", error);
-        alert("Error loading entry: " + error.message);
+        console.error('Error loading existing entry:', error);
+        alert('Error loading entry: ' + error.message);
       }
     }
 
-    // Populate trial selector
+    // Populate trial selector dropdown
     function populateTrialSelector() {
-      const select = document.getElementById('trialSelection');
-      select.innerHTML = '<option value="">Select a trial to manage entries...</option>';
-      
+      const trialSelect = document.getElementById('trialSelection');
+      trialSelect.innerHTML = '<option value="">Select a trial...</option>';
+
       availableTrials.forEach(trial => {
         const option = document.createElement('option');
         option.value = trial.id;
@@ -1102,8 +1079,9 @@
           const dates = trial.days
             .filter(day => day.date)
             .map(day => {
-              const date = createLocalDate(day.date);
-              return date.toLocaleDateString('en-US', { 
+              // Use timezone-safe date formatting
+              const localDate = createLocalDate(day.date);
+              return localDate.toLocaleDateString('en-US', { 
                 month: 'short', 
                 day: 'numeric' 
               });
@@ -1115,301 +1093,373 @@
         }
         
         option.textContent = trialLabel;
-        select.appendChild(option);
+        trialSelect.appendChild(option);
       });
 
-      // Handle trial selection
-      select.addEventListener('change', async function() {
+      // Handle trial selection change
+      trialSelect.addEventListener('change', function() {
         const trialId = this.value;
         if (trialId) {
           currentTrialData = availableTrials.find(t => t.id === trialId);
-          
-          // Generate shareable link
-          const shareableUrl = `${window.location.origin}${window.location.pathname}?trial=${trialId}`;
-          document.getElementById('shareableUrl').textContent = shareableUrl;
-          
-          // Show sections
-          document.getElementById('shareableLinkSection').style.display = 'block';
-          displayTrialInfo();
-          setupClassSelection();
-          document.getElementById('entryFormContainer').style.display = 'block';
+          if (currentTrialData) {
+            generateShareableLink();
+            populateTrialInfo();
+            showEntryForm();
+          }
         } else {
-          document.getElementById('shareableLinkSection').style.display = 'none';
-          document.getElementById('trialInfoSection').style.display = 'none';
-          document.getElementById('entryFormContainer').style.display = 'none';
+          hideShareableLink();
+          hideTrialInfo();
+          hideEntryForm();
         }
       });
     }
 
-    // Display trial information with fixed date handling
-    function displayTrialInfo() {
-      if (!currentTrialData) return;
+    // Generate shareable link
+    function generateShareableLink() {
+      if (!isSecretary || !currentTrialData) return;
+
+      const baseUrl = window.location.origin + window.location.pathname;
+      const shareableUrl = `${baseUrl}?trial=${currentTrialData.id}`;
       
-      document.getElementById('clubName').textContent = currentTrialData.clubName || 'N/A';
-      document.getElementById('trialLocation').textContent = currentTrialData.location || 'N/A';
-      document.getElementById('trialSecretary').textContent = currentTrialData.secretary || 'N/A';
-      
-      // Format trial dates safely
-      if (currentTrialData.days && currentTrialData.days.length > 0) {
-        const dateStrings = currentTrialData.days
-          .filter(day => day.date)
-          .map(day => formatDateDisplay(day.date, { weekday: 'short', month: 'short', day: 'numeric' }))
-          .join(', ');
-        document.getElementById('trialDates').textContent = dateStrings || 'N/A';
-      } else {
-        document.getElementById('trialDates').textContent = 'N/A';
-      }
-      
-      document.getElementById('trialInfoSection').style.display = 'block';
+      document.getElementById('shareableUrl').textContent = shareableUrl;
+      document.getElementById('shareableLinkSection').style.display = 'block';
     }
 
-    // Setup class selection with fixed date handling
-    function setupClassSelection() {
-      if (!currentTrialData || !currentTrialData.days) {
-        document.getElementById('classSelection').innerHTML = '<p>No classes available for this trial.</p>';
+    // Populate trial information
+    function populateTrialInfo() {
+      if (!currentTrialData) return;
+
+      document.getElementById('trialTitle').textContent = `${currentTrialData.clubName || 'Trial'} Entry Form`;
+      
+      // Use timezone-safe date formatting for trial dates
+      const dates = currentTrialData.days && currentTrialData.days.length > 0 
+        ? currentTrialData.days
+            .filter(day => day.date)
+            .map(day => formatDateDisplay(day.date, { 
+              weekday: undefined, 
+              year: 'numeric', 
+              month: 'short', 
+              day: 'numeric' 
+            }))
+            .join(', ')
+        : 'No dates specified';
+
+      document.getElementById('clubName').textContent = currentTrialData.clubName || 'TBD';
+      document.getElementById('trialDates').textContent = dates;
+      document.getElementById('trialLocation').textContent = 'TBD';
+      document.getElementById('trialSecretary').textContent = currentTrialData.secretary || 'TBD';
+
+      document.getElementById('trialInfoSection').style.display = 'block';
+      populateClasses();
+    }
+
+    // Populate classes with the exact style from screenshot and timezone-safe dates
+    function populateClasses() {
+      const classSelection = document.getElementById('classSelection');
+      let html = '';
+
+      if (!currentTrialData.days || currentTrialData.days.length === 0) {
+        html = '<div style="text-align: center; padding: 2rem; color: #666;">No classes available for this trial.</div>';
+        classSelection.innerHTML = html;
         return;
       }
 
-      let html = '';
-      
-      currentTrialData.days.forEach(day => {
-        if (!day.date || !day.classes) return;
-        
-        const dayDate = formatDateDisplay(day.date);
-        
+      currentTrialData.days.forEach((day, dayIndex) => {
+        if (!day.classes || day.classes.length === 0) return;
+
+        // Use timezone-safe date formatting
+        const dayDate = day.date ? formatDateDisplay(day.date) : `Day ${dayIndex + 1}`;
+
         html += `
           <div class="day-section">
             <div class="day-header">📅 ${dayDate}</div>
         `;
-        
-        day.classes.forEach(cls => {
-          if (!cls.rounds || cls.rounds.length === 0) return;
-          
+
+        // Group classes by name
+        const classGroups = new Map();
+        day.classes.forEach((cls, classIndex) => {
+          if (cls && cls.className && cls.className.trim()) {
+            const className = cls.className.trim();
+            if (!classGroups.has(className)) {
+              classGroups.set(className, []);
+            }
+            classGroups.get(className).push({...cls, dayIndex, classIndex});
+          }
+        });
+
+        classGroups.forEach((classInstances, className) => {
           html += `
             <div class="class-section">
               <div class="class-header">
-                <span>${cls.className}</span>
-                <span>Fee: ${cls.fee || '35'}</span>
+                <span>🎯 ${className}</span>
+                <span>${classInstances.length} round${classInstances.length > 1 ? 's' : ''}</span>
               </div>
               <div class="class-content">
           `;
-          
-          cls.rounds.forEach(round => {
-            const entryKey = `${day.date}_${cls.className}_${round.roundNumber}_${round.judge}`;
-            
-            html += `
-              <div class="round-item">
-                <div class="round-info">
-                  <div class="round-number">Round ${round.roundNumber}</div>
-                  <div class="judge-name">Judge: ${round.judge}</div>
-                </div>
-                <div class="entry-options">
-                  <button type="button" class="entry-btn" data-entry-key="${entryKey}" data-entry-type="regular">
-                    Regular Entry
-                  </button>
-                  <button type="button" class="entry-btn feo" data-entry-key="${entryKey}" data-entry-type="feo">
-                    FEO Entry
-                  </button>
-                </div>
-              </div>
-            `;
+
+          classInstances.forEach((classInstance, instanceIndex) => {
+            if (classInstance.rounds && Array.isArray(classInstance.rounds)) {
+              classInstance.rounds.forEach((round, roundIndex) => {
+                const judgeName = round.judge && round.judge.trim() ? round.judge : 'Judge TBD';
+                const roundNumber = round.roundNumber || (roundIndex + 1);
+                const regularId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_regular`;
+                const feoId = `entry_${dayIndex}_${classInstance.classIndex}_${roundIndex}_feo`;
+                
+                const baseEntryValue = {
+                  dayIndex,
+                  classIndex: classInstance.classIndex,
+                  roundIndex,
+                  className,
+                  judge: judgeName,
+                  roundNumber,
+                  date: prepareDateForFirebase(day.date) || `Day ${dayIndex + 1}` // Use timezone-safe date preparation
+                };
+                
+                const regularEntryValue = JSON.stringify({...baseEntryValue, entryType: 'regular'});
+                const feoEntryValue = JSON.stringify({...baseEntryValue, entryType: 'feo'});
+                
+                const showFeo = round.feo === true || round.FEO === true;
+
+                html += `
+                  <div class="round-item">
+                    <input type="checkbox" id="${regularId}" value='${regularEntryValue}' style="display: none;">
+                    ${showFeo ? `<input type="checkbox" id="${feoId}" value='${feoEntryValue}' style="display: none;">` : ''}
+                    
+                    <div class="round-info">
+                      <div class="round-number">Round ${roundNumber}</div>
+                      <div class="judge-name">${judgeName}</div>
+                    </div>
+                    <div class="entry-options">
+                      <button type="button" class="entry-btn regular" data-entry-id="${regularId}">Entry</button>
+                      ${showFeo ? `<button type="button" class="entry-btn feo" data-entry-id="${feoId}">FEO</button>` : ''}
+                    </div>
+                  </div>
+                `;
+              });
+            }
           });
-          
+
           html += `
               </div>
             </div>
           `;
         });
-        
-        html += '</div>';
+
+        html += `</div>`;
       });
-      
-      document.getElementById('classSelection').innerHTML = html;
-      
-      // Add event listeners to entry buttons
-      document.querySelectorAll('.entry-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const entryKey = this.dataset.entryKey;
-          const entryType = this.dataset.entryType;
-          
-          // Toggle selection
-          if (selectedClasses.has(entryKey)) {
-            selectedClasses.delete(entryKey);
-            this.classList.remove('selected');
-          } else {
-            selectedClasses.add(entryKey);
-            this.classList.add('selected');
-            
-            // Deselect other type for same class/round
-            const otherType = entryType === 'regular' ? 'feo' : 'regular';
-            const otherBtn = document.querySelector(`[data-entry-key="${entryKey}"][data-entry-type="${otherType}"]`);
-            if (otherBtn) {
-              otherBtn.classList.remove('selected');
-              selectedClasses.delete(entryKey);
-              selectedClasses.add(entryKey);
-            }
-          }
-          
-          updateEntrySummary();
-          validateForm();
-        });
-      });
+
+      classSelection.innerHTML = html;
+      setupEventListeners();
     }
 
-    // Populate form with existing entry data
-    function populateFormWithEntryData(entryData) {
-      // Basic info
-      document.getElementById('cwagsNumber').value = entryData.cwagsNumber || '';
-      document.getElementById('handlerName').value = entryData.handlerName || '';
-      document.getElementById('handlerPhone').value = entryData.handlerPhone || '';
-      document.getElementById('handlerEmail').value = entryData.handlerEmail || '';
-      document.getElementById('emergencyContact').value = entryData.emergencyContact || '';
-      document.getElementById('dogCallName').value = entryData.dogCallName || '';
-      document.getElementById('dogBreed').value = entryData.dogBreed || '';
-      document.getElementById('dogBirthdate').value = entryData.dogBirthdate || '';
-      document.getElementById('dogSex').value = entryData.dogSex || '';
-      document.getElementById('juniorHandler').value = entryData.juniorHandler || 'No';
-      
-      // Selected entries - with fixed date handling
-      if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
-        selectedClasses.clear();
-        
-        entryData.selectedEntries.forEach(entry => {
-          const entryKey = `${entry.date}_${entry.className}_${entry.roundNumber}_${entry.judge}`;
-          selectedClasses.add(entryKey);
+    // Setup event listeners
+    function setupEventListeners() {
+      // Entry button clicks
+      document.querySelectorAll('.entry-btn').forEach(button => {
+        button.addEventListener('click', handleEntryButtonClick);
+      });
+
+      // Registration number lookup with debouncing
+      let registrationTimeout;
+      const cwagsInput = document.getElementById('cwagsNumber');
+      if (cwagsInput) {
+        cwagsInput.addEventListener('input', function(e) {
+          const registrationNumber = e.target.value.trim();
+          
+          clearTimeout(registrationTimeout);
+          
+          if (registrationNumber.length >= 3) {
+            registrationTimeout = setTimeout(() => {
+              autoFillFromRegistration(registrationNumber);
+            }, 500);
+          } else {
+            hideLookupStatus();
+          }
+          
+          checkFormValidity();
         });
       }
+
+      // Form validation listeners
+      document.getElementById('entryForm').addEventListener('input', checkFormValidity);
+      document.getElementById('waiverAccepted').addEventListener('change', checkFormValidity);
+      document.getElementById('juniorHandler').addEventListener('change', updateEntrySummary);
+
+      // Form submission
+      document.getElementById('entryForm').addEventListener('submit', handleFormSubmit);
+    }
+
+    // Auto-fill from registration data (search both data.json and Firebase)
+    async function autoFillFromRegistration(registrationNumber) {
+      if (isAutoFilling) return;
+      
+      showLookupStatus('🔍 Looking up registration...', 'loading');
+      
+      try {
+        isAutoFilling = true;
+        
+        const normalizedInput = registrationNumber.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        console.log("🔍 Looking up registration:", normalizedInput);
+        
+        let matchingRegistration = null;
+
+        // First search data.json
+        matchingRegistration = registrationData.find(record => {
+          const normalizedRecord = (record.cwagsNumber || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+          return normalizedRecord === normalizedInput;
+        });
+
+        // If not found in data.json, search Firebase entries
+        if (!matchingRegistration) {
+          try {
+            const entriesQuery = query(
+              collection(db, "entries"),
+              where("cwagsNumber", "==", registrationNumber)
+            );
+            const entriesSnapshot = await getDocs(entriesQuery);
+            
+            if (!entriesSnapshot.empty) {
+              // Use the most recent entry
+              const entries = [];
+              entriesSnapshot.forEach(doc => {
+                const entryData = doc.data();
+                
+                // Fix date handling for entry data
+                if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                  entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+                    ...entry,
+                    date: entry.date ? getDateFromFirebase(entry.date) : null
+                  }));
+                }
+                
+                entries.push(entryData);
+              });
+              entries.sort((a, b) => b.submittedAt?.toDate() - a.submittedAt?.toDate());
+              matchingRegistration = entries[0];
+            }
+          } catch (firebaseError) {
+            console.warn("Could not search Firebase entries:", firebaseError);
+          }
+        }
+        
+        if (matchingRegistration) {
+          console.log("✅ Found matching registration:", matchingRegistration);
+          showLookupStatus('✅ Registration found! Auto-filling information...', 'success');
+          populateForm(matchingRegistration);
+        } else {
+          console.log("❌ No matching registration found for:", normalizedInput);
+          showLookupStatus('ℹ️ Registration number not found in our records. You can still continue with manual entry.', 'warning');
+        }
+        
+      } catch (error) {
+        console.error("❌ Error during registration lookup:", error);
+        showLookupStatus('❌ Error looking up registration', 'warning');
+      } finally {
+        isAutoFilling = false;
+      }
+    }
+
+    // Handle entry button clicks
+    function handleEntryButtonClick(event) {
+      event.preventDefault();
+      
+      const button = event.target;
+      const entryId = button.dataset.entryId;
+      const checkbox = document.getElementById(entryId);
+      
+      if (!checkbox) return;
+      
+      checkbox.checked = !checkbox.checked;
+      
+      if (checkbox.checked) {
+        button.classList.add('selected');
+        selectedClasses.add(checkbox.value);
+      } else {
+        button.classList.remove('selected');
+        selectedClasses.delete(checkbox.value);
+      }
+      
+      updateEntrySummary();
+      checkFormValidity();
     }
 
     // Update entry summary
     function updateEntrySummary() {
-      const classCount = selectedClasses.size;
+      const entryCount = selectedClasses.size;
       const isJunior = document.getElementById('juniorHandler').value === 'Yes';
       
       let totalFee = 0;
-      if (classCount > 0) {
-        if (isJunior) {
-          totalFee = classCount * fees.juniorHandler;
-        } else {
-          totalFee = fees.firstClass + ((classCount - 1) * fees.additionalClass);
+      let regularEntries = 0;
+      let feoEntries = 0;
+      
+      selectedClasses.forEach(entryJson => {
+        try {
+          const entry = JSON.parse(entryJson);
+          if (entry.entryType === 'feo') {
+            feoEntries++;
+          } else {
+            regularEntries++;
+          }
+        } catch (e) {
+          regularEntries++;
         }
+      });
+      
+      if (isJunior) {
+        totalFee = fees.juniorHandler * regularEntries;
+      } else if (regularEntries > 0) {
+        totalFee = fees.firstClass + (fees.additionalClass * Math.max(0, regularEntries - 1));
       }
       
-      document.getElementById('selectedClassCount').textContent = classCount;
+      const uniqueClasses = new Set();
+      selectedClasses.forEach(entryJson => {
+        try {
+          const entry = JSON.parse(entryJson);
+          uniqueClasses.add(entry.className);
+        } catch (e) {}
+      });
+      
+      let entryBreakdown = `${entryCount} entries (${uniqueClasses.size} classes)`;
+      if (feoEntries > 0) {
+        entryBreakdown += ` - ${regularEntries} Regular, ${feoEntries} FEO`;
+      }
+      
+      document.getElementById('selectedClassCount').textContent = entryBreakdown;
       document.getElementById('calculatedFee').textContent = `${totalFee.toFixed(2)}`;
-      document.getElementById('summaryJuniorHandler').textContent = isJunior ? 'Yes' : 'No';
+      document.getElementById('summaryJuniorHandler').textContent = document.getElementById('juniorHandler').value;
     }
 
-    // Validate form
-    function validateForm() {
-      const requiredFields = ['handlerName', 'handlerPhone', 'handlerEmail', 'dogCallName'];
-      const isValid = requiredFields.every(field => document.getElementById(field).value.trim()) &&
-                     selectedClasses.size > 0 &&
-                     document.getElementById('waiverAccepted').checked;
+    // Check form validity
+    function checkFormValidity() {
+      const waiverAccepted = document.getElementById('waiverAccepted').checked;
+      const handlerName = document.getElementById('handlerName').value.trim();
+      const handlerEmail = document.getElementById('handlerEmail').value.trim();
+      const handlerPhone = document.getElementById('handlerPhone').value.trim();
+      const dogCallName = document.getElementById('dogCallName').value.trim();
+      const hasClasses = selectedClasses.size > 0;
+      
+      const isValid = waiverAccepted && handlerName && handlerEmail && handlerPhone && dogCallName && hasClasses;
       
       document.getElementById('submitBtn').disabled = !isValid;
     }
 
-    // Setup form validation
-    function setupFormValidation() {
-      const formFields = ['handlerName', 'handlerPhone', 'handlerEmail', 'dogCallName', 'juniorHandler'];
-      formFields.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        field.addEventListener('input', () => {
-          updateEntrySummary();
-          validateForm();
-        });
-        field.addEventListener('change', () => {
-          updateEntrySummary();
-          validateForm();
-        });
-      });
-      
-      document.getElementById('waiverAccepted').addEventListener('change', validateForm);
-    }
-
-    // Registration number lookup
-    function setupRegistrationLookup() {
-      const cwagsInput = document.getElementById('cwagsNumber');
-      let lookupTimeout;
-      
-      cwagsInput.addEventListener('input', function() {
-        clearTimeout(lookupTimeout);
-        const regNum = this.value.trim();
-        
-        if (regNum.length < 3) {
-          hideStatus();
-          return;
-        }
-        
-        lookupTimeout = setTimeout(() => performLookup(regNum), 500);
-      });
-    }
-
-    function performLookup(regNum) {
-      if (isAutoFilling) return;
-      
-      showStatus('loading', '🔄 Looking up registration...');
-      
-      setTimeout(() => {
-        const match = registrationData.find(entry => 
-          entry.RegNumber && entry.RegNumber.toLowerCase().includes(regNum.toLowerCase())
-        );
-        
-        if (match) {
-          isAutoFilling = true;
-          autoFillForm(match);
-          showStatus('success', `✅ Found registration: ${match.HandlerLastName}, ${match.HandlerFirstName} & ${match.DogCallName}`);
-          isAutoFilling = false;
-        } else {
-          showStatus('warning', '⚠️ Registration not found - please enter information manually');
-        }
-      }, 800);
-    }
-
-    function autoFillForm(data) {
-      const fields = [
-        { id: 'handlerName', value: `${data.HandlerFirstName || ''} ${data.HandlerLastName || ''}`.trim() },
-        { id: 'dogCallName', value: data.DogCallName || '' },
-        { id: 'dogBreed', value: data.Breed || '' },
-        { id: 'dogSex', value: data.Sex || '' }
-      ];
-      
-      fields.forEach(field => {
-        if (field.value) {
-          const element = document.getElementById(field.id);
-          element.value = field.value;
-          element.classList.add('auto-filled');
-          setTimeout(() => element.classList.remove('auto-filled'), 3000);
-        }
-      });
-      
-      updateEntrySummary();
-      validateForm();
-    }
-
-    function showStatus(type, message) {
-      const status = document.getElementById('lookupStatus');
-      status.className = `lookup-status ${type}`;
-      status.textContent = message;
-    }
-
-    function hideStatus() {
-      const status = document.getElementById('lookupStatus');
-      status.className = 'lookup-status';
-    }
-
-    // Form submission with fixed date handling
+    // Handle form submission with timezone-safe date handling
     async function handleFormSubmit(event) {
       event.preventDefault();
       
-      if (selectedClasses.size === 0) {
-        alert('Please select at least one class to enter.');
-        return;
-      }
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
       
       try {
-        // Prepare entry data
+        const selectedEntries = Array.from(selectedClasses).map(entryJson => {
+          try {
+            return JSON.parse(entryJson);
+          } catch (e) {
+            return null;
+          }
+        }).filter(entry => entry !== null);
+
         const entryData = {
           trialId: currentTrialData.id,
           cwagsNumber: document.getElementById('cwagsNumber').value.trim(),
@@ -1421,68 +1471,185 @@
           dogBreed: document.getElementById('dogBreed').value.trim(),
           dogBirthdate: document.getElementById('dogBirthdate').value,
           dogSex: document.getElementById('dogSex').value,
-          juniorHandler: document.getElementById('juniorHandler').value,
+          selectedEntries: selectedEntries.map(entry => ({
+            ...entry,
+            date: entry.date // Already prepared with prepareDateForFirebase
+          })),
+          selectedClasses: selectedEntries.map(e => e.className),
+          entryCount: selectedEntries.length,
+          uniqueClassCount: new Set(selectedEntries.map(e => e.className)).size,
+          regularEntries: selectedEntries.filter(e => e.entryType === 'regular').length,
+          feoEntries: selectedEntries.filter(e => e.entryType === 'feo').length,
+          juniorHandler: document.getElementById('juniorHandler').value === 'Yes',
+          waiverAccepted: true,
+          entryFee: document.getElementById('calculatedFee').textContent,
           submittedAt: new Date(),
-          selectedEntries: []
+          submittedBy: auth.currentUser ? auth.currentUser.uid : 'public_entry'
         };
+
+        console.log("💾 Submitting entry data:", entryData);
+
+        // Save entry using timezone-safe date handling
+        await saveEntryData(entryData);
         
-        // Process selected classes with FIXED date handling
-        selectedClasses.forEach(entryKey => {
-          const [date, className, roundNumber, judge] = entryKey.split('_');
-          const entryType = document.querySelector(`[data-entry-key="${entryKey}"].selected`).dataset.entryType;
-          
-          entryData.selectedEntries.push({
-            date: date, // Keep as string for now, will be processed by saveEntryData
-            className: className,
-            roundNumber: parseInt(roundNumber),
-            judge: judge,
-            entryType: entryType
-          });
-        });
+        // Generate edit link
+        generateEditLink(entryData);
         
-        // Save with fixed date handling
-        const entryDoc = await saveEntryData(entryData);
-        
-        // Show success message with edit link
-        const editUrl = `${window.location.origin}${window.location.pathname}?entry=${entryDoc.id}`;
-        document.getElementById('editUrl').textContent = editUrl;
-        
-        if (isSecretary) {
-          document.getElementById('successMessage').classList.remove('hidden');
-        } else {
-          document.getElementById('editLinkSection').classList.remove('hidden');
-        }
-        
-        document.getElementById('entryForm').style.display = 'none';
-        
+        // Show success
+        showSuccessSection();
+
       } catch (error) {
-        console.error('❌ Error submitting entry:', error);
+        console.error('Error submitting entry:', error);
         alert('Error submitting entry: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Entry';
       }
     }
 
-    // Utility functions
-    window.resetForm = function() {
-      document.getElementById('entryForm').reset();
-      selectedClasses.clear();
-      document.querySelectorAll('.entry-btn.selected').forEach(btn => btn.classList.remove('selected'));
+    // Save entry data with timezone-safe date handling
+    async function saveEntryData(entryData) {
+      // Fix selected entries dates using the global date fix
+      if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+        entryData.selectedEntries = entryData.selectedEntries.map(entry => ({
+          ...entry,
+          date: entry.date ? prepareDateForFirebase(entry.date) : null
+        }));
+      }
+      
+      // Save to Firebase
+      const docRef = await addDoc(collection(db, "entries"), entryData);
+      console.log("✅ Entry submitted with ID:", docRef.id);
+      
+      return docRef;
+    }
+
+    // Generate edit link
+    function generateEditLink(entryData) {
+      const baseUrl = window.location.origin + window.location.pathname;
+      const editUrl = `${baseUrl}?entry=${entryData.id || 'new'}`;
+      
+      document.getElementById('editUrl').textContent = editUrl;
+    }
+
+    // Show success section
+    function showSuccessSection() {
+      document.getElementById('entryForm').style.display = 'none';
+      document.getElementById('editLinkSection').classList.remove('hidden');
+    }
+
+    // Populate form with existing entry data using timezone-safe dates
+    function populateFormWithEntryData(entryData) {
+      document.getElementById('cwagsNumber').value = entryData.cwagsNumber || '';
+      document.getElementById('handlerName').value = entryData.handlerName || '';
+      document.getElementById('handlerPhone').value = entryData.handlerPhone || '';
+      document.getElementById('handlerEmail').value = entryData.handlerEmail || '';
+      document.getElementById('emergencyContact').value = entryData.emergencyContact || '';
+      document.getElementById('dogCallName').value = entryData.dogCallName || '';
+      document.getElementById('dogBreed').value = entryData.dogBreed || '';
+      document.getElementById('dogBirthdate').value = entryData.dogBirthdate || '';
+      document.getElementById('dogSex').value = entryData.dogSex || '';
+      document.getElementById('juniorHandler').value = entryData.juniorHandler ? 'Yes' : 'No';
+      document.getElementById('waiverAccepted').checked = true;
+
+      // Restore selected classes with timezone-safe date handling
+      if (entryData.selectedEntries) {
+        entryData.selectedEntries.forEach(entry => {
+          // Ensure dates are properly handled
+          const processedEntry = {
+            ...entry,
+            date: entry.date ? getDateFromFirebase(entry.date) : entry.date
+          };
+          
+          const entryJson = JSON.stringify(processedEntry);
+          selectedClasses.add(entryJson);
+          
+          const entryId = `entry_${entry.dayIndex}_${entry.classIndex}_${entry.roundIndex}_${entry.entryType}`;
+          const button = document.querySelector(`[data-entry-id="${entryId}"]`);
+          const checkbox = document.getElementById(entryId);
+          
+          if (button && checkbox) {
+            button.classList.add('selected');
+            checkbox.checked = true;
+          }
+        });
+      }
+
       updateEntrySummary();
-      validateForm();
-      hideStatus();
-      document.getElementById('successMessage').classList.add('hidden');
-      document.getElementById('editLinkSection').classList.add('hidden');
-      document.getElementById('entryForm').style.display = 'block';
-    };
+      checkFormValidity();
+    }
 
-    window.resetForNewEntry = function() {
-      resetForm();
-    };
+    // Utility functions
+    function showLookupStatus(message, type = 'loading') {
+      const statusDiv = document.getElementById('lookupStatus');
+      if (statusDiv) {
+        statusDiv.textContent = message;
+        statusDiv.className = `lookup-status ${type}`;
+      }
+    }
 
+    function hideLookupStatus() {
+      const statusDiv = document.getElementById('lookupStatus');
+      if (statusDiv) {
+        statusDiv.style.display = 'none';
+      }
+    }
+
+    function fillField(fieldId, value) {
+      const field = document.getElementById(fieldId);
+      if (field && value && (!field.value || field.value.trim() === '')) {
+        field.value = value;
+        field.classList.add('auto-filled');
+        setTimeout(() => {
+          field.classList.remove('auto-filled');
+        }, 2000);
+      }
+    }
+
+    function populateForm(data) {
+      if (!data || isAutoFilling === false) return;
+      
+      fillField('handlerName', data.handlerName);
+      fillField('handlerPhone', data.handlerPhone);
+      fillField('handlerEmail', data.handlerEmail);
+      fillField('emergencyContact', data.emergencyContact);
+      fillField('dogCallName', data.dogCallName);
+      fillField('dogBreed', data.dogBreed);
+      fillField('dogBirthdate', data.dogBirthdate);
+      
+      if (data.dogSex) {
+        const sexField = document.getElementById('dogSex');
+        if (sexField && (!sexField.value || sexField.value === '')) {
+          sexField.value = data.dogSex;
+          sexField.classList.add('auto-filled');
+          setTimeout(() => {
+            sexField.classList.remove('auto-filled');
+          }, 2000);
+        }
+      }
+      
+      checkFormValidity();
+    }
+
+    function showEntryForm() {
+      document.getElementById('entryFormContainer').style.display = 'block';
+    }
+
+    function hideEntryForm() {
+      document.getElementById('entryFormContainer').style.display = 'none';
+    }
+
+    function hideTrialInfo() {
+      document.getElementById('trialInfoSection').style.display = 'none';
+    }
+
+    function hideShareableLink() {
+      document.getElementById('shareableLinkSection').style.display = 'none';
+    }
+
+    // Global functions for buttons
     window.copyShareableLink = function() {
       const url = document.getElementById('shareableUrl').textContent;
-      navigator.clipboard.writeText(url).then(() => {
-        alert('Link copied to clipboard!');
-      });
+      copyToClipboard(url, 'Shareable link copied to clipboard!');
     };
 
     window.testShareableLink = function() {
@@ -1492,9 +1659,7 @@
 
     window.copyEditLink = function() {
       const url = document.getElementById('editUrl').textContent;
-      navigator.clipboard.writeText(url).then(() => {
-        alert('Edit link copied to clipboard!');
-      });
+      copyToClipboard(url, 'Edit link copied to clipboard!');
     };
 
     window.testEditLink = function() {
@@ -1502,15 +1667,57 @@
       window.open(url, '_blank');
     };
 
-    // Initialize when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      setupFormValidation();
-      setupRegistrationLookup();
+    function copyToClipboard(text, successMessage) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert(successMessage);
+      }).catch(err => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert(successMessage);
+      });
+    }
+
+    window.resetForNewEntry = function() {
+      document.getElementById('editLinkSection').classList.add('hidden');
+      document.getElementById('entryForm').style.display = 'block';
+      resetForm();
+    };
+
+    window.resetForm = function() {
+      document.getElementById('entryForm').reset();
+      selectedClasses.clear();
       
-      document.getElementById('entryForm').addEventListener('submit', handleFormSubmit);
+      document.querySelectorAll('.entry-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
       
-      init();
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        if (cb.id !== 'waiverAccepted') cb.checked = false;
+      });
+      
+      hideLookupStatus();
+      updateEntrySummary();
+      checkFormValidity();
+    };
+
+    // Initialize when auth is ready (if secretary) or immediately (if public)
+    auth.onAuthStateChanged(async (user) => {
+      if (user || !isSecretary) {
+        await init();
+      } else if (isSecretary) {
+        alert("Please log in to access the entry form");
+        window.location.href = 'index.html';
+      }
     });
+
+    // For public access, initialize immediately
+    if (window.location.search.includes('trial=') || window.location.search.includes('entry=')) {
+      init();
+    }
   </script>
 </body>
 </html>
