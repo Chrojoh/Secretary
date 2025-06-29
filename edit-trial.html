@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Trial</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            margin: 0.25rem;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .status-message {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-info {
+            background: #cce7ff;
+            color: #0056b3;
+            border: 1px solid #99d3ff;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .day-container {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .class-container {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #fff;
+            border-radius: 6px;
+            position: relative;
+        }
+        
+        .round-container {
+            padding: 8px;
+            margin: 3px 0;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .subclass-container {
+            padding: 8px;
+            margin: 3px 0;
+            background-color: #f0fff0;
+            border-radius: 4px;
+            border-left: 3px solid #28a745;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .view-mode {
+            background-color: #f8f9fa !important;
+            border-color: #e9ecef !important;
+        }
+
+        .view-mode input,
+        .view-mode select,
+        .view-mode button:not(.mode-toggle) {
+            pointer-events: none;
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+
+        .view-mode .btn:not(.mode-toggle) {
+            display: none;
+        }
+
+        .mode-toggle-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .edit-mode .remove-btn {
+            display: block;
+        }
+
+        .add-btn {
+            background: #28a745;
+            margin-top: 0.5rem;
+        }
+
+        .trial-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .trial-info {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .print-section {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .header, .btn, .mode-toggle-container {
+                display: none !important;
+            }
+            
+            .print-section {
+                display: block;
+            }
+            
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1 id="pageTitle">📝 Loading Trial...</h1>
+                <div id="userInfo">Loading...</div>
+            </div>
+            <div>
+                <button class="btn btn-secondary" onclick="window.location.href='main-dashboard.html'">← Back to Dashboard</button>
+                <button class="btn btn-secondary" onclick="window.print()" id="printBtn">🖨️ Print</button>
+            </div>
+        </div>
+
+        <!-- Status Message -->
+        <div class="status-message" id="statusMessage"></div>
+
+        <!-- Loading State -->
+        <div class="card loading" id="loadingCard">
+            <h2>🔄 Loading Trial Data...</h2>
+            <p>Please wait while we fetch the trial information.</p>
+        </div>
+
+        <!-- Trial Not Found -->
+        <div class="card hidden" id="notFoundCard">
+            <h2>❌ Trial Not Found</h2>
+            <p>The requested trial could not be found or you don't have permission to access it.</p>
+            <button class="btn" onclick="window.location.href='main-dashboard.html'">Return to Dashboard</button>
+        </div>
+
+        <!-- Trial Editor -->
+        <div class="card hidden" id="trialEditor">
+            <!-- Print Header -->
+            <div class="print-section">
+                <h1>Trial Details</h1>
+                <p>Generated on: <span id="printDate"></span></p>
+                <hr style="margin: 1rem 0;">
+            </div>
+
+            <!-- Mode Toggle -->
+            <div class="mode-toggle-container">
+                <button class="btn btn-warning mode-toggle" onclick="toggleMode()" id="modeToggleBtn">
+                    ✏️ Switch to Edit Mode
+                </button>
+                <button class="btn btn-success hidden" onclick="saveTrial()" id="saveBtn">
+                    💾 Save Changes
+                </button>
+                <button class="btn btn-secondary hidden" onclick="cancelEdit()" id="cancelBtn">
+                    ❌ Cancel Changes
+                </button>
+            </div>
+
+            <!-- Trial Information -->
+            <div class="trial-info">
+                <div class="form-group">
+                    <label for="clubName">Club Name</label>
+                    <input type="text" id="clubName" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="secretary">Trial Secretary</label>
+                    <input type="text" id="secretary" readonly>
+                </div>
+            </div>
+
+            <!-- Trial Structure -->
+            <div id="trialStructure">
+                <!-- Days will be loaded here -->
+            </div>
+
+            <!-- Add Controls (Edit Mode Only) -->
+            <div class="hidden" id="addControls">
+                <button class="btn add-btn" onclick="addDay()">➕ Add Day</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import from your existing Firebase configuration
+        import { auth, db } from './js/firebase.js';
+        import { 
+            doc, 
+            getDoc, 
+            updateDoc, 
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+        // Global variables
+        let currentUser = null;
+        let currentTrial = null;
+        let isEditMode = false;
+        let globalClasses = [];
+        let globalJudges = [];
+        let originalTrialData = null;
+
+        // Standard field names (matching your existing system)
+        const STANDARD_FIELDS = {
+            HANDLER_NAME: 'handlerName',
+            DOG_CALL_NAME: 'dogCallName',
+            JUDGE_NAME: 'judgeName',
+            CLASS_NAME: 'className',
+            CWAGS_NUMBER: 'cwagsNumber'
+        };
+
+        // Get URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                trialId: params.get('id'),
+                mode: params.get('mode') || 'view'
+            };
+        }
+
+        // Show status messages
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status-message ' + (isError ? 'status-error' : 'status-success');
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load system data for dropdowns
+        async function loadSystemData() {
+            try {
+                const dataDoc = await getDoc(doc(db, 'system_data', 'dataforsite'));
+                if (dataDoc.exists()) {
+                    const data = dataDoc.data();
+                    globalClasses = data.classes || [];
+                    globalJudges = data.judges || [];
+                }
+            } catch (error) {
+                console.error('Error loading system data:', error);
+            }
+        }
+
+        // Timezone-safe date utilities (from your existing system)
+        function getDateFromFirebase(timestamp) {
+            if (!timestamp) return null;
+            if (timestamp.toDate) {
+                const date = timestamp.toDate();
+                return date.toISOString().split('T')[0];
+            }
+            return null;
+        }
+
+        function createLocalDate(dateStr) {
+            if (!dateStr) return null;
+            const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+            return new Date(dateWithTime);
+        }
+
+        // Load trial data
+        async function loadTrial(trialId) {
+            try {
+                console.log('Loading trial:', trialId);
+                
+                const trialDoc = await getDoc(doc(db, 'trials', trialId));
+                
+                if (!trialDoc.exists()) {
+                    throw new Error('Trial not found');
+                }
+                
+                const trialData = { id: trialDoc.id, ...trialDoc.data() };
+                
+                // Check if user has permission to view this trial
+                if (trialData.createdBy !== currentUser.uid) {
+                    throw new Error('Access denied');
+                }
+                
+                // Fix dates using your existing date handling
+                if (trialData.days && Array.isArray(trialData.days)) {
+                    trialData.days = trialData.days.map(day => ({
+                        ...day,
+                        date: day.date ? getDateFromFirebase(day.date) : null
+                    }));
+                }
+                
+                currentTrial = trialData;
+                originalTrialData = JSON.parse(JSON.stringify(trialData)); // Deep copy
+                
+                // Update page title
+                document.getElementById('pageTitle').textContent = 
+                    `📝 ${isEditMode ? 'Edit' : 'View'} Trial: ${trialData.clubName}`;
+                
+                // Populate form
+                document.getElementById('clubName').value = trialData.clubName || '';
+                document.getElementById('secretary').value = trialData.secretary || '';
+                
+                // Load trial structure
+                loadTrialStructure(trialData);
+                
+                // Show editor
+                document.getElementById('loadingCard').classList.add('hidden');
+                document.getElementById('trialEditor').classList.remove('hidden');
+                
+                // Set initial mode
+                if (getUrlParams().mode === 'edit') {
+                    toggleMode();
+                }
+                
+                console.log('Trial loaded successfully:', trialData);
+                
+            } catch (error) {
+                console.error('Error loading trial:', error);
+                document.getElementById('loadingCard').classList.add('hidden');
+                document.getElementById('notFoundCard').classList.remove('hidden');
+                showStatus('Error loading trial: ' + error.message, true);
+            }
+        }
+
+        // Load trial structure into form
+        function loadTrialStructure(trialData) {
+            const container = document.getElementById('trialStructure');
+            container.innerHTML = '';
+            
+            if (!trialData.days || trialData.days.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 2rem;">No days configured for this trial.</p>';
+                return;
+            }
+            
+            trialData.days.forEach((day, dayIndex) => {
+                const dayDiv = createDayElement(day, dayIndex);
+                container.appendChild(dayDiv);
+            });
+        }
+
+        // Create day element
+        function createDayElement(dayData, dayIndex) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'day-container';
+            dayDiv.dataset.dayIndex = dayIndex;
+            
+            dayDiv.innerHTML = `
+                <button class="remove-btn" onclick="removeDay(${dayIndex})" title="Remove Day">×</button>
+                <h3>Day ${dayData.dayNumber || dayIndex + 1}</h3>
+                
+                <div class="form-group">
+                    <label>Date:</label>
+                    <input type="date" value="${dayData.date || ''}" onchange="markAsModified()" readonly>
+                </div>
+                
+                <div class="classes-container" data-day-index="${dayIndex}">
+                    ${dayData.classes ? dayData.classes.map((classData, classIndex) => 
+                        createClassElement(classData, dayIndex, classIndex)).join('') : ''}
+                </div>
+                
+                <button class="btn add-btn hidden" onclick="addClass(${dayIndex})">➕ Add Class</button>
+            `;
+            
+            return dayDiv;
+        }
+
+        // Create class element
+        function createClassElement(classData, dayIndex, classIndex) {
+            const subClassOptions = getSubClassOptions(classData[STANDARD_FIELDS.CLASS_NAME] || classData.className);
+            
+            return `
+                <div class="class-container" data-class-index="${classIndex}">
+                    <button class="remove-btn" onclick="removeClass(${dayIndex}, ${classIndex})" title="Remove Class">×</button>
+                    <h4>Class ${classIndex + 1}</h4>
+                    
+                    <div class="form-group">
+                        <label>Class Name:</label>
+                        <input type="text" 
+                               value="${classData[STANDARD_FIELDS.CLASS_NAME] || classData.className || ''}"
+                               list="classes-datalist"
+                               onchange="handleClassSelection(this, ${dayIndex}, ${classIndex}); markAsModified()"
+                               readonly>
+                    </div>
+                    
+                    ${classData.subClass ? `
+                        <div class="form-group subclass-container">
+                            <label>Sub Class:</label>
+                            <select onchange="markAsModified()" disabled>
+                                <option value="">Select Sub Class</option>
+                                ${subClassOptions}
+                                <option value="${classData.subClass}" selected>${classData.subClass}</option>
+                            </select>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="rounds-container" data-day-index="${dayIndex}" data-class-index="${classIndex}">
+                        ${classData.rounds ? classData.rounds.map((roundData, roundIndex) => 
+                            createRoundElement(roundData, dayIndex, classIndex, roundIndex)).join('') : ''}
+                    </div>
+                    
+                    <button class="btn add-btn hidden" onclick="addRound(${dayIndex}, ${classIndex})">➕ Add Round</button>
+                </div>
+            `;
+        }
+
+        // Create round element
+        function createRoundElement(roundData, dayIndex, classIndex, roundIndex) {
+            return `
+                <div class="round-container" data-round-index="${roundIndex}">
+                    <button class="remove-btn" onclick="removeRound(${dayIndex}, ${classIndex}, ${roundIndex})" title="Remove Round">×</button>
+                    
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <strong>Round ${roundData.roundNumber || roundIndex + 1}:</strong>
+                        
+                        <label style="margin: 0;">Judge:</label>
+                        <input type="text" 
+                               style="width: 200px;"
+                               value="${roundData[STANDARD_FIELDS.JUDGE_NAME] || roundData.judge || ''}"
+                               list="judges-datalist"
+                               onchange="markAsModified()"
+                               readonly>
+                        
+                        <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" ${roundData.feoAvailable ? 'checked' : ''} onchange="markAsModified()" disabled>
+                            FEO Available
+                        </label>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get sub-class options based on class name
+        function getSubClassOptions(className) {
+            if (!className) return '';
+            
+            const classLower = className.toLowerCase();
+            if (classLower.includes('games')) {
+                return `
+                    <option value="games1">Games Sub Class 1</option>
+                    <option value="games2">Games Sub Class 2</option>
+                    <option value="games3">Games Sub Class 3</option>
+                    <option value="games4">Games Sub Class 4</option>
+                    <option value="games5">Games Sub Class 5</option>
+                `;
+            } else if (classLower.includes('obedience') || classLower.includes('obed')) {
+                return `
+                    <option value="obed1">Obedience Sub Class 1</option>
+                    <option value="obed2">Obedience Sub Class 2</option>
+                    <option value="obed3">Obedience Sub Class 3</option>
+                    <option value="obed4">Obedience Sub Class 4</option>
+                    <option value="obed5">Obedience Sub Class 5</option>
+                `;
+            }
+            return '';
+        }
+
+        // Toggle between view and edit mode
+        window.toggleMode = function() {
+            isEditMode = !isEditMode;
+            const trialEditor = document.getElementById('trialEditor');
+            const modeToggleBtn = document.getElementById('modeToggleBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const addControls = document.getElementById('addControls');
+            
+            if (isEditMode) {
+                // Switch to edit mode
+                trialEditor.classList.add('edit-mode');
+                trialEditor.classList.remove('view-mode');
+                modeToggleBtn.innerHTML = '👁️ Switch to View Mode';
+                saveBtn.classList.remove('hidden');
+                cancelBtn.classList.remove('hidden');
+                addControls.classList.remove('hidden');
+                
+                // Enable all inputs
+                trialEditor.querySelectorAll('input, select').forEach(input => {
+                    input.removeAttribute('readonly');
+                    input.removeAttribute('disabled');
+                });
+                
+                // Show add buttons
+                trialEditor.querySelectorAll('.add-btn').forEach(btn => {
+                    btn.classList.remove('hidden');
+                });
+                
+                document.getElementById('pageTitle').textContent = `✏️ Edit Trial: ${currentTrial.clubName}`;
+                
+            } else {
+                // Switch to view mode
+                trialEditor.classList.remove('edit-mode');
+                trialEditor.classList.add('view-mode');
+                modeToggleBtn.innerHTML = '✏️ Switch to Edit Mode';
+                saveBtn.classList.add('hidden');
+                cancelBtn.classList.add('hidden');
+                addControls.classList.add('hidden');
+                
+                // Disable all inputs
+                trialEditor.querySelectorAll('input, select').forEach(input => {
+                    input.setAttribute('readonly', 'readonly');
+                    if (input.tagName === 'SELECT') {
+                        input.setAttribute('disabled', 'disabled');
+                    }
+                });
+                
+                // Hide add buttons
+                trialEditor.querySelectorAll('.add-btn').forEach(btn => {
+                    btn.classList.add('hidden');
+                });
+                
+                document.getElementById('pageTitle').textContent = `👁️ View Trial: ${currentTrial.clubName}`;
+            }
+        }
+
+        // Mark trial as modified
+        window.markAsModified = function() {
+            if (isEditMode) {
+                console.log('Trial data modified');
+            }
+        }
+
+        // Save trial changes
+        window.saveTrial = async function() {
+            try {
+                showStatus('💾 Saving changes...');
+                
+                // Collect trial data from form
+                const updatedTrial = collectTrialData();
+                updatedTrial.updatedAt = serverTimestamp();
+                updatedTrial.updatedBy = currentUser.uid;
+                
+                // Save to Firebase
+                await updateDoc(doc(db, 'trials', currentTrial.id), updatedTrial);
+                
+                showStatus('✅ Trial updated successfully!');
+                
+                // Update current trial data
+                currentTrial = { ...currentTrial, ...updatedTrial };
+                originalTrialData = JSON.parse(JSON.stringify(currentTrial));
+                
+            } catch (error) {
+                console.error('Error saving trial:', error);
+                showStatus('Error saving trial: ' + error.message, true);
+            }
+        }
+
+        // Cancel edit mode
+        window.cancelEdit = function() {
+            if (confirm('Are you sure? All unsaved changes will be lost.')) {
+                // Reload original data
+                loadTrialStructure(originalTrialData);
+                document.getElementById('clubName').value = originalTrialData.clubName || '';
+                document.getElementById('secretary').value = originalTrialData.secretary || '';
+                
+                // Switch back to view mode
+                toggleMode();
+                
+                showStatus('Changes cancelled');
+            }
+        }
+
+        // Collect trial data from form
+        function collectTrialData() {
+            const days = [];
+            const dayContainers = document.querySelectorAll('.day-container');
+            
+            dayContainers.forEach((dayContainer, dayIndex) => {
+                const dayData = {
+                    dayNumber: dayIndex + 1,
+                    date: dayContainer.querySelector('input[type="date"]').value || null,
+                    classes: []
+                };
+                
+                const classContainers = dayContainer.querySelectorAll('.class-container');
+                classContainers.forEach((classContainer, classIndex) => {
+                    const classData = {
+                        [STANDARD_FIELDS.CLASS_NAME]: classContainer.querySelector('input[type="text"]').value || '',
+                        rounds: []
+                    };
+                    
+                    const roundContainers = classContainer.querySelectorAll('.round-container');
+                    roundContainers.forEach((roundContainer, roundIndex) => {
+                        const roundData = {
+                            roundNumber: roundIndex + 1,
+                            [STANDARD_FIELDS.JUDGE_NAME]: roundContainer.querySelector('input[type="text"]').value || '',
+                            feoAvailable: roundContainer.querySelector('input[type="checkbox"]').checked
+                        };
+                        
+                        classData.rounds.push(roundData);
+                    });
+                    
+                    dayData.classes.push(classData);
+                });
+                
+                days.push(dayData);
+            });
+            
+            return {
+                clubName: document.getElementById('clubName').value.trim(),
+                secretary: document.getElementById('secretary').value.trim(),
+                days: days
+            };
+        }
+
+        // Add/Remove functions (for edit mode)
+        window.addDay = function() {
+            const container = document.getElementById('trialStructure');
+            const dayCount = container.children.length;
+            
+            const newDay = {
+                dayNumber: dayCount + 1,
+                date: '',
+                classes: []
+            };
+            
+            const dayDiv = createDayElement(newDay, dayCount);
+            container.appendChild(dayDiv);
+            markAsModified();
+        }
+
+        window.removeDay = function(dayIndex) {
+            if (confirm('Are you sure you want to remove this day?')) {
+                const dayElement = document.querySelector(`[data-day-index="${dayIndex}"]`);
+                if (dayElement) {
+                    dayElement.remove();
+                    markAsModified();
+                }
+            }
+        }
+
+        window.addClass = function(dayIndex) {
+            const container = document.querySelector(`[data-day-index="${dayIndex}"] .classes-container`);
+            const classCount = container.children.length;
+            
+            const newClass = {
+                [STANDARD_FIELDS.CLASS_NAME]: '',
+                subClass: '',
+                rounds: []
+            };
+            
+            const classHTML = createClassElement(newClass, dayIndex, classCount);
+            container.insertAdjacentHTML('beforeend', classHTML);
+            markAsModified();
+        }
+
+        window.removeClass = function(dayIndex, classIndex) {
+            if (confirm('Are you sure you want to remove this class?')) {
+                const classElement = document.querySelector(`[data-day-index="${dayIndex}"] [data-class-index="${classIndex}"]`);
+                if (classElement) {
+                    classElement.remove();
+                    markAsModified();
+                }
+            }
+        }
+
+        window.addRound = function(dayIndex, classIndex) {
+            const container = document.querySelector(`[data-day-index="${dayIndex}"][data-class-index="${classIndex}"] .rounds-container`);
+            const roundCount = container.children.length;
+            
+            const newRound = {
+                roundNumber: roundCount + 1,
+                [STANDARD_FIELDS.JUDGE_NAME]: '',
+                feoAvailable: false
+            };
+            
+            const roundHTML = createRoundElement(newRound, dayIndex, classIndex, roundCount);
+            container.insertAdjacentHTML('beforeend', roundHTML);
+            markAsModified();
+        }
+
+        window.removeRound = function(dayIndex, classIndex, roundIndex) {
+            if (confirm('Are you sure you want to remove this round?')) {
+                const roundElement = document.querySelector(`[data-day-index="${dayIndex}"][data-class-index="${classIndex}"] [data-round-index="${roundIndex}"]`);
+                if (roundElement) {
+                    roundElement.remove();
+                    markAsModified();
+                }
+            }
+        }
+
+        // Initialize page
+        async function initializePage() {
+            const params = getUrlParams();
+            
+            if (!params.trialId) {
+                document.getElementById('loadingCard').classList.add('hidden');
+                document.getElementById('notFoundCard').classList.remove('hidden');
+                return;
+            }
+            
+            // Wait for authentication
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    try {
+                        // Set current user
+                        currentUser = { uid: user.uid, email: user.email };
+                        document.getElementById('userInfo').textContent = user.email;
+                        
+                        // Load system data
+                        await loadSystemData();
+                        
+                        // Load trial
+                        await loadTrial(params.trialId);
+                        
+                    } catch (error) {
+                        console.error('Error initializing:', error);
+                        showStatus('Error loading page: ' + error.message, true);
+                    }
+                } else {
+                    // Redirect to login
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        // Set print date
+        document.getElementById('printDate').textContent = new Date().toLocaleDateString();
+
+        // Create datalists for autocomplete
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add datalists to body for global access
+            document.body.insertAdjacentHTML('beforeend', `
+                <datalist id="classes-datalist">
+                    ${globalClasses.map(className => `<option value="${className}">${className}</option>`).join('')}
