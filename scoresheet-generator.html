@@ -338,6 +338,179 @@
             opacity: 0.9;
         }
 
+        /* PDF Editor Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 2% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+
+        .score-entry-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .scent-locations {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .scent-location-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+
+        .scent-location-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .scent-location-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+
+        .entrants-scoring {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .entrant-row {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .entrant-header {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .entrant-scoring-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr) 2fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .scent-result-group {
+            text-align: center;
+        }
+
+        .scent-result-group label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #6c757d;
+        }
+
+        .scent-checkboxes {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        .checkbox-option span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .fault-input, .time-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .pass-fail-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .pass-fail-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .pass-fail-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
         @media print {
             body {
                 background: white;
@@ -357,8 +530,14 @@
                 border: none;
                 box-shadow: none;
             }
+
+            .modal {
+                display: none !important;
+            }
         }
     </style>
+    <!-- Add PDF-lib for PDF generation -->
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -408,10 +587,161 @@
         <div id="scoreSheetsContainer" style="display: none;"></div>
     </div>
 
+    <!-- Score Entry Modal -->
+    <div id="scoreEntryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Score Sheet</h2>
+                <span class="close" onclick="closeScoreModal()">&times;</span>
+            </div>
+            
+            <div id="scoreEntryForm" class="score-entry-form">
+                <!-- Scent Locations Section -->
+                <div>
+                    <h3>🎯 Scent Locations</h3>
+                    <div class="scent-locations">
+                        <div class="scent-location-group">
+                            <label for="scent1Location">Scent 1 Located in/on:</label>
+                            <input type="text" id="scent1Location" placeholder="Enter location...">
+                        </div>
+                        <div class="scent-location-group">
+                            <label for="scent2Location">Scent 2 Located in/on:</label>
+                            <input type="text" id="scent2Location" placeholder="Enter location...">
+                        </div>
+                        <div class="scent-location-group">
+                            <label for="scent3Location">Scent 3 Located in/on:</label>
+                            <input type="text" id="scent3Location" placeholder="Enter location...">
+                        </div>
+                        <div class="scent-location-group">
+                            <label for="scent4Location">Scent 4 Located in/on:</label>
+                            <input type="text" id="scent4Location" placeholder="Enter location...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Entrants Scoring Section -->
+                <div>
+                    <h3>📊 Team Scoring</h3>
+                    <div id="entrantsScoring" class="entrants-scoring">
+                        <!-- Dynamic entrant rows will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button class="btn btn-secondary" onclick="closeScoreModal()">Cancel</button>
+                    <div>
+                        <button class="btn btn-warning" onclick="saveScores()">💾 Save Scores</button>
+                        <button class="btn btn-success" onclick="generateFilledPDF()">📄 Download Filled PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // Firebase imports
         import { auth, db } from './js/firebase.js';
         import { collection, query, where, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+        // ========================================
+        // GLOBAL DATE HANDLING FIX
+        // ========================================
+
+        /**
+         * CORE TIMEZONE-SAFE DATE UTILITIES
+         */
+
+        // Creates a date object that stays in local timezone
+        function createLocalDate(dateStr) {
+            if (!dateStr) return null;
+            
+            // Always add noon time to prevent timezone shifts
+            if (typeof dateStr === 'string') {
+                const dateWithTime = dateStr.includes('T') ? dateStr : dateStr + 'T12:00:00';
+                return new Date(dateWithTime);
+            }
+            
+            return new Date(dateStr);
+        }
+
+        // Formats a date to YYYY-MM-DD string in local timezone
+        function formatLocalDate(date) {
+            if (!date || !(date instanceof Date)) return '';
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            return `${year}-${month}-${day}`;
+        }
+
+        // Gets today's date in local timezone as YYYY-MM-DD string
+        function getTodayLocal() {
+            const now = new Date();
+            return formatLocalDate(now);
+        }
+
+        // Formats date for display with timezone consideration
+        function formatDateDisplay(dateInput, options = {}) {
+            let date;
+            
+            if (typeof dateInput === 'string') {
+                date = createLocalDate(dateInput);
+            } else if (dateInput instanceof Date) {
+                date = new Date(dateInput);
+            } else {
+                return 'Invalid Date';
+            }
+            
+            if (!date || isNaN(date.getTime())) return 'Invalid Date';
+            
+            const defaultOptions = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+            
+            const formatOptions = { ...defaultOptions, ...options };
+            return new Intl.DateTimeFormat('en-US', formatOptions).format(date);
+        }
+
+        /**
+         * Prepares date data for Firebase storage (prevents timezone conversion)
+         */
+        function prepareDateForFirebase(dateStr) {
+            if (!dateStr) return null;
+            
+            // Create a date that represents the exact local date at noon
+            const localDate = createLocalDate(dateStr);
+            
+            // Store as a Firestore Timestamp to maintain precision
+            return localDate;
+        }
+
+        /**
+         * Retrieves date data from Firebase (converts back to local date string)
+         */
+        function getDateFromFirebase(firebaseDate) {
+            if (!firebaseDate) return '';
+            
+            let date;
+            
+            // Handle Firestore Timestamps
+            if (firebaseDate.toDate) {
+                date = firebaseDate.toDate();
+            } else if (firebaseDate instanceof Date) {
+                date = firebaseDate;
+            } else if (typeof firebaseDate === 'string') {
+                date = createLocalDate(firebaseDate);
+            } else {
+                return '';
+            }
+            
+            return formatLocalDate(date);
+        }
 
         // Global variables
         let trials = [];
@@ -419,9 +749,8 @@
         let entries = [];
         let runningOrderData = {};
         let generatedSheets = [];
-
-        // Store scores in memory as user types
-        let currentFillableScores = {};
+        let currentEditingSheet = null;
+        let currentScoreData = {};
 
         // Initialize the application
         async function init() {
@@ -450,7 +779,17 @@
                 trials = [];
                 
                 snapshot.forEach(doc => {
-                    trials.push({ id: doc.id, ...doc.data() });
+                    const trialData = doc.data();
+                    
+                    // Fix date handling for trial days
+                    if (trialData.days && Array.isArray(trialData.days)) {
+                        trialData.days = trialData.days.map(day => ({
+                            ...day,
+                            date: day.date ? getDateFromFirebase(day.date) : null
+                        }));
+                    }
+                    
+                    trials.push({ id: doc.id, ...trialData });
                 });
 
                 // Sort by creation date (most recent first)
@@ -460,126 +799,165 @@
                     return dateB - dateA;
                 });
 
-                // Populate trial dropdown
-                const trialSelect = document.getElementById('trialSelect');
-                trialSelect.innerHTML = '<option value="">Select a trial...</option>';
-                
-                trials.forEach(trial => {
-                    const option = document.createElement('option');
-                    option.value = trial.id;
-                    option.textContent = `${trial.clubName} - ${trial.secretary}`;
-                    trialSelect.appendChild(option);
-                });
-
-                // Set up trial selection handler
-                trialSelect.addEventListener('change', async function() {
-                    const trialId = this.value;
-                    if (trialId) {
-                        currentTrial = trials.find(t => t.id === trialId);
-                        await populateDates();
-                    } else {
-                        currentTrial = null;
-                        document.getElementById('dateSelect').innerHTML = '<option value="">Select trial first...</option>';
-                        document.getElementById('judgeSelect').innerHTML = '<option value="">All Judges</option>';
-                    }
-                });
-
+                populateTrialSelector();
             } catch (error) {
                 console.error('Error loading trials:', error);
                 showError('Error loading trials: ' + error.message);
             }
         }
 
-        // Populate dates for selected trial
-        async function populateDates() {
-            if (!currentTrial) return;
+        // Populate trial selector dropdown
+        function populateTrialSelector() {
+            const trialSelect = document.getElementById('trialSelect');
+            trialSelect.innerHTML = '<option value="">Select a trial...</option>';
 
+            trials.forEach(trial => {
+                const option = document.createElement('option');
+                option.value = trial.id;
+                
+                let trialLabel = trial.clubName || 'Unnamed Trial';
+                
+                if (trial.days && trial.days.length > 0) {
+                    const dates = trial.days
+                        .filter(day => day.date)
+                        .map(day => {
+                            const date = createLocalDate(day.date);
+                            return date.toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                        })
+                        .join(', ');
+                    if (dates) {
+                        trialLabel += ` (${dates})`;
+                    }
+                }
+                
+                option.textContent = trialLabel;
+                trialSelect.appendChild(option);
+            });
+
+            // Handle trial selection change
+            trialSelect.addEventListener('change', function() {
+                const trialId = this.value;
+                if (trialId) {
+                    currentTrial = trials.find(t => t.id === trialId);
+                    populateDateSelector();
+                    populateJudgeSelector();
+                } else {
+                    currentTrial = null;
+                    document.getElementById('dateSelect').innerHTML = '<option value="">Select trial first...</option>';
+                    document.getElementById('judgeSelect').innerHTML = '<option value="">All Judges</option>';
+                }
+            });
+        }
+
+        // Populate date selector based on selected trial
+        function populateDateSelector() {
             const dateSelect = document.getElementById('dateSelect');
             dateSelect.innerHTML = '<option value="">Select a date...</option>';
 
-            // Extract dates from trial structure
-            const dates = new Set();
-            currentTrial.days?.forEach(day => {
-                if (day.date) {
-                    dates.add(day.date);
-                }
-            });
-
-            // Add dates to dropdown
-            Array.from(dates).sort().forEach(date => {
-                const option = document.createElement('option');
-                option.value = date;
-                option.textContent = new Date(date).toLocaleDateString();
-                dateSelect.appendChild(option);
-            });
-
-            // Set up date selection handler
-            dateSelect.addEventListener('change', async function() {
-                const selectedDate = this.value;
-                if (selectedDate) {
-                    await populateJudges(selectedDate);
-                }
-            });
+            if (currentTrial && currentTrial.days) {
+                currentTrial.days.forEach(day => {
+                    if (day.date) {
+                        const option = document.createElement('option');
+                        option.value = day.date;
+                        option.textContent = formatDateDisplay(day.date);
+                        dateSelect.appendChild(option);
+                    }
+                });
+            }
         }
 
-        // Populate judges for selected date
-        async function populateJudges(selectedDate) {
-            if (!currentTrial) return;
-
+        // Populate judge selector based on selected trial
+        function populateJudgeSelector() {
             const judgeSelect = document.getElementById('judgeSelect');
             judgeSelect.innerHTML = '<option value="">All Judges</option>';
 
-            const judges = new Set();
-
-            // Extract judges from trial structure for the selected date
-            currentTrial.days?.forEach(day => {
-                if (day.date === selectedDate) {
-                    day.classes?.forEach(cls => {
-                        cls.rounds?.forEach(round => {
-                            if (round.judge) {
-                                judges.add(round.judge);
+            if (currentTrial && currentTrial.days) {
+                const judges = new Set();
+                currentTrial.days.forEach(day => {
+                    if (day.classes) {
+                        day.classes.forEach(cls => {
+                            if (cls.rounds) {
+                                cls.rounds.forEach(round => {
+                                    if (round.judge && round.judge.trim()) {
+                                        judges.add(round.judge.trim());
+                                    }
+                                });
                             }
                         });
-                    });
-                }
-            });
+                    }
+                });
 
-            // Add judges to dropdown
-            Array.from(judges).sort().forEach(judge => {
-                const option = document.createElement('option');
-                option.value = judge;
-                option.textContent = judge;
-                judgeSelect.appendChild(option);
-            });
+                Array.from(judges).sort().forEach(judge => {
+                    const option = document.createElement('option');
+                    option.value = judge;
+                    option.textContent = judge;
+                    judgeSelect.appendChild(option);
+                });
+            }
         }
 
-        // Load trial data including entries
-        window.loadTrialData = async function() {
+        // Load trial data and entries
+        async function loadTrialData() {
             const trialId = document.getElementById('trialSelect').value;
             const selectedDate = document.getElementById('dateSelect').value;
 
-            if (!trialId || !selectedDate) {
-                alert('Please select both a trial and a date');
+            if (!trialId) {
+                alert('Please select a trial');
                 return;
             }
 
-            document.getElementById('loadBtn').disabled = true;
+            if (!selectedDate) {
+                alert('Please select a date');
+                return;
+            }
+
             document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('loadBtn').disabled = true;
 
             try {
                 // Load entries for this trial
-                const entriesQuery = query(
+                const q = query(
                     collection(db, "entries"),
-                    where("trialId", "==", trialId),
-                    where("date", "==", selectedDate)
+                    where("trialId", "==", trialId)
                 );
                 
-                const entriesSnapshot = await getDocs(entriesQuery);
+                const snapshot = await getDocs(q);
                 entries = [];
                 
-                entriesSnapshot.forEach(doc => {
-                    entries.push({ id: doc.id, ...doc.data() });
+                snapshot.forEach(doc => {
+                    const entryData = doc.data();
+                    
+                    // Fix selected entries dates
+                    if (entryData.selectedEntries && Array.isArray(entryData.selectedEntries)) {
+                        entryData.selectedEntries.forEach(selectedEntry => {
+                            const processedEntry = {
+                                ...selectedEntry,
+                                date: selectedEntry.date ? getDateFromFirebase(selectedEntry.date) : null
+                            };
+                            
+                            entries.push({
+                                id: doc.id,
+                                ...processedEntry,
+                                handlerName: entryData.handlerName,
+                                dogCallName: entryData.dogCallName,
+                                cwagsNumber: entryData.cwagsNumber,
+                                submittedAt: entryData.submittedAt
+                            });
+                        });
+                    }
                 });
+
+                // Filter entries for selected date using timezone-safe comparison
+                entries = entries.filter(entry => {
+                    const entryDate = getDateFromFirebase(entry.date);
+                    const filterDate = formatLocalDate(createLocalDate(selectedDate));
+                    return entryDate === filterDate;
+                });
+
+                console.log('Loaded entries for date:', selectedDate, entries);
 
                 if (entries.length === 0) {
                     showError('No entries found for the selected date');
@@ -688,7 +1066,7 @@
                         id: `${currentTrial.id}_${selectedDate}_${judge}_${classRound}`.replace(/[^a-zA-Z0-9]/g, '_'),
                         trialId: currentTrial.id,
                         trialName: currentTrial.clubName || 'Unnamed Trial',
-                        date: selectedDate,
+                        date: prepareDateForFirebase(selectedDate), // Fix the date
                         judge: judge,
                         classRound: classRound,
                         className: classRound.split(' - Round')[0],
@@ -733,12 +1111,13 @@
             let html = '';
             
             generatedSheets.forEach(sheet => {
+                const displayDate = getDateFromFirebase(sheet.date);
                 html += `
                     <div class="score-sheet-item">
                         <div class="score-sheet-info">
                             <div class="score-sheet-title">${sheet.judge} - ${sheet.classRound}</div>
                             <div class="score-sheet-details">
-                                ${sheet.entrants.length} entrants • ${sheet.date}
+                                ${sheet.entrants.length} entrants • ${formatDateDisplay(displayDate)}
                                 <span class="status-badge status-${sheet.status}">${sheet.status.toUpperCase()}</span>
                             </div>
                         </div>
@@ -796,6 +1175,8 @@
                 rowHeight = '35px';
             }
 
+            const displayDate = formatDateDisplay(getDateFromFirebase(sheetData.date));
+
             let html = `
                 <div class="score-sheet">
                     <div class="score-sheet-header">
@@ -804,7 +1185,7 @@
                             <img src="./images/cwags-logo.png" alt="C-WAGS Logo" />
                         </div>
                         <div class="score-sheet-title-text">${sheetData.className} Score Sheet</div>
-                        <div class="score-sheet-date">Date: ${sheetData.date}</div>
+                        <div class="score-sheet-date">Date: ${displayDate}</div>
                         <div class="score-sheet-class">CLASS: ${sheetData.className}</div>
                         <div class="score-sheet-class">JUDGE: ${sheetData.judge}</div>
                         
@@ -869,217 +1250,32 @@
             const minRows = Math.max(8, entrantCount);
             for (let i = 0; i < minRows; i++) {
                 const entrant = sheetData.entrants[i];
-                const teamName = entrant ? `${entrant.name}` : `Team ${i + 1}`;
+                const teamName = entrant ? `${entrant.handler} - ${entrant.dog}` : '';
                 
                 html += `
-                    <tr style="height: ${rowHeight};">
-                        <td style="font-weight: bold; padding: ${cellPadding}; text-align: center;">${i + 1}</td>
-                        <td style="font-weight: bold; padding: ${cellPadding}; font-size: 8px; ${!entrant ? 'color: #999;' : ''}">${teamName}</td>
-                        <td class="scent-cell"></td>
-                        <td class="scent-cell"></td>
-                        <td class="scent-cell"></td>
-                        <td class="scent-cell"></td>
-                        <td class="scent-cell"></td>
-                        <td class="scent-cell"></td>
-                        <td class="scent-cell"></td>
-                        <td class="scent-cell"></td>
-                    </tr>
-                `;
-            }
-
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
-            return html;
-        }
-
-        // Generate fillable score sheet HTML (for editing)
-        function generateFillableScoreSheetHTML(sheetData) {
-            const entrantCount = sheetData.entrants.length;
-            
-            // Calculate optimal font sizes and spacing based on entrant count
-            let scoringTableFontSize = '9px';
-            let cellPadding = '4px';
-            let rowHeight = '40px';
-            
-            if (entrantCount > 12) {
-                scoringTableFontSize = '7px';
-                cellPadding = '2px';
-                rowHeight = '30px';
-            } else if (entrantCount > 8) {
-                scoringTableFontSize = '8px';
-                cellPadding = '3px';
-                rowHeight = '35px';
-            }
-
-            // Load existing scores if they exist
-            const scores = sheetData.scores || {};
-
-            let html = `
-                <div class="score-sheet" style="border: 2px solid #007bff; background: #f8f9fa;">
-                    <div style="background: #007bff; color: white; padding: 10px; margin: -20px -20px 20px -20px; text-align: center;">
-                        <h3 style="margin: 0;">✏️ FILLABLE SCORE SHEET - Enter scores from judge's physical sheet</h3>
-                        <p style="margin: 5px 0 0 0; font-size: 14px;">Fill in the 4 scent locations, mark scent results, enter faults, times, and Pass/Fail</p>
-                    </div>
-                    
-                    <div class="score-sheet-header">
-                        <div style="text-align: right; font-size: 8px;">Copyright © by Canine-Work And Games, LLC, 2024</div>
-                        <div class="cwags-logo">
-                            <img src="./images/cwags-logo.png" alt="C-WAGS Logo" />
-                        </div>
-                        <div class="score-sheet-title-text">${sheetData.className} Score Sheet</div>
-                        <div class="score-sheet-date">Date: ${sheetData.date}</div>
-                        <div class="score-sheet-class">CLASS: ${sheetData.className}</div>
-                        <div class="score-sheet-class">JUDGE: ${sheetData.judge}</div>
-                        
-                        <div class="score-sheet-rounds">
-                            <label>Round</label>
-                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '1' ? 'checked' : ''}> 1
-                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '2' ? 'checked' : ''}> 2
-                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '3' ? 'checked' : ''}> 3
-                            <input type="checkbox" class="round-checkbox" ${sheetData.roundNumber === '4' ? 'checked' : ''}> 4
-                        </div>
-                    </div>
-
-                    <table class="scent-info-table">
-                        <tr>
-                            <th style="background: #fff3cd;">Scent 1</th>
-                            <th style="background: #fff3cd;">Scent 2</th>
-                            <th style="background: #fff3cd;">Scent 3</th>
-                            <th style="background: #fff3cd;">Scent 4</th>
-                        </tr>
-                        <tr>
-                            <td style="background: #fff3cd;">Located in/on:</td>
-                            <td style="background: #fff3cd;">Located in/on:</td>
-                            <td style="background: #fff3cd;">Located in/on:</td>
-                            <td style="background: #fff3cd;">Located in/on:</td>
-                        </tr>
-                        <tr>
-                            <td style="height: 30px; background: white;">
-                                <input type="text" id="scent1Location" 
-                                       value="${scores.scent1Location || ''}" 
-                                       placeholder="Enter scent 1 location"
-                                       style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
-                            </td>
-                            <td style="height: 30px; background: white;">
-                                <input type="text" id="scent2Location" 
-                                       value="${scores.scent2Location || ''}" 
-                                       placeholder="Enter scent 2 location"
-                                       style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
-                            </td>
-                            <td style="height: 30px; background: white;">
-                                <input type="text" id="scent3Location" 
-                                       value="${scores.scent3Location || ''}" 
-                                       placeholder="Enter scent 3 location"
-                                       style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
-                            </td>
-                            <td style="height: 30px; background: white;">
-                                <input type="text" id="scent4Location" 
-                                       value="${scores.scent4Location || ''}" 
-                                       placeholder="Enter scent 4 location"
-                                       style="width: 100%; border: 1px solid #ccc; padding: 5px; font-size: 11px;">
-                            </td>
-                        </tr>
-                    </table>
-
-                    <div class="faults-section">
-                        <strong>Faults:</strong> Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior; 
-                        Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert"; 
-                        SR crossing line less than half.
-                    </div>
-
-                    <table class="scoring-table" style="font-size: ${scoringTableFontSize};">
-                        <thead>
-                            <tr>
-                                <th rowspan="2">Team</th>
-                                <th rowspan="2">Dog - Handler</th>
-                                <th colspan="4">Scent Results</th>
-                                <th rowspan="2">Fault</th>
-                                <th rowspan="2">Fault</th>
-                                <th rowspan="2">Time</th>
-                                <th rowspan="2">Pass/Fail</th>
-                            </tr>
-                            <tr>
-                                <th>Scent 1</th>
-                                <th>Scent 2</th>
-                                <th>Scent 3</th>
-                                <th>Scent 4</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            // Add entrant rows - use actual count or minimum 8, whichever is larger
-            const minRows = Math.max(8, entrantCount);
-            for (let i = 0; i < minRows; i++) {
-                const entrant = sheetData.entrants[i];
-                const teamName = entrant ? `${entrant.name}` : `Team ${i + 1}`;
-                const entrantScores = scores[i] || {};
-                
-                html += `
-                    <tr style="height: ${rowHeight}; ${entrant ? 'background: white;' : 'background: #f8f9fa;'}">
-                        <td style="font-weight: bold; padding: ${cellPadding}; text-align: center;">${i + 1}</td>
-                        <td style="font-weight: bold; padding: ${cellPadding}; font-size: 8px; ${!entrant ? 'color: #999;' : ''}">${teamName}</td>
-                        <td style="padding: 2px;">
-                            <input type="text" 
-                                   value="${entrantScores.scent1 || ''}" 
-                                   onchange="updateEntrantScore(${i}, 'scent1', this.value)"
-                                   placeholder="✓ or X"
-                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                    <tr>
+                        <td class="team-name-cell" style="padding: ${cellPadding};">${i + 1}</td>
+                        <td class="team-name-cell" style="padding: ${cellPadding};">${teamName}</td>
+                        <td class="scent-cell" style="padding: ${cellPadding};">
+                            <div>Scent 1</div>
+                            <div style="height: 12px;"></div>
                         </td>
-                        <td style="padding: 2px;">
-                            <input type="text" 
-                                   value="${entrantScores.scent2 || ''}" 
-                                   onchange="updateEntrantScore(${i}, 'scent2', this.value)"
-                                   placeholder="✓ or X"
-                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                        <td class="scent-cell" style="padding: ${cellPadding};">
+                            <div>Scent 2</div>
+                            <div style="height: 12px;"></div>
                         </td>
-                        <td style="padding: 2px;">
-                            <input type="text" 
-                                   value="${entrantScores.scent3 || ''}" 
-                                   onchange="updateEntrantScore(${i}, 'scent3', this.value)"
-                                   placeholder="✓ or X"
-                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                        <td class="scent-cell" style="padding: ${cellPadding};">
+                            <div>Scent 3</div>
+                            <div style="height: 12px;"></div>
                         </td>
-                        <td style="padding: 2px;">
-                            <input type="text" 
-                                   value="${entrantScores.scent4 || ''}" 
-                                   onchange="updateEntrantScore(${i}, 'scent4', this.value)"
-                                   placeholder="✓ or X"
-                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
+                        <td class="scent-cell" style="padding: ${cellPadding};">
+                            <div>Scent 4</div>
+                            <div style="height: 12px;"></div>
                         </td>
-                        <td style="padding: 2px;">
-                            <input type="text" 
-                                   value="${entrantScores.fault1 || ''}" 
-                                   onchange="updateEntrantScore(${i}, 'fault1', this.value)"
-                                   placeholder="Fault type"
-                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 9px;">
-                        </td>
-                        <td style="padding: 2px;">
-                            <input type="text" 
-                                   value="${entrantScores.fault2 || ''}" 
-                                   onchange="updateEntrantScore(${i}, 'fault2', this.value)"
-                                   placeholder="Fault type"
-                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 9px;">
-                        </td>
-                        <td style="padding: 2px;">
-                            <input type="text" 
-                                   value="${entrantScores.time || ''}" 
-                                   onchange="updateEntrantScore(${i}, 'time', this.value)"
-                                   placeholder="mm:ss"
-                                   style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px;">
-                        </td>
-                        <td style="padding: 2px;">
-                            <select onchange="updateEntrantScore(${i}, 'passFail', this.value)"
-                                    style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 2px; font-size: 10px; font-weight: bold;">
-                                <option value="">-</option>
-                                <option value="Pass" ${entrantScores.passFail === 'Pass' ? 'selected' : ''} style="background: #d4edda;">Pass</option>
-                                <option value="Fail" ${entrantScores.passFail === 'Fail' ? 'selected' : ''} style="background: #f8d7da;">Fail</option>
-                            </select>
-                        </td>
+                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
+                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
+                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
+                        <td style="height: ${rowHeight}; padding: ${cellPadding};"></td>
                     </tr>
                 `;
             }
@@ -1088,15 +1284,8 @@
                         </tbody>
                     </table>
                     
-                    <div style="margin-top: 20px; text-align: center; padding: 20px; background: white; border: 2px solid #28a745; border-radius: 8px;">
-                        <button onclick="saveFillableScores('${sheetData.id}')" 
-                                style="background: #28a745; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-right: 10px;">
-                            💾 Save All Scores
-                        </button>
-                        <button onclick="clearScores()" 
-                                style="background: #6c757d; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 5px; cursor: pointer;">
-                            🗑️ Clear Form
-                        </button>
+                    <div style="margin-top: 20px; text-align: center; font-size: 8px;">
+                        Copyright © by Canine-Work And Games, LLC, 2024
                     </div>
                 </div>
             `;
@@ -1104,62 +1293,51 @@
             return html;
         }
 
-        window.updateEntrantScore = function(entrantIndex, field, value) {
-            if (!currentFillableScores[entrantIndex]) {
-                currentFillableScores[entrantIndex] = {};
-            }
-            currentFillableScores[entrantIndex][field] = value;
-        };
+        // Generate statistics
+        function generateStats() {
+            const totalEntries = entries.length;
+            const uniqueHandlers = new Set(entries.map(e => e.handlerName)).size;
+            const uniqueDogs = new Set(entries.map(e => e.dogCallName)).size;
+            const regularEntries = entries.filter(e => e.entryType === 'regular').length;
+            const feoEntries = entries.filter(e => e.entryType === 'feo').length;
 
-        window.saveFillableScores = async function(sheetId) {
-            try {
-                // Get scent locations
-                const scent1Location = document.getElementById('scent1Location')?.value || '';
-                const scent2Location = document.getElementById('scent2Location')?.value || '';
-                const scent3Location = document.getElementById('scent3Location')?.value || '';
-                const scent4Location = document.getElementById('scent4Location')?.value || '';
-                
-                // Combine all scores
-                const allScores = {
-                    ...currentFillableScores,
-                    scent1Location,
-                    scent2Location,
-                    scent3Location,
-                    scent4Location
-                };
-                
-                // Update the sheet in database
-                await updateDoc(doc(db, 'scoreSheets', sheetId), {
-                    scores: allScores,
-                    status: 'completed',
-                    lastModified: new Date()
-                });
-                
-                alert('✅ Scores saved successfully!');
-                
-                // Refresh the stored sheets view if it's displayed
-                if (document.getElementById('scoreSheetsSection').style.display === 'block') {
-                    viewStoredSheets();
-                }
-                
-            } catch (error) {
-                console.error('Error saving scores:', error);
-                alert('Error saving scores: ' + error.message);
-            }
-        };
+            const statsContainer = document.getElementById('stats');
+            statsContainer.style.display = 'grid';
+            statsContainer.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-number">${totalEntries}</span>
+                    <span class="stat-label">Total Entries</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueHandlers}</span>
+                    <span class="stat-label">Handlers</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${uniqueDogs}</span>
+                    <span class="stat-label">Dogs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${regularEntries}</span>
+                    <span class="stat-label">Regular</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">${feoEntries}</span>
+                    <span class="stat-label">FEO</span>
+                </div>
+            `;
+        }
 
-        window.clearScores = function() {
-            if (confirm('Are you sure you want to clear all entered scores?')) {
-                currentFillableScores = {};
-                
-                // Clear all input fields
-                const inputs = document.querySelectorAll('.score-sheet input, .score-sheet select');
-                inputs.forEach(input => {
-                    if (input.type === 'checkbox') return; // Don't clear round checkboxes
-                    input.value = '';
-                });
-            }
-        };
+        // Show error message
+        function showError(message) {
+            const container = document.getElementById('scoreSheetsSection');
+            container.innerHTML = `
+                <div class="no-data">
+                    ❌ ${message}
+                </div>
+            `;
+            container.style.display = 'block';
+            document.getElementById('stats').style.display = 'none';
+        }
 
         // Preview single sheet
         window.previewSheet = function(sheetId) {
@@ -1233,7 +1411,15 @@
                 const storedSheets = [];
                 
                 snapshot.forEach(doc => {
-                    storedSheets.push({ id: doc.id, ...doc.data() });
+                    const sheetData = doc.data();
+                    
+                    // Fix date handling when loading
+                    const processedSheet = {
+                        ...sheetData,
+                        date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                    };
+                    
+                    storedSheets.push({ id: doc.id, ...processedSheet });
                 });
 
                 // Sort by creation date (most recent first)
@@ -1265,21 +1451,25 @@
                 html = '<div class="no-data">No stored score sheets found.</div>';
             } else {
                 sheets.forEach(sheet => {
-                    const createdDate = sheet.createdAt ? 
-                        sheet.createdAt.toDate().toLocaleDateString() : 'Unknown';
+                    const createdDate = sheet.createdAt ? sheet.createdAt.toDate().toLocaleDateString() : 'Unknown';
+                    const displayDate = formatDateDisplay(sheet.date);
+                    const hasScores = sheet.scoreData && Object.keys(sheet.scoreData).length > 0;
+                    const statusClass = hasScores ? 'status-completed' : sheet.status;
+                    const statusText = hasScores ? 'SCORED' : sheet.status.toUpperCase();
+                    
                     html += `
                         <div class="score-sheet-item">
                             <div class="score-sheet-info">
                                 <div class="score-sheet-title">${sheet.trialName} - ${sheet.judge} - ${sheet.classRound}</div>
                                 <div class="score-sheet-details">
-                                    ${sheet.entrants.length} entrants • ${sheet.date} • Created: ${createdDate}
-                                    <span class="status-badge status-${sheet.status}">${sheet.status.toUpperCase()}</span>
+                                    ${sheet.entrants.length} entrants • ${displayDate} • Created: ${createdDate}
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
                                 </div>
                             </div>
                             <div class="score-sheet-actions">
                                 <button class="btn btn-secondary" onclick="previewStoredSheet('${sheet.id}')">Preview</button>
                                 <button class="btn btn-success" onclick="printStoredSheet('${sheet.id}')">Print</button>
-                                <button class="btn btn-warning" onclick="editScores('${sheet.id}')">Edit Scores</button>
+                                <button class="btn btn-warning" onclick="editScores('${sheet.id}')">✏️ Edit Scores</button>
                                 <button class="btn btn-danger" onclick="deleteSheet('${sheet.id}')">Delete</button>
                             </div>
                         </div>
@@ -1300,7 +1490,13 @@
                     return;
                 }
 
-                const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                const sheetData = sheetDoc.data();
+                const sheet = { 
+                    id: sheetDoc.id, 
+                    ...sheetData,
+                    date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                };
+                
                 const container = document.getElementById('scoreSheetsContainer');
                 container.innerHTML = generateScoreSheetHTML(sheet);
                 container.style.display = 'block';
@@ -1322,7 +1518,13 @@
                     return;
                 }
 
-                const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
+                const sheetData = sheetDoc.data();
+                const sheet = { 
+                    id: sheetDoc.id, 
+                    ...sheetData,
+                    date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                };
+                
                 const container = document.getElementById('scoreSheetsContainer');
                 container.innerHTML = generateScoreSheetHTML(sheet);
                 
@@ -1335,7 +1537,7 @@
             }
         };
 
-        // Edit scores - Simple fillable form approach
+        // Edit scores - Open the scoring modal
         window.editScores = async function(sheetId) {
             try {
                 const sheetDoc = await getDoc(doc(db, 'scoreSheets', sheetId));
@@ -1344,19 +1546,657 @@
                     return;
                 }
 
-                const sheet = { id: sheetDoc.id, ...sheetDoc.data() };
-                const container = document.getElementById('scoreSheetsContainer');
+                const sheetData = sheetDoc.data();
+                currentEditingSheet = { 
+                    id: sheetDoc.id, 
+                    ...sheetData,
+                    date: sheetData.date ? getDateFromFirebase(sheetData.date) : null
+                };
                 
-                // Generate fillable score sheet HTML
-                container.innerHTML = generateFillableScoreSheetHTML(sheet);
-                container.style.display = 'block';
+                // Load existing score data if available
+                currentScoreData = currentEditingSheet.scoreData || {};
                 
-                // Scroll to the form
-                container.scrollIntoView({ behavior: 'smooth' });
+                // Populate the scoring form
+                populateScoringForm();
+                
+                // Show the modal
+                document.getElementById('scoreEntryModal').style.display = 'block';
                 
             } catch (error) {
                 console.error('Error loading sheet for editing:', error);
                 alert('Error loading sheet: ' + error.message);
+            }
+        };
+
+        // Populate the scoring form with sheet data
+        function populateScoringForm() {
+            if (!currentEditingSheet) return;
+
+            // Set scent locations
+            document.getElementById('scent1Location').value = currentScoreData.scent1Location || '';
+            document.getElementById('scent2Location').value = currentScoreData.scent2Location || '';
+            document.getElementById('scent3Location').value = currentScoreData.scent3Location || '';
+            document.getElementById('scent4Location').value = currentScoreData.scent4Location || '';
+
+            // Generate entrant scoring rows
+            const entrantsContainer = document.getElementById('entrantsScoring');
+            let html = '';
+
+            currentEditingSheet.entrants.forEach((entrant, index) => {
+                const entrantKey = `entrant_${index}`;
+                const entrantScores = currentScoreData[entrantKey] || {};
+                
+                html += `
+                    <div class="entrant-row">
+                        <div class="entrant-header">
+                            ${index + 1}. ${entrant.handler} - ${entrant.dog}
+                        </div>
+                        <div class="entrant-scoring-grid">
+                            <!-- Scent 1 -->
+                            <div class="scent-result-group">
+                                <label>Scent 1</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent1_found" ${entrantScores.scent1Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent1_not_found" ${entrantScores.scent1NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scent 2 -->
+                            <div class="scent-result-group">
+                                <label>Scent 2</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent2_found" ${entrantScores.scent2Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent2_not_found" ${entrantScores.scent2NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scent 3 -->
+                            <div class="scent-result-group">
+                                <label>Scent 3</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent3_found" ${entrantScores.scent3Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent3_not_found" ${entrantScores.scent3NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scent 4 -->
+                            <div class="scent-result-group">
+                                <label>Scent 4</label>
+                                <div class="scent-checkboxes">
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent4_found" ${entrantScores.scent4Found ? 'checked' : ''}>
+                                        <span>✓</span>
+                                    </div>
+                                    <div class="checkbox-option">
+                                        <input type="checkbox" id="${entrantKey}_scent4_not_found" ${entrantScores.scent4NotFound ? 'checked' : ''}>
+                                        <span>✗</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Faults -->
+                            <div>
+                                <label>Faults</label>
+                                <input type="text" class="fault-input" id="${entrantKey}_faults" 
+                                       value="${entrantScores.faults || ''}" placeholder="Enter faults...">
+                            </div>
+                            
+                            <!-- Time -->
+                            <div>
+                                <label>Time</label>
+                                <input type="text" class="time-input" id="${entrantKey}_time" 
+                                       value="${entrantScores.time || ''}" placeholder="MM:SS">
+                            </div>
+                            
+                            <!-- Pass/Fail -->
+                            <div class="pass-fail-group">
+                                <div class="pass-fail-option">
+                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_pass" 
+                                           value="pass" ${entrantScores.result === 'pass' ? 'checked' : ''}>
+                                    <label for="${entrantKey}_pass">Pass</label>
+                                </div>
+                                <div class="pass-fail-option">
+                                    <input type="radio" name="${entrantKey}_result" id="${entrantKey}_fail" 
+                                           value="fail" ${entrantScores.result === 'fail' ? 'checked' : ''}>
+                                    <label for="${entrantKey}_fail">Fail</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            entrantsContainer.innerHTML = html;
+
+            // Add event listeners for mutual exclusivity of checkboxes
+            currentEditingSheet.entrants.forEach((entrant, index) => {
+                const entrantKey = `entrant_${index}`;
+                
+                // For each scent, make found/not found mutually exclusive
+                for (let scent = 1; scent <= 4; scent++) {
+                    const foundCheckbox = document.getElementById(`${entrantKey}_scent${scent}_found`);
+                    const notFoundCheckbox = document.getElementById(`${entrantKey}_scent${scent}_not_found`);
+                    
+                    if (foundCheckbox && notFoundCheckbox) {
+                        foundCheckbox.addEventListener('change', function() {
+                            if (this.checked) {
+                                notFoundCheckbox.checked = false;
+                            }
+                        });
+                        
+                        notFoundCheckbox.addEventListener('change', function() {
+                            if (this.checked) {
+                                foundCheckbox.checked = false;
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        // Close score modal
+        window.closeScoreModal = function() {
+            document.getElementById('scoreEntryModal').style.display = 'none';
+            currentEditingSheet = null;
+            currentScoreData = {};
+        };
+
+        // Save scores to database
+        window.saveScores = async function() {
+            if (!currentEditingSheet) {
+                alert('No sheet selected for editing');
+                return;
+            }
+
+            try {
+                // Collect all score data
+                const scoreData = {
+                    scent1Location: document.getElementById('scent1Location').value,
+                    scent2Location: document.getElementById('scent2Location').value,
+                    scent3Location: document.getElementById('scent3Location').value,
+                    scent4Location: document.getElementById('scent4Location').value
+                };
+
+                // Collect entrant scores
+                currentEditingSheet.entrants.forEach((entrant, index) => {
+                    const entrantKey = `entrant_${index}`;
+                    
+                    scoreData[entrantKey] = {
+                        handler: entrant.handler,
+                        dog: entrant.dog,
+                        scent1Found: document.getElementById(`${entrantKey}_scent1_found`)?.checked || false,
+                        scent1NotFound: document.getElementById(`${entrantKey}_scent1_not_found`)?.checked || false,
+                        scent2Found: document.getElementById(`${entrantKey}_scent2_found`)?.checked || false,
+                        scent2NotFound: document.getElementById(`${entrantKey}_scent2_not_found`)?.checked || false,
+                        scent3Found: document.getElementById(`${entrantKey}_scent3_found`)?.checked || false,
+                        scent3NotFound: document.getElementById(`${entrantKey}_scent3_not_found`)?.checked || false,
+                        scent4Found: document.getElementById(`${entrantKey}_scent4_found`)?.checked || false,
+                        scent4NotFound: document.getElementById(`${entrantKey}_scent4_not_found`)?.checked || false,
+                        faults: document.getElementById(`${entrantKey}_faults`)?.value || '',
+                        time: document.getElementById(`${entrantKey}_time`)?.value || '',
+                        result: document.querySelector(`input[name="${entrantKey}_result"]:checked`)?.value || ''
+                    };
+                });
+
+                // Update the sheet in Firebase
+                await updateDoc(doc(db, 'scoreSheets', currentEditingSheet.id), {
+                    scoreData: scoreData,
+                    status: 'scored',
+                    scoredAt: new Date(),
+                    lastModified: new Date()
+                });
+
+                alert('Scores saved successfully!');
+                closeScoreModal();
+                
+                // Refresh the stored sheets view
+                viewStoredSheets();
+
+            } catch (error) {
+                console.error('Error saving scores:', error);
+                alert('Error saving scores: ' + error.message);
+            }
+        };
+
+        // Generate filled PDF that matches the printed score sheet exactly
+        window.generateFilledPDF = async function() {
+            if (!currentEditingSheet) {
+                alert('No sheet selected');
+                return;
+            }
+
+            try {
+                // Create a new PDF document (8.5 x 11 inches)
+                const pdfDoc = await PDFLib.PDFDocument.create();
+                const page = pdfDoc.addPage([612, 792]);
+                
+                // Get fonts
+                const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+                const boldFont = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+                const { width, height } = page.getSize();
+                let yPos = height - 40;
+
+                // Draw border around entire page
+                page.drawRectangle({
+                    x: 30,
+                    y: 30,
+                    width: width - 60,
+                    height: height - 60,
+                    borderColor: PDFLib.rgb(0, 0, 0),
+                    borderWidth: 1,
+                });
+
+                // Header section
+                // Copyright notice (top right)
+                page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
+                    x: width - 280,
+                    y: yPos,
+                    size: 8,
+                    font: font,
+                });
+                yPos -= 25;
+
+                // Title
+                page.drawText(`${currentEditingSheet.className} Score Sheet`, {
+                    x: width / 2 - 100,
+                    y: yPos,
+                    size: 16,
+                    font: boldFont,
+                });
+                yPos -= 25;
+
+                // Date
+                const displayDate = formatDateDisplay(currentEditingSheet.date);
+                page.drawText(`Date: ${displayDate}`, {
+                    x: width / 2 - 80,
+                    y: yPos,
+                    size: 12,
+                    font: font,
+                });
+                yPos -= 20;
+
+                // Class
+                page.drawText(`CLASS: ${currentEditingSheet.className}`, {
+                    x: width / 2 - 60,
+                    y: yPos,
+                    size: 14,
+                    font: boldFont,
+                });
+                yPos -= 20;
+
+                // Judge
+                page.drawText(`JUDGE: ${currentEditingSheet.judge}`, {
+                    x: width / 2 - 60,
+                    y: yPos,
+                    size: 14,
+                    font: boldFont,
+                });
+                yPos -= 30;
+
+                // Round checkboxes
+                page.drawText('Round', {
+                    x: 50,
+                    y: yPos,
+                    size: 10,
+                    font: boldFont,
+                });
+
+                const rounds = ['1', '2', '3', '4'];
+                let roundX = 100;
+                rounds.forEach((round, index) => {
+                    // Draw checkbox
+                    page.drawRectangle({
+                        x: roundX,
+                        y: yPos - 3,
+                        width: 12,
+                        height: 12,
+                        borderColor: PDFLib.rgb(0, 0, 0),
+                        borderWidth: 1,
+                    });
+                    
+                    // Check the appropriate round
+                    if (round === currentEditingSheet.roundNumber) {
+                        page.drawText('X', {
+                            x: roundX + 3,
+                            y: yPos - 1,
+                            size: 9,
+                            font: boldFont,
+                        });
+                    }
+                    
+                    page.drawText(round, {
+                        x: roundX + 20,
+                        y: yPos,
+                        size: 10,
+                        font: font,
+                    });
+                    roundX += 60;
+                });
+                yPos -= 35;
+
+                // Scent information table
+                const scentTableY = yPos;
+                const scentTableHeight = 60;
+                const colWidth = (width - 100) / 4;
+
+                // Draw scent table border
+                page.drawRectangle({
+                    x: 50,
+                    y: scentTableY - scentTableHeight,
+                    width: width - 100,
+                    height: scentTableHeight,
+                    borderColor: PDFLib.rgb(0, 0, 0),
+                    borderWidth: 1,
+                });
+
+                // Scent table headers
+                const scentHeaders = ['Scent 1', 'Scent 2', 'Scent 3', 'Scent 4'];
+                scentHeaders.forEach((header, index) => {
+                    const x = 50 + (index * colWidth);
+                    
+                    // Draw column separator
+                    if (index > 0) {
+                        page.drawLine({
+                            start: { x: x, y: scentTableY },
+                            end: { x: x, y: scentTableY - scentTableHeight },
+                            thickness: 1,
+                            color: PDFLib.rgb(0, 0, 0),
+                        });
+                    }
+                    
+                    // Header background
+                    page.drawRectangle({
+                        x: x,
+                        y: scentTableY - 20,
+                        width: colWidth,
+                        height: 20,
+                        color: PDFLib.rgb(0.94, 0.94, 0.94),
+                    });
+                    
+                    page.drawText(header, {
+                        x: x + colWidth/2 - 20,
+                        y: scentTableY - 15,
+                        size: 10,
+                        font: boldFont,
+                    });
+                });
+
+                // "Located in/on:" row
+                page.drawLine({
+                    start: { x: 50, y: scentTableY - 20 },
+                    end: { x: width - 50, y: scentTableY - 20 },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
+                scentHeaders.forEach((header, index) => {
+                    const x = 50 + (index * colWidth);
+                    page.drawText('Located in/on:', {
+                        x: x + 5,
+                        y: scentTableY - 35,
+                        size: 9,
+                        font: font,
+                    });
+                });
+
+                // Fill in scent locations
+                const scentLocations = [
+                    document.getElementById('scent1Location').value,
+                    document.getElementById('scent2Location').value,
+                    document.getElementById('scent3Location').value,
+                    document.getElementById('scent4Location').value
+                ];
+
+                page.drawLine({
+                    start: { x: 50, y: scentTableY - 40 },
+                    end: { x: width - 50, y: scentTableY - 40 },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
+                scentLocations.forEach((location, index) => {
+                    const x = 50 + (index * colWidth);
+                    const text = location || '';
+                    page.drawText(text.length > 12 ? text.substring(0, 12) + '...' : text, {
+                        x: x + 5,
+                        y: scentTableY - 55,
+                        size: 8,
+                        font: font,
+                    });
+                });
+
+                yPos = scentTableY - scentTableHeight - 20;
+
+                // Faults section
+                page.drawText('Faults: Dropped Food; Dog stops working; Handler guiding dog; Incorrect find; Destructive behavior;', {
+                    x: 50,
+                    y: yPos,
+                    size: 9,
+                    font: boldFont,
+                });
+                yPos -= 12;
+                page.drawText('Disturbing search area by dog or handler; Verbally naming item; Continue search after "alert";', {
+                    x: 50,
+                    y: yPos,
+                    size: 9,
+                    font: boldFont,
+                });
+                yPos -= 12;
+                page.drawText('SR crossing line less than half.', {
+                    x: 50,
+                    y: yPos,
+                    size: 9,
+                    font: boldFont,
+                });
+                yPos -= 25;
+
+                // Main scoring table
+                const tableStartY = yPos;
+                const tableWidth = width - 100;
+                const teamColWidth = 40;
+                const nameColWidth = 140;
+                const scentColWidth = 45;
+                const faultColWidth = 60;
+                const timeColWidth = 50;
+                const resultColWidth = 50;
+
+                // Table header
+                const headers = ['Team', 'Dog - Handler', 'Scent Results', '', '', '', 'Fault', 'Fault', 'Time', 'Pass/Fail'];
+                const subHeaders = ['', '', 'Scent 1', 'Scent 2', 'Scent 3', 'Scent 4', '', '', '', ''];
+                const columnWidths = [teamColWidth, nameColWidth, scentColWidth, scentColWidth, scentColWidth, scentColWidth, faultColWidth/2, faultColWidth/2, timeColWidth, resultColWidth];
+
+                // Draw main table border
+                const rowHeight = 25;
+                const headerHeight = 40;
+                const totalRows = Math.max(8, currentEditingSheet.entrants.length);
+                const tableHeight = headerHeight + (totalRows * rowHeight);
+
+                page.drawRectangle({
+                    x: 50,
+                    y: tableStartY - tableHeight,
+                    width: tableWidth,
+                    height: tableHeight,
+                    borderColor: PDFLib.rgb(0, 0, 0),
+                    borderWidth: 1,
+                });
+
+                // Draw header background
+                page.drawRectangle({
+                    x: 50,
+                    y: tableStartY - headerHeight,
+                    width: tableWidth,
+                    height: headerHeight,
+                    color: PDFLib.rgb(0.94, 0.94, 0.94),
+                });
+
+                // Draw column separators and headers
+                let currentX = 50;
+                headers.forEach((header, index) => {
+                    if (index > 0) {
+                        page.drawLine({
+                            start: { x: currentX, y: tableStartY },
+                            end: { x: currentX, y: tableStartY - tableHeight },
+                            thickness: 1,
+                            color: PDFLib.rgb(0, 0, 0),
+                        });
+                    }
+
+                    // Main header
+                    if (header) {
+                        page.drawText(header, {
+                            x: currentX + 2,
+                            y: tableStartY - 15,
+                            size: 8,
+                            font: boldFont,
+                        });
+                    }
+
+                    // Sub header
+                    if (subHeaders[index]) {
+                        page.drawText(subHeaders[index], {
+                            x: currentX + 2,
+                            y: tableStartY - 30,
+                            size: 8,
+                            font: boldFont,
+                        });
+                    }
+
+                    currentX += columnWidths[index];
+                });
+
+                // Draw horizontal line separating headers from data
+                page.drawLine({
+                    start: { x: 50, y: tableStartY - headerHeight },
+                    end: { x: width - 50, y: tableStartY - headerHeight },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
+                // Draw sub-header separator line
+                page.drawLine({
+                    start: { x: 50, y: tableStartY - 20 },
+                    end: { x: width - 50, y: tableStartY - 20 },
+                    thickness: 1,
+                    color: PDFLib.rgb(0, 0, 0),
+                });
+
+                // Fill in entrant data
+                for (let i = 0; i < totalRows; i++) {
+                    const rowY = tableStartY - headerHeight - ((i + 1) * rowHeight);
+                    
+                    // Draw row separator
+                    page.drawLine({
+                        start: { x: 50, y: rowY },
+                        end: { x: width - 50, y: rowY },
+                        thickness: 1,
+                        color: PDFLib.rgb(0, 0, 0),
+                    });
+
+                    if (i < currentEditingSheet.entrants.length) {
+                        const entrant = currentEditingSheet.entrants[i];
+                        const entrantKey = `entrant_${i}`;
+                        
+                        // Get the current form data
+                        const scent1Result = document.getElementById(`${entrantKey}_scent1_found`)?.checked ? 'FOUND' : 
+                                           document.getElementById(`${entrantKey}_scent1_not_found`)?.checked ? 'X' : '';
+                        const scent2Result = document.getElementById(`${entrantKey}_scent2_found`)?.checked ? 'FOUND' : 
+                                           document.getElementById(`${entrantKey}_scent2_not_found`)?.checked ? 'X' : '';
+                        const scent3Result = document.getElementById(`${entrantKey}_scent3_found`)?.checked ? 'FOUND' : 
+                                           document.getElementById(`${entrantKey}_scent3_not_found`)?.checked ? 'X' : '';
+                        const scent4Result = document.getElementById(`${entrantKey}_scent4_found`)?.checked ? 'FOUND' : 
+                                           document.getElementById(`${entrantKey}_scent4_not_found`)?.checked ? 'X' : '';
+                        const faults = document.getElementById(`${entrantKey}_faults`)?.value || '';
+                        const time = document.getElementById(`${entrantKey}_time`)?.value || '';
+                        const result = document.querySelector(`input[name="${entrantKey}_result"]:checked`)?.value || '';
+
+                        const rowData = [
+                            (i + 1).toString(),
+                            `${entrant.handler} - ${entrant.dog}`,
+                            scent1Result,
+                            scent2Result,
+                            scent3Result,
+                            scent4Result,
+                            faults.length > 8 ? faults.substring(0, 6) + '..' : faults,
+                            '', // Second fault column (empty for now)
+                            time,
+                            result.toUpperCase()
+                        ];
+
+                        currentX = 50;
+                        rowData.forEach((data, colIndex) => {
+                            let displayText = data;
+                            if (colIndex === 1 && data.length > 20) { // Handler-Dog column
+                                displayText = data.substring(0, 17) + '...';
+                            }
+
+                            // Background color for team name cells
+                            if (colIndex === 0 || colIndex === 1) {
+                                page.drawRectangle({
+                                    x: currentX,
+                                    y: rowY,
+                                    width: columnWidths[colIndex],
+                                    height: rowHeight,
+                                    color: PDFLib.rgb(0.97, 0.97, 0.97),
+                                });
+                            }
+
+                            page.drawText(displayText, {
+                                x: currentX + 2,
+                                y: rowY + rowHeight/2 - 4,
+                                size: colIndex === 1 ? 7 : 8,
+                                font: (colIndex === 0 || colIndex === 1) ? boldFont : font,
+                            });
+                            currentX += columnWidths[colIndex];
+                        });
+                    }
+                }
+
+                // Footer copyright
+                page.drawText('Copyright © by Canine-Work And Games, LLC, 2024', {
+                    x: width / 2 - 100,
+                    y: 40,
+                    size: 8,
+                    font: font,
+                });
+
+                // Generate PDF bytes
+                const pdfBytes = await pdfDoc.save();
+                
+                // Create download link
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${currentEditingSheet.trialName}_${currentEditingSheet.judge}_${currentEditingSheet.classRound}_Scored.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                alert('Filled PDF generated and downloaded successfully!');
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF: ' + error.message);
             }
         };
 
@@ -1378,56 +2218,18 @@
             }
         };
 
-        // Generate statistics
-        function generateStats() {
-            const totalEntries = entries.length;
-            const uniqueHandlers = new Set(entries.map(e => e.handlerName)).size;
-            const uniqueDogs = new Set(entries.map(e => e.dogCallName)).size;
-            const regularEntries = entries.filter(e => e.entryType === 'regular').length;
-            const feoEntries = entries.filter(e => e.entryType === 'feo').length;
-
-            const statsContainer = document.getElementById('stats');
-            statsContainer.style.display = 'grid';
-            statsContainer.innerHTML = `
-                <div class="stat-item">
-                    <span class="stat-number">${totalEntries}</span>
-                    <span class="stat-label">Total Entries</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${uniqueHandlers}</span>
-                    <span class="stat-label">Handlers</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${uniqueDogs}</span>
-                    <span class="stat-label">Dogs</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${regularEntries}</span>
-                    <span class="stat-label">Regular</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">${feoEntries}</span>
-                    <span class="stat-label">FEO</span>
-                </div>
-            `;
-        }
-
-        // Show error message
-        function showError(message) {
-            const container = document.getElementById('scoreSheetsSection');
-            container.innerHTML = `
-                <div class="no-data">
-                    ❌ ${message}
-                </div>
-            `;
-            container.style.display = 'block';
-            document.getElementById('stats').style.display = 'none';
-        }
-
         // Make main functions available globally
         window.loadTrialData = loadTrialData;
         window.generateAllScoreSheets = generateAllScoreSheets;
         window.printScoreSheets = printScoreSheets;
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('scoreEntryModal');
+            if (event.target === modal) {
+                closeScoreModal();
+            }
+        };
 
         // Initialize when auth is ready
         auth.onAuthStateChanged(async (user) => {
