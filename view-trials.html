@@ -18,14 +18,16 @@ async function deleteTrial(trialId, trialName) {
   }
 }
 
-// UPDATED: Use new edit-trial.html page instead of create-trial.html
+// FIXED: Use the new edit-trial.html page instead of create-trial.html
 function editTrial(trialId) {
+  console.log("Editing trial:", trialId);
   // Navigate to the new edit trial page with the trial ID
   window.location.href = `edit-trial.html?id=${trialId}&mode=edit`;
 }
 
 // NEW: Add view trial function for read-only viewing
 function viewTrial(trialId) {
+  console.log("Viewing trial:", trialId);
   window.location.href = `edit-trial.html?id=${trialId}&mode=view`;
 }
 
@@ -97,12 +99,12 @@ async function loadTrials(user) {
         });
       }
       
-      // UPDATED: Add both View and Edit buttons with better styling
+      // UPDATED: Better button styling and functionality
       trialItem.innerHTML = `
         <div class="trial-actions">
-          <button class="view-btn" onclick="viewTrial('${trialData.id}')" style="background: #17a2b8; color: white; padding: 5px 10px; border: none; border-radius: 3px; margin-right: 5px;">👁️ View</button>
-          <button class="edit-btn" onclick="editTrial('${trialData.id}')" style="background: #28a745; color: white; padding: 5px 10px; border: none; border-radius: 3px; margin-right: 5px;">✏️ Edit</button>
-          <button class="delete-btn" onclick="deleteTrial('${trialData.id}', '${trialData.clubName || 'Unnamed Trial'}')" style="background: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 3px;">🗑️ Delete</button>
+          <button class="view-btn" onclick="viewTrial('${trialData.id}')" title="View trial details">👁️ View</button>
+          <button class="edit-btn" onclick="editTrial('${trialData.id}')" title="Edit trial">✏️ Edit</button>
+          <button class="delete-btn" onclick="deleteTrial('${trialData.id}', '${(trialData.clubName || 'Unnamed Trial').replace(/'/g, '\\\'')}')" title="Delete trial">🗑️ Delete</button>
         </div>
         <h3>${trialData.clubName || 'Unnamed Trial'}</h3>
         <div class="trial-details">
