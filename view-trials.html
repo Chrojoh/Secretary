@@ -118,6 +118,154 @@
     <h1>My Trials</h1>
     <div id="trialList">Loading trials...</div>
   </div>
-  <script type="module" src="js/view-trials.js"></script>
+
+  <script type="module">
+    // Import Firebase functions
+    import { auth, db } from './js/firebase.js';
+    import { collection, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+    console.log("🔧 Loading view-trials script...");
+
+    const trialList = document.getElementById("trialList");
+
+    // Delete trial function
+    async function deleteTrial(trialId, trialName) {
+      if (confirm(`Are you sure you want to delete "${trialName}"? This cannot be undone.`)) {
+        try {
+          await deleteDoc(doc(db, "trials", trialId));
+          console.log("Trial deleted:", trialId);
+          alert("Trial deleted successfully!");
+          location.reload();
+        } catch (error) {
+          console.error("Error deleting trial:", error);
+          alert("Error deleting trial: " + error.message);
+        }
+      }
+    }
+
+    // Edit trial function - goes to edit-trial.html
+    function editTrial(trialId) {
+      console.log("🔧 Editing trial:", trialId);
+      window.location.href = `edit-trial.html?id=${trialId}&mode=edit`;
+    }
+
+    // View trial function - goes to edit-trial.html in view mode
+    function viewTrial(trialId) {
+      console.log("🔧 Viewing trial:", trialId);
+      window.location.href = `edit-trial.html?id=${trialId}&mode=view`;
+    }
+
+    // Load trials function
+    async function loadTrials(user) {
+      try {
+        console.log("🔧 Loading trials for user:", user.email);
+        
+        const q = query(
+          collection(db, "trials"), 
+          where("createdBy", "==", user.uid)
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          trialList.innerHTML = '<div class="no-trials">No trials found. <a href="create-trial.html">Create your first trial</a></div>';
+          return;
+        }
+        
+        trialList.innerHTML = '';
+        
+        const trials = [];
+        snapshot.forEach(doc => {
+          const trialData = doc.data();
+          trials.push({ id: doc.id, ...trialData });
+        });
+        
+        trials.sort((a, b) => {
+          const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+          const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+          return dateB - dateA;
+        });
+        
+        trials.forEach(trialData => {
+          console.log("🔧 Rendering trial:", trialData.clubName);
+          
+          const trialItem = document.createElement("div");
+          trialItem.className = "trial-item";
+          
+          let createdDate = "Unknown date";
+          if (trialData.createdAt) {
+            createdDate = trialData.createdAt.toDate().toLocaleDateString();
+          }
+          
+          let trialDates = "No dates specified";
+          if (trialData.days && trialData.days.length > 0) {
+            const dates = trialData.days
+              .filter(day => day.date)
+              .map(day => day.date)
+              .join(', ');
+            if (dates) {
+              trialDates = dates;
+            }
+          }
+          
+          let totalClasses = 0;
+          if (trialData.days) {
+            trialData.days.forEach(day => {
+              if (day.classes) {
+                totalClasses += day.classes.length;
+              }
+            });
+          }
+          
+          trialItem.innerHTML = `
+            <div class="trial-actions">
+              <button class="view-btn" onclick="viewTrial('${trialData.id}')" title="View trial details">👁️ View</button>
+              <button class="edit-btn" onclick="editTrial('${trialData.id}')" title="Edit trial">✏️ Edit</button>
+              <button class="delete-btn" onclick="deleteTrial('${trialData.id}', '${(trialData.clubName || 'Unnamed Trial').replace(/'/g, '\\\'')}')" title="Delete trial">🗑️ Delete</button>
+            </div>
+            <h3>${trialData.clubName || 'Unnamed Trial'}</h3>
+            <div class="trial-details">
+              <strong>Secretary:</strong> ${trialData.secretary || 'Not specified'}<br>
+              <strong>Trial Dates:</strong> ${trialDates}<br>
+              <strong>Number of Days:</strong> ${trialData.numDays || 0}<br>
+              <strong>Total Classes:</strong> ${totalClasses}<br>
+              <strong>Created:</strong> ${createdDate}
+            </div>
+          `;
+          
+          trialList.appendChild(trialItem);
+        });
+        
+        console.log(`🔧 Loaded ${trials.length} trials successfully`);
+        
+      } catch (error) {
+        console.error("🔧 Error loading trials:", error);
+        trialList.innerHTML = '<div class="no-trials">Error loading trials: ' + error.message + '</div>';
+      }
+    }
+
+    // Make functions globally accessible
+    window.deleteTrial = deleteTrial;
+    window.editTrial = editTrial;
+    window.viewTrial = viewTrial;
+
+    console.log("🔧 Setting up auth state listener...");
+
+    // Auth state change listener
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        console.log("🔧 No user, redirecting to login");
+        window.location.href = "index.html";
+        return;
+      }
+      
+      console.log("🔧 User authenticated, loading trials...");
+      trialList.innerHTML = '<div class="no-trials">Loading trials...</div>';
+      
+      await loadTrials(user);
+    });
+
+    console.log("🔧 View trials script loaded successfully");
+  </script>
 </body>
 </html>
