@@ -861,7 +861,12 @@ loadSystemData().catch(error => {
     console.log('🔧 System data loading failed, using hardcoded data');
 });
 }
-            
+
+            // After building the structure, populate any dropdowns that were created
+setTimeout(() => {
+    populateAllDropdowns();
+}, 200);        
+        
             // Wait for authentication
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
