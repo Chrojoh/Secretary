@@ -856,10 +856,12 @@
             ];
             console.log('🔧 FORCED system data loaded - Classes:', globalClasses.length, 'Judges:', globalJudges.length);
             
-            // Try to load from Firebase (but don't wait for it)
-            loadSystemData().catch(error => {
-                console.log('🔧 Firebase system data failed, using hardcoded data');
-            });
+           // Try to load from trial setup data (but don't wait for it)
+if (typeof initializeTrialSetup === 'function') {
+    initializeTrialSetup().catch(error => {
+        console.log('🔧 Trial setup data failed, using hardcoded data');
+    });
+}
             
             // Wait for authentication
             auth.onAuthStateChanged(async (user) => {
