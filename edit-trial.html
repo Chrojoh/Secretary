@@ -451,6 +451,8 @@
 
         // Load trial structure into form
         function loadTrialStructure(trialData) {
+            console.log('🔧 Loading trial structure with system data:', { classes: globalClasses.length, judges: globalJudges.length });
+            
             const container = document.getElementById('trialStructure');
             container.innerHTML = '';
             
@@ -463,6 +465,8 @@
                 const dayDiv = createDayElement(day, dayIndex);
                 container.appendChild(dayDiv);
             });
+            
+            console.log('🔧 Trial structure loaded with datalists');
         }
 
         // Create day element
@@ -498,6 +502,8 @@
 
         // Create class element
         function createClassElement(classData, dayIndex, classIndex) {
+            console.log(`🔧 Creating class element with ${globalClasses.length} classes and ${globalJudges.length} judges`);
+            
             let roundsHTML = '';
             if (classData.rounds && classData.rounds.length > 0) {
                 roundsHTML = classData.rounds.map((roundData, roundIndex) => 
@@ -506,6 +512,10 @@
             
             // Get current class value
             const currentClass = classData[STANDARD_FIELDS.CLASS_NAME] || classData.className || '';
+            
+            // Create datalist options with debug
+            const classOptions = globalClasses.map(className => `<option value="${className}">${className}</option>`).join('');
+            console.log(`🔧 Created ${globalClasses.length} class options for datalist`);
             
             return `
                 <div class="class-container" data-class-index="${classIndex}">
@@ -523,7 +533,7 @@
                                onchange="markAsModified()"
                                readonly>
                         <datalist id="classes-datalist-${dayIndex}-${classIndex}">
-                            ${globalClasses.map(className => `<option value="${className}">${className}</option>`).join('')}
+                            ${classOptions}
                         </datalist>
                     </div>
                     
@@ -540,6 +550,10 @@
         function createRoundElement(roundData, dayIndex, classIndex, roundIndex) {
             const judgeName = roundData[STANDARD_FIELDS.JUDGE_NAME] || roundData.judgeName || roundData.judge || '';
             const feoChecked = roundData.feoAvailable || roundData.feo ? 'checked' : '';
+            
+            // Create datalist options with debug
+            const judgeOptions = globalJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('');
+            console.log(`🔧 Created ${globalJudges.length} judge options for round ${roundIndex + 1}, current judge: "${judgeName}"`);
             
             return `
                 <div class="round-container" data-round-index="${roundIndex}">
@@ -558,7 +572,7 @@
                                onchange="markAsModified()"
                                readonly>
                         <datalist id="judges-datalist-${dayIndex}-${classIndex}-${roundIndex}">
-                            ${globalJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
+                            ${judgeOptions}
                         </datalist>
                         
                         <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
@@ -837,6 +851,10 @@
                         // Set current user
                         currentUser = { uid: user.uid, email: user.email };
                         document.getElementById('userInfo').textContent = user.email;
+                        
+                        // Load system data FIRST
+                        console.log('🔧 Loading system data before trial...');
+                        await loadSystemData();
                         
                         // Load trial
                         await loadTrial(params.trialId);
