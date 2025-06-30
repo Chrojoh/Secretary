@@ -418,9 +418,12 @@
                 document.getElementById('loadingCard').classList.add('hidden');
                 document.getElementById('trialEditor').classList.remove('hidden');
                 
-                // Set initial mode based on URL parameter
+                // Set initial mode based on URL parameter (with delay to ensure DOM is ready)
                 if (params.mode === 'edit') {
-                    toggleMode();
+                    setTimeout(() => {
+                        console.log('🔧 Auto-switching to edit mode...');
+                        toggleMode();
+                    }, 500);
                 }
                 
             } catch (error) {
