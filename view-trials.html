@@ -9,106 +9,49 @@
       margin: 20px auto;
       padding: 20px;
     }
-    
     .trial-item {
       border: 1px solid #ddd;
       margin-bottom: 15px;
       padding: 15px;
       border-radius: 8px;
       background-color: #f9f9f9;
-      transition: box-shadow 0.2s ease;
     }
-    
-    .trial-item:hover {
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
     .trial-item h3 {
       margin: 10px 0 10px 0;
       color: #333;
-      font-size: 1.1em;
     }
-    
     .trial-details {
       color: #666;
       font-size: 14px;
-      line-height: 1.4;
     }
-    
     .trial-actions {
       display: flex;
       gap: 8px;
       margin-bottom: 10px;
-      flex-wrap: wrap;
     }
-
     .trial-actions button {
       padding: 8px 12px;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      min-width: 70px;
-      justify-content: center;
     }
-
-    .trial-actions button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-
-    .view-btn {
-      background: #17a2b8 !important;
-      color: white !important;
-    }
-
-    .view-btn:hover {
-      background: #138496 !important;
-    }
-
-    .edit-btn {
-      background: #28a745 !important;
-      color: white !important;
-    }
-
-    .edit-btn:hover {
-      background: #218838 !important;
-    }
-
-    .delete-btn {
-      background: #dc3545 !important;
-      color: white !important;
-    }
-
-    .delete-btn:hover {
-      background: #c82333 !important;
-    }
-    
+    .view-btn { background: #17a2b8; color: white; }
+    .edit-btn { background: #28a745; color: white; }
+    .delete-btn { background: #dc3545; color: white; }
     .no-trials {
       text-align: center;
       color: #666;
-      font-style: italic;
       margin: 50px 0;
     }
-    
     .back-button {
       background-color: #007cba;
       color: white;
       border: none;
       padding: 10px 20px;
-      font-size: 16px;
       cursor: pointer;
       border-radius: 5px;
       margin-bottom: 20px;
-    }
-    
-    .back-button:hover {
-      background-color: #005a8b;
     }
   </style>
 </head>
@@ -119,153 +62,115 @@
     <div id="trialList">Loading trials...</div>
   </div>
 
-  <script type="module">
-    // Import Firebase functions
-    import { auth, db } from './js/firebase.js';
-    import { collection, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+<script type="module">
+import { auth, db } from './js/firebase.js';
+import { collection, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-    console.log("🔧 Loading view-trials script...");
+console.log("Script loading...");
 
-    const trialList = document.getElementById("trialList");
+const trialList = document.getElementById("trialList");
 
-    // Delete trial function
-    async function deleteTrial(trialId, trialName) {
-      if (confirm(`Are you sure you want to delete "${trialName}"? This cannot be undone.`)) {
-        try {
-          await deleteDoc(doc(db, "trials", trialId));
-          console.log("Trial deleted:", trialId);
-          alert("Trial deleted successfully!");
-          location.reload();
-        } catch (error) {
-          console.error("Error deleting trial:", error);
-          alert("Error deleting trial: " + error.message);
-        }
-      }
+window.editTrial = function(trialId) {
+  console.log("Edit clicked:", trialId);
+  window.location.href = `edit-trial.html?id=${trialId}&mode=edit`;
+};
+
+window.viewTrial = function(trialId) {
+  console.log("View clicked:", trialId);
+  window.location.href = `edit-trial.html?id=${trialId}&mode=view`;
+};
+
+window.deleteTrial = async function(trialId, trialName) {
+  if (confirm(`Delete "${trialName}"?`)) {
+    try {
+      await deleteDoc(doc(db, "trials", trialId));
+      alert("Trial deleted!");
+      location.reload();
+    } catch (error) {
+      alert("Error: " + error.message);
     }
+  }
+};
 
-    // Edit trial function - goes to edit-trial.html
-    function editTrial(trialId) {
-      console.log("🔧 Editing trial:", trialId);
-      window.location.href = `edit-trial.html?id=${trialId}&mode=edit`;
+async function loadTrials(user) {
+  try {
+    console.log("Loading trials for:", user.email);
+    
+    const q = query(collection(db, "trials"), where("createdBy", "==", user.uid));
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+      trialList.innerHTML = '<div class="no-trials">No trials found. <a href="create-trial.html">Create your first trial</a></div>';
+      return;
     }
-
-    // View trial function - goes to edit-trial.html in view mode
-    function viewTrial(trialId) {
-      console.log("🔧 Viewing trial:", trialId);
-      window.location.href = `edit-trial.html?id=${trialId}&mode=view`;
-    }
-
-    // Load trials function
-    async function loadTrials(user) {
-      try {
-        console.log("🔧 Loading trials for user:", user.email);
-        
-        const q = query(
-          collection(db, "trials"), 
-          where("createdBy", "==", user.uid)
-        );
-        
-        const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          trialList.innerHTML = '<div class="no-trials">No trials found. <a href="create-trial.html">Create your first trial</a></div>';
-          return;
-        }
-        
-        trialList.innerHTML = '';
-        
-        const trials = [];
-        snapshot.forEach(doc => {
-          const trialData = doc.data();
-          trials.push({ id: doc.id, ...trialData });
-        });
-        
-        trials.sort((a, b) => {
-          const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
-          const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
-          return dateB - dateA;
-        });
-        
-        trials.forEach(trialData => {
-          console.log("🔧 Rendering trial:", trialData.clubName);
-          
-          const trialItem = document.createElement("div");
-          trialItem.className = "trial-item";
-          
-          let createdDate = "Unknown date";
-          if (trialData.createdAt) {
-            createdDate = trialData.createdAt.toDate().toLocaleDateString();
-          }
-          
-          let trialDates = "No dates specified";
-          if (trialData.days && trialData.days.length > 0) {
-            const dates = trialData.days
-              .filter(day => day.date)
-              .map(day => day.date)
-              .join(', ');
-            if (dates) {
-              trialDates = dates;
-            }
-          }
-          
-          let totalClasses = 0;
-          if (trialData.days) {
-            trialData.days.forEach(day => {
-              if (day.classes) {
-                totalClasses += day.classes.length;
-              }
-            });
-          }
-          
-          trialItem.innerHTML = `
-            <div class="trial-actions">
-              <button class="view-btn" onclick="viewTrial('${trialData.id}')" title="View trial details">👁️ View</button>
-              <button class="edit-btn" onclick="editTrial('${trialData.id}')" title="Edit trial">✏️ Edit</button>
-              <button class="delete-btn" onclick="deleteTrial('${trialData.id}', '${(trialData.clubName || 'Unnamed Trial').replace(/'/g, '\\\'')}')" title="Delete trial">🗑️ Delete</button>
-            </div>
-            <h3>${trialData.clubName || 'Unnamed Trial'}</h3>
-            <div class="trial-details">
-              <strong>Secretary:</strong> ${trialData.secretary || 'Not specified'}<br>
-              <strong>Trial Dates:</strong> ${trialDates}<br>
-              <strong>Number of Days:</strong> ${trialData.numDays || 0}<br>
-              <strong>Total Classes:</strong> ${totalClasses}<br>
-              <strong>Created:</strong> ${createdDate}
-            </div>
-          `;
-          
-          trialList.appendChild(trialItem);
-        });
-        
-        console.log(`🔧 Loaded ${trials.length} trials successfully`);
-        
-      } catch (error) {
-        console.error("🔧 Error loading trials:", error);
-        trialList.innerHTML = '<div class="no-trials">Error loading trials: ' + error.message + '</div>';
-      }
-    }
-
-    // Make functions globally accessible
-    window.deleteTrial = deleteTrial;
-    window.editTrial = editTrial;
-    window.viewTrial = viewTrial;
-
-    console.log("🔧 Setting up auth state listener...");
-
-    // Auth state change listener
-    auth.onAuthStateChanged(async user => {
-      if (!user) {
-        console.log("🔧 No user, redirecting to login");
-        window.location.href = "index.html";
-        return;
-      }
-      
-      console.log("🔧 User authenticated, loading trials...");
-      trialList.innerHTML = '<div class="no-trials">Loading trials...</div>';
-      
-      await loadTrials(user);
+    
+    trialList.innerHTML = '';
+    
+    const trials = [];
+    snapshot.forEach(doc => {
+      trials.push({ id: doc.id, ...doc.data() });
     });
+    
+    trials.sort((a, b) => {
+      const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+      const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+      return dateB - dateA;
+    });
+    
+    trials.forEach(trial => {
+      const trialItem = document.createElement("div");
+      trialItem.className = "trial-item";
+      
+      const createdDate = trial.createdAt ? trial.createdAt.toDate().toLocaleDateString() : "Unknown";
+      
+      let trialDates = "No dates";
+      if (trial.days && trial.days.length > 0) {
+        const dates = trial.days.filter(day => day.date).map(day => day.date).join(', ');
+        if (dates) trialDates = dates;
+      }
+      
+      let totalClasses = 0;
+      if (trial.days) {
+        trial.days.forEach(day => {
+          if (day.classes) totalClasses += day.classes.length;
+        });
+      }
+      
+      trialItem.innerHTML = `
+        <div class="trial-actions">
+          <button class="view-btn" onclick="viewTrial('${trial.id}')">👁️ View</button>
+          <button class="edit-btn" onclick="editTrial('${trial.id}')">✏️ Edit</button>
+          <button class="delete-btn" onclick="deleteTrial('${trial.id}', '${(trial.clubName || 'Trial').replace(/'/g, '')}')"">🗑️ Delete</button>
+        </div>
+        <h3>${trial.clubName || 'Unnamed Trial'}</h3>
+        <div class="trial-details">
+          <strong>Secretary:</strong> ${trial.secretary || 'Not specified'}<br>
+          <strong>Trial Dates:</strong> ${trialDates}<br>
+          <strong>Total Classes:</strong> ${totalClasses}<br>
+          <strong>Created:</strong> ${createdDate}
+        </div>
+      `;
+      
+      trialList.appendChild(trialItem);
+    });
+    
+    console.log(`Loaded ${trials.length} trials`);
+    
+  } catch (error) {
+    console.error("Error loading trials:", error);
+    trialList.innerHTML = '<div class="no-trials">Error: ' + error.message + '</div>';
+  }
+}
 
-    console.log("🔧 View trials script loaded successfully");
-  </script>
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+  
+  console.log("User authenticated");
+  await loadTrials(user);
+});
+</script>
 </body>
 </html>
