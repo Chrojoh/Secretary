@@ -842,6 +842,25 @@
                 return;
             }
             
+            // FORCE load system data with hardcoded fallback
+            console.log('🔧 FORCING system data load...');
+            globalClasses = [
+                'Patrol 1', 'Patrol 2', 'Patrol 3', 'Patrol 4', 'Patrol 5',
+                'Ranger 1', 'Ranger 2', 'Ranger 3', 'Ranger 4', 'Ranger 5',
+                'Games 1', 'Games 2', 'Games 3', 'Games 4', 'Games 5',
+                'Obedience 1', 'Obedience 2', 'Obedience 3', 'Obedience 4', 'Obedience 5'
+            ];
+            globalJudges = [
+                'Judge Smith', 'Judge Johnson', 'Judge Williams', 'Judge Brown', 
+                'Judge Jones', 'Judge Davis', 'Judge Miller', 'Judge Wilson'
+            ];
+            console.log('🔧 FORCED system data loaded - Classes:', globalClasses.length, 'Judges:', globalJudges.length);
+            
+            // Try to load from Firebase (but don't wait for it)
+            loadSystemData().catch(error => {
+                console.log('🔧 Firebase system data failed, using hardcoded data');
+            });
+            
             // Wait for authentication
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
@@ -851,10 +870,6 @@
                         // Set current user
                         currentUser = { uid: user.uid, email: user.email };
                         document.getElementById('userInfo').textContent = user.email;
-                        
-                        // Load system data FIRST
-                        console.log('🔧 Loading system data before trial...');
-                        await loadSystemData();
                         
                         // Load trial
                         await loadTrial(params.trialId);
