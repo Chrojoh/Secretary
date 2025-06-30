@@ -324,6 +324,8 @@
         let currentTrial = null;
         let isEditMode = false;
         let originalTrialData = null;
+        let globalClasses = [];
+        let globalJudges = [];
 
         // Standard field names (matching your existing system)
         const STANDARD_FIELDS = {
@@ -498,6 +500,9 @@
                         <label>Class Name:</label>
                         <input type="text" 
                                value="${classData[STANDARD_FIELDS.CLASS_NAME] || classData.className || ''}"
+                               list="global-classes-datalist"
+                               placeholder="Type or select class name..."
+                               style="border: 2px solid #e1e5e9; border-radius: 6px;"
                                onchange="markAsModified()"
                                readonly>
                     </div>
@@ -525,8 +530,10 @@
                         
                         <label style="margin: 0;">Judge:</label>
                         <input type="text" 
-                               style="width: 200px;"
+                               style="width: 200px; border: 2px solid #e1e5e9; border-radius: 6px;"
                                value="${judgeName}"
+                               list="global-judges-datalist"
+                               placeholder="Type or select judge..."
                                onchange="markAsModified()"
                                readonly>
                         
@@ -690,35 +697,97 @@
             };
         }
 
-        // Placeholder functions for add/remove (implement as needed)
+        // Add/Remove functions implementation
         window.addDay = function() {
-            console.log('🔧 Add day function called');
-            // Implementation would go here
+            if (!isEditMode) return;
+            
+            console.log('🔧 Adding new day...');
+            const container = document.getElementById('trialStructure');
+            const dayCount = container.children.length;
+            
+            const newDay = {
+                dayNumber: dayCount + 1,
+                date: '',
+                classes: []
+            };
+            
+            const dayDiv = createDayElement(newDay, dayCount);
+            container.appendChild(dayDiv);
+            markAsModified();
         }
 
         window.removeDay = function(dayIndex) {
-            console.log('🔧 Remove day function called:', dayIndex);
-            // Implementation would go here
+            if (!isEditMode) return;
+            
+            if (confirm('Are you sure you want to remove this day? All classes and rounds will be deleted.')) {
+                const dayElement = document.querySelector(`[data-day-index="${dayIndex}"]`);
+                if (dayElement) {
+                    dayElement.remove();
+                    markAsModified();
+                    console.log('🔧 Removed day:', dayIndex);
+                }
+            }
         }
 
         window.addClass = function(dayIndex) {
-            console.log('🔧 Add class function called:', dayIndex);
-            // Implementation would go here
+            if (!isEditMode) return;
+            
+            console.log('🔧 Adding new class to day:', dayIndex);
+            const container = document.querySelector(`[data-day-index="${dayIndex}"] .classes-container`);
+            const classCount = container.children.length;
+            
+            const newClass = {
+                [STANDARD_FIELDS.CLASS_NAME]: '',
+                rounds: []
+            };
+            
+            const classHTML = createClassElement(newClass, dayIndex, classCount);
+            container.insertAdjacentHTML('beforeend', classHTML);
+            markAsModified();
         }
 
         window.removeClass = function(dayIndex, classIndex) {
-            console.log('🔧 Remove class function called:', dayIndex, classIndex);
-            // Implementation would go here
+            if (!isEditMode) return;
+            
+            if (confirm('Are you sure you want to remove this class? All rounds will be deleted.')) {
+                const classElement = document.querySelector(`[data-day-index="${dayIndex}"] [data-class-index="${classIndex}"]`);
+                if (classElement) {
+                    classElement.remove();
+                    markAsModified();
+                    console.log('🔧 Removed class:', dayIndex, classIndex);
+                }
+            }
         }
 
         window.addRound = function(dayIndex, classIndex) {
-            console.log('🔧 Add round function called:', dayIndex, classIndex);
-            // Implementation would go here
+            if (!isEditMode) return;
+            
+            console.log('🔧 Adding new round to class:', dayIndex, classIndex);
+            const container = document.querySelector(`[data-day-index="${dayIndex}"][data-class-index="${classIndex}"] .rounds-container`);
+            const roundCount = container.children.length;
+            
+            const newRound = {
+                roundNumber: roundCount + 1,
+                [STANDARD_FIELDS.JUDGE_NAME]: '',
+                feoAvailable: false
+            };
+            
+            const roundHTML = createRoundElement(newRound, dayIndex, classIndex, roundCount);
+            container.insertAdjacentHTML('beforeend', roundHTML);
+            markAsModified();
         }
 
         window.removeRound = function(dayIndex, classIndex, roundIndex) {
-            console.log('🔧 Remove round function called:', dayIndex, classIndex, roundIndex);
-            // Implementation would go here
+            if (!isEditMode) return;
+            
+            if (confirm('Are you sure you want to remove this round?')) {
+                const roundElement = document.querySelector(`[data-day-index="${dayIndex}"][data-class-index="${classIndex}"] [data-round-index="${roundIndex}"]`);
+                if (roundElement) {
+                    roundElement.remove();
+                    markAsModified();
+                    console.log('🔧 Removed round:', dayIndex, classIndex, roundIndex);
+                }
+            }
         }
 
         // Initialize page
