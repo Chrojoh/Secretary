@@ -891,6 +891,119 @@ setTimeout(() => {
             });
         }
 
+// Add this function BEFORE your initializePage function
+async function loadSystemData() {
+    try {
+        console.log('🔧 Loading system data for edit trial...');
+        
+        // If trial setup data is available from trial-setup.js, use it
+        if (window.trialSetupData && window.trialSetupData.classes) {
+            const data = window.trialSetupData;
+            globalClasses = data.classes.map(cls => cls.className || cls.name || cls);
+            globalJudges = data.judges.map(judge => judge.judgeName || judge.name || judge);
+            console.log('✅ Using data from trial-setup.js');
+        } else {
+            // Try to load from JSON file like trial-setup.js does
+            try {
+                const response = await fetch('js/data.json');
+                const data = await response.json();
+                
+                globalClasses = Array.isArray(data.classes) ? data.classes : [];
+                globalJudges = Array.isArray(data.judges) ? data.judges : [];
+                console.log('✅ Loaded data from data.json');
+            } catch (fetchError) {
+                console.log('⚠️ Could not load data.json, keeping hardcoded data');
+            }
+        }
+        
+        console.log('✅ System data loaded - Classes:', globalClasses.length, 'Judges:', globalJudges.length);
+        
+    } catch (error) {
+        console.error('❌ Error loading system data:', error);
+        // Keep the hardcoded fallback data that's already set
+        console.log('🔧 Using hardcoded fallback data');
+    }
+}
+
+// Add this function to populate dropdowns after trial structure is loaded
+function populateAllDropdowns() {
+    console.log('🔧 Populating dropdowns...');
+    
+    // Populate class dropdowns
+    document.querySelectorAll('.class-autocomplete, select[class*="class"], input[class*="class"]').forEach(element => {
+        if (element.tagName === 'SELECT') {
+            // Clear and populate select dropdown
+            element.innerHTML = '<option value="">Select Class...</option>';
+            globalClasses.forEach(className => {
+                const option = document.createElement('option');
+                option.value = className;
+                option.textContent = className;
+                element.appendChild(option);
+            });
+        } else if (element.tagName === 'INPUT') {
+            // For input elements, set up datalist if it doesn't exist
+            let datalistId = element.getAttribute('list');
+            if (!datalistId) {
+                datalistId = 'classList_' + Math.random().toString(36).substr(2, 9);
+                element.setAttribute('list', datalistId);
+                
+                const datalist = document.createElement('datalist');
+                datalist.id = datalistId;
+                globalClasses.forEach(className => {
+                    const option = document.createElement('option');
+                    option.value = className;
+                    datalist.appendChild(option);
+                });
+                element.parentNode.appendChild(datalist);
+            }
+        }
+    });
+    
+    // Populate judge dropdowns
+    document.querySelectorAll('.judge-autocomplete, select[class*="judge"], input[class*="judge"]').forEach(element => {
+        if (element.tagName === 'SELECT') {
+            // Clear and populate select dropdown
+            element.innerHTML = '<option value="">Select Judge...</option>';
+            globalJudges.forEach(judgeName => {
+                const option = document.createElement('option');
+                option.value = judgeName;
+                option.textContent = judgeName;
+                element.appendChild(option);
+            });
+        } else if (element.tagName === 'INPUT') {
+            // For input elements, set up datalist if it doesn't exist
+            let datalistId = element.getAttribute('list');
+            if (!datalistId) {
+                datalistId = 'judgeList_' + Math.random().toString(36).substr(2, 9);
+                element.setAttribute('list', datalistId);
+                
+                const datalist = document.createElement('datalist');
+                datalist.id = datalistId;
+                globalJudges.forEach(judgeName => {
+                    const option = document.createElement('option');
+                    option.value = judgeName;
+                    datalist.appendChild(option);
+                });
+                element.parentNode.appendChild(datalist);
+            }
+        }
+    });
+    
+    console.log('✅ Populated dropdowns with', globalClasses.length, 'classes and', globalJudges.length, 'judges');
+}
+
+// Update your loadTrialStructure function to call dropdown population
+function loadTrialStructure(trialData) {
+    console.log('🔧 Loading trial structure with system data:', { classes: globalClasses.length, judges: globalJudges.length });
+    
+    // ... your existing code to build the structure ...
+    
+    // After building the structure, populate any dropdowns that were created
+    setTimeout(() => {
+        populateAllDropdowns();
+    }, 200);
+}
+        
         // Initialize the page
         initializePage();
 
