@@ -96,12 +96,6 @@
             border: 1px solid #f5c6cb;
         }
 
-        .status-info {
-            background: #cce7ff;
-            color: #0056b3;
-            border: 1px solid #99d3ff;
-        }
-
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -154,14 +148,6 @@
             background-color: #f0f0f0;
             border-radius: 4px;
             position: relative;
-        }
-
-        .subclass-container {
-            padding: 8px;
-            margin: 3px 0;
-            background-color: #f0fff0;
-            border-radius: 4px;
-            border-left: 3px solid #28a745;
         }
 
         .hidden {
@@ -234,10 +220,6 @@
             color: #666;
         }
 
-        .print-section {
-            display: none;
-        }
-
         @media print {
             body {
                 background: white;
@@ -246,10 +228,6 @@
             
             .header, .btn, .mode-toggle-container {
                 display: none !important;
-            }
-            
-            .print-section {
-                display: block;
             }
             
             .card {
@@ -268,7 +246,7 @@
                 <div id="userInfo">Loading...</div>
             </div>
             <div>
-                <button class="btn btn-secondary" onclick="window.location.href='main-dashboard.html'">← Back to Dashboard</button>
+                <button class="btn btn-secondary" onclick="window.location.href='view-trials.html'">← Back to Trials</button>
                 <button class="btn btn-secondary" onclick="window.print()" id="printBtn">🖨️ Print</button>
             </div>
         </div>
@@ -286,18 +264,11 @@
         <div class="card hidden" id="notFoundCard">
             <h2>❌ Trial Not Found</h2>
             <p>The requested trial could not be found or you don't have permission to access it.</p>
-            <button class="btn" onclick="window.location.href='main-dashboard.html'">Return to Dashboard</button>
+            <button class="btn" onclick="window.location.href='view-trials.html'">Return to Trials</button>
         </div>
 
         <!-- Trial Editor -->
         <div class="card hidden" id="trialEditor">
-            <!-- Print Header -->
-            <div class="print-section">
-                <h1>Trial Details</h1>
-                <p>Generated on: <span id="printDate"></span></p>
-                <hr style="margin: 1rem 0;">
-            </div>
-
             <!-- Mode Toggle -->
             <div class="mode-toggle-container">
                 <button class="btn btn-warning mode-toggle" onclick="toggleMode()" id="modeToggleBtn">
@@ -346,12 +317,12 @@
             serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
+        console.log("🔧 Edit trial page loading...");
+
         // Global variables
         let currentUser = null;
         let currentTrial = null;
         let isEditMode = false;
-        let globalClasses = [];
-        let globalJudges = [];
         let originalTrialData = null;
 
         // Standard field names (matching your existing system)
@@ -384,20 +355,6 @@
             }, 5000);
         }
 
-        // Load system data for dropdowns
-        async function loadSystemData() {
-            try {
-                const dataDoc = await getDoc(doc(db, 'system_data', 'dataforsite'));
-                if (dataDoc.exists()) {
-                    const data = dataDoc.data();
-                    globalClasses = data.classes || [];
-                    globalJudges = data.judges || [];
-                }
-            } catch (error) {
-                console.error('Error loading system data:', error);
-            }
-        }
-
         // Timezone-safe date utilities (from your existing system)
         function getDateFromFirebase(timestamp) {
             if (!timestamp) return null;
@@ -417,7 +374,7 @@
         // Load trial data
         async function loadTrial(trialId) {
             try {
-                console.log('Loading trial:', trialId);
+                console.log('🔧 Loading trial:', trialId);
                 
                 const trialDoc = await getDoc(doc(db, 'trials', trialId));
                 
@@ -429,7 +386,7 @@
                 
                 // Check if user has permission to view this trial
                 if (trialData.createdBy !== currentUser.uid) {
-                    throw new Error('Access denied');
+                    throw new Error('Access denied - you can only edit trials you created');
                 }
                 
                 // Fix dates using your existing date handling
@@ -443,9 +400,12 @@
                 currentTrial = trialData;
                 originalTrialData = JSON.parse(JSON.stringify(trialData)); // Deep copy
                 
+                console.log('🔧 Trial loaded successfully:', trialData.clubName);
+                
                 // Update page title
-                document.getElementById('pageTitle').textContent = 
-                    `📝 ${isEditMode ? 'Edit' : 'View'} Trial: ${trialData.clubName}`;
+                const params = getUrlParams();
+                const mode = params.mode === 'edit' ? 'Edit' : 'View';
+                document.getElementById('pageTitle').textContent = `📝 ${mode} Trial: ${trialData.clubName}`;
                 
                 // Populate form
                 document.getElementById('clubName').value = trialData.clubName || '';
@@ -458,15 +418,13 @@
                 document.getElementById('loadingCard').classList.add('hidden');
                 document.getElementById('trialEditor').classList.remove('hidden');
                 
-                // Set initial mode
-                if (getUrlParams().mode === 'edit') {
+                // Set initial mode based on URL parameter
+                if (params.mode === 'edit') {
                     toggleMode();
                 }
                 
-                console.log('Trial loaded successfully:', trialData);
-                
             } catch (error) {
-                console.error('Error loading trial:', error);
+                console.error('🔧 Error loading trial:', error);
                 document.getElementById('loadingCard').classList.add('hidden');
                 document.getElementById('notFoundCard').classList.remove('hidden');
                 showStatus('Error loading trial: ' + error.message, true);
@@ -495,6 +453,12 @@
             dayDiv.className = 'day-container';
             dayDiv.dataset.dayIndex = dayIndex;
             
+            let classesHTML = '';
+            if (dayData.classes && dayData.classes.length > 0) {
+                classesHTML = dayData.classes.map((classData, classIndex) => 
+                    createClassElement(classData, dayIndex, classIndex)).join('');
+            }
+            
             dayDiv.innerHTML = `
                 <button class="remove-btn" onclick="removeDay(${dayIndex})" title="Remove Day">×</button>
                 <h3>Day ${dayData.dayNumber || dayIndex + 1}</h3>
@@ -505,8 +469,7 @@
                 </div>
                 
                 <div class="classes-container" data-day-index="${dayIndex}">
-                    ${dayData.classes ? dayData.classes.map((classData, classIndex) => 
-                        createClassElement(classData, dayIndex, classIndex)).join('') : ''}
+                    ${classesHTML}
                 </div>
                 
                 <button class="btn add-btn hidden" onclick="addClass(${dayIndex})">➕ Add Class</button>
@@ -517,7 +480,11 @@
 
         // Create class element
         function createClassElement(classData, dayIndex, classIndex) {
-            const subClassOptions = getSubClassOptions(classData[STANDARD_FIELDS.CLASS_NAME] || classData.className);
+            let roundsHTML = '';
+            if (classData.rounds && classData.rounds.length > 0) {
+                roundsHTML = classData.rounds.map((roundData, roundIndex) => 
+                    createRoundElement(roundData, dayIndex, classIndex, roundIndex)).join('');
+            }
             
             return `
                 <div class="class-container" data-class-index="${classIndex}">
@@ -528,25 +495,12 @@
                         <label>Class Name:</label>
                         <input type="text" 
                                value="${classData[STANDARD_FIELDS.CLASS_NAME] || classData.className || ''}"
-                               list="classes-datalist"
-                               onchange="handleClassSelection(this, ${dayIndex}, ${classIndex}); markAsModified()"
+                               onchange="markAsModified()"
                                readonly>
                     </div>
                     
-                    ${classData.subClass ? `
-                        <div class="form-group subclass-container">
-                            <label>Sub Class:</label>
-                            <select onchange="markAsModified()" disabled>
-                                <option value="">Select Sub Class</option>
-                                ${subClassOptions}
-                                <option value="${classData.subClass}" selected>${classData.subClass}</option>
-                            </select>
-                        </div>
-                    ` : ''}
-                    
                     <div class="rounds-container" data-day-index="${dayIndex}" data-class-index="${classIndex}">
-                        ${classData.rounds ? classData.rounds.map((roundData, roundIndex) => 
-                            createRoundElement(roundData, dayIndex, classIndex, roundIndex)).join('') : ''}
+                        ${roundsHTML}
                     </div>
                     
                     <button class="btn add-btn hidden" onclick="addRound(${dayIndex}, ${classIndex})">➕ Add Round</button>
@@ -556,6 +510,9 @@
 
         // Create round element
         function createRoundElement(roundData, dayIndex, classIndex, roundIndex) {
+            const judgeName = roundData[STANDARD_FIELDS.JUDGE_NAME] || roundData.judgeName || roundData.judge || '';
+            const feoChecked = roundData.feoAvailable || roundData.feo ? 'checked' : '';
+            
             return `
                 <div class="round-container" data-round-index="${roundIndex}">
                     <button class="remove-btn" onclick="removeRound(${dayIndex}, ${classIndex}, ${roundIndex})" title="Remove Round">×</button>
@@ -566,43 +523,17 @@
                         <label style="margin: 0;">Judge:</label>
                         <input type="text" 
                                style="width: 200px;"
-                               value="${roundData[STANDARD_FIELDS.JUDGE_NAME] || roundData.judge || ''}"
-                               list="judges-datalist"
+                               value="${judgeName}"
                                onchange="markAsModified()"
                                readonly>
                         
                         <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="checkbox" ${roundData.feoAvailable ? 'checked' : ''} onchange="markAsModified()" disabled>
+                            <input type="checkbox" ${feoChecked} onchange="markAsModified()" disabled>
                             FEO Available
                         </label>
                     </div>
                 </div>
             `;
-        }
-
-        // Get sub-class options based on class name
-        function getSubClassOptions(className) {
-            if (!className) return '';
-            
-            const classLower = className.toLowerCase();
-            if (classLower.includes('games')) {
-                return `
-                    <option value="games1">Games Sub Class 1</option>
-                    <option value="games2">Games Sub Class 2</option>
-                    <option value="games3">Games Sub Class 3</option>
-                    <option value="games4">Games Sub Class 4</option>
-                    <option value="games5">Games Sub Class 5</option>
-                `;
-            } else if (classLower.includes('obedience') || classLower.includes('obed')) {
-                return `
-                    <option value="obed1">Obedience Sub Class 1</option>
-                    <option value="obed2">Obedience Sub Class 2</option>
-                    <option value="obed3">Obedience Sub Class 3</option>
-                    <option value="obed4">Obedience Sub Class 4</option>
-                    <option value="obed5">Obedience Sub Class 5</option>
-                `;
-            }
-            return '';
         }
 
         // Toggle between view and edit mode
@@ -665,7 +596,7 @@
         // Mark trial as modified
         window.markAsModified = function() {
             if (isEditMode) {
-                console.log('Trial data modified');
+                console.log('🔧 Trial data modified');
             }
         }
 
@@ -689,7 +620,7 @@
                 originalTrialData = JSON.parse(JSON.stringify(currentTrial));
                 
             } catch (error) {
-                console.error('Error saving trial:', error);
+                console.error('🔧 Error saving trial:', error);
                 showStatus('Error saving trial: ' + error.message, true);
             }
         }
@@ -703,7 +634,9 @@
                 document.getElementById('secretary').value = originalTrialData.secretary || '';
                 
                 // Switch back to view mode
-                toggleMode();
+                if (isEditMode) {
+                    toggleMode();
+                }
                 
                 showStatus('Changes cancelled');
             }
@@ -739,7 +672,9 @@
                         classData.rounds.push(roundData);
                     });
                     
-                    dayData.classes.push(classData);
+                    if (classData[STANDARD_FIELDS.CLASS_NAME]) {
+                        dayData.classes.push(classData);
+                    }
                 });
                 
                 days.push(dayData);
@@ -752,85 +687,42 @@
             };
         }
 
-        // Add/Remove functions (for edit mode)
+        // Placeholder functions for add/remove (implement as needed)
         window.addDay = function() {
-            const container = document.getElementById('trialStructure');
-            const dayCount = container.children.length;
-            
-            const newDay = {
-                dayNumber: dayCount + 1,
-                date: '',
-                classes: []
-            };
-            
-            const dayDiv = createDayElement(newDay, dayCount);
-            container.appendChild(dayDiv);
-            markAsModified();
+            console.log('🔧 Add day function called');
+            // Implementation would go here
         }
 
         window.removeDay = function(dayIndex) {
-            if (confirm('Are you sure you want to remove this day?')) {
-                const dayElement = document.querySelector(`[data-day-index="${dayIndex}"]`);
-                if (dayElement) {
-                    dayElement.remove();
-                    markAsModified();
-                }
-            }
+            console.log('🔧 Remove day function called:', dayIndex);
+            // Implementation would go here
         }
 
         window.addClass = function(dayIndex) {
-            const container = document.querySelector(`[data-day-index="${dayIndex}"] .classes-container`);
-            const classCount = container.children.length;
-            
-            const newClass = {
-                [STANDARD_FIELDS.CLASS_NAME]: '',
-                subClass: '',
-                rounds: []
-            };
-            
-            const classHTML = createClassElement(newClass, dayIndex, classCount);
-            container.insertAdjacentHTML('beforeend', classHTML);
-            markAsModified();
+            console.log('🔧 Add class function called:', dayIndex);
+            // Implementation would go here
         }
 
         window.removeClass = function(dayIndex, classIndex) {
-            if (confirm('Are you sure you want to remove this class?')) {
-                const classElement = document.querySelector(`[data-day-index="${dayIndex}"] [data-class-index="${classIndex}"]`);
-                if (classElement) {
-                    classElement.remove();
-                    markAsModified();
-                }
-            }
+            console.log('🔧 Remove class function called:', dayIndex, classIndex);
+            // Implementation would go here
         }
 
         window.addRound = function(dayIndex, classIndex) {
-            const container = document.querySelector(`[data-day-index="${dayIndex}"][data-class-index="${classIndex}"] .rounds-container`);
-            const roundCount = container.children.length;
-            
-            const newRound = {
-                roundNumber: roundCount + 1,
-                [STANDARD_FIELDS.JUDGE_NAME]: '',
-                feoAvailable: false
-            };
-            
-            const roundHTML = createRoundElement(newRound, dayIndex, classIndex, roundCount);
-            container.insertAdjacentHTML('beforeend', roundHTML);
-            markAsModified();
+            console.log('🔧 Add round function called:', dayIndex, classIndex);
+            // Implementation would go here
         }
 
         window.removeRound = function(dayIndex, classIndex, roundIndex) {
-            if (confirm('Are you sure you want to remove this round?')) {
-                const roundElement = document.querySelector(`[data-day-index="${dayIndex}"][data-class-index="${classIndex}"] [data-round-index="${roundIndex}"]`);
-                if (roundElement) {
-                    roundElement.remove();
-                    markAsModified();
-                }
-            }
+            console.log('🔧 Remove round function called:', dayIndex, classIndex, roundIndex);
+            // Implementation would go here
         }
 
         // Initialize page
         async function initializePage() {
             const params = getUrlParams();
+            
+            console.log('🔧 URL params:', params);
             
             if (!params.trialId) {
                 document.getElementById('loadingCard').classList.add('hidden');
@@ -842,33 +734,30 @@
             auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     try {
+                        console.log('🔧 User authenticated:', user.email);
+                        
                         // Set current user
                         currentUser = { uid: user.uid, email: user.email };
                         document.getElementById('userInfo').textContent = user.email;
-                        
-                        // Load system data
-                        await loadSystemData();
                         
                         // Load trial
                         await loadTrial(params.trialId);
                         
                     } catch (error) {
-                        console.error('Error initializing:', error);
+                        console.error('🔧 Error initializing:', error);
                         showStatus('Error loading page: ' + error.message, true);
                     }
                 } else {
-                    // Redirect to login
+                    console.log('🔧 No user, redirecting to login');
                     window.location.href = 'index.html';
                 }
             });
         }
 
-        // Set print date
-        document.getElementById('printDate').textContent = new Date().toLocaleDateString();
+        // Initialize the page
+        initializePage();
 
-        // Create datalists for autocomplete
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add datalists to body for global access
-            document.body.insertAdjacentHTML('beforeend', `
-                <datalist id="classes-datalist">
-                    ${globalClasses.map(className => `<option value="${className}">${className}</option>`).join('')}
+        console.log('🔧 Edit trial page script loaded successfully');
+    </script>
+</body>
+</html>
