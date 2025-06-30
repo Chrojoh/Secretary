@@ -235,6 +235,19 @@
                 border: 1px solid #ddd;
             }
         }
+
+        .judge-autocomplete:focus,
+        .class-autocomplete:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .judge-autocomplete::placeholder,
+        .class-autocomplete::placeholder {
+            color: #999;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -494,13 +507,6 @@
             // Get current class value
             const currentClass = classData[STANDARD_FIELDS.CLASS_NAME] || classData.className || '';
             
-            // Create class options
-            let classOptions = '<option value="">Select a class...</option>';
-            globalClasses.forEach(className => {
-                const selected = className === currentClass ? 'selected' : '';
-                classOptions += `<option value="${className}" ${selected}>${className}</option>`;
-            });
-            
             return `
                 <div class="class-container" data-class-index="${classIndex}">
                     <button class="remove-btn" onclick="removeClass(${dayIndex}, ${classIndex})" title="Remove Class">×</button>
@@ -508,9 +514,17 @@
                     
                     <div class="form-group">
                         <label>Class Name:</label>
-                        <select onchange="markAsModified()" disabled>
-                            ${classOptions}
-                        </select>
+                        <input type="text" 
+                               value="${currentClass}"
+                               list="classes-datalist-${dayIndex}-${classIndex}"
+                               placeholder="Type class name..."
+                               style="width: 100%; padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px;"
+                               class="class-autocomplete"
+                               onchange="markAsModified()"
+                               readonly>
+                        <datalist id="classes-datalist-${dayIndex}-${classIndex}">
+                            ${globalClasses.map(className => `<option value="${className}">${className}</option>`).join('')}
+                        </datalist>
                     </div>
                     
                     <div class="rounds-container" data-day-index="${dayIndex}" data-class-index="${classIndex}">
@@ -527,13 +541,6 @@
             const judgeName = roundData[STANDARD_FIELDS.JUDGE_NAME] || roundData.judgeName || roundData.judge || '';
             const feoChecked = roundData.feoAvailable || roundData.feo ? 'checked' : '';
             
-            // Create judge options
-            let judgeOptions = '<option value="">Select a judge...</option>';
-            globalJudges.forEach(judge => {
-                const selected = judge === judgeName ? 'selected' : '';
-                judgeOptions += `<option value="${judge}" ${selected}>${judge}</option>`;
-            });
-            
             return `
                 <div class="round-container" data-round-index="${roundIndex}">
                     <button class="remove-btn" onclick="removeRound(${dayIndex}, ${classIndex}, ${roundIndex})" title="Remove Round">×</button>
@@ -542,10 +549,17 @@
                         <strong>Round ${roundData.roundNumber || roundIndex + 1}:</strong>
                         
                         <label style="margin: 0;">Judge:</label>
-                        <select style="width: 200px; border: 2px solid #e1e5e9; border-radius: 6px; padding: 4px;"
-                                onchange="markAsModified()" disabled>
-                            ${judgeOptions}
-                        </select>
+                        <input type="text" 
+                               style="width: 200px; padding: 8px; border: 2px solid #e1e5e9; border-radius: 6px;"
+                               value="${judgeName}"
+                               list="judges-datalist-${dayIndex}-${classIndex}-${roundIndex}"
+                               placeholder="Type judge name..."
+                               class="judge-autocomplete"
+                               onchange="markAsModified()"
+                               readonly>
+                        <datalist id="judges-datalist-${dayIndex}-${classIndex}-${roundIndex}">
+                            ${globalJudges.map(judge => `<option value="${judge}">${judge}</option>`).join('')}
+                        </datalist>
                         
                         <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                             <input type="checkbox" ${feoChecked} onchange="markAsModified()" disabled>
@@ -676,18 +690,18 @@
                 
                 const classContainers = dayContainer.querySelectorAll('.class-container');
                 classContainers.forEach((classContainer, classIndex) => {
-                    const classSelect = classContainer.querySelector('select');
+                    const classInput = classContainer.querySelector('.class-autocomplete');
                     const classData = {
-                        [STANDARD_FIELDS.CLASS_NAME]: classSelect ? classSelect.value : '',
+                        [STANDARD_FIELDS.CLASS_NAME]: classInput ? classInput.value : '',
                         rounds: []
                     };
                     
                     const roundContainers = classContainer.querySelectorAll('.round-container');
                     roundContainers.forEach((roundContainer, roundIndex) => {
-                        const judgeSelect = roundContainer.querySelector('select');
+                        const judgeInput = roundContainer.querySelector('.judge-autocomplete');
                         const roundData = {
                             roundNumber: roundIndex + 1,
-                            [STANDARD_FIELDS.JUDGE_NAME]: judgeSelect ? judgeSelect.value : '',
+                            [STANDARD_FIELDS.JUDGE_NAME]: judgeInput ? judgeInput.value : '',
                             feoAvailable: roundContainer.querySelector('input[type="checkbox"]').checked
                         };
                         
