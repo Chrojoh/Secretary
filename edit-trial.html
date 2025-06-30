@@ -491,6 +491,16 @@
                     createRoundElement(roundData, dayIndex, classIndex, roundIndex)).join('');
             }
             
+            // Get current class value
+            const currentClass = classData[STANDARD_FIELDS.CLASS_NAME] || classData.className || '';
+            
+            // Create class options
+            let classOptions = '<option value="">Select a class...</option>';
+            globalClasses.forEach(className => {
+                const selected = className === currentClass ? 'selected' : '';
+                classOptions += `<option value="${className}" ${selected}>${className}</option>`;
+            });
+            
             return `
                 <div class="class-container" data-class-index="${classIndex}">
                     <button class="remove-btn" onclick="removeClass(${dayIndex}, ${classIndex})" title="Remove Class">×</button>
@@ -498,13 +508,9 @@
                     
                     <div class="form-group">
                         <label>Class Name:</label>
-                        <input type="text" 
-                               value="${classData[STANDARD_FIELDS.CLASS_NAME] || classData.className || ''}"
-                               list="global-classes-datalist"
-                               placeholder="Type or select class name..."
-                               style="border: 2px solid #e1e5e9; border-radius: 6px;"
-                               onchange="markAsModified()"
-                               readonly>
+                        <select onchange="markAsModified()" disabled>
+                            ${classOptions}
+                        </select>
                     </div>
                     
                     <div class="rounds-container" data-day-index="${dayIndex}" data-class-index="${classIndex}">
@@ -521,6 +527,13 @@
             const judgeName = roundData[STANDARD_FIELDS.JUDGE_NAME] || roundData.judgeName || roundData.judge || '';
             const feoChecked = roundData.feoAvailable || roundData.feo ? 'checked' : '';
             
+            // Create judge options
+            let judgeOptions = '<option value="">Select a judge...</option>';
+            globalJudges.forEach(judge => {
+                const selected = judge === judgeName ? 'selected' : '';
+                judgeOptions += `<option value="${judge}" ${selected}>${judge}</option>`;
+            });
+            
             return `
                 <div class="round-container" data-round-index="${roundIndex}">
                     <button class="remove-btn" onclick="removeRound(${dayIndex}, ${classIndex}, ${roundIndex})" title="Remove Round">×</button>
@@ -529,13 +542,10 @@
                         <strong>Round ${roundData.roundNumber || roundIndex + 1}:</strong>
                         
                         <label style="margin: 0;">Judge:</label>
-                        <input type="text" 
-                               style="width: 200px; border: 2px solid #e1e5e9; border-radius: 6px;"
-                               value="${judgeName}"
-                               list="global-judges-datalist"
-                               placeholder="Type or select judge..."
-                               onchange="markAsModified()"
-                               readonly>
+                        <select style="width: 200px; border: 2px solid #e1e5e9; border-radius: 6px; padding: 4px;"
+                                onchange="markAsModified()" disabled>
+                            ${judgeOptions}
+                        </select>
                         
                         <label style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
                             <input type="checkbox" ${feoChecked} onchange="markAsModified()" disabled>
@@ -666,16 +676,18 @@
                 
                 const classContainers = dayContainer.querySelectorAll('.class-container');
                 classContainers.forEach((classContainer, classIndex) => {
+                    const classSelect = classContainer.querySelector('select');
                     const classData = {
-                        [STANDARD_FIELDS.CLASS_NAME]: classContainer.querySelector('input[type="text"]').value || '',
+                        [STANDARD_FIELDS.CLASS_NAME]: classSelect ? classSelect.value : '',
                         rounds: []
                     };
                     
                     const roundContainers = classContainer.querySelectorAll('.round-container');
                     roundContainers.forEach((roundContainer, roundIndex) => {
+                        const judgeSelect = roundContainer.querySelector('select');
                         const roundData = {
                             roundNumber: roundIndex + 1,
-                            [STANDARD_FIELDS.JUDGE_NAME]: roundContainer.querySelector('input[type="text"]').value || '',
+                            [STANDARD_FIELDS.JUDGE_NAME]: judgeSelect ? judgeSelect.value : '',
                             feoAvailable: roundContainer.querySelector('input[type="checkbox"]').checked
                         };
                         
